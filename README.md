@@ -1,1 +1,1 @@
-# mse_auto_checking_slides
+# mse_auto_checking_slides_vaganov
