@@ -1,0 +1,4 @@
+// Some kind of "package.json" for pip.
+
+flask
+request
