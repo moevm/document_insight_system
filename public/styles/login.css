@@ -1,0 +1,77 @@
+.login_form_label {
+    font-family: Helvetica Neue, serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 20px;
+    line-height: 24px;
+
+    display: flex;
+    align-items: flex-end;
+
+    color: var(--text-color);
+}
+
+.login_form_field {
+    background: var(--bright-color);
+    border: 1px solid var(--border-color);
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+
+
+#login_title {
+    position: absolute;
+    width: 76px;
+    height: 33px;
+    left: 682px;
+    top: 267px;
+}
+
+#login_label {
+    position: absolute;
+    width: 151px;
+    height: 58px;
+    left: 316px;
+    top: 300px;
+}
+
+#login_text_field {
+    position: absolute;
+    width: 807px;
+    height: 91px;
+    left: 316px;
+    top: 377px;
+}
+
+#password_label {
+    position: absolute;
+    width: 142px;
+    height: 58px;
+    left: 316px;
+    top: 495px;
+}
+
+#password_text_field {
+    position: absolute;
+    width: 807px;
+    height: 91px;
+    left: 316px;
+    top: 572px;
+}
+
+#login_button {
+    position: absolute;
+    width: 573px;
+    height: 52px;
+    left: 446px;
+    top: 713px;
+}
+
+#signup_link {
+    position: absolute;
+    width: 189px;
+    height: 33px;
+    left: 830px;
+    top: 790px;
+}

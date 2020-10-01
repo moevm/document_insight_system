@@ -1,0 +1,80 @@
+.upload_form_label {
+    font-family: Helvetica Neue, serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 21px;
+    line-height: 23px;
+
+    display: flex;
+    align-items: flex-end;
+
+    color: var(--text-color);
+}
+
+
+
+#user_info {
+    position: absolute;
+    width: 309px;
+    height: 51px;
+    left: 1082px;
+    top: 51px;
+}
+
+#upload_title {
+    position: absolute;
+    width: 568px;
+    height: 85px;
+    left: 450px;
+    top: 219px;
+}
+
+#uploading_form {
+    position: absolute;
+    width: 554px;
+    height: 50px;
+    left: 449px;
+    top: 445px;
+}
+
+#uploading_progress {
+    position: absolute;
+    width: 550px;
+    height: 14px;
+    left: 453px;
+    top: 537px;
+}
+
+#uploading_button {
+    position: absolute;
+    width: 110px;
+    height: 38px;
+    left: 456px;
+    top: 590px;
+}
+
+
+
+#checking_label {
+    position: absolute;
+    width: 279px;
+    height: 46px;
+    left: 450px;
+    top: 686px;
+}
+
+#checking_progress {
+    position: absolute;
+    width: 550px;
+    height: 13px;
+    left: 453px;
+    top: 752px;
+}
+
+#checking_button {
+    position: absolute;
+    width: 110px;
+    height: 38px;
+    left: 449px;
+    top: 813px;
+}
