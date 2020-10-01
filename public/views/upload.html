@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Страница с формой отправки презентации на проверку</title>
+    <link rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+            integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+            crossorigin="anonymous"/>
+    <link rel="stylesheet" href="/public/styles/main.css">
+    <link rel="stylesheet" href="/public/styles/upload.css">
+    <script src="/public/scripts/upload.js"></script>
+</head>
+<body>
+<div>
+    <div class="header"></div>
+    <h3 class="username" id="user_info">Имя Фамилия</h3>
+    <h1 class="title" id="upload_title">Какую презентацию Вы хотите проверить?</h1>
+
+    <div id="uploading_body">
+        <label class="upload_form_label" id="uploading_label">Презентация</label>
+        <div id="uploading_form" class="custom-file">
+            <label class="custom-file-label" for="upload_file">Choose file...</label>
+            <input type="file" class="custom-file-input" id="upload_file" required>
+        </div>
+        <div id="uploading_progress" class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 75%"></div>
+        </div>
+        <button class="pale_button" id="uploading_button" onclick="send1()">send</button>
+    </div>
+
+    <div id="checking_body">
+        <label class="upload_form_label" id="checking_label">Проверка</label>
+        <div id="checking_progress" class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 75%"></div>
+        </div>
+        <button class="pale_button" id="checking_button" onclick="send2()">send</button>
+    </div>
+
+    <div class="footer"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous">
+</script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous">
+</script>
+</body>
+</html>

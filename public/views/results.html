@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Страница результатов проверки</title>
+    <link rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+            integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+            crossorigin="anonymous"/>
+    <link rel="stylesheet" href="/public/styles/main.css">
+    <link rel="stylesheet" href="/public/styles/results.css">
+    <script src="/public/scripts/results.js"></script>
+</head>
+<body>
+<div>
+    <div class="header"></div>
+    <h1 id="results_title">Какую презентацию Вы хотите проверить?</h1>
+
+    <table class="table table-striped table-hover" id="results_table">
+        <thead>
+            <tr>
+                <th class="results_table_index" scope="col">#</th>
+                <th class="results_table_test" scope="col">Test</th>
+                <th class="results_table_result" scope="col">Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">1</th>
+                <td>Количество основных слайдов</td>
+                <td class="table-success">Пройдена</td>
+            </tr>
+            <tr>
+                <th scope="row">2</th>
+                <td>Нумерация слайдов</td>
+                <td class="table-success">Пройдена</td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td>Заголовки слайдов занимают не более двух строк</td>
+                <td class="table-danger">Не пройдена. Проблемные слайды: 4, 6, 7.</td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td>Слайд "Цель и задачи"</td>
+                <td class="table-success">Пройдена</td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td>Слайд "Апробация работы"</td>
+                <td class="table-success">Пройдена</td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td>Слайд с описанием актуальности работы</td>
+                <td class="table-danger">Не пройдена. Слайд отсутствует.</td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td>Слайд с заключением</td>
+                <td class="table-success">Пройдена</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous">
+</script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous">
+</script>
+</body>
+</html>
