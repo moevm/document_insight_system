@@ -11,11 +11,10 @@
 }
 
 body {
-    overflow: hidden;
-}
+    font-family: Helvetica Neue, serif;
+    font-style: normal;
 
-.scrollable {
-    overflow-y: auto;
+    overflow: hidden;
 }
 
 
@@ -28,11 +27,8 @@ body {
 .holder {
     background: var(--background-color);
     height: 75vh;
-}
-
-.title {
-    font-family: Helvetica Neue, serif;
-    font-style: normal;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .footer {
@@ -57,7 +53,21 @@ body {
 
 
 .username {
-    font-family: Helvetica Neue, serif;
-    font-style: normal;
     color: var(--username-color);
+}
+
+.texteous {
+    color: var(--text-color);
+}
+
+.inputous {
+    background: var(--bright-color);
+    border: 1px solid var(--border-color);
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.linked {
+    display: block;
+    margin-top: .5rem;
 }

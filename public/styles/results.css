@@ -12,8 +12,6 @@
 
 
 
-#results_title {
-    font-family: Helvetica Neue, serif;
-    font-style: normal;
-    color: var(--text-color);
+#results_holder {
+    overflow: auto;
 }

@@ -1,19 +1,27 @@
 .criteria_container {
     background: var(--criteria-color);
     border-radius: 4px;
+
+    height: 82.5%;
+    padding: .5rem;
 }
 
 .criteria_header {
-    font-family: Helvetica Neue, serif;
-    font-style: normal;
-    color: var(--text-color);
+    height: 10%;
+    margin-top: 1.5rem !important;
+    margin-bottom: .5rem !important;
+}
+
+.criteria_sub_header {
+    margin-top: 1rem !important;
 }
 
 
 
 #criteria_save_button {
-    font-family: Helvetica Neue, serif;
-    font-style: normal;
+    margin-top: 1rem;
+    margin-bottom: .5rem;
+
     text-align: center;
     color: var(--accent-color);
 

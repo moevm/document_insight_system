@@ -1,16 +1,7 @@
-.login_form_label {
-    font-family: Helvetica Neue, serif;
-    font-style: normal;
-    color: var(--text-color);
+#login_title {
+    margin-bottom: 1rem !important;
 }
 
-.login_form_field {
-    background: var(--bright-color);
-    border: 1px solid var(--border-color);
-    box-sizing: border-box;
-    border-radius: 4px;
-}
-
-#signup_link {
-    display: block;
+#login_button {
+    margin-top: 1rem;
 }

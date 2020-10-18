@@ -1,13 +1,17 @@
-.upload_form_label {
-    font-family: Helvetica Neue, serif;
-    font-style: normal;
-    color: var(--text-color);
-}
-
 h5 {
     margin-bottom: 1rem !important;
 }
 
 #uploading_body {
     margin-bottom: 3rem;
+    margin-top: 1rem;
+}
+
+#user_info {
+    margin-left: 2rem;
+    margin-right: 2rem;
+}
+
+#upload_title {
+    margin-bottom: 1rem !important;
 }
