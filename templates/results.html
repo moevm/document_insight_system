@@ -1,0 +1,66 @@
+{% extends "root.html" %}
+
+{% block title %}Страница результатов проверки{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href={{ url_for("static", filename="styles/results.css") }}>
+{% endblock %}
+
+{% block scripts %}
+    <script src={{ url_for("static", filename="scripts/results.js") }}></script>
+{% endblock %}
+
+{% block main %}
+    <div class="header row justify-content-end"></div>
+    <div class="holder row scrollable">
+        <h3 id="results_title">Результат проверки: пройдена!</h3>
+
+        <table class="table table-striped table-hover" id="results_table">
+            <thead>
+                <tr>
+                    <th class="results_table_index" scope="col">#</th>
+                    <th class="results_table_test" scope="col">Test</th>
+                    <th class="results_table_result" scope="col">Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td>Количество основных слайдов</td>
+                    <td class="table-success">Пройдена</td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>Нумерация слайдов</td>
+                    <td class="table-success">Пройдена</td>
+                </tr>
+                <tr>
+                    <th scope="row">3</th>
+                    <td>Заголовки слайдов занимают не более двух строк</td>
+                    <td class="table-danger">Не пройдена. Проблемные слайды: 4, 6, 7.</td>
+                </tr>
+                <tr>
+                    <th scope="row">4</th>
+                    <td>Слайд "Цель и задачи"</td>
+                    <td class="table-success">Пройдена</td>
+                </tr>
+                <tr>
+                    <th scope="row">5</th>
+                    <td>Слайд "Апробация работы"</td>
+                    <td class="table-success">Пройдена</td>
+                </tr>
+                <tr>
+                    <th scope="row">6</th>
+                    <td>Слайд с описанием актуальности работы</td>
+                    <td class="table-danger">Не пройдена. Слайд отсутствует.</td>
+                </tr>
+                <tr>
+                    <th scope="row">7</th>
+                    <td>Слайд с заключением</td>
+                    <td class="table-success">Пройдена</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="footer row"></div>
+{% endblock %}

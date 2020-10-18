@@ -1,0 +1,83 @@
+{% extends "root.html" %}
+
+{% block title %}Страница настройки шкалы проверки и выбора критериев для проверки{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href={{ url_for("static", filename="styles/criteria.css") }}>
+{% endblock %}
+
+{% block scripts %}
+    <script src={{ url_for("static", filename="scripts/criteria.js") }}></script>
+{% endblock %}
+
+{% block main %}
+    <div class="header row"></div>
+    <div class="holder row justify-content-center">
+        <div class="col-10 my-auto">
+            <h3 class="title text-center" id="login_title">Выбор критериев для проверки</h3>
+
+            <div class="row justify-content-center">
+                <div class="col-6">
+                    <h4 class="criteria_header" id="simple_criteria">Простые критерии</h4>
+                    <div class="criteria_container" id="simple_criteria_container">
+                        <div class="form-check" id="slides_count_check">
+                            <input class="form-check-input" type="checkbox" value="" id="slides_count">
+                            <label class="form-check-label" for="slides_count">Количество основных слайдов</label>
+                        </div>
+                        <div class="form-check" id="slides_numeration_check">
+                            <input class="form-check-input" type="checkbox" value="" id="slides_numeration">
+                            <label class="form-check-label" for="slides_numeration">Нумерация слайдов</label>
+                        </div>
+                        <div class="form-check" id="slide_headers_check">
+                            <input class="form-check-input" type="checkbox" value="" id="slide_headers">
+                            <label class="form-check-label" for="slide_headers">Заголовки слайдов занимают не более двух строк</label>
+                        </div>
+                        <h5 class="criteria_header" id="main_criteria">Наличие основных слайдов:</h5>
+                        <div class="form-check" id="slide_objectives_check">
+                            <input class="form-check-input" type="checkbox" value="" id="slide_objectives">
+                            <label class="form-check-label" for="slide_objectives">"Цель и задачи"</label>
+                        </div>
+                        <div class="form-check" id="slide_checking_check">
+                            <input class="form-check-input" type="checkbox" value="" id="slide_checking">
+                            <label class="form-check-label" for="slide_checking">"Апробация работы"</label>
+                        </div>
+                        <div class="form-check" id="slide_conclusion_check">
+                            <input class="form-check-input" type="checkbox" value="" id="slide_conclusion">
+                            <label class="form-check-label" for="slide_conclusion">"Заключение"</label>
+                        </div>
+                        <div class="form-check" id="slide_actual_check">
+                            <input class="form-check-input" type="checkbox" value="" id="slide_actual">
+                            <label class="form-check-label" for="slide_actual">Слайд с описанием актуальноти работы</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <h4 class="criteria_header" id="complex_criteria">Сложные критерии</h4>
+                    <div class="criteria_container" id="complex_criteria_container">
+                        <div class="form-check" id="slide_every_task_check">
+                            <input class="form-check-input" type="checkbox" value="" id="slide_every_task">
+                            <label class="form-check-label" for="slide_every_task">Наличие слайда/слайдов на каждую задачу</label>
+                        </div>
+                        <h5 class="criteria_header" id="conclusion_analysis">Анализ слайда "Заключение":</h5>
+                        <div class="form-check" id="slide_results_check">
+                            <input class="form-check-input" type="checkbox" value="" id="slide_results">
+                            <label class="form-check-label" for="slide_results">Кратко приведены результаты решения задач со слайда "Цели и задачи"</label>
+                        </div>
+                        <div class="form-check" id="slide_along_check">
+                            <input class="form-check-input" type="checkbox" value="" id="slide_along">
+                            <label class="form-check-label" for="slide_along">Приведены направления дальнейшей разработки или улучшения программы</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-6 my-auto">
+                    <button type="button" class="btn btn-block" id="criteria_save_button">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer row"></div>
+{% endblock %}

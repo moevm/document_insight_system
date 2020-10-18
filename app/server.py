@@ -1,8 +1,8 @@
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request, redirect, url_for, render_template
 import app.user.user as user
 import app.main.main as main
 
-app = Flask(__name__, static_folder="./../public/")
+app = Flask(__name__, static_folder="./../public/", template_folder="./../templates/")
 
 
 # User pages request handlers:
@@ -10,13 +10,13 @@ app = Flask(__name__, static_folder="./../public/")
 @app.route("/login")
 def login():
     user.login(request.args)
-    return app.send_static_file("./views/login.html")
+    return render_template("./login.html")
 
 
 @app.route("/signup")
 def signup():
     user.signup(request.args)
-    return app.send_static_file("./views/signup.html")
+    return render_template("./signup.html")
 
 
 # Main pages request handlers:
@@ -24,19 +24,19 @@ def signup():
 @app.route("/upload")
 def upload():
     main.upload(request.args)
-    return app.send_static_file("./views/upload.html")
+    return render_template("./upload.html")
 
 
 @app.route("/results")
 def results():
     main.results(request.args)
-    return app.send_static_file("./views/results.html")
+    return render_template("./results.html")
 
 
 @app.route("/criteria")
 def criteria():
     main.criteria(request.args)
-    return app.send_static_file("./views/criteria.html")
+    return render_template("./criteria.html")
 
 
 # Redirection:

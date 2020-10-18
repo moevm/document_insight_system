@@ -1,13 +1,6 @@
 .signup_form_label {
     font-family: Helvetica Neue, serif;
     font-style: normal;
-    font-weight: normal;
-    font-size: 16px;
-    line-height: 24px;
-
-    display: flex;
-    align-items: flex-end;
-
     color: var(--text-color);
 }
 
@@ -18,108 +11,6 @@
     border-radius: 4px;
 }
 
-
-
-#signup_title {
-    position: absolute;
-    width: 247px;
-    height: 33px;
-    left: 568px;
-    top: 267px;
-}
-
-#name_label {
-    position: absolute;
-    width: 32px;
-    height: 24px;
-    left: 399px;
-    top: 415px;
-}
-
-#name_text_field {
-    position: absolute;
-    width: 350px;
-    height: 38px;
-    left: 588px;
-    top: 412px;
-}
-
-#surname_label {
-    position: absolute;
-    width: 70px;
-    height: 24px;
-    left: 398px;
-    top: 463px;
-}
-
-#surname_text_field {
-    position: absolute;
-    width: 350px;
-    height: 38px;
-    left: 588px;
-    top: 460px;
-}
-
-#email_label {
-    position: absolute;
-    width: 40px;
-    height: 24px;
-    left: 398px;
-    top: 527px;
-}
-
-#email_text_field {
-    position: absolute;
-    width: 350px;
-    height: 38px;
-    left: 588px;
-    top: 524px;
-}
-
-#password_label {
-    position: absolute;
-    width: 71px;
-    height: 24px;
-    left: 398px;
-    top: 575px;
-}
-
-#password_text_field {
-    position: absolute;
-    width: 350px;
-    height: 38px;
-    left: 588px;
-    top: 572px;
-}
-
-#confirmation_label {
-    position: absolute;
-    width: 132px;
-    height: 24px;
-    left: 397px;
-    top: 623px;
-}
-
-#confirmation_text_field {
-    position: absolute;
-    width: 350px;
-    height: 38px;
-    left: 587px;
-    top: 620px;
-}
-
-#signup_button {
-    position: absolute;
-    width: 541px;
-    height: 51px;
-    left: 397px;
-    top: 711px;
-}
-
 #login_link {
-    position: absolute;
-    width: 179px;
-    height: 21px;
-    left: 836px;
-    top: 790px;
+    display: block;
 }

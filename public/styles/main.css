@@ -10,46 +10,41 @@
     --criteria-color: #EDEDED;
 }
 
-.body {
-    background: var(--background-color);
+body {
+    overflow: hidden;
+}
+
+.scrollable {
+    overflow-y: auto;
 }
 
 
 
 .header {
     background: var(--main-color);
-    position: absolute;
-    width: 1440px;
-    height: 203px;
-    left: 0px;
-    top: 0px;
+    height: 15vh;
+}
+
+.holder {
+    background: var(--background-color);
+    height: 75vh;
 }
 
 .title {
     font-family: Helvetica Neue, serif;
     font-style: normal;
-    font-weight: 500;
-    font-size: 30px;
-    line-height: 33px;
-
-    display: flex;
-    align-items: flex-end;
 }
 
 .footer {
     background: var(--footer-color);
-    position: absolute;
-    width: 1440px;
-    height: 103px;
-    left: 0px;
-    top: 921px;
+    height: 10vh;
 }
 
 
 
 .blue_button {
-    background: var(--main-color);
-    color: var(--bright-color);
+    background: var(--main-color) !important;
+    color: var(--bright-color) !important;
 }
 
 .pale_button {
@@ -64,12 +59,5 @@
 .username {
     font-family: Helvetica Neue, serif;
     font-style: normal;
-    font-weight: 500;
-    font-size: 26px;
-    line-height: 23px;
-
-    display: flex;
-    align-items: flex-end;
-
     color: var(--username-color);
 }
