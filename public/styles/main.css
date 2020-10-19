@@ -10,46 +10,37 @@
     --criteria-color: #EDEDED;
 }
 
-.body {
-    background: var(--background-color);
+body {
+    font-family: Helvetica Neue, serif;
+    font-style: normal;
+
+    overflow: hidden;
 }
 
 
 
 .header {
     background: var(--main-color);
-    position: absolute;
-    width: 1440px;
-    height: 203px;
-    left: 0px;
-    top: 0px;
+    height: 15vh;
 }
 
-.title {
-    font-family: Helvetica Neue, serif;
-    font-style: normal;
-    font-weight: 500;
-    font-size: 30px;
-    line-height: 33px;
-
-    display: flex;
-    align-items: flex-end;
+.holder {
+    background: var(--background-color);
+    height: 75vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .footer {
     background: var(--footer-color);
-    position: absolute;
-    width: 1440px;
-    height: 103px;
-    left: 0px;
-    top: 921px;
+    height: 10vh;
 }
 
 
 
 .blue_button {
-    background: var(--main-color);
-    color: var(--bright-color);
+    background: var(--main-color) !important;
+    color: var(--bright-color) !important;
 }
 
 .pale_button {
@@ -62,14 +53,21 @@
 
 
 .username {
-    font-family: Helvetica Neue, serif;
-    font-style: normal;
-    font-weight: 500;
-    font-size: 26px;
-    line-height: 23px;
-
-    display: flex;
-    align-items: flex-end;
-
     color: var(--username-color);
+}
+
+.texteous {
+    color: var(--text-color);
+}
+
+.inputous {
+    background: var(--bright-color);
+    border: 1px solid var(--border-color);
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.linked {
+    display: block;
+    margin-top: .5rem;
 }
