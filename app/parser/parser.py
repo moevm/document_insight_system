@@ -19,7 +19,8 @@ class Parser:
                 text = self.presentation.get_text_from_slides()
                 self.state = 2
                 return text
-            except:
+            except Exception as err:
+                print(err)
                 self.state = -1
         elif str(self.presentation_name).endswith('.odp'):
             try:
@@ -28,7 +29,8 @@ class Parser:
                 text = self.presentation.get_text_from_slides()
                 self.state = 2
                 return text
-            except:
+            except Exception as err:
+                print(err)
                 self.state = -1
         return ""
 

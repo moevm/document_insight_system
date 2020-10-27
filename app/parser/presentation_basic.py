@@ -5,8 +5,15 @@ class PresentationBasic:
         self.text = text
         self.titles = titles
 
-    def get_text_from_slides(self):
+    def add_slides(self):
         pass
 
+    def get_text_from_slides(self):
+        for slide in self.slides:
+            self.text += str(slide.get_text()) + '\n'
+        return self.text
+
     def get_titles(self):
-        pass
+        for slide in self.slides:
+            self.titles.append(slide.get_title())
+        return self.titles

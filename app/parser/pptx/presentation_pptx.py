@@ -1,4 +1,4 @@
-from app.parser.pptx.slide_pptx import SlidePPTX
+from app.parser.slide import Slide
 from pptx import Presentation
 from app.parser.presentation_basic import PresentationBasic
 
@@ -11,15 +11,6 @@ class PresentationPPTX(PresentationBasic):
 
     def add_slides(self):
         for slide in self.prs.slides:
-            self.slides.append(SlidePPTX(slide))
+            self.slides.append(Slide(slide, 'pptx'))
 
-    def get_text_from_slides(self):
-        for slide in self.slides:
-            self.text += slide.get_text()
-        return self.text
-
-    def get_titles(self):
-        for slide in self.slides:
-            self.titles.append(slide.get_title())
-        return self.titles
 
