@@ -1,12 +1,10 @@
 from flask import Flask, request, redirect, url_for, render_template
 import app.user.user as user
 import app.main.main as main
-from app.parser.parser import Parser
-from werkzeug.utils import secure_filename
-import os
+
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
-UPLOAD_FOLDER = 'app/files'
+UPLOAD_FOLDER = '../files'
 
 app = Flask(__name__, static_folder="./../public/", template_folder="./../templates/")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -43,12 +41,10 @@ def results():
 @app.route("/criteria", methods=['GET', 'POST'])
 def criteria():
     if request.method == 'POST':
+        print('Начало обработки презентации!')
         file = request.files['presentation']
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-        parser = Parser(UPLOAD_FOLDER + '/' + filename)
-        with open(UPLOAD_FOLDER + '/' + 'answer.txt', 'w') as answer:
-            answer.write(parser.parse_presentation())
+        main.parse_presentation(app, file, UPLOAD_FOLDER)
+        print('Конец обработки презентации!')
     main.criteria(request.args)
     return render_template("./criteria.html")
 
