@@ -41,10 +41,8 @@ def results():
 @app.route("/criteria", methods=['GET', 'POST'])
 def criteria():
     if request.method == 'POST':
-        print('Начало обработки презентации!')
         file = request.files['presentation']
         main.parse_presentation(app, file, UPLOAD_FOLDER)
-        print('Конец обработки презентации!')
     main.criteria(request.args)
     return render_template("./criteria.html")
 

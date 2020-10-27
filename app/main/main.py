@@ -21,3 +21,9 @@ def parse_presentation(app, file, upload_folder):
     parser = Parser(upload_folder + '/' + filename)
     with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_answer.txt', 'w') as answer:
         answer.write(parser.parse_presentation())
+    if parser.get_state() == -1:
+        print("Что-то пошло не так")
+    elif parser.get_state() == 1:
+        print("Презентация загружена")
+    elif parser.get_state() == 2:
+        print("Презентация обработана")
