@@ -2,7 +2,12 @@ from flask import Flask, request, redirect, url_for, render_template
 import app.user.user as user
 import app.main.main as main
 
+
+ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
+UPLOAD_FOLDER = '../files'
+
 app = Flask(__name__, static_folder="./../public/", template_folder="./../templates/")
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 # User pages request handlers:
@@ -33,8 +38,11 @@ def results():
     return render_template("./results.html")
 
 
-@app.route("/criteria")
+@app.route("/criteria", methods=['GET', 'POST'])
 def criteria():
+    if request.method == 'POST':
+        file = request.files['presentation']
+        main.parse_presentation(app, file, UPLOAD_FOLDER)
     main.criteria(request.args)
     return render_template("./criteria.html")
 
