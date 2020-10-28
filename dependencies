@@ -1,6 +1,4 @@
 // Some kind of "package.json" for pip.
 
-Flask==1.1.2
-requests==2.24.0
-python-pptx==0.6.18
-odfpy==1.4.1
+flask
+request
