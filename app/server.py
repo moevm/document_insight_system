@@ -12,43 +12,39 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # User pages request handlers:
 
-@app.route("/login", methods=["GET"])
+@app.route("/login")
 def login():
     user.login(request.args)
-    return render_template("./login.html", navi_upload=True, logout=False, name=(" ", " "))
+    return render_template("./login.html")
 
 
-@app.route("/signup", methods=["GET"])
+@app.route("/signup")
 def signup():
     user.signup(request.args)
-    return render_template("./signup.html", navi_upload=True, logout=False, name=(" ", " "))
+    return render_template("./signup.html")
 
 
 # Main pages request handlers:
 
-@app.route("/upload", methods=["GET", "POST"])
+@app.route("/upload")
 def upload():
-    if request.method == "POST":
-        return str(main.upload(request, UPLOAD_FOLDER))
-    elif request.method == "GET":
-        return render_template("./upload.html", debug=True, navi_upload=False, logout=True, name=("Имя", "Фамилия"))
+    main.upload(request.args)
+    return render_template("./upload.html")
 
 
-@app.route("/results", methods=["GET"])
+@app.route("/results")
 def results():
     main.results(request.args)
-    return render_template("./results.html", navi_upload=True, logout=True, name=("Имя", "Фамилия"))
+    return render_template("./results.html")
 
 
-@app.route("/criteria", methods=["GET"])
+@app.route("/criteria", methods=['GET', 'POST'])
 def criteria():
+    if request.method == 'POST':
+        file = request.files['presentation']
+        main.parse_presentation(app, file, UPLOAD_FOLDER)
     main.criteria(request.args)
-    return render_template("./criteria.html", navi_upload=True, logout=True, name=("Имя", "Фамилия"))
-
-
-@app.route("/status", methods=["GET"])
-def status():
-    return str(main.status())
+    return render_template("./criteria.html")
 
 
 # Redirection:

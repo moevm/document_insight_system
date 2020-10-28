@@ -9,7 +9,8 @@ class PresentationBasic:
     def get_text_from_slides(self):
         texts = []
         for slide in self.slides:
-            texts.append(slide.get_text())
+            text = str(slide.get_text()).replace('\x0b', '\n') + '\n'
+            texts.append(text)
         return texts
 
     def get_titles(self):

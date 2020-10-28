@@ -2,29 +2,9 @@ from app.parser.parser import Parser
 from werkzeug.utils import secure_filename
 import os
 
-parser = None
 
-
-def upload(request, upload_folder):
-    global parser
-    filename = request.data.decode("utf-8")
-    if filename != "":
-        filename = filename.split("=")[1]
-    else:
-        if "presentation" not in request.files:
-            print("Поступил пустой запрос")
-            return -1
-        file = request.files["presentation"]
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(upload_folder, file.filename))
-    parser = Parser(upload_folder + '/' + filename)
-    with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_answer.txt', 'w') as answer:
-        answer.write("".join(parser.parse_presentation()))
-    if parser.get_state() == -1:
-        print("Что-то пошло не так")
-    elif parser.get_state() == 3:
-        print("Презентация обработана")
-    return parser.get_state()
+def upload(args):
+    return "Upload page, args: " + str(args)
 
 
 def results(args):
@@ -35,9 +15,20 @@ def criteria(args):
     return "Criteria page, args: " + str(args)
 
 
-def status():
-    global parser
-    if parser is not None:
-        return parser.get_state()
-    else:
-        return 0
+def parse_presentation(app, file, upload_folder):
+    filename = secure_filename(file.filename)
+    file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+    parser = Parser(upload_folder + '/' + filename)
+    if parser.get_state() == -1:
+        print("Что-то пошло не так")
+    elif parser.get_state() == 1:
+        print("Презентация загружена")
+    elif parser.get_state() == 2:
+        print("Презентация обработана")
+    try:
+        with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_answer.txt', 'w') as answer:
+            for line in parser.get_text():
+                answer.write(line)
+    except Exception as err:
+        print(err)
+        print("Что-то пошло не так")
