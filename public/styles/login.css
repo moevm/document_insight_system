@@ -1,3 +1,7 @@
 #login_title {
     margin-bottom: 1rem !important;
 }
+
+#login_button {
+    margin-top: 1rem;
+}
