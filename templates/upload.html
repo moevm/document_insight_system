@@ -1,3 +1,7 @@
+{# Accepts: "debug", header dependicies #}
+
+
+
 {% extends "root.html" %}
 
 {% block title %}Страница с формой отправки презентации на проверку{% endblock %}
@@ -11,9 +15,7 @@
 {% endblock %}
 
 {% block main %}
-    <div class="header row justify-content-end">
-        <h4 class="username text-center my-auto" id="user_info">Имя Фамилия</h4>
-    </div>
+    <div class="header row">{% include "header.html" %}</div>
     <div class="holder row justify-content-center">
         <div class="col-11 col-sm-8 col-md-5 col-lg-4 my-auto">
             <h3 class="text-center" id="upload_title">Какую презентацию Вы хотите проверить?</h3>
@@ -29,13 +31,19 @@
                                 <div class="invalid-feedback">Плохой файл!</div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <div id="uploading_progress" class="progress">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%"></div>
+                        <div id="uploading_progress_holder" class="form-group" style="display: none">
+                            <div class="progress">
+                                <div id="uploading_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%"></div>
                             </div>
                         </div>
                     </form>
-                    <button type="button" class="pale_button" id="uploading_button" onclick="send1()">Послать</button>
+                    <div class="row h-box">
+                        <button type="button" class="pale_button" id="uploading_button" onclick="upload()">Загрузить</button>
+                        <button type="button" class="pale_button" id="uploading_button" onclick="criteria()">Критерии</button>
+                            {% if debug %}
+                                <a class="linked flex-grow-1 text-right" href="/upload" onclick="debug()">Preloaded</a>
+                            {% endif %}
+                    </div>
                 </div>
             </div>
 
@@ -49,7 +57,7 @@
                             </div>
                         </div>
                     </form>
-                    <button type="button" class="pale_button" id="uploading_button" onclick="send2()">Результат</button>
+                    <button type="button" class="pale_button" id="uploading_button" onclick="check()">Результат</button>
                 </div>
             </div>
 
