@@ -1,3 +1,7 @@
+{# Accepts: header dependicies #}
+
+
+
 {% extends "root.html" %}
 
 {% block title %}Авторизация{% endblock %}
@@ -11,7 +15,7 @@
 {% endblock %}
 
 {% block main %}
-    <div class="header row"></div>
+    <div class="header row">{% include "header.html" %}</div>
     <div class="holder row justify-content-center">
         <div class="col-11 col-sm-8 col-md-5 col-lg-4 col-xl-3 my-auto">
             <h2 class="text-center" id="login_title">Вход</h2>
@@ -30,7 +34,7 @@
             </form>
 
             <div class="row justify-content-center">
-                <div class="col-8 my-auto">
+                <div class="col-8 v-box">
                     <button type="button" class="btn btn-block blue_button" id="login_button" onclick="login()">Войти</button>
                     <a class="linked text-right" href="/signup" id="signup_link">Регистрация</a>
                 </div>

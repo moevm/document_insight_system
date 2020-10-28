@@ -19,21 +19,23 @@ class Parser:
     def parse_presentation(self):
         if str(self.presentation_name).endswith('.ppt') or str(self.presentation_name).endswith('.pptx'):
             try:
-                self.presentation = PresentationPPTX(self.presentation_name)
                 self.state = 1
+                self.presentation = PresentationPPTX(self.presentation_name)
+                self.state = 2
                 self.text = self.presentation.get_text_from_slides()
                 self.titles = self.presentation.get_titles()
-                self.state = 2
+                self.state = 3
             except Exception as err:
                 print(err)
                 self.state = -1
         elif str(self.presentation_name).endswith('.odp'):
             try:
-                self.presentation = PresentationODP(self.presentation_name)
                 self.state = 1
+                self.presentation = PresentationODP(self.presentation_name)
+                self.state = 2
                 self.text = self.presentation.get_text_from_slides()
                 self.titles = self.presentation.get_titles()
-                self.state = 2
+                self.state = 3
             except Exception as err:
                 print(err)
                 self.state = -1
