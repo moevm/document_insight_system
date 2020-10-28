@@ -27,6 +27,7 @@ def upload(request, upload_folder):
         print(err)
         print("Что-то пошло не так")
         return -1
+    parser.check_title_size(filename, upload_folder)
     if parser.get_state() == -1:
         print("Что-то пошло не так")
     elif parser.get_state() == 3:

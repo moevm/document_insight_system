@@ -1,5 +1,7 @@
 from app.parser.odp.presentation_odp import PresentationODP
 from app.parser.pptx.presentation_pptx import PresentationPPTX
+import re
+import os
 
 
 class Parser:
@@ -46,3 +48,23 @@ class Parser:
 
     def get_state(self):
         return self.state
+
+    def check_title_size(self, filename, upload_folder):
+        i = 0
+        error_slides = ''
+        for title in self.titles:
+            i += 1
+            title = str(title).replace('\x0b', '\n')
+            if '\n' in title or '\r' in title:
+                titles = []
+                for t in re.split('\r|\n', title):
+                    if t != '':
+                        titles.append(t)
+                if len(titles) > 2:
+                    error_slides += str(i) + ' '
+        try:
+            with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_error_with_title_size.txt', 'w') as answer:
+                answer.write(error_slides)
+        except Exception as err:
+            print(err)
+            print("Что-то пошло не так")
