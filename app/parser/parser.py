@@ -48,7 +48,7 @@ class Parser:
         return self.state
 
     def check_title_size(self, filename, upload_folder):
-        i = 1
+        i = 0
         error_slides = ''
         for title in self.titles:
             i += 1
