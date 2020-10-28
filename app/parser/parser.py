@@ -7,6 +7,9 @@ class Parser:
         self.presentation_name = presentation_name
         self.presentation = None
         self.state = 0
+        self.text = []
+        self.titles = []
+        self.parse_presentation()
 
     def get_presentation_name(self):
         return self.presentation_name
@@ -16,9 +19,9 @@ class Parser:
             try:
                 self.presentation = PresentationPPTX(self.presentation_name)
                 self.state = 1
-                text = self.presentation.get_text_from_slides()
+                self.text = self.presentation.get_text_from_slides()
+                self.titles = self.presentation.get_titles()
                 self.state = 2
-                return text
             except Exception as err:
                 print(err)
                 self.state = -1
@@ -26,13 +29,18 @@ class Parser:
             try:
                 self.presentation = PresentationODP(self.presentation_name)
                 self.state = 1
-                text = self.presentation.get_text_from_slides()
+                self.text = self.presentation.get_text_from_slides()
+                self.titles = self.presentation.get_titles()
                 self.state = 2
-                return text
             except Exception as err:
                 print(err)
                 self.state = -1
-        return ""
+
+    def get_titles(self):
+        return self.titles
+
+    def get_text(self):
+        return self.text
 
     def get_state(self):
         return self.state
