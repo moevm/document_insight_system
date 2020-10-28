@@ -1,3 +1,7 @@
+{# Accepts: header dependicies #}
+
+
+
 {% extends "root.html" %}
 
 {% block title %}Страница результатов проверки{% endblock %}
@@ -11,7 +15,7 @@
 {% endblock %}
 
 {% block main %}
-    <div class="header row justify-content-end"></div>
+    <div class="header row">{% include "header.html" %}</div>
     <div class="holder row" id="results_holder">
         <h3 id="results_title" class="texteous">Результат проверки: пройдена!</h3>
 
