@@ -19,9 +19,31 @@ body {
 
 
 
+.h-box {
+    margin-left: 1rem !important;
+    margin-right: 1rem !important;
+}
+
+.v-box {
+    margin-top: .5rem !important;
+    margin-bottom: .5rem !important;
+}
+
+.h-box > * + * {
+    margin-left: .5rem !important;
+}
+
+.v-box > * + * {
+    margin-top: .5rem !important;
+}
+
+
+
 .header {
     background: var(--main-color);
     height: 15vh;
+    padding-left: 2rem;
+    padding-right: 2rem;
 }
 
 .holder {
@@ -69,5 +91,15 @@ body {
 
 .linked {
     display: block;
-    margin-top: .5rem;
+    text-align: center;
+}
+
+.header-linked, .header-linked:visited {
+    display: block;
+    color: var(--bright-color);
+}
+
+.header-linked:hover {
+    display: block;
+    color: var(--border-color);
 }

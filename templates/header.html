@@ -1,0 +1,21 @@
+{# Accepts: "navi_upload", "logout", "name" #}
+
+
+
+<div class="col-sm-4 col-md-3 col-lg-2 my-auto">
+    {% if logout %}
+        <a class="header-linked text-center" href="/login" id="login_ref_link">Выйти</a>
+    {% endif %}
+</div>
+
+<div class="col-sm-4 col-md-3 col-lg-2 my-auto">
+    {% if navi_upload %}
+        <a class="header-linked text-center" href="/upload" id="upload_ref_link">Загрузка презентации</a>
+    {% endif %}
+</div>
+
+<div class="offset-md-3 offset-lg-6 col-sm-4 col-md-3 col-lg-2 my-auto">
+    {% if name is defined %}
+        <h4 class="username text-right my-auto" id="user_info">{{ name[0] }} {{ name[1] }}</h4>
+    {% endif %}
+</div>
