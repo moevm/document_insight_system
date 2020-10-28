@@ -5,7 +5,7 @@ import os
 
 parser = None
 SLIDE_CONCLUSION = 'Заключение'
-SLIDE_APPROBATION_OF_WORK = 'Апробация работы'
+SLIDE_APPROBATION_OF_WORK = 'Апробация'
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
 
 
