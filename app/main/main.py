@@ -19,11 +19,16 @@ def parse_presentation(app, file, upload_folder):
     filename = secure_filename(file.filename)
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
     parser = Parser(upload_folder + '/' + filename)
-    with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_answer.txt', 'w') as answer:
-        answer.write(parser.parse_presentation())
     if parser.get_state() == -1:
         print("Что-то пошло не так")
     elif parser.get_state() == 1:
         print("Презентация загружена")
     elif parser.get_state() == 2:
         print("Презентация обработана")
+    try:
+        with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_answer.txt', 'w') as answer:
+            for line in parser.get_text():
+                answer.write(line)
+    except Exception as err:
+        print(err)
+        print("Что-то пошло не так")
