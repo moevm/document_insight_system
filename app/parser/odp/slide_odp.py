@@ -22,7 +22,7 @@ class SlideODP(SlideBasic):
                 self.__walk_children(node, node_text)
                 texts.append(node_text)
 
-        self.title = "".join(title)
+        self.title = "\n".join(title)
         for text in texts:
             self.text += " ".join(text) + "\n"  # For now text from multiple nodes is separated with new line.
 

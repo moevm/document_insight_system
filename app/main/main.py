@@ -32,3 +32,4 @@ def parse_presentation(app, file, upload_folder):
     except Exception as err:
         print(err)
         print("Что-то пошло не так")
+    parser.check_title_size(filename, upload_folder)
