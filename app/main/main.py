@@ -4,6 +4,9 @@ import os
 
 
 parser = None
+SLIDE_CONCLUSION = 'Заключение'
+SLIDE_APPROBATION_OF_WORK = 'Апробация'
+SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
 
 
 def upload(request, upload_folder):
@@ -28,6 +31,21 @@ def upload(request, upload_folder):
         print("Что-то пошло не так")
         return -1
     parser.check_title_size(filename, upload_folder)
+    try:
+        with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_definite_slides.txt', 'w') as definite_slides:
+            buf = parser.find_definite_slide(SLIDE_CONCLUSION)
+            if buf:
+                definite_slides.write(SLIDE_CONCLUSION+':' + str(buf) + '\n')
+            buf = parser.find_definite_slide(SLIDE_GOALS_AND_TASKS)
+            if buf:
+                definite_slides.write(SLIDE_GOALS_AND_TASKS+':' + str(buf) + '\n')
+            buf = parser.find_definite_slide(SLIDE_APPROBATION_OF_WORK)
+            if buf:
+                definite_slides.write(SLIDE_APPROBATION_OF_WORK+':' + str(buf) + '\n')
+    except Exception as err:
+        print(err)
+        print("Что-то пошло не так")
+        return -1
     if parser.get_state() == -1:
         print("Что-то пошло не так")
     elif parser.get_state() == 3:

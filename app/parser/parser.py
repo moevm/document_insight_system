@@ -68,3 +68,10 @@ class Parser:
         except Exception as err:
             print(err)
             print("Что-то пошло не так")
+
+    def find_definite_slide(self, type_of_slide):
+        i = 0
+        for title in self.titles:
+            i += 1
+            if str(title).lower().find(str(type_of_slide).lower()) != -1:
+                return i
