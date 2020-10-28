@@ -24,7 +24,7 @@ class SlideODP(SlideBasic):
 
         self.title = "".join(title)
         for text in texts:
-            self.text += "".join(text) + "\n"  # For now text from multiple nodes is separated with new line.
+            self.text += " ".join(text) + "\n"  # For now text from multiple nodes is separated with new line.
 
     def __walk_children(self, child, child_container):
         if hasattr(child, "data"):
