@@ -69,6 +69,25 @@ class Parser:
             print(err)
             print("Что-то пошло не так")
 
+    def check_enumeration(self, filename, upload_folder):
+        not_numbered = []
+        for i in range(1, len(self.presentation.slides)):
+            text = self.text[i]
+            added = False
+            for node_text in text.split("\n"):
+                if str(i) == node_text:
+                    added = True
+            if not added:
+                not_numbered.append(i)
+        try:
+            with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_error_with_slide_numbers.txt', 'w') as answer:
+                answer.write(str(not_numbered))
+        except Exception as err:
+            print(err)
+            print("Что-то пошло не так")
+        if len(not_numbered) == 0:
+            return 0
+
     def find_definite_slide(self, type_of_slide):
         i = 0
         for title in self.titles:

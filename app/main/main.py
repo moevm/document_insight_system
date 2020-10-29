@@ -46,6 +46,11 @@ def upload(request, upload_folder):
         print(err)
         print("Что-то пошло не так")
         return -1
+    if parser.check_enumeration(filename, upload_folder) == 0:
+        print("Слайды корректно пронумерованы")
+    else:
+        print("Слайды пронумерованы некорректно")
+
     if parser.get_state() == -1:
         print("Что-то пошло не так")
     elif parser.get_state() == 3:
