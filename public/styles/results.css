@@ -15,3 +15,7 @@
 #results_holder {
     overflow: auto;
 }
+
+#results_title {
+    margin-top: 1rem;
+}

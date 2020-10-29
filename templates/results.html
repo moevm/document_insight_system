@@ -31,37 +31,37 @@
                 <tr>
                     <th scope="row">1</th>
                     <td>Количество основных слайдов</td>
-                    <td class="table-success">Пройдена</td>
+                    <td class="table-secondary">N/A</td>
                 </tr>
                 <tr>
                     <th scope="row">2</th>
                     <td>Нумерация слайдов</td>
-                    <td class="table-success">Пройдена</td>
+                    <td class="table-secondary">N/A</td>
                 </tr>
                 <tr>
                     <th scope="row">3</th>
                     <td>Заголовки слайдов занимают не более двух строк</td>
-                    <td class="table-danger">Не пройдена. Проблемные слайды: 4, 6, 7.</td>
+                    <td class={{ "table-success" if results[2] == "" else "table-danger" }}>{{ "Пройдена!" if results[2] == "" else ("Не пройдена. Проблемные слайды: " + results[2] + ".") }}</td>
                 </tr>
                 <tr>
                     <th scope="row">4</th>
                     <td>Слайд "Цель и задачи"</td>
-                    <td class="table-success">Пройдена</td>
+                    <td class={{ "table-danger" if results[3] == "" else "table-success" }}>{{ "Не найден!" if results[3] == "" else ("Найден под номером: " + results[3] + ".") }}</td>
                 </tr>
                 <tr>
                     <th scope="row">5</th>
                     <td>Слайд "Апробация работы"</td>
-                    <td class="table-success">Пройдена</td>
+                    <td class={{ "table-danger" if results[4] == "" else "table-success" }}>{{ "Не найден!" if results[4] == "" else ("Найден под номером: " + results[4] + ".") }}</td>
                 </tr>
                 <tr>
                     <th scope="row">6</th>
                     <td>Слайд с описанием актуальности работы</td>
-                    <td class="table-danger">Не пройдена. Слайд отсутствует.</td>
+                    <td class="table-secondary">N/A</td>
                 </tr>
                 <tr>
                     <th scope="row">7</th>
                     <td>Слайд с заключением</td>
-                    <td class="table-success">Пройдена</td>
+                    <td class={{ "table-danger" if results[6] == "" else "table-success" }}>{{ "Не найден!" if results[6] == "" else ("Найден под номером: " + results[6] + ".") }}</td>
                 </tr>
             </tbody>
         </table>
