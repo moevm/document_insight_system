@@ -1,6 +1,7 @@
 # mse_auto_checking_slides_vaganov
 ## Таск-трекер: [[link]](https://github.com/moevm/mse_auto_checking_slides_vaganov/projects/1)  
-Скринкаст первой итерации (прототип): [[link]](https://yadi.sk/i/59qktvtQMWLZyw)
+Скринкаст первой итерации (прототип): [[link]](https://yadi.sk/i/59qktvtQMWLZyw)  
+Скринкаст второй итерации: [[link]](https://yadi.sk/i/zHboIWHajNgnKg)  
 #### Инструкция запуска приложения:  
 Для того, чтобы развернуть и запустить программу, необходимо выполнить следующие консольные команды (bash):
 1. `pip install Flask`  
