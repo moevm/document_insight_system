@@ -1,5 +1,8 @@
 let checking_presentation_uploading;
 const file_input = $("#upload_file");
+const checking_button = $("#checking_button");
+
+checking_button.prop("disabled", true);
 
 file_input.change(() => {
     const fileName = file_input.val().split("\\")[2];
@@ -41,6 +44,7 @@ function upload(file_name) {
                 break;
             case "3":
                 bar.addClass("bg-success");
+                checking_button.prop("disabled", false);
                 break;
         }
     });
@@ -76,5 +80,5 @@ function criteria() {
 }
 
 function check() {
-
+    window.location.href = "/results";
 }
