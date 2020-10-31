@@ -25,6 +25,7 @@ def upload(request, upload_folder):
         filename = secure_filename(file.filename)
         file.save(os.path.join(upload_folder, file.filename))
     parser = Parser(upload_folder + '/' + filename)
+    result = []
     try:
         with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_answer.txt', 'w') as answer:
             for line in parser.get_text():
