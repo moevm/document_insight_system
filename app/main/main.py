@@ -4,13 +4,16 @@ import os
 
 
 parser = None
-SLIDE_CONCLUSION = 'Заключение'
-SLIDE_APPROBATION_OF_WORK = 'Апробация'
+result = []
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
+SLIDE_APPROBATION_OF_WORK = 'Апробация'
+SLIDE_CONCLUSION = 'Заключение'
 
 
 def upload(request, upload_folder):
     global parser
+    global result
+
     filename = request.data.decode("utf-8")
     if filename != "":
         filename = filename.split("=")[1]
@@ -22,6 +25,7 @@ def upload(request, upload_folder):
         filename = secure_filename(file.filename)
         file.save(os.path.join(upload_folder, file.filename))
     parser = Parser(upload_folder + '/' + filename)
+    result = []
     try:
         with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_answer.txt', 'w') as answer:
             for line in parser.get_text():
@@ -30,27 +34,42 @@ def upload(request, upload_folder):
         print(err)
         print("Что-то пошло не так")
         return -1
-    parser.check_title_size(filename, upload_folder)
+
+    result.append(-1)  # Количество основных слайдов
+    result.append(-1)  # Нумерация слайдов
+
+    titles_size = parser.check_title_size(filename, upload_folder)
+    result.append(titles_size)  # Заголовки слайдов занимают не более двух строк
+
     try:
         with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_definite_slides.txt', 'w') as definite_slides:
+            buf = parser.find_definite_slide(SLIDE_GOALS_AND_TASKS)
+            if buf:
+                definite_slides.write(SLIDE_GOALS_AND_TASKS + ':' + str(buf) + '\n')
+                result.append(str(buf))  # Слайд "Цель и задачи"
+            else:
+                result.append("")
+
+            buf = parser.find_definite_slide(SLIDE_APPROBATION_OF_WORK)
+            if buf:
+                definite_slides.write(SLIDE_APPROBATION_OF_WORK + ':' + str(buf) + '\n')
+                result.append(str(buf))  # Слайд "Апробация работы"
+            else:
+                result.append("")
+
+            result.append(-1)  # Слайд с описанием актуальности работы
+
             buf = parser.find_definite_slide(SLIDE_CONCLUSION)
             if buf:
                 definite_slides.write(SLIDE_CONCLUSION+':' + str(buf) + '\n')
-            buf = parser.find_definite_slide(SLIDE_GOALS_AND_TASKS)
-            if buf:
-                definite_slides.write(SLIDE_GOALS_AND_TASKS+':' + str(buf) + '\n')
-            buf = parser.find_definite_slide(SLIDE_APPROBATION_OF_WORK)
-            if buf:
-                definite_slides.write(SLIDE_APPROBATION_OF_WORK+':' + str(buf) + '\n')
+                result.append(str(buf))  # Слайд с заключением
+            else:
+                result.append("")
+
     except Exception as err:
         print(err)
         print("Что-то пошло не так")
         return -1
-    if parser.check_enumeration(filename, upload_folder) == 0:
-        print("Слайды корректно пронумерованы")
-    else:
-        print("Слайды пронумерованы некорректно")
-
     if parser.get_state() == -1:
         print("Что-то пошло не так")
     elif parser.get_state() == 3:
@@ -59,7 +78,7 @@ def upload(request, upload_folder):
 
 
 def results(args):
-    return "Results page, args: " + str(args)
+    return result
 
 
 def criteria(args):

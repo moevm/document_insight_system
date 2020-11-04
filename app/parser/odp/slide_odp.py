@@ -1,26 +1,27 @@
 from app.parser.slide_basic import SlideBasic
+from app.utils import tict
 
 
 def _is_title(node):
-    for key in node.attributes:
-        if (key[1] == "class") and (node.attributes[key] == "title"):
-            return True
-    return False
+    return tict.get(node.attributes, "class") == "title"
 
 
 def _is_notes(node):
     return node.tagName == "presentation:notes"
 
 
-def _contains_page_number(node):
-    for key in node.attributes:
-        if key[1] == "page-number":
-            return True
-    return False
+def _page_number_valid(node, slide, styles):
+    style = tict.get(slide.attributes, "style-name")
+    if "display-page-number" in styles[style]:
+        display_page_number = styles[style]["display-page-number"] == "true"
+    else:
+        display_page_number = False
+
+    return (tict.has(node.attributes, "page-number")) and display_page_number
 
 
 class SlideODP(SlideBasic):
-    def __init__(self, container):
+    def __init__(self, container, styles):
         SlideBasic.__init__(self, container)
         title = []
         texts = []
@@ -32,14 +33,10 @@ class SlideODP(SlideBasic):
                 self.__walk_children(node, title)
             elif _is_notes(node):
                 for child in node.childNodes:
-                    if _contains_page_number(child):
-                        for key in child.attributes:
-                            if key[1] == "page-number":
-                                self.page_number[2] = int(child.attributes[key])
-                            elif key[1] == "x":
-                                self.page_number[0] = float(child.attributes[key][:-3])
-                            elif key[1] == "y":
-                                self.page_number[1] = float(child.attributes[key][:-3])
+                    if _page_number_valid(child, container, styles):
+                        self.page_number[0] = int(tict.get(child.attributes, "page-number"))
+                        self.page_number[1] = float(tict.get(child.attributes, "x")[:-2])
+                        self.page_number[2] = float(tict.get(child.attributes, "y")[:-2])
             else:
                 node_text = []
                 self.__walk_children(node, node_text)

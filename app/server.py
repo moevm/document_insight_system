@@ -36,8 +36,8 @@ def upload():
 
 @app.route("/results", methods=["GET"])
 def results():
-    main.results(request.args)
-    return render_template("./results.html", navi_upload=True, logout=True, name=("Имя", "Фамилия"))
+    result = main.results(request.args)
+    return render_template("./results.html", navi_upload=True, logout=True, name=("Имя", "Фамилия"), results=result)
 
 
 @app.route("/criteria", methods=["GET"])
