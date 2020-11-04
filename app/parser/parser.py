@@ -76,3 +76,12 @@ class Parser:
             i += 1
             if str(title).lower().find(str(type_of_slide).lower()) != -1:
                 return i
+
+    def check_slides_enumeration(self):
+        error = ""
+        if self.presentation.slides[0].page_number[0] != -1:
+            error += "0 "
+        for i in range(1, len(self.presentation.slides)):
+            if self.presentation.slides[i].page_number[0] != i + 1:
+                error += str(i) + " "
+        return error
