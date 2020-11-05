@@ -4,7 +4,7 @@
 Скринкаст второй итерации: [[link]](https://yadi.sk/i/zHboIWHajNgnKg)  
 #### Инструкция запуска приложения:  
 Для того, чтобы развернуть и запустить программу, необходимо выполнить следующие консольные команды (bash):
-1. `pip install Flask`  
+1. `pip install -r dependencies`  
 2. `python3 ./app/server.py`  
 3. В браузере открыть адрес localhost:8080  
   
