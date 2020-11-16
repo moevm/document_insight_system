@@ -2,7 +2,8 @@ class SlideBasic:
     def __init__(self, container):  # Extracting only the properties we need!
         self.title = ""
         self.text = ""  # Maybe should be a list for multiple text nodes.
-        self.page_number = 0
+        self.page_number = [-1, -1, -1]
+        self.dimensions = [-1, -1]
 
     def get_title(self):
         return self.title

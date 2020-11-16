@@ -36,7 +36,7 @@
                 <tr>
                     <th scope="row">2</th>
                     <td>Нумерация слайдов</td>
-                    <td class="table-secondary">N/A</td>
+                    <td class={{ "table-success" if results[1] == "" else "table-danger" }}>{{ "Пройдена!" if results[1] == "" else ("Не пройдена. Проблемные слайды: " + results[1] + ".") }}</td>
                 </tr>
                 <tr>
                     <th scope="row">3</th>
