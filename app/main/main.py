@@ -76,6 +76,12 @@ def upload(request, upload_folder):
         print("Что-то пошло не так")
     elif parser.get_state() == 3:
         print("Презентация обработана")
+
+    satisfied = True
+    for crit in result:
+        satisfied &= crit == "" or crit == -1
+    result.append(satisfied)
+
     return parser.get_state()
 
 
