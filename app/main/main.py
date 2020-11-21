@@ -36,7 +36,9 @@ def upload(request, upload_folder):
         return -1
 
     result.append(-1)  # Количество основных слайдов
-    result.append(-1)  # Нумерация слайдов
+
+    slides_enumeration = parser.check_slides_enumeration()
+    result.append(slides_enumeration)  # Нумерация слайдов
 
     titles_size = parser.check_title_size(filename, upload_folder)
     result.append(titles_size)  # Заголовки слайдов занимают не более двух строк
