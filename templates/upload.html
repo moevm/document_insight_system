@@ -4,7 +4,7 @@
 
 {% extends "root.html" %}
 
-{% block title %}Страница с формой отправки презентации на проверку{% endblock %}
+{% block title %}Загрузка презентаций{% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href={{ url_for("static", filename="styles/upload.css") }}>
@@ -38,7 +38,7 @@
                         </div>
                     </form>
                     <div class="row h-box">
-                        <button type="button" class="pale_button" onclick="upload()">Загрузить</button>
+                        <button type="button" class="pale_button" id="upload_upload_button" onclick="upload()" disabled>Загрузить</button>
                         <button type="button" class="pale_button" onclick="criteria()">Критерии</button>
                             {% if debug %}
                                 <button type="button" class="pale_button" onclick="upload('sample.odp')">Тестирование</button>

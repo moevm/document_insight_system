@@ -22,6 +22,11 @@
 
             <form>
                 <div class="form-group row">
+                    <label class="texteous col-auto col-sm-3" id="login_label" for="login_text_field">Логин</label>
+                    <input class="inputous form-control col-auto col-sm-9" id="login_text_field" type="text" placeholder="Логин" aria-label="Логин" required>
+                    <div class="invalid-feedback">Невозможный логин!</div>
+                </div>
+                <div class="form-group row">
                     <label class="texteous col-auto col-sm-3" id="name_label" for="name_text_field">Имя</label>
                     <input class="inputous form-control col-auto col-sm-9" id="name_text_field" type="text" placeholder="Имя" aria-label="Имя" required>
                     <div class="invalid-feedback">Имя не может быть пустым!</div>
@@ -30,11 +35,6 @@
                     <label class="texteous col-auto col-sm-3" id="surname_label" for="surname_text_field">Фамилия</label>
                     <input class="inputous form-control col-auto col-sm-9" id="surname_text_field" type="text" placeholder="Фамилия" aria-label="Фамилия" required>
                     <div class="invalid-feedback">Фамилия не может быть пустой!</div>
-                </div>
-                <div class="form-group row">
-                    <label class="texteous col-auto col-sm-3" id="email_label" for="email_text_field">E-mail</label>
-                    <input class="inputous form-control col-auto col-sm-9" id="email_text_field" type="email" placeholder="E-mail" aria-label="E-mail" required>
-                    <div class="invalid-feedback">E-mail не может быть пустым!</div>
                 </div>
                 <div class="form-group row">
                     <label class="texteous col-auto col-sm-3" id="password_label" for="password_text_field">Пароль</label>
