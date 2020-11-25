@@ -1,3 +1,6 @@
+from flask_login import UserMixin
+
+
 class Packable:
     def __init__(self, dictionary):
         pass
@@ -7,7 +10,7 @@ class Packable:
 
 
 # You shouldn't create this or change username and presentations explicitly
-class User(Packable):
+class User(Packable, UserMixin):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
         if dictionary is None:
@@ -29,6 +32,9 @@ class User(Packable):
                 "password_hash: " + self.password_hash + ", " +
                 "presentations: " + str(self.presentations) + ", " +
                 "is_admin: " + str(self.is_admin) + " }")
+
+    def get_id(self):
+        return self.username
 
 
 # You shouldn't create or change this explicitly

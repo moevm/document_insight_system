@@ -14,9 +14,8 @@ def upload(request, upload_folder):
     global parser
     global result
 
-    filename = request.data.decode("utf-8")
-    if filename != "":
-        filename = filename.split("=")[1]
+    if request.json is not None and request.json['file_name'] is not None:
+        filename = request.json['file_name']
     else:
         if "presentation" not in request.files:
             print("Поступил пустой запрос")

@@ -22,12 +22,13 @@ def add_user(username, password_hash):
         return user
 
 
-# Returns True if user was given credentials exists and False if not
+# Returns user if there was user with given credentials and None if not
 def validate_user(username, password_hash):
-    if users_collection.find_one({'username': username, 'password_hash': password_hash}) is not None:
-        return True
+    user = users_collection.find_one({'username': username, 'password_hash': password_hash})
+    if user is not None:
+        return User(user)
     else:
-        return False
+        return None
 
 
 # Returns user with given username or None
@@ -39,7 +40,7 @@ def get_user(username):
         return None
 
 
-# Returns True if user was found and updated and false if not (username and presentations list can not be changed!)
+# Returns True if user was found and updated and false if not (username can not be changed!)
 def edit_user(user):
     if users_collection.find_one_and_replace({'username': user.username}, user.pack()) is not None:
         return True
