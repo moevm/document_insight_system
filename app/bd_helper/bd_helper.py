@@ -22,7 +22,7 @@ def add_user(username, password_hash):
         return user
 
 
-# Returns user if there was user with given credentials and False if not
+# Returns user if there was user with given credentials and None if not
 def validate_user(username, password_hash):
     user = users_collection.find_one({'username': username, 'password_hash': password_hash})
     if user is not None:
