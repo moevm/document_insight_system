@@ -25,7 +25,9 @@ def __check_title_size(presentation):
     for title in presentation.get_titles():
         i += 1
         title = str(title).replace('\x0b', '\n')
-        if '\n' in title or '\r' in title:
+        if title:
+            error_slides += str(i) + ' '
+        elif '\n' in title or '\r' in title:
             titles = []
             for t in split('\r|\n', title):
                 if t != '':
@@ -63,14 +65,13 @@ def __are_slides_similar(goals, conclusions):
 
 def check(presentation, checks):
     goals_array = ""
-    aprobation_array = ""
     conclusion_array = ""
 
     if checks.slides_number != -1:  # Количество основных слайдов
         checks.slides_number = __check_slides_number(presentation)
     if checks.slides_enum != -1:  # Нумерация слайдов
         checks.slides_enum = __check_slides_enumeration(presentation)
-    if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк
+    if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк или заголовков нет
         checks.slides_headers = __check_title_size(presentation)
     if checks.goals_slide != -1:  # Слайд "Цель и задачи"
         checks.goals_slide, goals_array = __find_definite_slide(presentation, SLIDE_GOALS_AND_TASKS)

@@ -10,6 +10,9 @@ class SlidePPTX(SlideBasic):
             if p.is_placeholder and p.placeholder_format.type == PP_PLACEHOLDER.SLIDE_NUMBER:
                 self.page_number = [int(p.text), int(p.left), int(p.top)]
         for shape in container.shapes:
-            self.title = container.shapes.title.text  # Bug! Not all slides have title!
+            if container.shapes.title:
+                self.title = container.shapes.title.text
+            else:
+                continue
             if hasattr(shape, "text"):
                 self.text = shape.text  # Is it possible for .PPTX presentation to have more than one text node on a single slide?
