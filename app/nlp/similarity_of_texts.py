@@ -28,6 +28,7 @@ def check_similarity(file1, file2):
             avg_sims.append(avg)
         total_avg = np.sum(avg_sims, dtype=np.float)
         percentage_of_similarity = round(float(total_avg) * 100)
+        os.rmdir(PATH)
         return percentage_of_similarity
     except OSError:
         print("Создать директорию %s не удалось" % PATH)
