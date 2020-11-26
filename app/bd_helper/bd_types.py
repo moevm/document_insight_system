@@ -29,7 +29,7 @@ class User(Packable, UserMixin):
     def __str__(self) -> str:
         return ("User: { username: " + self.username + ", " +
                 "name: " + self.name + ", " +
-                "password_hash: " + self.password_hash + ", " +
+                "password_hash: " + str(self.password_hash) + ", " +
                 "presentations: " + str(self.presentations) + ", " +
                 "is_admin: " + str(self.is_admin) + " }")
 
@@ -79,8 +79,8 @@ class Checks(Packable):
 
     def correct(self):
         return (self.slides_number == '' and self.slides_enum == '' and self.slides_headers == '' and
-                self.goals_slide == '' and self.probe_slide == '' and self.actual_slide == '' and
-                self.conclusion_slide == '')
+                self.goals_slide != '' and self.probe_slide != '' and self.actual_slide != '' and
+                self.conclusion_slide != '')
 
     def __str__(self) -> str:
         return ("Checks: { " + (("_id: " + str(self._id) + ", ") if hasattr(self, "_id") else "") +
