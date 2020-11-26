@@ -14,8 +14,7 @@ def check_similarity(string1, string2):
         corpus = [dictionary.doc2bow(gen_doc) for gen_doc in gen_docs]
 
         tf_idf = gensim.models.TfidfModel(corpus)
-        sims = gensim.similarities.Similarity(PATH, tf_idf[corpus],
-                                              num_features=len(dictionary))
+        sims = gensim.similarities.Similarity(PATH, tf_idf[corpus], num_features=len(dictionary))
 
         avg_sims = []
 
@@ -32,5 +31,5 @@ def check_similarity(string1, string2):
         shutil.rmtree(PATH)
         return percentage_of_similarity
     except OSError:
-        print("Создать директорию %s не удалось" % PATH)
+        print("Проблема с директорией ", PATH)
         return -1

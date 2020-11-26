@@ -5,10 +5,6 @@ from re import split
 from app.nlp.similarity_of_texts import check_similarity
 
 
-def __filename(folder, file_type, name):
-    return folder + '/' + file_type + '_' + name
-
-
 def __check_slides_number(presentation):
     return -1
 
@@ -44,7 +40,7 @@ SLIDE_APPROBATION_OF_WORK = 'Апробация'
 SLIDE_CONCLUSION = 'Заключение'
 
 
-def __find_definite_slide(presentation, type_of_slide, flush, upload_folder='', presentation_name=''):
+def __find_definite_slide(presentation, type_of_slide):
     i = 0
     for title in presentation.get_titles():
         i += 1
@@ -57,7 +53,7 @@ def __check_actual_slide(presentation):
     return -1
 
 
-def __are_slides_similar(slide_type_1, slide_type_2, upload_folder='', presentation_name='', goals="", conclusions=""):
+def __are_slides_similar(goals, conclusions):
     if goals == "" or conclusions == "":
         return -1
     result = check_similarity(goals, conclusions)
@@ -65,7 +61,11 @@ def __are_slides_similar(slide_type_1, slide_type_2, upload_folder='', presentat
     return result
 
 
-def check(presentation, checks, upload_folder, presentation_name):
+def check(presentation, checks):
+    goals_array = ""
+    aprobation_array = ""
+    conclusion_array = ""
+
     if checks.slides_number != -1:  # Количество основных слайдов
         checks.slides_number = __check_slides_number(presentation)
     if checks.slides_enum != -1:  # Нумерация слайдов
@@ -73,23 +73,14 @@ def check(presentation, checks, upload_folder, presentation_name):
     if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк
         checks.slides_headers = __check_title_size(presentation)
     if checks.goals_slide != -1:  # Слайд "Цель и задачи"
-        checks.goals_slide, goals_array = __find_definite_slide(presentation, SLIDE_GOALS_AND_TASKS,
-                                                                True, upload_folder, presentation_name)
+        checks.goals_slide, goals_array = __find_definite_slide(presentation, SLIDE_GOALS_AND_TASKS)
     if checks.probe_slide != -1:  # Слайд "Апробация работы"
-        checks.probe_slide, aprobation_array = __find_definite_slide(presentation, SLIDE_APPROBATION_OF_WORK, False)
+        checks.probe_slide, aprobation_array = __find_definite_slide(presentation, SLIDE_APPROBATION_OF_WORK)
     if checks.actual_slide != -1:  # Слайд с описанием актуальности работы
         checks.actual_slide = __check_actual_slide(presentation)
     if checks.conclusion_slide != -1:  # Слайд с заключением
-        checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION,
-                                                                          True, upload_folder, presentation_name)
+        checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION)
     if checks.conclusion_actual != -1:  # Соответствие закличения задачам
-        checks.conclusion_actual = __are_slides_similar(SLIDE_GOALS_AND_TASKS, SLIDE_CONCLUSION, upload_folder,
-                                                       presentation_name, goals_array, conclusion_array)
+        checks.conclusion_actual = __are_slides_similar(goals_array, conclusion_array)
 
-    if exists(__filename(upload_folder, SLIDE_GOALS_AND_TASKS, presentation_name)):
-        remove(__filename(upload_folder, SLIDE_GOALS_AND_TASKS, presentation_name))
-    if exists(__filename(upload_folder, SLIDE_APPROBATION_OF_WORK, presentation_name)):
-        remove(__filename(upload_folder, SLIDE_APPROBATION_OF_WORK, presentation_name))
-    if exists(__filename(upload_folder, SLIDE_CONCLUSION, presentation_name)):
-        remove(__filename(upload_folder, SLIDE_CONCLUSION, presentation_name))
     return checks

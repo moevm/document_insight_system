@@ -25,7 +25,7 @@ def upload(request, upload_folder):
             presentation = get_presentation(presentation_id)
 
         checks = create_check()
-        check(parse(upload_folder + '/' + filename), checks, upload_folder, presentation_name)
+        check(parse(upload_folder + '/' + filename), checks)
 
         presentation, checks_id = add_check(presentation, checks)
         return str(checks_id)
