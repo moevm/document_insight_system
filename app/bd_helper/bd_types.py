@@ -55,6 +55,9 @@ class Presentation(Packable):
                 "checks: " + str(self.checks) + " }")
 
 
+PERCENTAGE_OF_SIMILARITY = 60
+
+
 # You shouldn't create or change this explicitly
 class Checks(Packable):
     def __init__(self, dictionary=None):
@@ -67,6 +70,7 @@ class Checks(Packable):
             self.probe_slide = ''
             self.actual_slide = ''
             self.conclusion_slide = ''
+            self.conclusion_actual = 0
         else:
             self._id = dictionary['_id']
             self.slides_number = dictionary['slides_number']
@@ -76,11 +80,12 @@ class Checks(Packable):
             self.probe_slide = dictionary['probe_slide']
             self.actual_slide = dictionary['actual_slide']
             self.conclusion_slide = dictionary['conclusion_slide']
+            self.conclusion_actual = dictionary['conclusion_actual']
 
     def correct(self):
         return (self.slides_number == '' and self.slides_enum == '' and self.slides_headers == '' and
                 self.goals_slide != '' and self.probe_slide != '' and self.actual_slide != '' and
-                self.conclusion_slide != '')
+                self.conclusion_slide != '' and self.conclusion_actual >= PERCENTAGE_OF_SIMILARITY)
 
     def __str__(self) -> str:
         return ("Checks: { " + (("_id: " + str(self._id) + ", ") if hasattr(self, "_id") else "") +
@@ -90,4 +95,5 @@ class Checks(Packable):
                 "goals_slide: " + self.goals_slide + ", " +
                 "probe_slide: " + self.probe_slide + ", " +
                 "actual_slide: " + self.actual_slide + ", " +
-                "conclusion_slide: " + self.conclusion_slide + " }")
+                "conclusion_slide: " + self.conclusion_slide +
+                "conclusion_actual: " + self.conclusion_actual + " }")

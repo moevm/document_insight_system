@@ -60,14 +60,11 @@ def __check_actual_slide(presentation):
     return -1
 
 
-PERCENTAGE_OF_SIMILARITY = 60
-
-
 def __are_slides_similar(slide_type_1, slide_type_2, upload_folder='', presentation_name=''):
     result = check_similarity(__filename(upload_folder, slide_type_1, presentation_name),
                               __filename(upload_folder, slide_type_2, presentation_name))
     print('Result:' + str(result))
-    return result >= PERCENTAGE_OF_SIMILARITY
+    return result
 
 
 def check(presentation, checks, upload_folder, presentation_name):
@@ -87,8 +84,9 @@ def check(presentation, checks, upload_folder, presentation_name):
     if checks.conclusion_slide != -1:  # Слайд с заключением
         checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION,
                                                                           True, upload_folder, presentation_name)
-    if checks.conclusion_slide:
-        checks.conclusion_slide = __are_slides_similar(SLIDE_GOALS_AND_TASKS, SLIDE_CONCLUSION, upload_folder, presentation_name)
+    if checks.conclusion_actual != -1:  # Соответствие закличения задачам
+        checks.conclusion_actual = __are_slides_similar(SLIDE_GOALS_AND_TASKS, SLIDE_CONCLUSION, upload_folder,
+                                                       presentation_name)
 
     if exists(__filename(upload_folder, SLIDE_GOALS_AND_TASKS, presentation_name)):
         remove(__filename(upload_folder, SLIDE_GOALS_AND_TASKS, presentation_name))
