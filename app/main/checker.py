@@ -52,8 +52,8 @@ def __find_definite_slide(presentation, type_of_slide, flush, upload_folder='', 
             if flush:
                 with open(__filename(upload_folder, type_of_slide, presentation_name), 'w') as result_file:
                     result_file.write(presentation.get_text_from_slides()[i - 1])
-            return str(i)
-    return ""
+            return str(i), presentation.get_text_from_slides()[i - 1]
+    return "", ""
 
 
 def __check_actual_slide(presentation):
@@ -78,17 +78,17 @@ def check(presentation, checks, upload_folder, presentation_name):
     if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк
         checks.slides_headers = __check_title_size(presentation)
     if checks.goals_slide != -1:  # Слайд "Цель и задачи"
-        checks.goals_slide = __find_definite_slide(presentation, SLIDE_GOALS_AND_TASKS,
-                                                   True, upload_folder, presentation_name)
+        checks.goals_slide, goals_array = __find_definite_slide(presentation, SLIDE_GOALS_AND_TASKS,
+                                                                True, upload_folder, presentation_name)
     if checks.probe_slide != -1:  # Слайд "Апробация работы"
-        checks.probe_slide = __find_definite_slide(presentation, SLIDE_APPROBATION_OF_WORK, False)
+        checks.probe_slide, aprobation_array = __find_definite_slide(presentation, SLIDE_APPROBATION_OF_WORK, False)
     if checks.actual_slide != -1:  # Слайд с описанием актуальности работы
         checks.actual_slide = __check_actual_slide(presentation)
     if checks.conclusion_slide != -1:  # Слайд с заключением
-        checks.conclusion_slide = __find_definite_slide(presentation, SLIDE_CONCLUSION,
-                                                        True, upload_folder, presentation_name)
-    if True:
-        __are_slides_similar(SLIDE_GOALS_AND_TASKS, SLIDE_CONCLUSION, upload_folder, presentation_name)
+        checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION,
+                                                                          True, upload_folder, presentation_name)
+    if checks.conclusion_slide:
+        checks.conclusion_slide = __are_slides_similar(SLIDE_GOALS_AND_TASKS, SLIDE_CONCLUSION, upload_folder, presentation_name)
 
     if exists(__filename(upload_folder, SLIDE_GOALS_AND_TASKS, presentation_name)):
         remove(__filename(upload_folder, SLIDE_GOALS_AND_TASKS, presentation_name))
