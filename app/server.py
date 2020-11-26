@@ -66,7 +66,7 @@ def upload():
     if request.method == "POST":
         return main.upload(request, UPLOAD_FOLDER)
     elif request.method == "GET":
-        return render_template("./upload.html", debug=True, navi_upload=False, name=current_user.name)
+        return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name)
     elif request.method == "PUT":
         return main.remove_presentation(request.json)
 
