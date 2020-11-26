@@ -1,4 +1,4 @@
-from app.parser.slide_basic import SlideBasic
+from app.main.slide_basic import SlideBasic
 from app.utils import tict
 
 

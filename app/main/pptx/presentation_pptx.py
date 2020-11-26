@@ -1,6 +1,6 @@
-from app.parser.pptx.slide_pptx import SlidePPTX
+from app.main.pptx.slide_pptx import SlidePPTX
 from pptx import Presentation
-from app.parser.presentation_basic import PresentationBasic
+from app.main.presentation_basic import PresentationBasic
 
 
 class PresentationPPTX(PresentationBasic):

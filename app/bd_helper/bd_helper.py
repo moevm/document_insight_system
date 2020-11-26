@@ -57,14 +57,14 @@ def delete_user(username):
     return user
 
 
-# Adds presentation with given name to given user presentations, updates user, returns user and presentation
+# Adds presentation with given name to given user presentations, updates user, returns user and presentation id
 def add_presentation(user, presentation_name):
     presentation = Presentation()
     presentation.name = presentation_name
     presentation_id = presentations_collection.insert_one(presentation.pack()).inserted_id
     user.presentations.append(presentation_id)
     edit_user(user)
-    return user, presentation
+    return user, presentation_id
 
 
 # Returns presentation with given id or None
@@ -72,6 +72,18 @@ def get_presentation(presentation_id):
     presentation = presentations_collection.find_one({'_id': presentation_id})
     if presentation is not None:
         return Presentation(presentation)
+    else:
+        return None
+
+
+# Returns presentation of given user with given id or None
+def find_presentation(user, presentation_name):
+    presentations = []
+    for presentation_id in user.presentations:
+        presentations.append(get_presentation(presentation_id))
+    presentation = next((x for x in presentations if x.name == presentation_name), None)
+    if presentation is not None:
+        return presentation
     else:
         return None
 
@@ -85,13 +97,16 @@ def __edit_presentation(presentation):
 
 # Deletes presentation with given id, deleting also its checks, returns presentation
 def delete_presentation(user, presentation_id):
-    user.presentations.remove(presentation_id)
-    edit_user(user)
-    presentation = get_presentation(presentation_id)
-    for check_id in presentation.checks:
-        presentation, check = delete_check(presentation, check_id)
-    presentation = Presentation(presentations_collection.find_one_and_delete({'_id': presentation_id}))
-    return user, presentation
+    if presentation_id in user.presentations:
+        user.presentations.remove(presentation_id)
+        edit_user(user)
+        presentation = get_presentation(presentation_id)
+        for check_id in presentation.checks:
+            presentation, check = delete_check(presentation, check_id)
+        presentation = Presentation(presentations_collection.find_one_and_delete({'_id': presentation_id}))
+        return user, presentation
+    else:
+        return user, get_presentation(presentation_id)
 
 
 # Creates checks with given params
@@ -108,12 +123,12 @@ def create_check(slides_number='', slides_enum='', slides_headers='', goals_slid
     return checks
 
 
-# Adds checks to given presentation, updates presentation, returns presentation and checks
+# Adds checks to given presentation, updates presentation, returns presentation and checks id
 def add_check(presentation, checks):
     checks_id = checks_collection.insert_one(checks.pack()).inserted_id
     presentation.checks.append(checks_id)
     __edit_presentation(presentation)
-    return presentation, checks
+    return presentation, checks_id
 
 
 # Returns checks with given id or None
@@ -127,7 +142,10 @@ def get_check(checks_id):
 
 # Deletes checks with given id, returns presentation
 def delete_check(presentation, checks_id):
-    presentation.checks.remove(checks_id)
-    __edit_presentation(presentation)
-    checks = Checks(checks_collection.find_one_and_delete({'_id': checks_id}))
-    return presentation, checks
+    if checks_id in presentation.checks:
+        presentation.checks.remove(checks_id)
+        __edit_presentation(presentation)
+        checks = Checks(checks_collection.find_one_and_delete({'_id': checks_id}))
+        return presentation, checks
+    else:
+        return presentation, get_check(checks_id)

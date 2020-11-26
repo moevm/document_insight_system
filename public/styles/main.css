@@ -74,12 +74,12 @@ body {
 
 
 
-.username {
-    color: var(--username-color);
-}
-
 .texteous {
     color: var(--text-color);
+}
+
+.ins {
+    cursor: default;
 }
 
 .inputous {
@@ -102,4 +102,20 @@ body {
 .header-linked:hover {
     display: block;
     color: var(--border-color);
+}
+
+.dropdown-item:active {
+  background-color: var(--footer-color) !important;
+}
+
+
+
+#user_info {
+    display: inline-flex;
+    color: var(--username-color);
+}
+
+#user_info:hover {
+    text-decoration: underline;
+    cursor: pointer;
 }
