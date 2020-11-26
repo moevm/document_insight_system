@@ -1,29 +1,29 @@
 from app.bd_helper.bd_helper import add_user, validate_user, get_user, edit_user, delete_user, add_presentation, \
     get_presentation, delete_presentation, create_check, add_check, get_check, delete_check
 
-user = add_user("milty", "12345")
+user = add_user("multy", "12345")
 print("Created user: " + str(user))
-user = add_user("milty", "12345")
+user = add_user("multy", "12345")
 print("User with same params: " + str(user))
 
-valid = validate_user("milty", "12345")
+valid = validate_user("multy", "12345")
 print("Validated user: " + str(valid))
 
-user = get_user("milty")
+user = get_user("multy")
 print("User got: " + str(user))
 
 user.is_admin = True
 edited = edit_user(user)
 print("User edited: " + str(edited))
-user = get_user("milty")
+user = get_user("multy")
 print("User got: " + str(user))
 
 
 print("User has " + str(len(user.presentations)) + " presentations")
 
 presentation_name = "New presentation"
-user, presentation = add_presentation(user, presentation_name)
-print("Presentation created: " + str(presentation))
+user, presentation_id = add_presentation(user, presentation_name)
+print("Presentation id created: " + str(presentation_id))
 
 print("User has " + str(len(user.presentations)) + " presentations")
 for presentation_id in user.presentations:
@@ -34,8 +34,8 @@ for presentation_id in user.presentations:
         checks = create_check(conclusion_slide='1, 3', probe_slide='7, 11')
         print("Checks created: " + str(checks))
 
-        presentation, checks = add_check(presentation, checks)
-        print("Checks added: " + str(checks))
+        presentation, checks_id = add_check(presentation, checks)
+        print("Checks id added: " + str(checks_id))
 
         print("Presentation has " + str(len(presentation.checks)) + " checks")
         for checks_id in presentation.checks:
@@ -53,7 +53,7 @@ for presentation_id in user.presentations:
 print("User has " + str(len(user.presentations)) + " presentations")
 
 
-user = delete_user("milty")
+user = delete_user("multy")
 print("Deleted user: " + str(user))
-user = get_user("milty")
+user = get_user("multy")
 print("User got: " + str(user))

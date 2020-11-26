@@ -29,7 +29,7 @@ class User(Packable, UserMixin):
     def __str__(self) -> str:
         return ("User: { username: " + self.username + ", " +
                 "name: " + self.name + ", " +
-                "password_hash: " + self.password_hash + ", " +
+                "password_hash: " + str(self.password_hash) + ", " +
                 "presentations: " + str(self.presentations) + ", " +
                 "is_admin: " + str(self.is_admin) + " }")
 

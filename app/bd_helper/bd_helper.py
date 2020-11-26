@@ -57,14 +57,14 @@ def delete_user(username):
     return user
 
 
-# Adds presentation with given name to given user presentations, updates user, returns user and presentation
+# Adds presentation with given name to given user presentations, updates user, returns user and presentation id
 def add_presentation(user, presentation_name):
     presentation = Presentation()
     presentation.name = presentation_name
     presentation_id = presentations_collection.insert_one(presentation.pack()).inserted_id
     user.presentations.append(presentation_id)
     edit_user(user)
-    return user, presentation
+    return user, presentation_id
 
 
 # Returns presentation with given id or None
@@ -108,12 +108,12 @@ def create_check(slides_number='', slides_enum='', slides_headers='', goals_slid
     return checks
 
 
-# Adds checks to given presentation, updates presentation, returns presentation and checks
+# Adds checks to given presentation, updates presentation, returns presentation and checks id
 def add_check(presentation, checks):
     checks_id = checks_collection.insert_one(checks.pack()).inserted_id
     presentation.checks.append(checks_id)
     __edit_presentation(presentation)
-    return presentation, checks
+    return presentation, checks_id
 
 
 # Returns checks with given id or None

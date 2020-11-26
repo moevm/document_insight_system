@@ -1,3 +1,5 @@
+from flask_login import current_user
+
 from app.parser.parser import Parser
 from werkzeug.utils import secure_filename
 import os
@@ -81,7 +83,10 @@ def upload(request, upload_folder):
         satisfied &= crit == "" or crit == -1
     result.append(satisfied)
 
-    return parser.get_state()
+    return {
+        "status": parser.get_state(),
+        "id": "12334"
+    }
 
 
 def results(args):

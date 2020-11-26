@@ -1,0 +1,44 @@
+{# Accepts: header dependicies #}
+
+
+
+{% extends "root.html" %}
+
+{% block title %}{{ name }}{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href={{ url_for("static", filename="styles/presentations.css") }}>
+{% endblock %}
+
+{% block scripts %}
+    <script src={{ url_for("static", filename="scripts/presentations.js") }}></script>
+{% endblock %}
+
+{% block main %}
+    <div class="header row">{% include "header.html" %}</div>
+    <div class="holder row justify-content-center">
+        <div class="col-11 col-sm-8 col-md-5 col-lg-4" id="container">
+            <h3 class="texteous text-center ins">{{ "Презентации " + user.name + ":" }}</h3>
+            <ul id="presentations_tree">
+                {% for presentation in user.presentations %}
+                    <li>
+                        <span class="caret">presentation.name</span>
+                        <ul class="nested">
+                            {% for checks in presentations.checks %}
+                                <li>
+                                    <span class="caret">checks._id</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% if me %}
+                <div class="row justify-content-end">
+                    <a class="linked" href="{{ "/profile/" + user.username }}">К профилю</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="footer row"></div>
+{% endblock %}

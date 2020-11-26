@@ -1,0 +1,44 @@
+#container {
+  margin-top: 1rem;
+}
+
+
+
+ul {
+  list-style-type: none;
+}
+
+#presentations_tree {
+  list-style-type: none;
+  user-select: none;
+}
+
+#presentations_tree > * {
+  user-select: none;
+}
+
+.caret {
+  cursor: pointer;
+}
+
+
+
+.caret::before {
+  content: "\25B8";
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.caret-down::before {
+  content: "\25BE";
+}
+
+
+
+.nested {
+  display: none;
+}
+
+.active {
+  display: block;
+}
