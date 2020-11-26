@@ -6,10 +6,10 @@ import shutil
 PATH = os.path.dirname(__file__) + '/' + 'workdir/'
 
 
-def check_similarity(file1, file2):
+def check_similarity(string1, string2):
     try:
         os.mkdir(PATH)
-        gen_docs = get_filtered_docs(file1, True)
+        gen_docs = get_filtered_docs(string1, True)
         dictionary = gensim.corpora.Dictionary(gen_docs)
         corpus = [dictionary.doc2bow(gen_doc) for gen_doc in gen_docs]
 
@@ -19,7 +19,7 @@ def check_similarity(file1, file2):
 
         avg_sims = []
 
-        gen_docs1 = get_filtered_docs(file2, False)
+        gen_docs1 = get_filtered_docs(string2, False)
 
         for g in gen_docs1:
             query_doc_bow = dictionary.doc2bow(g)

@@ -49,9 +49,6 @@ def __find_definite_slide(presentation, type_of_slide, flush, upload_folder='', 
     for title in presentation.get_titles():
         i += 1
         if str(title).lower().find(str(type_of_slide).lower()) != -1:
-            if flush:
-                with open(__filename(upload_folder, type_of_slide, presentation_name), 'w') as result_file:
-                    result_file.write(presentation.get_text_from_slides()[i - 1])
             return str(i), presentation.get_text_from_slides()[i - 1]
     return "", ""
 
@@ -63,8 +60,7 @@ def __check_actual_slide(presentation):
 def __are_slides_similar(slide_type_1, slide_type_2, upload_folder='', presentation_name='', goals="", conclusions=""):
     if goals == "" or conclusions == "":
         return -1
-    result = check_similarity(__filename(upload_folder, slide_type_1, presentation_name),
-                              __filename(upload_folder, slide_type_2, presentation_name))
+    result = check_similarity(goals, conclusions)
     print('Result:' + str(result))
     return result
 
