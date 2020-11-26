@@ -24,10 +24,12 @@ def __check_title_size(presentation):
     error_slides = ''
     for title in presentation.get_titles():
         i += 1
-        title = str(title).replace('\x0b', '\n')
-        if title:
+        if title == "":
             error_slides += str(i) + ' '
-        elif '\n' in title or '\r' in title:
+            continue
+
+        title = str(title).replace('\x0b', '\n')
+        if '\n' in title or '\r' in title:
             titles = []
             for t in split('\r|\n', title):
                 if t != '':

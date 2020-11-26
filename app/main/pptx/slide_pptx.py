@@ -13,6 +13,6 @@ class SlidePPTX(SlideBasic):
             if container.shapes.title:
                 self.title = container.shapes.title.text
             else:
-                continue
+                self.title = ""
             if hasattr(shape, "text"):
                 self.text = shape.text  # Is it possible for .PPTX presentation to have more than one text node on a single slide?
