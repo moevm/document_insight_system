@@ -16,6 +16,6 @@ class SlidePPTX(SlideBasic):
             if container.shapes.title:
                 self.title = container.shapes.title.text
             else:
-                self.title = ""
+                continue
             if hasattr(shape, "text"):
                 self.text += "\n" + shape.text
