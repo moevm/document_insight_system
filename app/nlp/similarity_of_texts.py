@@ -33,3 +33,4 @@ def check_similarity(file1, file2):
         return percentage_of_similarity
     except OSError:
         print("Создать директорию %s не удалось" % PATH)
+        return 0

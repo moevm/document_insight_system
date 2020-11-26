@@ -60,7 +60,9 @@ def __check_actual_slide(presentation):
     return -1
 
 
-def __are_slides_similar(slide_type_1, slide_type_2, upload_folder='', presentation_name=''):
+def __are_slides_similar(slide_type_1, slide_type_2, upload_folder='', presentation_name='', goals="", conclusions=""):
+    if goals == "" or conclusions == "":
+        return -1
     result = check_similarity(__filename(upload_folder, slide_type_1, presentation_name),
                               __filename(upload_folder, slide_type_2, presentation_name))
     print('Result:' + str(result))
@@ -86,7 +88,7 @@ def check(presentation, checks, upload_folder, presentation_name):
                                                                           True, upload_folder, presentation_name)
     if checks.conclusion_actual != -1:  # Соответствие закличения задачам
         checks.conclusion_actual = __are_slides_similar(SLIDE_GOALS_AND_TASKS, SLIDE_CONCLUSION, upload_folder,
-                                                       presentation_name)
+                                                       presentation_name, goals_array, conclusion_array)
 
     if exists(__filename(upload_folder, SLIDE_GOALS_AND_TASKS, presentation_name)):
         remove(__filename(upload_folder, SLIDE_GOALS_AND_TASKS, presentation_name))
