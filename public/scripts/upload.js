@@ -17,7 +17,7 @@ file_input.change(() => {
     10% - 60% = 1 -> 2
     60% - 90% = 2 -> 3
  */
-function upload(file_name) {
+function upload(sample = false) {
     let presentation = file_input.prop("files")[0];
     let formData = new FormData();
     formData.append("presentation", presentation);
@@ -29,28 +29,20 @@ function upload(file_name) {
     if (bar.hasClass("bg-success")) bar.removeClass("bg-success");
 
     const post_data = { method: "POST" };
-    if (!file_name) post_data.body = formData;
-    else {
-        post_data.headers = { "Content-Type": "application/json" };
-        post_data.body = JSON.stringify({ file_name: file_name });
-    }
+    if (!sample) post_data.body = formData;
     fetch("/upload", post_data)
         .then((response) => {
             return response.text();
         }).then((response_text) => {
-            const result = JSON.parse(response_text);
-            console.log("Final answer:", result);
-            upload_id = result.id;
+            console.log("Final answer:", response_text);
             bar.css("width", "100%").attr('aria-valuenow', 100);
-            switch (result.status) {
-                case -1:
-                    bar.addClass("bg-danger");
-                    file_input.addClass("is-invalid");
-                    break;
-                case 3:
-                    bar.addClass("bg-success");
-                    checking_button.prop("disabled", false);
-                    break;
+            if (response_text === "") {
+                bar.addClass("bg-danger");
+                file_input.addClass("is-invalid");
+            } else {
+                upload_id = response_text;
+                bar.addClass("bg-success");
+                checking_button.prop("disabled", false);
             }
         });
 }

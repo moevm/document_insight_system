@@ -1,10 +1,10 @@
 from bson import ObjectId
-from flask import Flask, request, redirect, url_for, render_template, jsonify
+from flask import Flask, request, redirect, url_for, render_template
 from flask_login import LoginManager, login_user, current_user, login_required
 from uuid import uuid4
 
-import app.user.user as user
-import app.main.main as main
+import app.servants.user as user
+import app.servants.data as main
 from app.bd_helper.bd_helper import get_user, get_check
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
@@ -61,7 +61,7 @@ def interact():
 @login_required
 def upload():
     if request.method == "POST":
-        return jsonify(main.upload(request, UPLOAD_FOLDER))
+        return main.upload(request, UPLOAD_FOLDER)
     elif request.method == "GET":
         return render_template("./upload.html", debug=True, navi_upload=False, name=current_user.name)
     elif request.method == "PUT":

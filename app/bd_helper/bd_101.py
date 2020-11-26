@@ -1,5 +1,4 @@
-from app.bd_helper.bd_helper import add_user, validate_user, get_user, edit_user, delete_user, add_presentation, \
-    get_presentation, delete_presentation, create_check, add_check, get_check, delete_check
+from app.bd_helper.bd_helper import *
 
 user = add_user("multy", "12345")
 print("Created user: " + str(user))

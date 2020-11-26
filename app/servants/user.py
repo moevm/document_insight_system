@@ -1,7 +1,6 @@
 from flask_login import logout_user, current_user
 
-from app.bd_helper.bd_helper import add_user, validate_user, edit_user, delete_user, get_user, get_presentation, \
-    get_check
+from app.bd_helper.bd_helper import *
 
 
 def login(args):
