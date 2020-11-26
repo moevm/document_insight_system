@@ -71,6 +71,7 @@ class Checks(Packable):
             self.actual_slide = ''
             self.conclusion_slide = ''
             self.conclusion_actual = 0
+            self.actuality_percent = 50
         else:
             self._id = dictionary['_id']
             self.slides_number = dictionary['slides_number']
@@ -81,6 +82,7 @@ class Checks(Packable):
             self.actual_slide = dictionary['actual_slide']
             self.conclusion_slide = dictionary['conclusion_slide']
             self.conclusion_actual = dictionary['conclusion_actual']
+            self.actuality_percent = dictionary['actuality_percent']
 
     def correct(self):
         return (self.slides_number == '' and self.slides_enum == '' and self.slides_headers == '' and
@@ -96,4 +98,5 @@ class Checks(Packable):
                 "probe_slide: " + self.probe_slide + ", " +
                 "actual_slide: " + self.actual_slide + ", " +
                 "conclusion_slide: " + self.conclusion_slide +
+                "actuality_percent: " + self.actuality_percent +
                 "conclusion_actual: " + self.conclusion_actual + " }")

@@ -80,7 +80,7 @@
                 <tr>
                     <th scope="row" class="ins">8</th>
                     <td class="ins">Соответствие закличения задачам</td>
-                    <td class="{{ "table-secondary ins" if results.conclusion_actual == -1 else ("table-danger ins" if results.conclusion_actual < 60 else "table-success ins") }}">
+                    <td class="{{ "table-secondary ins" if results.conclusion_actual == -1 else ("table-danger ins" if results.conclusion_actual < results.actuality_percent else "table-success ins") }}">
                         {{ "Не проведена" if results.conclusion_actual == -1 else ("Соответствует на " ~ results.conclusion_actual ~ "%") }}
                     </td>
                 </tr>
