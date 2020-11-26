@@ -7,7 +7,7 @@ def parse(presentation_name):
         try:
             return PresentationPPTX(presentation_name)
         except Exception as err:
-            print(err.args)
+            print(err)
             return None
     elif presentation_name.endswith('.odp'):
         try:
