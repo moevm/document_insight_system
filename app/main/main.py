@@ -48,6 +48,9 @@ def upload(request, upload_folder):
             if buf:
                 definite_slides.write(SLIDE_GOALS_AND_TASKS + ':' + str(buf) + '\n')
                 result.append(str(buf))  # Слайд "Цель и задачи"
+                with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_goals_and_tasks.txt',
+                          'w') as goals_and_tasks:
+                    goals_and_tasks.write(parser.text[buf-1])
             else:
                 result.append("")
 
@@ -64,6 +67,9 @@ def upload(request, upload_folder):
             if buf:
                 definite_slides.write(SLIDE_CONCLUSION+':' + str(buf) + '\n')
                 result.append(str(buf))  # Слайд с заключением
+                with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_conclusion.txt',
+                          'w') as conclusion:
+                    conclusion.write(parser.text[buf-1])
             else:
                 result.append("")
 
@@ -81,6 +87,7 @@ def upload(request, upload_folder):
         satisfied &= crit == "" or crit == -1
     result.append(satisfied)
 
+    print(parser.is_slides_similar(upload_folder + '/' + os.path.splitext(filename)[0] + '_goals_and_tasks.txt', upload_folder + '/' + os.path.splitext(filename)[0] + '_conclusion.txt'))
     return parser.get_state()
 
 

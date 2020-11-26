@@ -1,8 +1,10 @@
 from app.parser.odp.presentation_odp import PresentationODP
 from app.parser.pptx.presentation_pptx import PresentationPPTX
+from app.nlp.similarity_of_texts import check_similarity
 import re
 import os
 
+PERCENTAGE_OF_SIMILARITY = 60
 
 class Parser:
     def __init__(self, presentation_name):
@@ -85,3 +87,10 @@ class Parser:
             if self.presentation.slides[i].page_number[0] != i + 1:
                 error += str(i) + " "
         return error
+
+    def is_slides_similar(self, file1, file2):
+        result = check_similarity(file1, file2)
+        print('Result:' + str(result))
+        if result >= PERCENTAGE_OF_SIMILARITY:
+            return True
+        return False
