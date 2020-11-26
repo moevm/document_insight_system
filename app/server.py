@@ -6,6 +6,9 @@ from uuid import uuid4
 import app.servants.user as user
 import app.servants.data as main
 from app.bd_helper.bd_helper import get_user, get_check
+from app.servants import pre_luncher
+
+DEBUG = True
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
 UPLOAD_FOLDER = '../files'
@@ -146,4 +149,5 @@ def add_header(r):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+    if pre_luncher.init(DEBUG):
+        app.run(debug=DEBUG, port=8080)

@@ -2,12 +2,16 @@ from pymongo import MongoClient
 
 from app.bd_helper.bd_types import User, Presentation, Checks
 
-client = MongoClient()
+client = MongoClient(serverSelectionTimeoutMS=500)
 db = client['pres-parser-db']
 
 users_collection = db['users']
 presentations_collection = db['presentations']
 checks_collection = db['checks']
+
+
+def get_client():
+    return client
 
 
 # Returns user if user was created and None if already exists

@@ -1,4 +1,5 @@
-from os.path import splitext, join
+from os import remove
+from os.path import splitext, join, exists
 from bson import ObjectId
 from flask_login import current_user
 
@@ -13,19 +14,25 @@ def upload(request, upload_folder):
     try:
         if "presentation" in request.files:
             file = request.files["presentation"]
-            filename = file.filename
-            file.save(join(upload_folder, file.filename))
+            filename = join(upload_folder, file.filename)
+            file.save(filename)
+            delete = True
         else:
-            filename = DEFAULT_PRESENTATION
+            filename = join(upload_folder, DEFAULT_PRESENTATION)
+            delete = False
 
         presentation_name = splitext(filename)[0]
+        print("Parsing presentation " + presentation_name)
         presentation = find_presentation(current_user, presentation_name)
         if presentation is None:
             user, presentation_id = add_presentation(current_user, presentation_name)
             presentation = get_presentation(presentation_id)
 
         checks = create_check()
-        check(parse(upload_folder + '/' + filename), checks)
+        check(parse(filename), checks)
+
+        if delete and exists(filename):
+            remove(filename)
 
         presentation, checks_id = add_check(presentation, checks)
         return str(checks_id)
