@@ -17,7 +17,7 @@ class Parser:
         return self.presentation_name
 
     def parse_presentation(self):
-        if str(self.presentation_name).endswith('.ppt') or str(self.presentation_name).endswith('.pptx'):
+        if str(self.presentation_name).endswith('ppt') or str(self.presentation_name).endswith('pptx'):
             try:
                 self.state = 1
                 self.presentation = PresentationPPTX(self.presentation_name)
@@ -28,7 +28,7 @@ class Parser:
             except Exception as err:
                 print(err)
                 self.state = -1
-        elif str(self.presentation_name).endswith('.odp'):
+        elif str(self.presentation_name).endswith('odp'):
             try:
                 self.state = 1
                 self.presentation = PresentationODP(self.presentation_name)
@@ -39,6 +39,8 @@ class Parser:
             except Exception as err:
                 print(err)
                 self.state = -1
+        else:
+            pass
 
     def get_titles(self):
         return self.titles
