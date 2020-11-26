@@ -42,6 +42,7 @@ def __check_title_size(presentation):
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
 SLIDE_APPROBATION_OF_WORK = 'Апробация'
 SLIDE_CONCLUSION = 'Заключение'
+SLIDE_WITH_RELEVANCE = 'Актуальность'
 
 
 def __find_definite_slide(presentation, type_of_slide):
@@ -54,6 +55,14 @@ def __find_definite_slide(presentation, type_of_slide):
 
 
 def __check_actual_slide(presentation):
+    i = 0
+    size = presentation.get_len_slides()
+    for text in presentation.get_text_from_slides():
+        i += 1
+        if i > size:
+            break
+        if SLIDE_WITH_RELEVANCE.lower() in str(text).lower():
+            return str(i)
     return -1
 
 
