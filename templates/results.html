@@ -73,8 +73,8 @@
                 <tr>
                     <th scope="row" class="ins">7</th>
                     <td class="ins">Слайд с заключением</td>
-                    <td class="{{ "table-secondary ins" if results.conclusion_slide == -1 else ("table-danger ins" if results.conclusion_slide == "" else "table-success ins") }}">
-                        {{ "Не проведена" if results.conclusion_slide == -1 else ("Не найден!" if results.conclusion_slide == "" else ("Найден под номером: " + results.conclusion_slide)) }}
+                    <td class="{{ "table-secondary ins" if results.conclusion_slide == -1 else ("table-danger ins" if not results.conclusion_slide else "table-success ins") }}">
+                        {{ "Не проведена" if results.conclusion_slide == -1 else ("Не найден!" if not results.conclusion_slide else "Найден") }}
                     </td>
                 </tr>
             </tbody>
