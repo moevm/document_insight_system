@@ -7,7 +7,7 @@ def parse(presentation_name):
         try:
             return PresentationPPTX(presentation_name)
         except Exception as err:
-            print(err)
+            print(err.args)
             return None
     elif presentation_name.endswith('.odp'):
         try:
@@ -15,3 +15,5 @@ def parse(presentation_name):
         except Exception as err:
             print(err)
             return None
+    else:
+        raise ValueError("Презентация с недопустимым именем или недопустимого формата: " + presentation_name)

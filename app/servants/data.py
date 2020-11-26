@@ -1,7 +1,6 @@
 from os.path import splitext, join
 from bson import ObjectId
 from flask_login import current_user
-from werkzeug.utils import secure_filename
 
 from app.bd_helper.bd_helper import *
 from app.main.checker import check
@@ -14,7 +13,7 @@ def upload(request, upload_folder):
     try:
         if "presentation" in request.files:
             file = request.files["presentation"]
-            filename = secure_filename(file.filename)
+            filename = file.filename
             file.save(join(upload_folder, file.filename))
         else:
             filename = DEFAULT_PRESENTATION
@@ -30,7 +29,8 @@ def upload(request, upload_folder):
 
         presentation, checks_id = add_check(presentation, checks)
         return str(checks_id)
-    except Exception:
+    except Exception as e:
+        print(e)
         return ""
 
 

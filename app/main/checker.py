@@ -1,4 +1,8 @@
+from os import remove
+from os.path import exists
 from re import split
+
+from app.nlp.similarity_of_texts import check_similarity
 
 
 def __check_slides_number(presentation):
@@ -41,15 +45,27 @@ def __find_definite_slide(presentation, type_of_slide):
     for title in presentation.get_titles():
         i += 1
         if str(title).lower().find(str(type_of_slide).lower()) != -1:
-            return str(i)
-    return ""
+            return str(i), presentation.get_text_from_slides()[i - 1]
+    return "", ""
 
 
 def __check_actual_slide(presentation):
     return -1
 
 
+def __are_slides_similar(goals, conclusions):
+    if goals == "" or conclusions == "":
+        return -1
+    result = check_similarity(goals, conclusions)
+    print('Result:' + str(result))
+    return result
+
+
 def check(presentation, checks):
+    goals_array = ""
+    aprobation_array = ""
+    conclusion_array = ""
+
     if checks.slides_number != -1:  # Количество основных слайдов
         checks.slides_number = __check_slides_number(presentation)
     if checks.slides_enum != -1:  # Нумерация слайдов
@@ -57,11 +73,14 @@ def check(presentation, checks):
     if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк
         checks.slides_headers = __check_title_size(presentation)
     if checks.goals_slide != -1:  # Слайд "Цель и задачи"
-        checks.goals_slide = __find_definite_slide(presentation, SLIDE_GOALS_AND_TASKS)
+        checks.goals_slide, goals_array = __find_definite_slide(presentation, SLIDE_GOALS_AND_TASKS)
     if checks.probe_slide != -1:  # Слайд "Апробация работы"
-        checks.probe_slide = __find_definite_slide(presentation, SLIDE_APPROBATION_OF_WORK)
+        checks.probe_slide, aprobation_array = __find_definite_slide(presentation, SLIDE_APPROBATION_OF_WORK)
     if checks.actual_slide != -1:  # Слайд с описанием актуальности работы
         checks.actual_slide = __check_actual_slide(presentation)
     if checks.conclusion_slide != -1:  # Слайд с заключением
-        checks.conclusion_slide = __find_definite_slide(presentation, SLIDE_CONCLUSION)
+        checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION)
+    if checks.conclusion_actual != -1:  # Соответствие закличения задачам
+        checks.conclusion_actual = __are_slides_similar(goals_array, conclusion_array)
+
     return checks

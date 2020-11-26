@@ -77,6 +77,13 @@
                         {{ "Не проведена" if results.conclusion_slide == -1 else ("Не найден!" if results.conclusion_slide == "" else ("Найден под номером: " + results.conclusion_slide)) }}
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row" class="ins">8</th>
+                    <td class="ins">Соответствие заключения задачам</td>
+                    <td class="{{ "table-secondary ins" if results.conclusion_actual == -1 else ("table-danger ins" if results.conclusion_actual < results.actuality_percent else "table-success ins") }}">
+                        {{ "Не проведена" if results.conclusion_actual == -1 else ("Соответствует на " ~ results.conclusion_actual ~ "%") }}
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
