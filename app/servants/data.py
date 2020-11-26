@@ -20,16 +20,15 @@ def upload(request, upload_folder):
             filename = DEFAULT_PRESENTATION
 
         presentation_name = splitext(filename)[0]
-        db_presentation = find_presentation(current_user, presentation_name)
-        if db_presentation is None:
+        presentation = find_presentation(current_user, presentation_name)
+        if presentation is None:
             user, presentation_id = add_presentation(current_user, presentation_name)
-            db_presentation = get_presentation(presentation_id)
+            presentation = get_presentation(presentation_id)
 
         checks = create_check()
-        presentation = parse(upload_folder + '/' + filename)
-        check(presentation, checks)
+        check(parse(upload_folder + '/' + filename), checks)
 
-        db_presentation, checks_id = add_check(db_presentation, checks)
+        presentation, checks_id = add_check(presentation, checks)
         return str(checks_id)
     except Exception:
         return ""
