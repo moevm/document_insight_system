@@ -1,5 +1,6 @@
 #container {
   margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 
@@ -41,4 +42,34 @@ ul {
 
 .active {
   display: block;
+}
+
+
+
+.flex {
+  display: flex;
+}
+
+.micro_button {
+  margin-left: auto;
+  background: transparent;
+  border: 0;
+}
+
+
+
+.good_link {
+  color: limegreen;
+}
+
+.good_link:hover {
+  color: green;
+}
+
+.bad_link {
+  color: crimson;
+}
+
+.bad_link:hover {
+  color: darkred;
 }

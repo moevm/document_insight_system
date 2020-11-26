@@ -22,22 +22,27 @@
             <ul id="presentations_tree">
                 {% for presentation in user.presentations %}
                     <li>
-                        <span class="caret">presentation.name</span>
+                        <div class="flex">
+                            <span class="caret ins">{{"Презентация '" + presentation.name + "'" }}</span>
+                            {% if me %}
+                                <button class="pale_button micro_button" id="{{ presentation._id }}">&times;</button>
+                            {% endif %}
+                        </div>
                         <ul class="nested">
-                            {% for checks in presentations.checks %}
+                            {% for checks in presentation.checks %}
                                 <li>
-                                    <span class="caret">checks._id</span>
+                                    <a class="{{ "good_link" if checks.correct() else "bad_link" }}" href="/login">
+                                        {{ "Проверка " + (checks._id | string)[-5:] }}
+                                    </a>
                                 </li>
                             {% endfor %}
                         </ul>
                     </li>
                 {% endfor %}
             </ul>
-            {% if me %}
-                <div class="row justify-content-end">
-                    <a class="linked" href="{{ "/profile/" + user.username }}">К профилю</a>
-                </div>
-            {% endif %}
+            <div class="row justify-content-end">
+                <a class="linked" href="{{ "/profile/" + user.username }}">К профилю</a>
+            </div>
         </div>
     </div>
     <div class="footer row"></div>

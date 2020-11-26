@@ -1,10 +1,11 @@
+from bson import ObjectId
 from flask import Flask, request, redirect, url_for, render_template, jsonify
-from flask_login import LoginManager, login_user, current_user, login_required, logout_user
+from flask_login import LoginManager, login_user, current_user, login_required
 from uuid import uuid4
 
 import app.user.user as user
 import app.main.main as main
-from app.bd_helper.bd_helper import get_user, delete_user
+from app.bd_helper.bd_helper import get_user, get_check
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
 UPLOAD_FOLDER = '../files'
@@ -46,7 +47,6 @@ def signup():
 @app.route("/user", methods=["GET", "PUT", "DELETE"])
 @login_required
 def interact():
-    r = request
     if request.method == "GET":
         return user.logout()
     elif request.method == "PUT":
@@ -57,20 +57,26 @@ def interact():
 
 # Main pages request handlers:
 
-@app.route("/upload", methods=["GET", "POST"])
+@app.route("/upload", methods=["GET", "POST", "PUT"])
 @login_required
 def upload():
     if request.method == "POST":
         return jsonify(main.upload(request, UPLOAD_FOLDER))
     elif request.method == "GET":
         return render_template("./upload.html", debug=True, navi_upload=False, name=current_user.name)
+    elif request.method == "PUT":
+        return main.remove_presentation(request.json)
 
 
-@app.route("/results", methods=["GET"])
+@app.route("/results/<string:_id>", methods=["GET"])
 @login_required
-def results():
-    result = main.results(request.args)
-    return render_template("./results.html", navi_upload=True, name=current_user.name, results=result)
+def results(_id):
+    c = get_check(ObjectId(_id))
+    if c is not None:
+        return render_template("./results.html", navi_upload=True, name=current_user.name, results=c)
+    else:
+        print("No such checks: " + _id)
+        return render_template("./404.html")
 
 
 @app.route("/criteria", methods=["GET"])
@@ -80,7 +86,7 @@ def criteria():
 
 
 @app.route('/profile', methods=["GET"], defaults={'username': ''})
-@app.route('/profile/<string:username>')
+@app.route('/profile/<string:username>', methods=["GET"])
 @login_required
 def profile(username):
     if username == '':
@@ -95,7 +101,7 @@ def profile(username):
 
 
 @app.route("/presentations", methods=["GET"], defaults={'username': ''})
-@app.route('/presentations/<string:username>')
+@app.route('/presentations/<string:username>', methods=["GET"])
 @login_required
 def presentations(username):
     if username == '':
@@ -107,11 +113,6 @@ def presentations(username):
     else:
         print("No such user presentations: " + username)
         return render_template("./404.html")
-
-
-@app.route("/status", methods=["GET"])
-def status():
-    return str(main.status())
 
 
 # Redirection:

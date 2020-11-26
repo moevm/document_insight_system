@@ -36,7 +36,7 @@ def edit(json):
 def get_rich(username):
     u = get_user(username)
     for i in range(0, len(u.presentations)):
-        u.presentations[i] = get_presentation(u.presentations[i]._id)
+        u.presentations[i] = get_presentation(u.presentations[i])
         for j in range(0, len(u.presentations[i].checks)):
-            u.presentations[i].checks[j] = get_check(u.presentations[i].checks[j]._id)
+            u.presentations[i].checks[j] = get_check(u.presentations[i].checks[j])
     return u

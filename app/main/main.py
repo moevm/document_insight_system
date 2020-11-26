@@ -1,34 +1,46 @@
+from bson import ObjectId
 from flask_login import current_user
 
+from app.bd_helper.bd_helper import create_check, add_check, add_presentation, get_presentation, get_check, \
+    delete_presentation, find_presentation
 from app.parser.parser import Parser
 from werkzeug.utils import secure_filename
 import os
 
 
-parser = None
-result = []
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
 SLIDE_APPROBATION_OF_WORK = 'Апробация'
 SLIDE_CONCLUSION = 'Заключение'
 
 
-def upload(request, upload_folder):
-    global parser
-    global result
+def _collect_results(status, checks_id):
+    return {
+        "status": status,
+        "id": str(checks_id)
+    }
 
+
+def upload(request, upload_folder):
     if request.json is not None and request.json['file_name'] is not None:
         filename = request.json['file_name']
     else:
         if "presentation" not in request.files:
             print("Поступил пустой запрос")
-            return -1
+            return _collect_results(-1, None)
         file = request.files["presentation"]
         filename = secure_filename(file.filename)
         file.save(os.path.join(upload_folder, file.filename))
+
+    presentation_name = os.path.splitext(filename)[0]
+    presentation = find_presentation(current_user, presentation_name)
+    if presentation is None:
+        user, presentation_id = add_presentation(current_user, presentation_name)
+        presentation = get_presentation(presentation_id)
+
     parser = Parser(upload_folder + '/' + filename)
     result = []
     try:
-        with open(upload_folder + '/' + os.path.splitext(filename)[0] + '_answer.txt', 'w') as answer:
+        with open(upload_folder + '/' + presentation_name + '_answer.txt', 'w') as answer:
             for line in parser.get_text():
                 answer.write(line)
     except Exception as err:
@@ -72,34 +84,23 @@ def upload(request, upload_folder):
     except Exception as err:
         print(err)
         print("Что-то пошло не так")
-        return -1
+        return _collect_results(-1, None)
     if parser.get_state() == -1:
         print("Что-то пошло не так")
     elif parser.get_state() == 3:
         print("Презентация обработана")
 
-    satisfied = True
-    for crit in result:
-        satisfied &= crit == "" or crit == -1
-    result.append(satisfied)
+    checks = create_check(result[0], result[1], result[2], result[3], result[4], result[5], result[6])
+    presentation, checks_id = add_check(presentation, checks)
 
-    return {
-        "status": parser.get_state(),
-        "id": "12334"
-    }
+    return _collect_results(parser.get_state(), checks_id)
 
 
-def results(args):
-    return result
+def remove_presentation(json):
+    count = len(current_user.presentations)
+    user, presentation = delete_presentation(current_user, ObjectId(json['presentation']))
+    return 'OK' if count == len(user.presentations) - 1 else 'Not OK'
 
 
 def criteria(args):
     return "Criteria page, args: " + str(args)
-
-
-def status():
-    global parser
-    if parser is not None:
-        return parser.get_state()
-    else:
-        return 0

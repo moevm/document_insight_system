@@ -76,6 +76,18 @@ def get_presentation(presentation_id):
         return None
 
 
+# Returns presentation of given user with given id or None
+def find_presentation(user, presentation_name):
+    presentations = []
+    for presentation_id in user.presentations:
+        presentations.append(get_presentation(presentation_id))
+    presentation = next((x for x in presentations if x.name == presentation_name), None)
+    if presentation is not None:
+        return presentation
+    else:
+        return None
+
+
 def __edit_presentation(presentation):
     if presentations_collection.find_one_and_replace({'_id': presentation._id}, presentation.pack()) is not None:
         return True
@@ -85,13 +97,16 @@ def __edit_presentation(presentation):
 
 # Deletes presentation with given id, deleting also its checks, returns presentation
 def delete_presentation(user, presentation_id):
-    user.presentations.remove(presentation_id)
-    edit_user(user)
-    presentation = get_presentation(presentation_id)
-    for check_id in presentation.checks:
-        presentation, check = delete_check(presentation, check_id)
-    presentation = Presentation(presentations_collection.find_one_and_delete({'_id': presentation_id}))
-    return user, presentation
+    if presentation_id in user.presentations:
+        user.presentations.remove(presentation_id)
+        edit_user(user)
+        presentation = get_presentation(presentation_id)
+        for check_id in presentation.checks:
+            presentation, check = delete_check(presentation, check_id)
+        presentation = Presentation(presentations_collection.find_one_and_delete({'_id': presentation_id}))
+        return user, presentation
+    else:
+        return user, get_presentation(presentation_id)
 
 
 # Creates checks with given params
@@ -127,7 +142,10 @@ def get_check(checks_id):
 
 # Deletes checks with given id, returns presentation
 def delete_check(presentation, checks_id):
-    presentation.checks.remove(checks_id)
-    __edit_presentation(presentation)
-    checks = Checks(checks_collection.find_one_and_delete({'_id': checks_id}))
-    return presentation, checks
+    if checks_id in presentation.checks:
+        presentation.checks.remove(checks_id)
+        __edit_presentation(presentation)
+        checks = Checks(checks_collection.find_one_and_delete({'_id': checks_id}))
+        return presentation, checks
+    else:
+        return presentation, get_check(checks_id)
