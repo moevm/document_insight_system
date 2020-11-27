@@ -10,7 +10,7 @@ from app.bd_helper.bd_helper import get_user, get_check
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
 UPLOAD_FOLDER = '../files'
 
-app = Flask(__name__, static_folder="./../public/", template_folder="./../templates/")
+app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = str(uuid4())
 

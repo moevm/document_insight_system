@@ -6,14 +6,6 @@
 
 {% block title %}Загрузка презентаций{% endblock %}
 
-{% block styles %}
-    <link rel="stylesheet" href={{ url_for("static", filename="styles/upload.css") }}>
-{% endblock %}
-
-{% block scripts %}
-    <script src={{ url_for("static", filename="scripts/upload.js") }}></script>
-{% endblock %}
-
 {% block main %}
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row justify-content-center">
@@ -38,10 +30,10 @@
                         </div>
                     </form>
                     <div class="row h-box">
-                        <button type="button" class="pale_button" id="upload_upload_button" onclick="upload()" disabled>Загрузить</button>
-                        <button type="button" class="pale_button" onclick="criteria()">Критерии</button>
+                        <button type="button" class="pale_button" id="upload_upload_button" disabled>Загрузить</button>
+                        <button type="button" class="pale_button" id="upload_criteria_button">Критерии</button>
                             {% if debug %}
-                                <button type="button" class="pale_button" onclick="upload(true)">Тестирование</button>
+                                <button type="button" class="pale_button" id="upload_test_button">Тестирование</button>
                             {% endif %}
                     </div>
                 </div>
@@ -57,7 +49,7 @@
                             </div>
                         </div>
                     </form>
-                    <button type="button" class="pale_button" id="checking_button" onclick="check()" disabled>Результат</button>
+                    <button type="button" class="pale_button" id="checking_button" disabled>Результат</button>
                 </div>
             </div>
 

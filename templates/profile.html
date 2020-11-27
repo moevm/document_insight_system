@@ -6,14 +6,6 @@
 
 {% block title %}{{ name }}{% endblock %}
 
-{% block styles %}
-    <link rel="stylesheet" href={{ url_for("static", filename="styles/profile.css") }}>
-{% endblock %}
-
-{% block scripts %}
-    <script src={{ url_for("static", filename="scripts/profile.js") }}></script>
-{% endblock %}
-
 {% block main %}
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row justify-content-center">
@@ -48,8 +40,8 @@
             </table>
             {% if me %}
                 <div class="row justify-content-center h-box">
-                    <button type="button" class="btn blue_button" id="user_save_button" onclick="save()">Сохранить</button>
-                    <button type="button" class="pale_button" onclick="logout()">Выйти</button>
+                    <button type="button" class="btn blue_button" id="user_save_button">Сохранить</button>
+                    <button type="button" class="pale_button" id="user_logout_button">Выйти</button>
                     <button type="button" class="pale_button" data-toggle="modal" data-target="#delete_user_confirmation">Удалить</button>
                 </div>
             {% endif %}
@@ -69,7 +61,7 @@
                 <div class="modal-body ins">Вы уверены, что хотите удалить Ваш профиль? Вместе с ним будет удалена информация обо всех проверенных презентациях!</div>
                 <div class="modal-footer">
                     <button type="button" class="btn blue_button" data-dismiss="modal">Не удалять</button>
-                    <button type="button" class="btn btn-danger" data-dismiss="modal" id="delete_button" onclick="signout()">Удалить!</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" id="user_delete_button">Удалить!</button>
                 </div>
             </div>
         </div>

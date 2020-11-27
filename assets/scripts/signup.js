@@ -1,4 +1,9 @@
-function signup() {
+import {collect_values_if_possible, hash} from "./main";
+
+import '../styles/signup.css';
+
+
+$("#signup_button").click(async () => {
     const params = collect_values_if_possible("login_text_field", "name_text_field",
         "surname_text_field", "password_text_field", "confirmation_text_field");
 
@@ -19,11 +24,8 @@ function signup() {
             name: params["surname_text_field"] + " " + params["name_text_field"]
         })
     };
-    fetch("/signup", post_data).then((response) => {
-            return response.text();
-        }).then((name) => {
-            console.log("User " + name + " was" + (name === "" ? " not" : "") + " signed up");
-            if (name === "") $("#login_text_field").toggleClass("is-invalid", true);
-            else window.location.href = "/upload";
-        });
-}
+    const name = await (await fetch("/signup", post_data)).text();
+    console.log("User " + name + " was" + (name === "" ? " not" : "") + " signed up");
+    if (name === "") $("#login_text_field").toggleClass("is-invalid", true);
+    else window.location.href = "/upload";
+});

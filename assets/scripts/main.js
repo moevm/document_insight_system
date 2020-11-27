@@ -1,4 +1,21 @@
-function hash(password) {
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+import '../styles/main.css';
+
+import './criteria';
+import './login';
+import './presentations';
+import './profile';
+import './results';
+import './signup';
+import './upload';
+
+import '../favicon.ico';
+import '../styles/404.css';
+
+
+export function hash(password) {
     let hash = 0;
     if (password.length === 0) return hash;
     for (let i = 0; i < password.length; i++) {
@@ -9,7 +26,7 @@ function hash(password) {
     return hash;
 }
 
-function collect_values_if_possible(...ids) {
+export function collect_values_if_possible(...ids) {
     const id_array = [...ids];
     const necessary_fields = $(id_array.map(el => "#" + el).join(", "));
     let valid = true;
