@@ -1,14 +1,22 @@
+from os import mkdir
+from os.path import exists
+from shutil import rmtree
 import gensim
 import numpy as np
+
+from app import server
 from app.nlp.stemming import get_filtered_docs
-import os
-import shutil
-PATH = os.path.dirname(__file__) + '/' + 'workdir/'
+
+
+PATH = server.UPLOAD_FOLDER + '/workdir/'
 
 
 def check_similarity(string1, string2):
     try:
-        os.mkdir(PATH)
+        if exists(PATH):
+            rmtree(PATH)
+        mkdir(PATH)
+
         gen_docs = get_filtered_docs(string1, True)
         dictionary = gensim.corpora.Dictionary(gen_docs)
         corpus = [dictionary.doc2bow(gen_doc) for gen_doc in gen_docs]
@@ -28,7 +36,9 @@ def check_similarity(string1, string2):
             avg_sims.append(avg)
         total_avg = np.sum(avg_sims, dtype=np.float)
         percentage_of_similarity = round(float(total_avg) * 100)
-        shutil.rmtree(PATH)
+
+        if exists(PATH):
+            rmtree(PATH)
         return percentage_of_similarity
     except OSError:
         print("Проблема с директорией ", PATH)

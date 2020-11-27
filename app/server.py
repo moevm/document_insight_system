@@ -6,6 +6,9 @@ from uuid import uuid4
 import app.servants.user as user
 import app.servants.data as main
 from app.bd_helper.bd_helper import get_user, get_check
+from app.servants import pre_luncher
+
+DEBUG = True
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
 UPLOAD_FOLDER = '../files'
@@ -63,7 +66,7 @@ def upload():
     if request.method == "POST":
         return main.upload(request, UPLOAD_FOLDER)
     elif request.method == "GET":
-        return render_template("./upload.html", debug=True, navi_upload=False, name=current_user.name)
+        return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name)
     elif request.method == "PUT":
         return main.remove_presentation(request.json)
 
@@ -146,4 +149,5 @@ def add_header(r):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+    if pre_luncher.init(DEBUG):
+        app.run(debug=DEBUG, port=8080)
