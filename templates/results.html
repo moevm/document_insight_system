@@ -44,7 +44,7 @@
                 </tr>
                 <tr>
                     <th scope="row" class="ins">3</th>
-                    <td class="ins">Заголовки слайдов занимают не более двух строк</td>
+                    <td class="ins">Заголовки слайдов присутствуют и занимают не более двух строк</td>
                     <td class="{{ "table-secondary ins" if results.slides_headers == -1 else ("table-success ins" if results.slides_headers == "" else "table-danger ins") }}">
                         {{ "Не проведена" if results.slides_headers == -1 else ("Пройдена!" if results.slides_headers == "" else ("Не пройдена, проблемные слайды: " + results.slides_headers)) }}
                     </td>

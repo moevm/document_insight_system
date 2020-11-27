@@ -22,6 +22,10 @@ def __check_title_size(presentation):
     error_slides = ''
     for title in presentation.get_titles():
         i += 1
+        if title == "":
+            error_slides += str(i) + ' '
+            continue
+
         title = str(title).replace('\x0b', '\n')
         if '\n' in title or '\r' in title:
             titles = []
@@ -65,7 +69,7 @@ def check(presentation, checks):
 
     if checks.slides_enum != -1:  # Нумерация слайдов
         checks.slides_enum = __check_slides_enumeration(presentation)
-    if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк
+    if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк или заголовков нет
         checks.slides_headers = __check_title_size(presentation)
 
     if checks.goals_slide != -1:  # Слайд "Цель и задачи"
