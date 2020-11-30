@@ -1,12 +1,10 @@
-from os import remove
-from os.path import exists
 from re import split
 
 from app.nlp.similarity_of_texts import check_similarity
 
 
-def __check_slides_number(presentation):
-    return -1
+def __check_slides_number(conclusion_slide_number):
+    return conclusion_slide_number
 
 
 def __check_slides_enumeration(presentation):
@@ -24,6 +22,10 @@ def __check_title_size(presentation):
     error_slides = ''
     for title in presentation.get_titles():
         i += 1
+        if title == "":
+            error_slides += str(i) + ' '
+            continue
+
         title = str(title).replace('\x0b', '\n')
         if '\n' in title or '\r' in title:
             titles = []
@@ -38,6 +40,7 @@ def __check_title_size(presentation):
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
 SLIDE_APPROBATION_OF_WORK = 'Апробация'
 SLIDE_CONCLUSION = 'Заключение'
+SLIDE_WITH_RELEVANCE = 'Актуальность'
 
 
 def __find_definite_slide(presentation, type_of_slide):
@@ -45,11 +48,19 @@ def __find_definite_slide(presentation, type_of_slide):
     for title in presentation.get_titles():
         i += 1
         if str(title).lower().find(str(type_of_slide).lower()) != -1:
-            return str(i), presentation.get_text_from_slides()[i - 1]
+            return i, presentation.get_text_from_slides()[i - 1]
     return "", ""
 
 
 def __check_actual_slide(presentation):
+    i = 0
+    size = presentation.get_len_slides()
+    for text in presentation.get_text_from_slides():
+        i += 1
+        if i > size:
+            break
+        if SLIDE_WITH_RELEVANCE.lower() in str(text).lower():
+            return str(i)
     return -1
 
 
@@ -63,15 +74,13 @@ def __are_slides_similar(goals, conclusions):
 
 def check(presentation, checks):
     goals_array = ""
-    aprobation_array = ""
     conclusion_array = ""
 
-    if checks.slides_number != -1:  # Количество основных слайдов
-        checks.slides_number = __check_slides_number(presentation)
     if checks.slides_enum != -1:  # Нумерация слайдов
         checks.slides_enum = __check_slides_enumeration(presentation)
-    if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк
+    if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк или заголовков нет
         checks.slides_headers = __check_title_size(presentation)
+
     if checks.goals_slide != -1:  # Слайд "Цель и задачи"
         checks.goals_slide, goals_array = __find_definite_slide(presentation, SLIDE_GOALS_AND_TASKS)
     if checks.probe_slide != -1:  # Слайд "Апробация работы"
@@ -80,6 +89,10 @@ def check(presentation, checks):
         checks.actual_slide = __check_actual_slide(presentation)
     if checks.conclusion_slide != -1:  # Слайд с заключением
         checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION)
+
+    if checks.slides_number != -1:  # Количество основных слайдов
+        checks.slides_number = __check_slides_number(checks.conclusion_slide)
+
     if checks.conclusion_actual != -1:  # Соответствие закличения задачам
         checks.conclusion_actual = __are_slides_similar(goals_array, conclusion_array)
 

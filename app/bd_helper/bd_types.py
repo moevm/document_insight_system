@@ -97,6 +97,6 @@ class Checks(Packable):
                 "goals_slide: " + self.goals_slide + ", " +
                 "probe_slide: " + self.probe_slide + ", " +
                 "actual_slide: " + self.actual_slide + ", " +
-                "conclusion_slide: " + self.conclusion_slide +
-                "actuality_percent: " + str(self.actuality_percent) +
+                "conclusion_slide: " + self.conclusion_slide + ", " +
+                "actuality_percent: " + str(self.actuality_percent) + ", " +
                 "conclusion_actual: " + str(self.conclusion_actual) + " }")

@@ -3,6 +3,9 @@ class PresentationBasic:
         self.presentation_name = presentation_name
         self.slides = []
 
+    def get_len_slides(self):
+        return len(self.slides)
+
     def add_slides(self):
         pass
 
