@@ -13,7 +13,7 @@ DEBUG = True
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
 UPLOAD_FOLDER = '../files'
 
-app = Flask(__name__, static_folder="./../public/", template_folder="./../templates/")
+app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = str(uuid4())
 
@@ -141,10 +141,11 @@ def default():
 
 @app.after_request
 def add_header(r):
-    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    r.headers["Pragma"] = "no-cache"
-    r.headers["Expires"] = "0"
-    r.headers['Cache-Control'] = 'public, max-age=0'
+    if DEBUG:
+        r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        r.headers["Pragma"] = "no-cache"
+        r.headers["Expires"] = "0"
+        r.headers['Cache-Control'] = 'public, max-age=0'
     return r
 
 

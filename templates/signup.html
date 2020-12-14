@@ -6,14 +6,6 @@
 
 {% block title %}Регистрация{% endblock %}
 
-{% block styles %}
-    <link rel="stylesheet" href={{ url_for("static", filename="styles/signup.css") }}>
-{% endblock %}
-
-{% block scripts %}
-    <script src={{ url_for("static", filename="scripts/signup.js") }}></script>
-{% endblock %}
-
 {% block main %}
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row justify-content-center">
@@ -50,7 +42,7 @@
 
             <div class="row justify-content-center">
                 <div class="col-8 v-box">
-                    <button type="button" class="btn btn-block blue_button" id="signup_button" onclick="signup()">Создать аккаунт</button>
+                    <button type="button" class="btn btn-block blue_button" id="signup_button">Создать аккаунт</button>
                     <a class="linked text-right" href="/login" id="login_link">Вход</a>
                 </div>
             </div>

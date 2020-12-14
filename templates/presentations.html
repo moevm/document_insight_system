@@ -6,14 +6,6 @@
 
 {% block title %}{{ name }}{% endblock %}
 
-{% block styles %}
-    <link rel="stylesheet" href={{ url_for("static", filename="styles/presentations.css") }}>
-{% endblock %}
-
-{% block scripts %}
-    <script src={{ url_for("static", filename="scripts/presentations.js") }}></script>
-{% endblock %}
-
 {% block main %}
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row justify-content-center">

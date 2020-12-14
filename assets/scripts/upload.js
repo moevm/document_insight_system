@@ -1,3 +1,6 @@
+import '../styles/upload.css';
+
+
 let upload_id;
 const file_input = $("#upload_file");
 const checking_button = $("#checking_button");
@@ -12,12 +15,10 @@ file_input.change(() => {
     upload_button.prop('disabled', false);
 });
 
-/*
-    0% - 10% = 0 -> 1
-    10% - 60% = 1 -> 2
-    60% - 90% = 2 -> 3
- */
-function upload(sample = false) {
+upload_button.click(async () => { await upload(false); });
+$("#upload_test_button").click(async () => { await upload(true); });
+
+async function upload(sample = false) {
     let presentation = file_input.prop("files")[0];
     let formData = new FormData();
     formData.append("presentation", presentation);
@@ -30,27 +31,18 @@ function upload(sample = false) {
 
     const post_data = { method: "POST" };
     if (!sample) post_data.body = formData;
-    fetch("/upload", post_data)
-        .then((response) => {
-            return response.text();
-        }).then((response_text) => {
-            console.log("Final answer:", response_text);
-            bar.css("width", "100%").attr('aria-valuenow', 100);
-            if (response_text === "") {
-                bar.addClass("bg-danger");
-                file_input.addClass("is-invalid");
-            } else {
-                upload_id = response_text;
-                bar.addClass("bg-success");
-                checking_button.prop("disabled", false);
-            }
-        });
+    const response_text = await (await fetch("/upload", post_data)).text();
+    console.log("Answer:", response_text);
+    bar.css("width", "100%").attr('aria-valuenow', 100);
+    if (response_text === "") {
+        bar.addClass("bg-danger");
+        file_input.addClass("is-invalid");
+    } else {
+        upload_id = response_text;
+        bar.addClass("bg-success");
+        checking_button.prop("disabled", false);
+    }
 }
 
-function criteria() {
-    window.location.href = "/criteria";
-}
-
-function check() {
-    window.location.href = "/results/" + upload_id;
-}
+$("#upload_criteria_button").click(() => { window.location.href = "/criteria"; });
+checking_button.click(() => { window.location.href = "/results/" + upload_id; });
