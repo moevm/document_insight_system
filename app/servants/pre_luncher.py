@@ -1,8 +1,6 @@
-import os
-
 from pymongo.errors import ConnectionFailure
 
-from app.bd_helper.bd_helper import add_user, get_user, get_client
+from app.bd_helper.bd_helper import add_user, get_user, get_client, edit_user
 
 
 def __js_hash(password):
@@ -28,9 +26,12 @@ def init(debug):
         return True
 
     cred = "admin"
-    user = add_user(cred, __js_hash(cred))
+    user = get_user(cred)
     if user is None:
-        user = get_user(cred)
+        user = add_user(cred, __js_hash(cred))
+        user.name = cred
+        edit_user(user)
+
     print("Created default user: { login: " + user.username + ", password: " + cred + " }")
 
     return True

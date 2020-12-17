@@ -39,3 +39,9 @@ def get_rich(username):
         for j in range(0, len(u.presentations[i].checks)):
             u.presentations[i].checks[j] = get_check(u.presentations[i].checks[j])
     return u
+
+
+def update_criteria(json):
+    print(json)
+    current_user.criteria = Checks(json)
+    return 'OK' if edit_user(current_user) else 'Not OK'

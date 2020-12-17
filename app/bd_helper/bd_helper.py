@@ -113,18 +113,9 @@ def delete_presentation(user, presentation_id):
         return user, get_presentation(presentation_id)
 
 
-# Creates checks with given params
-def create_check(slides_number='', slides_enum='', slides_headers='', goals_slide='',
-                 probe_slide='', actual_slide='', conclusion_slide=''):
-    checks = Checks()
-    checks.slides_number = slides_number
-    checks.slides_enum = slides_enum
-    checks.slides_headers = slides_headers
-    checks.goals_slide = goals_slide
-    checks.probe_slide = probe_slide
-    checks.actual_slide = actual_slide
-    checks.conclusion_slide = conclusion_slide
-    return checks
+# Creates checks from given user check-list
+def create_check(user):
+    return Checks(user.criteria.pack())
 
 
 # Adds checks to given presentation, updates presentation, returns presentation and checks id

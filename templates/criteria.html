@@ -1,4 +1,4 @@
-{# Accepts: header dependicies #}
+{# Accepts: header dependicies, user.criteria AS crit #}
 
 
 
@@ -17,33 +17,33 @@
                     <h4 class="criteria_header texteous ins" id="simple_criteria">Простые критерии</h4>
                     <div class="criteria_container" id="simple_criteria_container">
                         <div class="form-check" id="slides_count_check">
-                            <input class="form-check-input" type="checkbox" value="" id="slides_count">
-                            <label class="form-check-label" for="slides_count">Количество основных слайдов</label>
+                            <input class="form-check-input" type="checkbox" value="" id="slides_number" {% if crit.slides_number != -1 %}checked{% endif %}>
+                            <label class="form-check-label" for="slides_number">Количество основных слайдов</label>
                         </div>
                         <div class="form-check" id="slides_numeration_check">
-                            <input class="form-check-input" type="checkbox" value="" id="slides_numeration">
-                            <label class="form-check-label" for="slides_numeration">Нумерация слайдов</label>
+                            <input class="form-check-input" type="checkbox" value="" id="slides_enum" {% if crit.slides_enum != -1 %}checked{% endif %}>
+                            <label class="form-check-label" for="slides_enum">Нумерация слайдов</label>
                         </div>
                         <div class="form-check" id="slide_headers_check">
-                            <input class="form-check-input" type="checkbox" value="" id="slide_headers">
-                            <label class="form-check-label" for="slide_headers">Заголовки слайдов присутствуют и занимают не более двух строк</label>
+                            <input class="form-check-input" type="checkbox" value="" id="slides_headers" {% if crit.slides_headers != -1 %}checked{% endif %}>
+                            <label class="form-check-label" for="slides_headers">Заголовки слайдов присутствуют и занимают не более двух строк</label>
                         </div>
                         <h5 class="criteria_sub_header texteous ins" id="main_criteria">Наличие основных слайдов:</h5>
                         <div class="form-check" id="slide_objectives_check">
-                            <input class="form-check-input" type="checkbox" value="" id="slide_objectives">
-                            <label class="form-check-label" for="slide_objectives">"Цель и задачи"</label>
+                            <input class="form-check-input" type="checkbox" value="" id="goals_slide" {% if crit.goals_slide != -1 %}checked{% endif %}>
+                            <label class="form-check-label" for="goals_slide">"Цель и задачи"</label>
                         </div>
                         <div class="form-check" id="slide_checking_check">
-                            <input class="form-check-input" type="checkbox" value="" id="slide_checking">
-                            <label class="form-check-label" for="slide_checking">"Апробация работы"</label>
+                            <input class="form-check-input" type="checkbox" value="" id="probe_slide" {% if crit.probe_slide != -1 %}checked{% endif %}>
+                            <label class="form-check-label" for="probe_slide">"Апробация работы"</label>
                         </div>
                         <div class="form-check" id="slide_conclusion_check">
-                            <input class="form-check-input" type="checkbox" value="" id="slide_conclusion">
-                            <label class="form-check-label" for="slide_conclusion">"Заключение"</label>
+                            <input class="form-check-input" type="checkbox" value="" id="conclusion_slide" {% if crit.conclusion_slide != -1 %}checked{% endif %}>
+                            <label class="form-check-label" for="conclusion_slide">"Заключение"</label>
                         </div>
                         <div class="form-check" id="slide_actual_check">
-                            <input class="form-check-input" type="checkbox" value="" id="slide_actual">
-                            <label class="form-check-label" for="slide_actual">Слайд с описанием актуальноти работы</label>
+                            <input class="form-check-input" type="checkbox" value="" id="actual_slide" {% if crit.actual_slide != -1 %}checked{% endif %}>
+                            <label class="form-check-label" for="actual_slide">Слайд с описанием актуальноти работы</label>
                         </div>
                     </div>
                 </div>
@@ -52,16 +52,18 @@
                     <h4 class="criteria_header texteous ins" id="complex_criteria">Сложные критерии</h4>
                     <div class="criteria_container" id="complex_criteria_container">
                         <div class="form-check" id="slide_every_task_check">
-                            <input class="form-check-input" type="checkbox" value="" id="slide_every_task">
+                            <input class="form-check-input" type="checkbox" value="" id="slide_every_task" disabled>
                             <label class="form-check-label" for="slide_every_task">Наличие слайда/слайдов на каждую задачу</label>
                         </div>
                         <h5 class="criteria_sub_header texteous ins" id="conclusion_analysis">Анализ слайда "Заключение":</h5>
                         <div class="form-check" id="slide_results_check">
-                            <input class="form-check-input" type="checkbox" value="" id="slide_results">
-                            <label class="form-check-label" for="slide_results">Кратко приведены результаты решения задач со слайда "Цели и задачи"</label>
+                            <input class="form-check-input" type="checkbox" value="" id="conclusion_actual" {% if crit.conclusion_actual != -1 %}checked{% endif %} {% if (crit.goals_slide == -1) or (crit.conclusion_slide == -1) %}disabled{% endif %}>
+                            <label class="form-check-label" for="conclusion_actual">Кратко приведены результаты решения задач со слайда "Цели и задачи"</label>
+                            <label class="form-check-label" for="actuality_percent" id="actuality_percent_label">Процент соответствия результатов целям: {{ crit.actuality_percent }}%</label>
+                            <input type="range" class="custom-range" id="actuality_percent" {% if crit.conclusion_actual == -1 %}disabled{% else %}value={{ crit.actuality_percent }}{% endif %}>
                         </div>
                         <div class="form-check" id="slide_along_check">
-                            <input class="form-check-input" type="checkbox" value="" id="slide_along">
+                            <input class="form-check-input" type="checkbox" value="" id="slide_along" disabled>
                             <label class="form-check-label" for="slide_along">Приведены направления дальнейшей разработки или улучшения программы</label>
                         </div>
                     </div>
