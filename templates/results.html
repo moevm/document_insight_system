@@ -1,4 +1,4 @@
-{# Accepts: header dependicies #}
+{# Accepts: header dependicies, results, id, fi #}
 
 
 
@@ -78,6 +78,8 @@
                 </tr>
             </tbody>
         </table>
+
+        <a href="/checks/{{ id }}" id="presentation_download" class="col text-center" download="{{ fi }}">Загрузить презентацию</a>
     </div>
     <div class="footer row"></div>
 {% endblock %}

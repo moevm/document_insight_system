@@ -1,11 +1,11 @@
 from bson import ObjectId
-from flask import Flask, request, redirect, url_for, render_template
+from flask import Flask, request, redirect, url_for, render_template, Response
 from flask_login import LoginManager, login_user, current_user, login_required
 from uuid import uuid4
 
 import app.servants.user as user
 import app.servants.data as main
-from app.bd_helper.bd_helper import get_user, get_check
+from app.bd_helper.bd_helper import get_user, get_check, get_presentation_check
 from app.servants import pre_luncher
 
 DEBUG = True
@@ -74,12 +74,28 @@ def upload():
 @app.route("/results/<string:_id>", methods=["GET"])
 @login_required
 def results(_id):
-    c = get_check(ObjectId(_id))
+    oid = ObjectId(_id)
+    c = get_check(oid)
+    f = get_presentation_check(oid)
     if c is not None:
-        return render_template("./results.html", navi_upload=True, name=current_user.name, results=c)
+        return render_template("./results.html", navi_upload=True, name=current_user.name, results=c, id=_id, fi=f.name)
     else:
         print("No such checks: " + _id)
         return render_template("./404.html")
+
+
+@app.route("/checks/<string:_id>", methods=["GET"])
+@login_required
+def checks(_id):
+    f = get_presentation_check(ObjectId(_id))
+    n = 'txt/plain'
+    if f.name.endswith('.ppt'):
+        n = 'application/vnd.ms-powerpoint'
+    elif f.name.endswith('.pptx'):
+        n = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    elif f.name.endswith('.odp'):
+        n = 'application/vnd.oasis.opendocument.presentation'
+    return Response(f.read(), mimetype=n)
 
 
 @app.route("/criteria", methods=["GET", "POST"])

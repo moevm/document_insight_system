@@ -30,11 +30,11 @@ def upload(request, upload_folder):
 
         checks = create_check(current_user)
         check(parse(filename), checks)
+        presentation, checks_id = add_check(presentation, checks, filename)
 
         if delete and exists(filename):
             remove(filename)
 
-        presentation, checks_id = add_check(presentation, checks)
         return str(checks_id)
     except Exception as e:
         print(e)
