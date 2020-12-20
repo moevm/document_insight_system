@@ -73,6 +73,7 @@ def __are_slides_similar(goals, conclusions):
 
 
 def check(presentation, checks):
+    print(str(checks))
     goals_array = ""
     conclusion_array = ""
 

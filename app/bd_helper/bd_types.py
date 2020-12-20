@@ -6,7 +6,7 @@ class Packable:
         pass
 
     def pack(self):
-        return vars(self)
+        return dict(vars(self))
 
 
 # You shouldn't create this or change username and presentations explicitly
@@ -18,12 +18,14 @@ class User(Packable, UserMixin):
             self.name = ''
             self.password_hash = ''
             self.presentations = []
+            self.criteria = Checks()
             self.is_admin = False
         else:
             self.username = dictionary['username']
             self.name = dictionary['name']
             self.password_hash = dictionary['password_hash']
             self.presentations = dictionary['presentations']
+            self.criteria = Checks(dictionary['criteria'])
             self.is_admin = dictionary['is_admin']
 
     def __str__(self) -> str:
@@ -31,7 +33,13 @@ class User(Packable, UserMixin):
                 "name: " + self.name + ", " +
                 "password_hash: " + str(self.password_hash) + ", " +
                 "presentations: " + str(self.presentations) + ", " +
+                "personal criteria: " + str(self.criteria) + ", " +
                 "is_admin: " + str(self.is_admin) + " }")
+
+    def pack(self):
+        package = super(User, self).pack()
+        package['criteria'] = self.criteria.pack()
+        return package
 
     def get_id(self):
         return self.username
@@ -55,9 +63,6 @@ class Presentation(Packable):
                 "checks: " + str(self.checks) + " }")
 
 
-PERCENTAGE_OF_SIMILARITY = 60
-
-
 # You shouldn't create or change this explicitly
 class Checks(Packable):
     def __init__(self, dictionary=None):
@@ -73,7 +78,8 @@ class Checks(Packable):
             self.conclusion_actual = 0
             self.actuality_percent = 50
         else:
-            self._id = dictionary['_id']
+            if '_id' in dictionary:
+                self._id = dictionary['_id']
             self.slides_number = dictionary['slides_number']
             self.slides_enum = dictionary['slides_enum']
             self.slides_headers = dictionary['slides_headers']
@@ -87,16 +93,16 @@ class Checks(Packable):
     def correct(self):
         return (self.slides_number == '' and self.slides_enum == '' and self.slides_headers == '' and
                 self.goals_slide != '' and self.probe_slide != '' and self.actual_slide != '' and
-                self.conclusion_slide != '' and self.conclusion_actual >= PERCENTAGE_OF_SIMILARITY)
+                self.conclusion_slide != '' and self.conclusion_actual >= self.actuality_percent)
 
     def __str__(self) -> str:
         return ("Checks: { " + (("_id: " + str(self._id) + ", ") if hasattr(self, "_id") else "") +
-                "slides_number: " + self.slides_number + ", " +
-                "slides_enum: " + self.slides_enum + ", " +
-                "slides_headers: " + self.slides_headers + ", " +
-                "goals_slide: " + self.goals_slide + ", " +
-                "probe_slide: " + self.probe_slide + ", " +
-                "actual_slide: " + self.actual_slide + ", " +
-                "conclusion_slide: " + self.conclusion_slide + ", " +
+                "slides_number: " + str(self.slides_number) + ", " +
+                "slides_enum: " + str(self.slides_enum) + ", " +
+                "slides_headers: " + str(self.slides_headers) + ", " +
+                "goals_slide: " + str(self.goals_slide) + ", " +
+                "probe_slide: " + str(self.probe_slide) + ", " +
+                "actual_slide: " + str(self.actual_slide) + ", " +
+                "conclusion_slide: " + str(self.conclusion_slide) + ", " +
                 "actuality_percent: " + str(self.actuality_percent) + ", " +
                 "conclusion_actual: " + str(self.conclusion_actual) + " }")
