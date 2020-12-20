@@ -98,10 +98,13 @@ def checks(_id):
     return Response(f.read(), mimetype=n)
 
 
-@app.route("/criteria", methods=["GET"])
+@app.route("/criteria", methods=["GET", "POST"])
 @login_required
 def criteria():
-    return render_template("./criteria.html", navi_upload=True, name=current_user.name)
+    if request.method == "GET":
+        return render_template("./criteria.html", navi_upload=True, name=current_user.name, crit=current_user.criteria)
+    elif request.method == "POST":
+        return user.update_criteria(request.json)
 
 
 @app.route('/profile', methods=["GET"], defaults={'username': ''})
