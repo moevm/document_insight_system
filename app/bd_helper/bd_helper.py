@@ -1,9 +1,12 @@
+from os.path import basename
+from gridfs import GridFSBucket
 from pymongo import MongoClient
 
 from app.bd_helper.bd_types import User, Presentation, Checks
 
 client = MongoClient(serverSelectionTimeoutMS=500)
 db = client['pres-parser-db']
+fs = GridFSBucket(db)
 
 users_collection = db['users']
 presentations_collection = db['presentations']
@@ -128,10 +131,15 @@ def create_check(slides_number='', slides_enum='', slides_headers='', goals_slid
 
 
 # Adds checks to given presentation, updates presentation, returns presentation and checks id
-def add_check(presentation, checks):
+def add_check(presentation, checks, presentation_file):
     checks_id = checks_collection.insert_one(checks.pack()).inserted_id
     presentation.checks.append(checks_id)
     __edit_presentation(presentation)
+
+    grid_in = fs.open_upload_stream_with_id(checks_id, basename(presentation_file))
+    grid_in.write(open(presentation_file, 'rb'))
+    grid_in.close()
+
     return presentation, checks_id
 
 
@@ -144,12 +152,18 @@ def get_check(checks_id):
         return None
 
 
+# Returns checks with given id or None
+def get_presentation_check(checks_id):
+    return fs.open_download_stream(checks_id)
+
+
 # Deletes checks with given id, returns presentation
 def delete_check(presentation, checks_id):
     if checks_id in presentation.checks:
         presentation.checks.remove(checks_id)
         __edit_presentation(presentation)
         checks = Checks(checks_collection.find_one_and_delete({'_id': checks_id}))
+        fs.delete(checks_id)
         return presentation, checks
     else:
         return presentation, get_check(checks_id)
