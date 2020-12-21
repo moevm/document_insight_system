@@ -11,7 +11,7 @@ def __answer(mod, value):
 
 
 def __check_slides_number(presentation, number, conclusion_slide_number):
-    if conclusion_slide_number == -1 or conclusion_slide_number == '':
+    if conclusion_slide_number == -1 or conclusion_slide_number['value'] == '':
         conclusion_slide_number = len(presentation.slides)
     return __answer(int(number) >= conclusion_slide_number, conclusion_slide_number)
 
@@ -101,7 +101,7 @@ def check(presentation, checks):
         checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION)
 
     if checks.slides_number != -1:  # Количество основных слайдов
-        checks.slides_number = __check_slides_number(presentation, checks.slides_number, checks.conclusion_slide['value'])
+        checks.slides_number = __check_slides_number(presentation, checks.slides_number, checks.conclusion_slide)
 
     if checks.conclusion_actual != -1:  # Соответствие закличения задачам
         checks.conclusion_actual = __are_slides_similar(goals_array, conclusion_array, checks.conclusion_actual)
