@@ -3,8 +3,13 @@ from re import split
 from app.nlp.similarity_of_texts import check_similarity
 
 
-def __check_slides_number(conclusion_slide_number):
-    return conclusion_slide_number
+def __check_slides_number(presentation, number, conclusion_slide_number):
+    if conclusion_slide_number == -1 or conclusion_slide_number == '':
+        conclusion_slide_number = len(presentation.slides)
+    return {
+        "pass": number >= conclusion_slide_number,
+        "value": conclusion_slide_number
+    }
 
 
 def __check_slides_enumeration(presentation):
@@ -64,12 +69,15 @@ def __check_actual_slide(presentation):
     return -1
 
 
-def __are_slides_similar(goals, conclusions):
+def __are_slides_similar(goals, conclusions, number):
     if goals == "" or conclusions == "":
         return -1
     result = check_similarity(goals, conclusions)
     print('Result:' + str(result))
-    return result
+    return {
+        "pass": result >= number,
+        "value": result
+    }
 
 
 def check(presentation, checks):
@@ -92,9 +100,9 @@ def check(presentation, checks):
         checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION)
 
     if checks.slides_number != -1:  # Количество основных слайдов
-        checks.slides_number = __check_slides_number(checks.conclusion_slide)
+        checks.slides_number = __check_slides_number(presentation, checks.slides_number, checks.conclusion_slide)
 
     if checks.conclusion_actual != -1:  # Соответствие закличения задачам
-        checks.conclusion_actual = __are_slides_similar(goals_array, conclusion_array)
+        checks.conclusion_actual = __are_slides_similar(goals_array, conclusion_array, checks.conclusion_actual)
 
     return checks

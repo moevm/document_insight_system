@@ -8,7 +8,7 @@
 
 .criteria_header {
     height: 10%;
-    margin-top: 1.5rem !important;
+    margin-top: 1rem !important;
     margin-bottom: .5rem !important;
 }
 
@@ -17,6 +17,24 @@
 }
 
 
+
+.form-control-range:disabled~.form-range-input, .form-control-range[disabled]~.form-range-input {
+    color: #6c757d;
+}
+
+
+
+#slides_number_options_holder {
+    margin-bottom: .5rem;
+}
+
+#actuality_percent {
+    margin-top: .5rem;
+}
+
+#actuality_percent_label {
+    margin-bottom: 0;
+}
 
 #criteria_save_button {
     margin-top: 1rem;

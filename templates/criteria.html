@@ -19,6 +19,16 @@
                         <div class="form-check" id="slides_count_check">
                             <input class="form-check-input" type="checkbox" value="" id="slides_number" {% if crit.slides_number != -1 %}checked{% endif %}>
                             <label class="form-check-label" for="slides_number">Количество основных слайдов</label>
+                            <div class="form-group" id="slides_number_options_holder">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="optradio" id="bachelors" {% if crit.slides_number == -1 %}disabled{% elif crit.slides_number == 12 %}checked{% endif %}>
+                                    <label class="form-check-label" for="bachelors">Для бакалавров (12)</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="optradio" id="masters" {% if crit.slides_number == -1 %}disabled{% elif crit.slides_number == 15 %}checked{% endif %}>
+                                    <label class="form-check-label" for="masters">Для магистров (15)</label>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-check" id="slides_numeration_check">
                             <input class="form-check-input" type="checkbox" value="" id="slides_enum" {% if crit.slides_enum != -1 %}checked{% endif %}>
@@ -59,8 +69,10 @@
                         <div class="form-check" id="slide_results_check">
                             <input class="form-check-input" type="checkbox" value="" id="conclusion_actual" {% if crit.conclusion_actual != -1 %}checked{% endif %} {% if (crit.goals_slide == -1) or (crit.conclusion_slide == -1) %}disabled{% endif %}>
                             <label class="form-check-label" for="conclusion_actual">Кратко приведены результаты решения задач со слайда "Цели и задачи"</label>
-                            <label class="form-check-label" for="actuality_percent" id="actuality_percent_label">Процент соответствия результатов целям: {{ crit.actuality_percent }}%</label>
-                            <input type="range" class="custom-range" id="actuality_percent" {% if crit.conclusion_actual == -1 %}disabled{% else %}value={{ crit.actuality_percent }}{% endif %}>
+                            <div class="form-group">
+                                <input type="range" class="form-control-range" id="actuality_percent" {% if crit.conclusion_actual == -1 %}disabled{% else %}value={{ crit.actuality_percent }}{% endif %}>
+                                <label class="form-range-input" for="actuality_percent" id="actuality_percent_label">Процент соответствия результатов целям: {{ crit.actuality_percent }}%</label>
+                            </div>
                         </div>
                         <div class="form-check" id="slide_along_check">
                             <input class="form-check-input" type="checkbox" value="" id="slide_along" disabled>

@@ -23,8 +23,8 @@
                 <tr>
                     <th scope="row" class="ins">1</th>
                     <td class="ins">Количество основных слайдов</td>
-                    <td class="{{ "table-secondary ins" if results.slides_number == -1 else ("table-danger ins" if results.slides_number == "" else "table-success ins") }}">
-                        {{ "Не проведена" if results.slides_number == -1 else ("Нет ключевых слайдов!" if results.slides_number == "" else ("Всего: " ~ results.slides_number)) }}
+                    <td class="{{ "table-secondary ins" if results.slides_number == -1 else ("table-success ins" if results.slides_number.pass else "table-danger ins") }}">
+                        {{ "Не проведена" if results.slides_number == -1 else ("Всего: " ~ results.slides_number.value) }}
                     </td>
                 </tr>
                 <tr>
@@ -72,8 +72,8 @@
                 <tr>
                     <th scope="row" class="ins">8</th>
                     <td class="ins">Соответствие заключения задачам</td>
-                    <td class="{{ "table-secondary ins" if results.conclusion_actual == -1 else ("table-danger ins" if results.conclusion_actual < results.actuality_percent else "table-success ins") }}">
-                        {{ "Не проведена" if results.conclusion_actual == -1 else ("Соответствует на " ~ results.conclusion_actual ~ "%") }}
+                    <td class="{{ "table-secondary ins" if results.conclusion_actual == -1 else ("table-success ins" if results.conclusion_actual.pass else "table-danger ins") }}">
+                        {{ "Не проведена" if results.conclusion_actual == -1 else ("Соответствует на " ~ results.conclusion_actual.value ~ "%") }}
                     </td>
                 </tr>
             </tbody>
