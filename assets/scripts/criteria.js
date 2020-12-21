@@ -42,18 +42,17 @@ criteria_save_button.click(async function () {
     const necessary_fields = $(fields.map(el => "#" + el).join(", ")); // в идеале, когда будут готовы все проверки, будет: $("input[type=checkbox]")
 
     const criteria = Object();
-    for (const field of necessary_fields) criteria[field.id] = $(field).prop("checked") ? "" : -1;
+    for (const field of necessary_fields) criteria[field.id] = $(field).prop("checked") ? 0 : -1;
     if (Object.values(criteria).every(x => (x === -1))) {
         $(this).popover("show");
         setTimeout(() => { $(this).popover("hide"); }, 1000);
     }
 
-    if (criteria.slides_number === "") {
+    if (criteria.slides_number !== -1) {
         if ($("#bachelors").prop("checked")) criteria.slides_number = 12;
         else if ($("#masters").prop("checked")) criteria.slides_number = 15;
-        else criteria.slides_number = 0;
     }
-    if (criteria.conclusion_actual === "") criteria.conclusion_actual = Number.parseInt(actuality_percent.val());
+    if (criteria.conclusion_actual === 0) criteria.conclusion_actual = Number.parseInt(actuality_percent.val());
 
     const post_data = {
         method: "POST",

@@ -3,13 +3,17 @@ from re import split
 from app.nlp.similarity_of_texts import check_similarity
 
 
+def __answer(mod, value):
+    return {
+        "pass": bool(mod),
+        "value": str(value)
+    }
+
+
 def __check_slides_number(presentation, number, conclusion_slide_number):
     if conclusion_slide_number == -1 or conclusion_slide_number == '':
         conclusion_slide_number = len(presentation.slides)
-    return {
-        "pass": number >= conclusion_slide_number,
-        "value": conclusion_slide_number
-    }
+    return __answer(int(number) >= conclusion_slide_number, conclusion_slide_number)
 
 
 def __check_slides_enumeration(presentation):
@@ -19,7 +23,7 @@ def __check_slides_enumeration(presentation):
     for i in range(1, len(presentation.slides)):
         if presentation.slides[i].page_number[0] != i + 1:
             error += str(i) + " "
-    return error
+    return __answer(error == "", error)
 
 
 def __check_title_size(presentation):
@@ -39,7 +43,7 @@ def __check_title_size(presentation):
                     titles.append(t)
             if len(titles) > 2:
                 error_slides += str(i) + ' '
-    return error_slides
+    return __answer(error_slides == "", error_slides)
 
 
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
@@ -53,8 +57,8 @@ def __find_definite_slide(presentation, type_of_slide):
     for title in presentation.get_titles():
         i += 1
         if str(title).lower().find(str(type_of_slide).lower()) != -1:
-            return i, presentation.get_text_from_slides()[i - 1]
-    return "", ""
+            return __answer(True, i), presentation.get_text_from_slides()[i - 1]
+    return __answer(False, ""), ""
 
 
 def __check_actual_slide(presentation):
@@ -65,8 +69,8 @@ def __check_actual_slide(presentation):
         if i > size:
             break
         if SLIDE_WITH_RELEVANCE.lower() in str(text).lower():
-            return str(i)
-    return -1
+            return __answer(True, i)
+    return __answer(False, "")
 
 
 def __are_slides_similar(goals, conclusions, number):
@@ -74,10 +78,7 @@ def __are_slides_similar(goals, conclusions, number):
         return -1
     result = check_similarity(goals, conclusions)
     print('Result:' + str(result))
-    return {
-        "pass": result >= number,
-        "value": result
-    }
+    return __answer(result >= number, result)
 
 
 def check(presentation, checks):
@@ -100,7 +101,7 @@ def check(presentation, checks):
         checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION)
 
     if checks.slides_number != -1:  # Количество основных слайдов
-        checks.slides_number = __check_slides_number(presentation, checks.slides_number, checks.conclusion_slide)
+        checks.slides_number = __check_slides_number(presentation, checks.slides_number, checks.conclusion_slide['value'])
 
     if checks.conclusion_actual != -1:  # Соответствие закличения задачам
         checks.conclusion_actual = __are_slides_similar(goals_array, conclusion_array, checks.conclusion_actual)
