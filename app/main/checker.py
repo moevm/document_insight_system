@@ -13,6 +13,8 @@ def __answer(mod, value):
 def __check_slides_number(presentation, number, conclusion_slide_number):
     if conclusion_slide_number == -1 or conclusion_slide_number['value'] == '':
         conclusion_slide_number = len(presentation.slides)
+    else:
+        conclusion_slide_number = int(conclusion_slide_number['value'])
     return __answer(int(number) >= conclusion_slide_number, conclusion_slide_number)
 
 

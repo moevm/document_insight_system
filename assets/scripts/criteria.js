@@ -9,7 +9,9 @@ const criteria_save_button = $("#criteria_save_button");
 $("input").change(function () {
     switch (this.id) {
         case "slides_number":
-            $("#slides_number_options_holder .form-check-input").prop("disabled", !$(this).prop("checked"));
+            const checked = $(this).prop("checked");
+            if (checked) $("#bachelors").prop("checked", true);
+            $("#slides_number_options_holder .form-check-input").prop("disabled", !checked);
             break;
         case "conclusion_actual":
             actuality_percent.prop("disabled", !$(this).prop("checked"));
