@@ -67,8 +67,10 @@ def __check_actual_slide(presentation):
 def __are_slides_similar(goals, conclusions):
     if goals == "" or conclusions == "":
         return -1
-    result = check_similarity(goals, conclusions)
+    results = check_similarity(goals, conclusions)
+    result = results[0]
     print('Result:' + str(result))
+    print('Is further development on slide conclusion: ' + str(results[1]))
     return result
 
 
@@ -94,7 +96,7 @@ def check(presentation, checks):
     if checks.slides_number != -1:  # Количество основных слайдов
         checks.slides_number = __check_slides_number(checks.conclusion_slide)
 
-    if checks.conclusion_actual != -1:  # Соответствие закличения задачам
+    if checks.conclusion_actual != -1:  # Соответствие заключения задачам
         checks.conclusion_actual = __are_slides_similar(goals_array, conclusion_array)
 
     return checks

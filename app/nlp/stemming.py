@@ -8,6 +8,7 @@ from nltk.corpus import stopwords
 
 
 TASKS = 'задачи:'
+FURTHER_DEVELOPMENT = 'дальнейшие'
 
 
 def get_filtered_docs(string, flag):
@@ -17,6 +18,7 @@ def get_filtered_docs(string, flag):
     filtered_docs = []
     filtered_doc = []
     find_title_tasks = False
+    find_further_development = False
     for sent in string.split('\n'):
         if flag and TASKS not in sent.lower() and not find_title_tasks:
             continue
@@ -28,7 +30,10 @@ def get_filtered_docs(string, flag):
             if word.isalpha():
                 word = word.lower()
                 if word not in stop_words:
-                    filtered_doc.append(morph.parse(word)[0].normal_form)
+                    w = morph.parse(word)[0].normal_form
+                    filtered_doc.append(w)
+                    if w == morph.parse(FURTHER_DEVELOPMENT.lower())[0].normal_form and flag == False:
+                        find_further_development = True
         filtered_docs.append(filtered_doc)
         filtered_doc = []
-    return filtered_docs
+    return [filtered_docs, find_further_development]
