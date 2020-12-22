@@ -1,5 +1,4 @@
 from re import split
-
 from app.nlp.similarity_of_texts import check_similarity
 
 
