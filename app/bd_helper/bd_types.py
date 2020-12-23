@@ -68,15 +68,14 @@ class Checks(Packable):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
         if dictionary is None:
-            self.slides_number = ''
-            self.slides_enum = ''
-            self.slides_headers = ''
-            self.goals_slide = ''
-            self.probe_slide = ''
-            self.actual_slide = ''
-            self.conclusion_slide = ''
+            self.slides_number = 12
+            self.slides_enum = 0
+            self.slides_headers = 0
+            self.goals_slide = 0
+            self.probe_slide = 0
+            self.actual_slide = 0
+            self.conclusion_slide = 0
             self.conclusion_actual = 0
-            self.actuality_percent = 50
         else:
             if '_id' in dictionary:
                 self._id = dictionary['_id']
@@ -88,12 +87,18 @@ class Checks(Packable):
             self.actual_slide = dictionary['actual_slide']
             self.conclusion_slide = dictionary['conclusion_slide']
             self.conclusion_actual = dictionary['conclusion_actual']
-            self.actuality_percent = dictionary['actuality_percent']
 
     def correct(self):
-        return (self.slides_number == '' and self.slides_enum == '' and self.slides_headers == '' and
-                self.goals_slide != '' and self.probe_slide != '' and self.actual_slide != '' and
-                self.conclusion_slide != '' and self.conclusion_actual >= self.actuality_percent)
+        return (
+            (self.slides_number == -1 or self.slides_number['pass']) and
+            (self.slides_enum == -1 or self.slides_enum['pass']) and
+            (self.slides_headers == -1 or self.slides_headers['pass']) and
+            (self.goals_slide == -1 or self.goals_slide['pass']) and
+            (self.probe_slide == -1 or self.probe_slide['pass']) and
+            (self.actual_slide == -1 or self.actual_slide['pass']) and
+            (self.conclusion_slide == -1 or self.conclusion_slide['pass']) and
+            (self.conclusion_actual == -1 or self.conclusion_actual['pass'])
+        )
 
     def __str__(self) -> str:
         return ("Checks: { " + (("_id: " + str(self._id) + ", ") if hasattr(self, "_id") else "") +
@@ -104,5 +109,4 @@ class Checks(Packable):
                 "probe_slide: " + str(self.probe_slide) + ", " +
                 "actual_slide: " + str(self.actual_slide) + ", " +
                 "conclusion_slide: " + str(self.conclusion_slide) + ", " +
-                "actuality_percent: " + str(self.actuality_percent) + ", " +
                 "conclusion_actual: " + str(self.conclusion_actual) + " }")
