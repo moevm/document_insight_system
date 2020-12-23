@@ -1,3 +1,5 @@
+from sys import argv
+
 from bson import ObjectId
 from flask import Flask, request, redirect, url_for, render_template, Response
 from flask_login import LoginManager, login_user, current_user, login_required
@@ -169,5 +171,15 @@ def add_header(r):
 
 
 if __name__ == '__main__':
+    if len(argv) == 2:
+        if argv[1] == '-d':
+            DEBUG = True
+        elif argv[1] == '-p':
+            DEBUG = False
+    else:
+        print("App accepts only one key option")
+        print("Use \"-d\" to launch in debug mode or \"-p\" to launch in production mode")
+        print("Defaults to debug mode...")
+
     if pre_luncher.init(DEBUG):
         app.run(debug=DEBUG, port=8080)
