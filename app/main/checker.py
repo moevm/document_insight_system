@@ -103,5 +103,5 @@ def check(presentation, checks):
 
     if checks.conclusion_actual != -1:  # Соответствие заключения задачам
         checks.conclusion_actual = __are_slides_similar(goals_array, conclusion_array)
-        __find_tasks_on_slides(presentation, goals_array)
+        __find_tasks_on_slides(presentation, goals_array)  # Наличие слайдов соответстующих задачам
     return checks
