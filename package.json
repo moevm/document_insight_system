@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "license": "ISC",
   "repository": "https://github.com/moevm/mse_auto_checking_slides_vaganov",
+  "description": "Presentation parsing app",
   "scripts": {
     "build": "webpack"
   },
@@ -19,6 +20,8 @@
     "popper.js": "^1.16.1",
     "styles-loader": "^2.0.0",
     "webpack": "^5.8.0",
-    "webpack-cli": "^4.2.0"
+    "webpack-cli": "^4.2.0",
+    "file-loader": "^6.2.0",
+    "css-loader": "^5.0.1"
   }
 }
