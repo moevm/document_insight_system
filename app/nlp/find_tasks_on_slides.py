@@ -45,13 +45,15 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles):
         i = 0
         for task in tasks:
             i = 0
-            if task == Task:
+            if task == Task or task.isdigit():
                 continue
             for title in titles:
                 i += 1
+                if title == '':
+                    continue
                 similarity = compare_task_and_title(task, title)
                 if similarity >= AVAILABLE_PERCENT_INTERSECTION_TASK_AND_TITLE:
-                    print('На слайде ' + str(i) + ' содержится описание задачи:' + str(task))
+                    print('На слайде ' + str(i) + ' содержится описание задачи: ' + str(task))
                     break
     except:
         print("Что-то пошло не так")
