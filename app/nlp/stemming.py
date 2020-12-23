@@ -17,18 +17,26 @@ class Stemming:
         self.find_further_development = False
         self.filtered_docs = []
 
-    def parse_text(self, string, flag):
-        morph = MorphAnalyzer()
-        stop_words = stopwords.words("russian")
-        filtered_doc = []
+    def get_sentences(self, string, flag):
+        self.sentences = []
         find_title_tasks = False
-
         for sent in string.split('\n'):
             if flag and TASKS not in sent.lower() and not find_title_tasks:
                 continue
             find_title_tasks = True
             for s in sent_tokenize(sent):
                 self.sentences.append(s)
+        return self.sentences
+
+    def parse_text(self, string, flag):
+        self.sentences = []
+        self.find_further_development = False
+        self.filtered_docs = []
+        morph = MorphAnalyzer()
+        stop_words = stopwords.words("russian")
+        filtered_doc = []
+        self.get_sentences(string, flag)
+
         for sent in self.sentences:
             for word in word_tokenize(sent):
                 if word.isalpha():
