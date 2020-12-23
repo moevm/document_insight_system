@@ -37,18 +37,22 @@ def compare_task_and_title(task, title):
 
 
 def find_tasks_on_slides(slide_goal_and_tasks, titles):
-    stemming = Stemming()
-    tasks = stemming.get_sentences(slide_goal_and_tasks, True)
-    if len(tasks) == 0:
-        return -1
-    i = 0
-    for task in tasks:
+    try:
+        stemming = Stemming()
+        tasks = stemming.get_sentences(slide_goal_and_tasks, True)
+        if len(tasks) == 0:
+            return -1
         i = 0
-        if task == Task:
-            continue
-        for title in titles:
-            i += 1
-            similarity = compare_task_and_title(task, title)
-            if similarity >= AVAILABLE_PERCENT_INTERSECTION_TASK_AND_TITLE:
-                print('На слайде ' + str(i) + ' содержится описание задачи:' + str(task))
-                break
+        for task in tasks:
+            i = 0
+            if task == Task:
+                continue
+            for title in titles:
+                i += 1
+                similarity = compare_task_and_title(task, title)
+                if similarity >= AVAILABLE_PERCENT_INTERSECTION_TASK_AND_TITLE:
+                    print('На слайде ' + str(i) + ' содержится описание задачи:' + str(task))
+                    break
+    except:
+        print("Что-то пошло не так")
+        return -1
