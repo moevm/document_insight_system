@@ -42,17 +42,22 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
         if len(tasks) == 0:
             return -1
 
+        task_count = 0
+        slides_with_task = 0
         for task in tasks:
             if task == Task or task.isdigit():
                 continue
+            task_count += 1
             for title in titles:
                 if title == '':
                     continue
-                similarity = compare_task_and_title(task, title)
+                similarity = compare_task_and_title(task, title) * 100
                 if similarity >= intersection:
-                    print('\tВ презентации найдено описание задачи: ' + str(task))
+                    slides_with_task += 1
+                    print('\t\tВ презентации найдено описание задачи: ' + str(task))
                     break
-        return 0
+        if task_count == slides_with_task:
+            return 0
+        return -1
     except:
-        print("Что-то пошло не так")
         return -1
