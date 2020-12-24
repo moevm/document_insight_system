@@ -83,19 +83,30 @@ def __check_actual_slide(presentation):
     return __answer(False, "")
 
 
-def __are_slides_similar(goals, conclusions, number):
+def __are_slides_similar(goals, conclusions, actual_number):
     if goals == "" or conclusions == "":
         return -1
+
     results = check_similarity(goals, conclusions)
-    result = results[0]
-    print('Result:' + str(result))
-    print('Is further development on slide conclusion: ' + str(results[1]))
-    return __answer(result >= number, result)
+    if results == -1:
+        return __answer(False, "Произошла ошибка!"), __answer(False, "Произошла ошибка!")
+    else:
+        return __answer(results[0] >= actual_number, results[0]), __answer(results[1], results[1])
 
 
-def __find_tasks_on_slides(presentation, goals_array):
+def __find_tasks_on_slides(presentation, goals, intersection_number):
+    if goals == "":
+        return -1
+
     titles = presentation.get_titles()
-    slides_with_tasks = find_tasks_on_slides(goals_array, titles)
+    slides_with_tasks = find_tasks_on_slides(goals, titles, intersection_number)
+
+    if slides_with_tasks == 0:
+        print("\tВсе заявленные задачи найдены на слайдах")
+        return __answer(True, "Все задачи найдены на слайдах")
+    else:
+        print("\tНекоторые из заявленных задач на слайдах не найдены")
+        return __answer(False, "Некоторые задачи на слайдах не найдены")
 
 
 def check(presentation, checks):
@@ -119,8 +130,21 @@ def check(presentation, checks):
     if checks.slides_number != -1:  # Количество основных слайдов
         checks.slides_number = __check_slides_number(presentation, checks.slides_number, checks.conclusion_slide)
 
+    similar = __are_slides_similar(goals_array, conclusion_array, checks.conclusion_actual)
     if checks.conclusion_actual != -1:  # Соответствие закличения задачам
-        checks.conclusion_actual = __are_slides_similar(goals_array, conclusion_array, checks.conclusion_actual)
-        __find_tasks_on_slides(presentation, goals_array)  # Наличие слайдов соответстующих задачам
+        if similar != -1:
+            print("\tОбозначенные цели совпадают с задачами на " + similar[0]['value'] + "%")
+            checks.conclusion_actual = similar[0]
+        else:
+            checks.conclusion_actual = -1
+    if checks.conclusion_along != -1:  # Наличие направлений дальнейшего развития
+        if similar != -1:
+            print("\tНаправления дальнейшего развития " + ("" if similar[1]['value'] else "не ") + "найдены")
+            checks.conclusion_along = similar[1]
+        else:
+            checks.conclusion_along = -1
+
+    if checks.slide_every_task != -1:  # Наличие слайдов соответстующих задачам
+        checks.slide_every_task = __find_tasks_on_slides(presentation, goals_array, checks.slide_every_task)
     
     return checks

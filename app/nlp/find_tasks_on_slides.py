@@ -1,7 +1,6 @@
 from app.nlp.stemming import Stemming
 
 Task = 'Задачи:'
-AVAILABLE_PERCENT_INTERSECTION_TASK_AND_TITLE = 0.6
 
 
 def compare_task_and_title(task, title):
@@ -36,7 +35,7 @@ def compare_task_and_title(task, title):
     return cosine
 
 
-def find_tasks_on_slides(slide_goal_and_tasks, titles):
+def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
     try:
         stemming = Stemming()
         tasks = stemming.get_sentences(slide_goal_and_tasks, True)
@@ -50,9 +49,10 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles):
                 if title == '':
                     continue
                 similarity = compare_task_and_title(task, title)
-                if similarity >= AVAILABLE_PERCENT_INTERSECTION_TASK_AND_TITLE:
-                    print('В презентации найдено описание задачи: ' + str(task))
+                if similarity >= intersection:
+                    print('\tВ презентации найдено описание задачи: ' + str(task))
                     break
+        return 0
     except:
         print("Что-то пошло не так")
         return -1

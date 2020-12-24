@@ -71,9 +71,23 @@
                 </tr>
                 <tr>
                     <th scope="row" class="ins">8</th>
+                    <td class="ins">Наличие слайдов, посвященных задачам</td>
+                    <td class="{{ "table-secondary ins" if results.slide_every_task == -1 else ("table-success ins" if results.slide_every_task.pass else "table-danger ins") }}">
+                        {{ "Не проведена" if results.slide_every_task == -1 else results.slide_every_task.value }}
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row" class="ins">9</th>
                     <td class="ins">Соответствие заключения задачам</td>
                     <td class="{{ "table-secondary ins" if results.conclusion_actual == -1 else ("table-success ins" if results.conclusion_actual.pass else "table-danger ins") }}">
                         {{ "Не проведена" if results.conclusion_actual == -1 else ("Соответствует на " ~ results.conclusion_actual.value ~ "%") }}
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row" class="ins">10</th>
+                    <td class="ins">Наличие направлений дальнейшего развития</td>
+                    <td class="{{ "table-secondary ins" if results.conclusion_along == -1 else ("table-success ins" if results.conclusion_along.pass else "table-danger ins") }}">
+                        {{ "Не проведена" if results.conclusion_along == -1 else ("Найдены" if results.conclusion_along.value else "Не найдены") }}
                     </td>
                 </tr>
             </tbody>

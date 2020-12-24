@@ -1,8 +1,12 @@
 import '../styles/criteria.css';
 
+const goals_slide = $("#goals_slide");
 
+const every_task_percent = $("#every_task_percent");
+const slide_every_task = $("#slide_every_task");
 const actuality_percent = $("#actuality_percent");
-const conclusion_actual = $("#conclusion_actual");
+const conclusions = $("#conclusion_actual, #conclusion_along");
+
 const criteria_save_button = $("#criteria_save_button");
 
 
@@ -13,20 +17,32 @@ $("input").change(function () {
             if (checked) $("#bachelors").prop("checked", true);
             $("#slides_number_options_holder .form-check-input").prop("disabled", !checked);
             break;
+        case "slide_every_task":
+            every_task_percent.prop("disabled", !$(this).prop("checked"));
+            break;
         case "conclusion_actual":
             actuality_percent.prop("disabled", !$(this).prop("checked"));
+            break;
+        case "every_task_percent":
+            $("#every_task_percent_label").text("Процент точности поиска: " + $(this).val() + "%");
             break;
         case "actuality_percent":
             $("#actuality_percent_label").text("Процент соответствия результатов целям: " + $(this).val() + "%");
             break;
         case "goals_slide":
+            const goals_available = goals_slide.prop("checked");
+            if (!goals_available) {
+                slide_every_task.prop("checked", false);
+                every_task_percent.prop("disabled", true);
+            }
+            slide_every_task.prop("disabled", !goals_available);
         case "conclusion_slide":
-            const conclusion_actual_available = $("#goals_slide").prop("checked") && $("#conclusion_slide").prop("checked");
-            if (!conclusion_actual_available) {
-                conclusion_actual.prop("checked", false);
+            const conclusion_goals_available = $("#goals_slide").prop("checked") && $("#conclusion_slide").prop("checked");
+            if (!conclusion_goals_available) {
+                conclusions.prop("checked", false);
                 actuality_percent.prop("disabled", true);
             }
-            conclusion_actual.prop("disabled", !conclusion_actual_available);
+            conclusions.prop("disabled", !conclusion_goals_available);
             break;
     }
 });
@@ -42,9 +58,7 @@ function save_button_popover (text) {
 }
 
 criteria_save_button.click(async function () {
-    const fields = ["slides_number", "slides_enum", "slides_headers", "goals_slide", "probe_slide", "conclusion_slide", "actual_slide", "conclusion_actual"];
-    const necessary_fields = $(fields.map(el => "#" + el).join(", ")); // в идеале, когда будут готовы все проверки, будет: $("input[type=checkbox]")
-
+    const necessary_fields = $("input[type=checkbox]");
     const criteria = Object();
     for (const field of necessary_fields) criteria[field.id] = $(field).prop("checked") ? 0 : -1;
 
@@ -57,6 +71,7 @@ criteria_save_button.click(async function () {
         if ($("#bachelors").prop("checked")) criteria.slides_number = 12;
         else if ($("#masters").prop("checked")) criteria.slides_number = 15;
     }
+    if (criteria.slide_every_task === 0) criteria.slide_every_task = Number.parseInt(every_task_percent.val());
     if (criteria.conclusion_actual === 0) criteria.conclusion_actual = Number.parseInt(actuality_percent.val());
 
     const post_data = {

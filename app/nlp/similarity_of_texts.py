@@ -44,9 +44,9 @@ def check_similarity(string1, string2):
 
         if exists(PATH):
             rmtree(PATH)
-        return [percentage_of_similarity, is_further_development_on_slide]
+        return percentage_of_similarity, is_further_development_on_slide
     except OSError:
-        if os.path.exists(PATH):
-            shutil.rmtree(PATH)
+        if exists(PATH):
+            rmtree(PATH)
         print("Проблема с директорией ", PATH)
         return -1
