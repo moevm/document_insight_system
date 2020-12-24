@@ -1,5 +1,4 @@
 from re import split
-
 from app.nlp.similarity_of_texts import check_similarity
 
 
@@ -78,8 +77,10 @@ def __check_actual_slide(presentation):
 def __are_slides_similar(goals, conclusions, number):
     if goals == "" or conclusions == "":
         return -1
-    result = check_similarity(goals, conclusions)
+    results = check_similarity(goals, conclusions)
+    result = results[0]
     print('Result:' + str(result))
+    print('Is further development on slide conclusion: ' + str(results[1]))
     return __answer(result >= number, result)
 
 

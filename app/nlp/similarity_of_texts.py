@@ -17,7 +17,7 @@ def check_similarity(string1, string2):
             rmtree(PATH)
         mkdir(PATH)
 
-        gen_docs = get_filtered_docs(string1, True)
+        gen_docs = get_filtered_docs(string1, True)[0]
         dictionary = gensim.corpora.Dictionary(gen_docs)
         corpus = [dictionary.doc2bow(gen_doc) for gen_doc in gen_docs]
 
@@ -26,7 +26,9 @@ def check_similarity(string1, string2):
 
         avg_sims = []
 
-        gen_docs1 = get_filtered_docs(string2, False)
+        gen_docs_conclusion = get_filtered_docs(string2, False)
+        gen_docs1 = gen_docs_conclusion[0]
+        is_further_development_on_slide = gen_docs_conclusion[1]
 
         for g in gen_docs1:
             query_doc_bow = dictionary.doc2bow(g)
@@ -39,7 +41,7 @@ def check_similarity(string1, string2):
 
         if exists(PATH):
             rmtree(PATH)
-        return percentage_of_similarity
+        return [percentage_of_similarity, is_further_development_on_slide]
     except OSError:
         if os.path.exists(PATH):
             shutil.rmtree(PATH)
