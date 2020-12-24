@@ -2,6 +2,7 @@
 ## Таск-трекер: [[link]](https://github.com/moevm/mse_auto_checking_slides_vaganov/projects/1)  
 Скринкаст первой итерации (прототип): [[link]](https://yadi.sk/i/59qktvtQMWLZyw)  
 Скринкаст второй итерации: [[link]](https://yadi.sk/i/zHboIWHajNgnKg)  
+Скринкаст финальной итерации: [[link]](https://drive.google.com/file/d/1JuTmW1nTFn5pWT72HhZlyj1bzGfbjv8D/view?usp=sharing)
 #### Инструкция запуска приложения:  
 Протестировано для Ubuntu 18.04.  
 ```bash
