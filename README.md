@@ -3,11 +3,17 @@
 Скринкаст первой итерации (прототип): [[link]](https://yadi.sk/i/59qktvtQMWLZyw)  
 Скринкаст второй итерации: [[link]](https://yadi.sk/i/zHboIWHajNgnKg)  
 #### Инструкция запуска приложения:  
-Для работы приложения требуется установленная MongoDB - подробная инструкция установки для конкретных ОС есть на сайте: [[link]](https://docs.mongodb.com/manual/installation/)  
-Для того, чтобы развернуть и запустить программу, необходимо выполнить следующие консольные команды (bash):  
-1. `pip3 install -r dependencies`  
-2. `python3 ./app/server.py`  
-3. В браузере открыть адрес localhost:8080  
-  
-При наличии проблем с запуском:  
-`export PYTHONPATH="$PYTHONPATH:YOUR_PATH_TO_DIRECTORY/"`, где YOUR_PATH_TO_DIRECTORY - путь до папки с приложением.   
+Протестировано для Ubuntu 18.04.  
+```bash
+git clone https://github.com/moevm/mse_auto_checking_slides_vaganov.git
+cd mse_auto_checking_slides_vaganov/
+sudo apt install git curl python3-pip python3-venv npm mongodb
+python3 -m pip install virtualenv
+python3 -m venv venv
+source venv/bin/activate
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+sudo apt install -y nodejs
+./act.sh -i -b -d
+```  
+Далее в терминале отобразится адрес, по которому можно получить доступ к приложению. До первой проверки необходимо установить критерии. Для debug-режима по умолчанию доступен пользователь admin с паролем admin.
+ 
