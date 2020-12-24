@@ -7,14 +7,14 @@ from flask_login import LoginManager, login_user, current_user, login_required
 from uuid import uuid4
 
 import app.servants.user as user
-import app.servants.data as data
+from app.servants import data as data
 from app.bd_helper.bd_helper import get_user, get_check, get_presentation_check
 from app.servants import pre_luncher
 
 DEBUG = True
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
-UPLOAD_FOLDER = '../files'
+UPLOAD_FOLDER = './files'
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
