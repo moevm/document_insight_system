@@ -26,7 +26,7 @@ install()
     exit
   }
 
-  xargs -I %s pip install %s < ./dependencies
+  xargs -I %s python3 -m pip install %s < ./dependencies
 
   {
     npm -v > /dev/null && echo -e "${GOOD}Node.js and npm are proved to be installed!${OK}"

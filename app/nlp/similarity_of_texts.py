@@ -19,6 +19,7 @@ def check_similarity(string1, string2):
 
         stemming = Stemming()
         gen_docs = stemming.get_filtered_docs(string1, True)
+
         dictionary = gensim.corpora.Dictionary(gen_docs)
         corpus = [dictionary.doc2bow(gen_doc) for gen_doc in gen_docs]
 
@@ -27,8 +28,10 @@ def check_similarity(string1, string2):
 
         avg_sims = []
 
+
         gen_docs1 = stemming.get_filtered_docs(string2, False)
         is_further_development_on_slide = stemming.is_find_further_development_on_slide()
+
 
         for g in gen_docs1:
             query_doc_bow = dictionary.doc2bow(g)

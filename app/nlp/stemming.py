@@ -55,3 +55,4 @@ class Stemming:
 
     def is_find_further_development_on_slide(self):
         return self.find_further_development
+
