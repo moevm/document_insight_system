@@ -17,8 +17,14 @@ $("input").change(function () {
             if (checked) $("#bachelors").prop("checked", true);
             $("#slides_number_options_holder .form-check-input").prop("disabled", !checked);
             break;
+        case "slide_every_task":
+            every_task_percent.prop("disabled", !$(this).prop("checked"));
+            break;
         case "conclusion_actual":
             actuality_percent.prop("disabled", !$(this).prop("checked"));
+            break;
+        case "every_task_percent":
+            $("#every_task_percent_label").text("Процент точности поиска: " + $(this).val() + "%");
             break;
         case "actuality_percent":
             $("#actuality_percent_label").text("Процент соответствия результатов целям: " + $(this).val() + "%");
