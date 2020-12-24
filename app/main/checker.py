@@ -15,6 +15,7 @@ def __check_slides_number(presentation, number, conclusion_slide_number):
         conclusion_slide_number = len(presentation.slides)
     else:
         conclusion_slide_number = int(conclusion_slide_number['value'])
+    print("\tКоличество основных слайдов в презентации равно " + str(conclusion_slide_number))
     return __answer(int(number) >= conclusion_slide_number, conclusion_slide_number)
 
 
@@ -25,6 +26,7 @@ def __check_slides_enumeration(presentation):
     for i in range(1, len(presentation.slides)):
         if presentation.slides[i].page_number[0] != i + 1:
             error += str(i) + " "
+    print(("\tПлохо пронумерованные слайды: " + str(error)) if error != "" else "\tВсе слайды пронумерованы корректно")
     return __answer(error == "", error)
 
 
@@ -45,6 +47,8 @@ def __check_title_size(presentation):
                     titles.append(t)
             if len(titles) > 2:
                 error_slides += str(i) + ' '
+    print(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides != ""
+          else "\tВсе слайды озаглавлены корректно")
     return __answer(error_slides == "", error_slides)
 
 
@@ -59,7 +63,9 @@ def __find_definite_slide(presentation, type_of_slide):
     for title in presentation.get_titles():
         i += 1
         if str(title).lower().find(str(type_of_slide).lower()) != -1:
+            print("\tСлайд " + type_of_slide + " найден")
             return __answer(True, i), presentation.get_text_from_slides()[i - 1]
+    print("\tСлайд " + type_of_slide + " не найден")
     return __answer(False, ""), ""
 
 
@@ -71,7 +77,9 @@ def __check_actual_slide(presentation):
         if i > size:
             break
         if SLIDE_WITH_RELEVANCE.lower() in str(text).lower():
+            print("\tСлайд " + SLIDE_WITH_RELEVANCE + " найден")
             return __answer(True, i)
+    print("\tСлайд " + SLIDE_WITH_RELEVANCE + " не найден")
     return __answer(False, "")
 
 
@@ -91,7 +99,6 @@ def __find_tasks_on_slides(presentation, goals_array):
 
 
 def check(presentation, checks):
-    print(str(checks))
     goals_array = ""
     conclusion_array = ""
 

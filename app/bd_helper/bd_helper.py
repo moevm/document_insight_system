@@ -1,5 +1,5 @@
 from os.path import basename
-from gridfs import GridFSBucket
+from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 
 from app.bd_helper.bd_types import User, Presentation, Checks
@@ -145,7 +145,10 @@ def get_check(checks_id):
 
 # Returns checks with given id or None
 def get_presentation_check(checks_id):
-    return fs.open_download_stream(checks_id)
+    try:
+        return fs.open_download_stream(checks_id)
+    except NoFile:
+        return None
 
 
 # Deletes checks with given id, returns presentation
