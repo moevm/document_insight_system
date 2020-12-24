@@ -1,5 +1,6 @@
 from re import split
 from app.nlp.similarity_of_texts import check_similarity
+from app.nlp.find_tasks_on_slides import find_tasks_on_slides
 
 
 def __answer(mod, value):
@@ -84,6 +85,11 @@ def __are_slides_similar(goals, conclusions, number):
     return __answer(result >= number, result)
 
 
+def __find_tasks_on_slides(presentation, goals_array):
+    titles = presentation.get_titles()
+    slides_with_tasks = find_tasks_on_slides(goals_array, titles)
+
+
 def check(presentation, checks):
     print(str(checks))
     goals_array = ""
@@ -108,5 +114,6 @@ def check(presentation, checks):
 
     if checks.conclusion_actual != -1:  # Соответствие закличения задачам
         checks.conclusion_actual = __are_slides_similar(goals_array, conclusion_array, checks.conclusion_actual)
-
+        __find_tasks_on_slides(presentation, goals_array)  # Наличие слайдов соответстующих задачам
+    
     return checks

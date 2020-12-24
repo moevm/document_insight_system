@@ -5,7 +5,7 @@ import gensim
 import numpy as np
 
 from app import server
-from app.nlp.stemming import get_filtered_docs
+from app.nlp.stemming import Stemming
 
 
 PATH = server.UPLOAD_FOLDER + '/workdir/'
@@ -17,7 +17,9 @@ def check_similarity(string1, string2):
             rmtree(PATH)
         mkdir(PATH)
 
-        gen_docs = get_filtered_docs(string1, True)[0]
+        stemming = Stemming()
+        gen_docs = stemming.get_filtered_docs(string1, True)
+
         dictionary = gensim.corpora.Dictionary(gen_docs)
         corpus = [dictionary.doc2bow(gen_doc) for gen_doc in gen_docs]
 
@@ -26,9 +28,10 @@ def check_similarity(string1, string2):
 
         avg_sims = []
 
-        gen_docs_conclusion = get_filtered_docs(string2, False)
-        gen_docs1 = gen_docs_conclusion[0]
-        is_further_development_on_slide = gen_docs_conclusion[1]
+
+        gen_docs1 = stemming.get_filtered_docs(string2, False)
+        is_further_development_on_slide = stemming.is_find_further_development_on_slide()
+
 
         for g in gen_docs1:
             query_doc_bow = dictionary.doc2bow(g)
