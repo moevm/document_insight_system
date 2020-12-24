@@ -16,13 +16,13 @@ def __js_hash(password):
 def init(debug):
     try:
         get_client().admin.command('ismaster')
-        print("MongoDB running!")
+        print("MongoDB работает!")
     except ConnectionFailure:
-        print("MongoDB not available!")
+        print("MongoDB не доступна!")
         return False
 
     if not debug:
-        print("Have a nice launch!")
+        print("Удачного запуска!")
         return True
 
     cred = "admin"
@@ -30,8 +30,9 @@ def init(debug):
     if user is None:
         user = add_user(cred, __js_hash(cred))
         user.name = cred
+        user.is_admin = True
         edit_user(user)
 
-    print("Created default user: { login: " + user.username + ", password: " + cred + " }")
+    print("Создан пользователь по умолчанию: { логин: " + user.username + ", пароль: " + cred + " }")
 
     return True

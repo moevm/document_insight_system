@@ -33,11 +33,13 @@ $("input").change(function () {
 
 
 
-criteria_save_button.popover({
-    placement: "auto",
-    trigger: "manual",
-    content: "Сохранена проверка без критериев!"
-});
+function save_button_popover (text) {
+    return {
+        placement: "auto",
+        trigger: "manual",
+        content: text
+    };
+}
 
 criteria_save_button.click(async function () {
     const fields = ["slides_number", "slides_enum", "slides_headers", "goals_slide", "probe_slide", "conclusion_slide", "actual_slide", "conclusion_actual"];
@@ -45,10 +47,11 @@ criteria_save_button.click(async function () {
 
     const criteria = Object();
     for (const field of necessary_fields) criteria[field.id] = $(field).prop("checked") ? 0 : -1;
-    if (Object.values(criteria).every(x => (x === -1))) {
-        $(this).popover("show");
-        setTimeout(() => { $(this).popover("hide"); }, 1000);
-    }
+
+    if (Object.values(criteria).every(x => (x === -1))) $(this).popover(save_button_popover("Сохранена проверка без критериев!"));
+    else $(this).popover(save_button_popover("Проверка сохранена!"));
+    $(this).popover("show");
+    setTimeout(() => { $(this).popover("dispose"); }, 1000);
 
     if (criteria.slides_number !== -1) {
         if ($("#bachelors").prop("checked")) criteria.slides_number = 12;

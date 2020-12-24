@@ -1,3 +1,4 @@
+import logging
 from sys import argv
 
 from bson import ObjectId
@@ -6,7 +7,7 @@ from flask_login import LoginManager, login_user, current_user, login_required
 from uuid import uuid4
 
 import app.servants.user as user
-import app.servants.data as main
+import app.servants.data as data
 from app.bd_helper.bd_helper import get_user, get_check, get_presentation_check
 from app.servants import pre_luncher
 
@@ -22,6 +23,9 @@ app.config['SECRET_KEY'] = str(uuid4())
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.init_app(app)
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 
 @login_manager.user_loader
@@ -66,11 +70,11 @@ def interact():
 @login_required
 def upload():
     if request.method == "POST":
-        return main.upload(request, UPLOAD_FOLDER)
+        return data.upload(request, UPLOAD_FOLDER)
     elif request.method == "GET":
         return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name)
     elif request.method == "PUT":
-        return main.remove_presentation(request.json)
+        return data.remove_presentation(request.json)
 
 
 @app.route("/results/<string:_id>", methods=["GET"])
@@ -82,7 +86,7 @@ def results(_id):
     if c is not None:
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=c, id=_id, fi=f.name)
     else:
-        print("No such checks: " + _id)
+        print("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
 
 
@@ -90,14 +94,17 @@ def results(_id):
 @login_required
 def checks(_id):
     f = get_presentation_check(ObjectId(_id))
-    n = 'txt/plain'
-    if f.name.endswith('.ppt'):
-        n = 'application/vnd.ms-powerpoint'
-    elif f.name.endswith('.pptx'):
-        n = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-    elif f.name.endswith('.odp'):
-        n = 'application/vnd.oasis.opendocument.presentation'
-    return Response(f.read(), mimetype=n)
+    if f is not None:
+        n = 'txt/plain'
+        if f.name.endswith('.ppt'):
+            n = 'application/vnd.ms-powerpoint'
+        elif f.name.endswith('.pptx'):
+            n = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        elif f.name.endswith('.odp'):
+            n = 'application/vnd.oasis.opendocument.presentation'
+        return Response(f.read(), mimetype=n)
+    else:
+        print("Запрошенная презентация не найдена: " + _id)
 
 
 @app.route("/criteria", methods=["GET", "POST"])
@@ -120,7 +127,7 @@ def profile(username):
     if u is not None:
         return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
     else:
-        print("No such user profile: " + username)
+        print("Запрошенный пользователь не найден: " + username)
         return render_template("./404.html")
 
 
@@ -135,7 +142,7 @@ def presentations(username):
     if u is not None:
         return render_template("./presentations.html", navi_upload=True, name=current_user.name, user=u, me=me)
     else:
-        print("No such user presentations: " + username)
+        print("Запрошенный пользователь не найден: " + username)
         return render_template("./404.html")
 
 
@@ -149,7 +156,7 @@ def unauthorized_callback():
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
-    print("Page /" + path + " was not found!")
+    print("Старница /" + path + " не найдена!")
     return render_template("./404.html")
 
 
@@ -177,9 +184,9 @@ if __name__ == '__main__':
         elif argv[1] == '-p':
             DEBUG = False
     else:
-        print("App accepts only one key option")
-        print("Use \"-d\" to launch in debug mode or \"-p\" to launch in production mode")
-        print("Defaults to debug mode...")
+        print("Приложение принимает только один аргумент")
+        print("Используйте \"-d\" для запуска в отладочном режиме и \"-p\" для запуска в рабочем режиме")
+        print("По умолчанию выбран отладочный режим...")
 
     if pre_luncher.init(DEBUG):
         app.run(debug=DEBUG, port=8080)
