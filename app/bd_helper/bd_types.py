@@ -75,7 +75,9 @@ class Checks(Packable):
             self.probe_slide = 0
             self.actual_slide = 0
             self.conclusion_slide = 0
-            self.conclusion_actual = 0
+            self.conclusion_actual = 50
+            self.conclusion_along = 0
+            self.slide_every_task = 50
         else:
             if '_id' in dictionary:
                 self._id = dictionary['_id']
@@ -87,6 +89,8 @@ class Checks(Packable):
             self.actual_slide = dictionary['actual_slide']
             self.conclusion_slide = dictionary['conclusion_slide']
             self.conclusion_actual = dictionary['conclusion_actual']
+            self.conclusion_along = dictionary['conclusion_along']
+            self.slide_every_task = dictionary['slide_every_task']
 
     def correct(self):
         return (
@@ -97,7 +101,9 @@ class Checks(Packable):
             (self.probe_slide == -1 or self.probe_slide['pass']) and
             (self.actual_slide == -1 or self.actual_slide['pass']) and
             (self.conclusion_slide == -1 or self.conclusion_slide['pass']) and
-            (self.conclusion_actual == -1 or self.conclusion_actual['pass'])
+            (self.conclusion_actual == -1 or self.conclusion_actual['pass']) and
+            (self.conclusion_along == -1 or self.conclusion_along['pass']) and
+            (self.slide_every_task == -1 or self.slide_every_task['pass'])
         )
 
     def __str__(self) -> str:
@@ -109,4 +115,6 @@ class Checks(Packable):
                 "probe_slide: " + str(self.probe_slide) + ", " +
                 "actual_slide: " + str(self.actual_slide) + ", " +
                 "conclusion_slide: " + str(self.conclusion_slide) + ", " +
-                "conclusion_actual: " + str(self.conclusion_actual) + " }")
+                "conclusion_actual: " + str(self.conclusion_actual) + ", " +
+                "conclusion_actual: " + str(self.conclusion_along) + ", " +
+                "conclusion_actual: " + str(self.slide_every_task) + " }")

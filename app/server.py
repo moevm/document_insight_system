@@ -14,7 +14,7 @@ from app.servants import pre_luncher
 DEBUG = True
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
-UPLOAD_FOLDER = './files'
+UPLOAD_FOLDER = '../files'
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -189,4 +189,8 @@ if __name__ == '__main__':
         print("По умолчанию выбран отладочный режим...")
 
     if pre_luncher.init(DEBUG):
-        app.run(debug=DEBUG, port=8080)
+        port = 8080
+        ip = '127.0.0.1'
+        print("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
+              ("отладочном" if DEBUG else "рабочем") + " режиме")
+        app.run(debug=DEBUG, host=ip, port=8080, use_reloader=False)
