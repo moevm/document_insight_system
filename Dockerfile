@@ -9,4 +9,4 @@ RUN pip install -r dependencies
 
 EXPOSE 8080
 
-CMD ["python3", "./app/server.py"]
+CMD ["python3", "./app/server.py", "--host", "0.0.0.0"]

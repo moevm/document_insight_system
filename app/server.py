@@ -190,7 +190,7 @@ if __name__ == '__main__':
 
     if pre_luncher.init(DEBUG):
         port = 8080
-        ip = '127.0.0.1'
+        ip = '0.0.0.0'
         print("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
               ("отладочном" if DEBUG else "рабочем") + " режиме")
         app.run(debug=DEBUG, host=ip, port=8080, use_reloader=False)

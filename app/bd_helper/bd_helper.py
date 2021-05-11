@@ -3,8 +3,10 @@ from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 
 from app.bd_helper.bd_types import User, Presentation, Checks
+DOMAIN='172.17.0.2'  #container's ip
+PORT=27017
 
-client = MongoClient(serverSelectionTimeoutMS=500)
+client = MongoClient(host = [ str(DOMAIN) + ":" + str(PORT) ], serverSelectionTimeoutMS=500)
 db = client['pres-parser-db']
 fs = GridFSBucket(db)
 
