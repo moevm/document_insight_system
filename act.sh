@@ -52,8 +52,8 @@ do
     h) help;;
     i) install;;
     b) npm run build;;
-    d) ./venv/bin/python3 -m app.server -d;;
-    p) ./venv/bin/python3 -m app.server -p;;
+    d) python3.8 -m app.server -d;;   ##########
+    p) python3.8 -m app.server -p;;   ##########
     *) help;;
   esac
 done

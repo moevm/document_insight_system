@@ -6,8 +6,8 @@ services:
     #restart: always
     ports:
       - "8080:8080"
-    volumes:
-      - ./app/bd_helper:/bd_helper
+    #volumes:
+    #  - ./app/bd_helper:/bd_helper
     depends_on:
       - mongodb
 
@@ -20,5 +20,3 @@ services:
       - "27017:27017"
 
 #don't expose mongo ports
-
-#deprecated links
