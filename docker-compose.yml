@@ -1,13 +1,24 @@
-web:
- build: .
- ports:
-   - "8080:8080"
- volumes:
-   - ./app/bd_helper:/bd_helper
- links:
-   - mongodb
+version: '2'
 
-mongodb:
- image: mongo:4.2
- ports:
-   - "27017:27017"
+services:
+  web:
+    build: .
+    #restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./app/bd_helper:/bd_helper
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:4.2
+    #restart: always creates a mess
+    volumes:
+      - ../mongo_data:/data
+    ports:
+      - "27017:27017"
+
+#don't expose mongo ports
+
+#deprecated links
