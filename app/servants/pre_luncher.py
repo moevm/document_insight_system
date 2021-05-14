@@ -18,7 +18,7 @@ def init(debug):
         get_client().admin.command('ismaster')
         print("MongoDB работает!")
     except ConnectionFailure:
-        print("MongoDB не доступна!....")
+        print("MongoDB не доступна!")
         return False
 
     if not debug:
