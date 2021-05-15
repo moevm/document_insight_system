@@ -14,7 +14,7 @@ from app.servants import pre_luncher
 DEBUG = True
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
-UPLOAD_FOLDER = '../files'
+UPLOAD_FOLDER = './files'
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER

@@ -2,10 +2,10 @@ FROM ubuntu:18.04
 ENV LANG en_US.UTF-8
 
 RUN apt update
-RUN apt -y install curl gnupg
+RUN apt install -y curl gnupg
 RUN apt install -y python3-pip python3.8-dev
 RUN curl -sL https://deb.nodesource.com/setup_10.x  | bash -
-RUN apt -y install nodejs   
+RUN apt install -y  nodejs   
 
 ADD . /usr/src/project
 WORKDIR /usr/src/project
