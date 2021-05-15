@@ -4,7 +4,8 @@ from pymongo import MongoClient
 
 from app.bd_helper.bd_types import User, Presentation, Checks
 
-client = MongoClient(serverSelectionTimeoutMS=500)
+
+client = MongoClient("mongodb://mongodb:27017")
 db = client['pres-parser-db']
 fs = GridFSBucket(db)
 

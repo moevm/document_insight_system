@@ -1,11 +1,16 @@
-web:
- build: .
- ports:
-   - "8080:8080"
- volumes:
-   - ./app/bd_helper:/bd_helper
- links:
-   - mongodb
+version: '2'
 
-mongodb:
- image: mongo:4.2
+services:
+  web:
+    build: .
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:4.2
+    restart: always
+    volumes:
+      - ../mongo_data:/data/db
