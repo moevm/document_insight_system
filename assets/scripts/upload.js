@@ -19,9 +19,11 @@ upload_button.click(async () => { await upload(false); });
 $("#upload_test_button").click(async () => { await upload(true); });
 
 async function upload(sample = false) {
+    let response = grecaptcha.getResponse();
     let presentation = file_input.prop("files")[0];
     let formData = new FormData();
     formData.append("presentation", presentation);
+    formData.append("g-recaptcha-response", response);
 
     const bar = $("#uploading_progress");
     $("#uploading_progress_holder").css("display", "block");

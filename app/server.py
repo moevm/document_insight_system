@@ -11,12 +11,28 @@ from app.servants import data as data
 from app.bd_helper.bd_helper import get_user, get_check, get_presentation_check
 from app.servants import pre_luncher
 
+from logging import getLogger
+logger = getLogger('root')
+
+
 DEBUG = True
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
 UPLOAD_FOLDER = './files'
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
+
+app.config['RECAPTCHA_ENABLED'] = True
+
+app.config['RECAPTCHA_SITE_KEY'] = ''
+app.config['RECAPTCHA_SECRET_KEY'] = ''
+
+from flask_recaptcha import ReCaptcha 
+
+recaptcha = ReCaptcha(app=app) 
+
+app.recaptcha = recaptcha
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = str(uuid4())
 
@@ -25,7 +41,7 @@ login_manager.login_view = 'auth.login'
 login_manager.init_app(app)
 
 log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+log.setLevel(logging.DEBUG)
 
 
 @login_manager.user_loader
@@ -69,6 +85,8 @@ def interact():
 @app.route("/upload", methods=["GET", "POST", "PUT"])
 @login_required
 def upload():
+    logger.error(str(request.form.to_dict()))
+    logger.error('Recaptcha verify: {}'.format(app.recaptcha.verify()))
     if request.method == "POST":
         return data.upload(request, UPLOAD_FOLDER)
     elif request.method == "GET":
@@ -193,4 +211,4 @@ if __name__ == '__main__':
         ip = '0.0.0.0'
         print("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
               ("отладочном" if DEBUG else "рабочем") + " режиме")
-        app.run(debug=DEBUG, host=ip, port=8080, use_reloader=False)
+        app.run(debug=True, host=ip, port=8080, use_reloader=False)
