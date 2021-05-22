@@ -11,6 +11,8 @@ from app.servants import data as data
 from app.bd_helper.bd_helper import get_user, get_check, get_presentation_check
 from app.servants import pre_luncher
 
+from os import environ as os_environ
+
 from logging import getLogger
 logger = getLogger('root')
 
@@ -24,12 +26,12 @@ app = Flask(__name__, static_folder="./../src/", template_folder="./../templates
 
 app.config['RECAPTCHA_ENABLED'] = True
 
-app.config['RECAPTCHA_SITE_KEY'] = ''
-app.config['RECAPTCHA_SECRET_KEY'] = ''
+app.config['RECAPTCHA_SITE_KEY'] = os_environ.get('RECAPTCHA_SITE_KEY', '')
+app.config['RECAPTCHA_SECRET_KEY'] = os_environ.get('RECAPTCHA_SECRET_KEY', '')
 
-from flask_recaptcha import ReCaptcha 
+from flask_recaptcha import ReCaptcha
 
-recaptcha = ReCaptcha(app=app) 
+recaptcha = ReCaptcha(app=app)
 
 app.recaptcha = recaptcha
 

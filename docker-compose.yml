@@ -8,6 +8,8 @@ services:
       - "8080:8080"
     depends_on:
       - mongodb
+    env_file:
+      - .env
 
   mongodb:
     image: mongo:4.2
