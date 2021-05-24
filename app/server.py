@@ -4,7 +4,6 @@ from sys import argv
 from bson import ObjectId
 from flask import Flask, request, redirect, url_for, render_template, Response
 from flask_login import LoginManager, login_user, current_user, login_required
-from uuid import uuid4
 
 import app.servants.user as user
 from app.servants import data as data
