@@ -19,13 +19,14 @@ UPLOAD_FOLDER = './files'
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = str(uuid4())
+app.config.from_pyfile('ini_config.py')
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.init_app(app)
 
 log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+log.setLevel(logging.DEBUG)
 
 
 @login_manager.user_loader
@@ -144,6 +145,14 @@ def presentations(username):
     else:
         print("Запрошенный пользователь не найден: " + username)
         return render_template("./404.html")
+
+
+# Handle exceptions
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    #?
+    return 'file too large', 413
 
 
 # Redirection:

@@ -5,12 +5,18 @@ let upload_id;
 const file_input = $("#upload_file");
 const checking_button = $("#checking_button");
 const upload_button = $("#upload_upload_button");
+const file_upload_limit = 16; //
 
 checking_button.prop("disabled", true);
 upload_button.prop("disabled", true);
 
 file_input.change(() => {
     const fileName = file_input.val().split("\\")[2];
+    let file = file_input.prop("files")[0];
+    if (file.size > file_upload_limit*1024*1024){ //
+      $("#upload_file_label").html(`Exceeded the ${file_upload_limit} MB file limit.`);
+      return;
+    }
     $("#upload_file_label").html(fileName);
     upload_button.prop('disabled', false);
 });
