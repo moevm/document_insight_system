@@ -24,7 +24,7 @@ UPLOAD_FOLDER = './files'
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config.from_pyfile('settings.py')
 app.config['RECAPTCHA_ENABLED'] = True
-
+app.jinja_env.globals.update(config=app.config)
 recaptcha = ReCaptcha(app=app)
 
 app.recaptcha = recaptcha

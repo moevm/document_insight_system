@@ -7,12 +7,10 @@ const checking_button = $("#checking_button");
 const upload_button = $("#upload_upload_button");
 
 checking_button.prop("disabled", true);
-upload_button.prop("disabled", true);
 
 file_input.change(() => {
     const fileName = file_input.val().split("\\")[2];
     $("#upload_file_label").html(fileName);
-    upload_button.prop('disabled', false);
 });
 
 upload_button.click(async () => { await upload(false); });

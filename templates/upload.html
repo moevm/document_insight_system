@@ -28,7 +28,17 @@
                                 <div id="uploading_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%"></div>
                             </div>
                         </div>
-                        {{ recaptcha }}
+                        <script src='//www.google.com/recaptcha/api.js'></script>
+                        <div class="g-recaptcha" data-sitekey={{ config['RECAPTCHA_SITE_KEY'] }} data-callback="recaptchaCallback" data-expired-callback="recaptchaFail"></div>
+
+                        <script type="text/javascript">
+                          var recaptchaCallback = function() {
+                            document.getElementById('upload_upload_button').disabled = false;
+                          };
+                          var recaptchaFail = function() {
+                            document.getElementById('upload_upload_button').disabled = true;
+                          };
+                        </script>
                     </form>
                     <div class="row h-box">
                         <button type="button" class="pale_button" id="upload_upload_button" disabled>Загрузить</button>
