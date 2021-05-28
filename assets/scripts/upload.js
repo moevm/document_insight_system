@@ -41,10 +41,9 @@ async function upload(sample = false) {
     }
 }
 
-document.querySelector("#upload_upload_button").addEventListener("click",  async () =>{
+$("#upload_upload_button").click(async () =>{
         let get_captcha_result = grecaptcha.getResponse().length;
         if (get_captcha_result === 0){
-          event.preventDefault();
           alert('Check recaptcha to continue!');
         }
         else{

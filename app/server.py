@@ -23,10 +23,7 @@ UPLOAD_FOLDER = './files'
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config.from_pyfile('settings.py')
-app.config['RECAPTCHA_ENABLED'] = True
-recaptcha = ReCaptcha(app=app)
-
-app.recaptcha = recaptcha
+app.recaptcha = ReCaptcha(app=app)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -79,10 +76,9 @@ def interact():
 @app.route("/upload", methods=["GET", "POST", "PUT"])
 @login_required
 def upload():
-    logger.error(str(request.form.to_dict()))
-    logger.error('Recaptcha verify: {}'.format(app.recaptcha.verify()))
     if request.method == "POST":
-        return data.upload(request, UPLOAD_FOLDER)
+        if app.recaptcha.verify():
+            return data.upload(request, UPLOAD_FOLDER)
     elif request.method == "GET":
         return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name)
     elif request.method == "PUT":
@@ -205,4 +201,4 @@ if __name__ == '__main__':
         ip = '0.0.0.0'
         print("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
               ("отладочном" if DEBUG else "рабочем") + " режиме")
-        app.run(debug=True, host=ip, port=8080, use_reloader=False)
+        app.run(debug=DEBUG, host=ip, port=8080, use_reloader=False)
