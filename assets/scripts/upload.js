@@ -7,21 +7,18 @@ const checking_button = $("#checking_button");
 const upload_button = $("#upload_upload_button");
 
 checking_button.prop("disabled", true);
-upload_button.prop("disabled", true);
 
 file_input.change(() => {
     const fileName = file_input.val().split("\\")[2];
     $("#upload_file_label").html(fileName);
-    upload_button.prop('disabled', false);
 });
 
-upload_button.click(async () => { await upload(false); });
-$("#upload_test_button").click(async () => { await upload(true); });
-
 async function upload(sample = false) {
+    let response = grecaptcha.getResponse();
     let presentation = file_input.prop("files")[0];
     let formData = new FormData();
     formData.append("presentation", presentation);
+    formData.append("g-recaptcha-response", response);
 
     const bar = $("#uploading_progress");
     $("#uploading_progress_holder").css("display", "block");
@@ -44,5 +41,17 @@ async function upload(sample = false) {
     }
 }
 
+$("#upload_upload_button").click(async () =>{
+        let get_captcha_result = grecaptcha.getResponse().length;
+        if (get_captcha_result === 0){
+          alert('Check recaptcha to continue!');
+        }
+        else{
+          await upload(false);
+        }
+      });
+
+
+$("#upload_test_button").click(async () => { await upload(true); });
 $("#upload_criteria_button").click(() => { window.location.href = "/criteria"; });
 checking_button.click(() => { window.location.href = "/results/" + upload_id; });
