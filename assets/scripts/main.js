@@ -1,5 +1,6 @@
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import * as CryptoJS from "crypto-js";
 
 import '../styles/main.css';
 
@@ -16,14 +17,7 @@ import '../styles/404.css';
 
 
 export function hash(password) {
-    let hash = 0;
-    if (password.length === 0) return hash;
-    for (let i = 0; i < password.length; i++) {
-        const char = password.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-    }
-    return hash;
+    return CryptoJS.MD5(password).toString()
 }
 
 export function collect_values_if_possible(...ids) {
