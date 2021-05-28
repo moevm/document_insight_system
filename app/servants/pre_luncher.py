@@ -13,7 +13,7 @@ def __js_hash(password):
     return password_hash
 
 
-def init(debug):
+def init(app, debug):
     try:
         get_client().admin.command('ismaster')
         print("MongoDB работает!")
@@ -21,18 +21,15 @@ def init(debug):
         print("MongoDB не доступна!")
         return False
 
-    if not debug:
-        print("Удачного запуска!")
-        return True
-
-    cred = "admin"
-    user = get_user(cred)
+    cred_id = "admin"
+    cred_pass = app.config['ADMIN_PASSWORD']
+    user = get_user(cred_id)
     if user is None:
-        user = add_user(cred, __js_hash(cred))
-        user.name = cred
+        user = add_user(cred_id, __js_hash(cred_pass))
+        user.name = cred_id
         user.is_admin = True
         edit_user(user)
 
-    print("Создан пользователь по умолчанию: { логин: " + user.username + ", пароль: " + cred + " }")
+    print("Создан администратор по умолчанию: { логин: " + user.username + ", пароль: уточняйте у разработчика }")
 
     return True

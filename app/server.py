@@ -198,7 +198,7 @@ if __name__ == '__main__':
         print("Используйте \"-d\" для запуска в отладочном режиме и \"-p\" для запуска в рабочем режиме")
         print("По умолчанию выбран отладочный режим...")
 
-    if pre_luncher.init(DEBUG):
+    if pre_luncher.init(app, DEBUG):
         port = 8080
         ip = '0.0.0.0'
         print("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
