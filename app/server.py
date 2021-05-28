@@ -2,7 +2,7 @@ import logging
 from sys import argv
 
 from bson import ObjectId
-from flask import Flask, request, redirect, url_for, render_template, Response
+from flask import Flask, request, redirect, url_for, render_template, Response, abort
 from flask_login import LoginManager, login_user, current_user, login_required
 
 import app.servants.user as user
@@ -32,7 +32,7 @@ login_manager.login_view = 'auth.login'
 login_manager.init_app(app)
 
 log = logging.getLogger('werkzeug')
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.ERROR)
 
 
 @login_manager.user_loader
@@ -79,6 +79,8 @@ def upload():
     if request.method == "POST":
         if app.recaptcha.verify():
             return data.upload(request, UPLOAD_FOLDER)
+        else:
+            abort(401)
     elif request.method == "GET":
         return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name)
     elif request.method == "PUT":
