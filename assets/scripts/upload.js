@@ -13,9 +13,6 @@ file_input.change(() => {
     $("#upload_file_label").html(fileName);
 });
 
-upload_button.click(async () => { await upload(false); });
-$("#upload_test_button").click(async () => { await upload(true); });
-
 async function upload(sample = false) {
     let response = grecaptcha.getResponse();
     let presentation = file_input.prop("files")[0];
@@ -44,5 +41,18 @@ async function upload(sample = false) {
     }
 }
 
+document.querySelector("#upload_upload_button").addEventListener("click",  async () =>{
+        let get_captcha_result = grecaptcha.getResponse().length;
+        if (get_captcha_result === 0){
+          event.preventDefault();
+          alert('Check recaptcha to continue!');
+        }
+        else{
+          await upload(false);
+        }
+      });
+
+
+$("#upload_test_button").click(async () => { await upload(true); });
 $("#upload_criteria_button").click(() => { window.location.href = "/criteria"; });
 checking_button.click(() => { window.location.href = "/results/" + upload_id; });
