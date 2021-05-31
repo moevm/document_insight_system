@@ -7,3 +7,4 @@ config = configparser.ConfigParser()
 config.read(ini_file)
 
 MAX_CONTENT_LENGTH = config.get('consts', 'MAX_CONTENT_LENGTH')
+MAX_GRIDFS_STORAGE = config.get('consts', 'MAX_GRIDFS_STORAGE')
