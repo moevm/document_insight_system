@@ -21,6 +21,8 @@ def upload(request, upload_folder):
     try:
         if "presentation" in request.files:
             file = request.files["presentation"]
+            if get_file_len(file) + get_storage() > app.config['MAX_GRIDFS_STORAGE']:
+                return 'storage_overload'
             filename = join(upload_folder, file.filename)
             file.save(filename)
             delete = True
