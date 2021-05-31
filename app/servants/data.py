@@ -7,8 +7,15 @@ from app.bd_helper.bd_helper import *
 from app.main.checker import check
 from app.main.parser import parse
 
+import os
+
 DEFAULT_PRESENTATION = 'sample.odp'
 
+def get_file_len(file):
+    file.seek(0, os.SEEK_END)
+    file_length = file.tell()
+    file.seek(0, 0)
+    return file_length
 
 def upload(request, upload_folder):
     try:
