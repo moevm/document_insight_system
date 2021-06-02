@@ -7,6 +7,8 @@ from app.bd_helper.bd_helper import *
 from app.main.checker import check
 from app.main.parser import parse
 
+from flask import current_app
+
 import os
 
 DEFAULT_PRESENTATION = 'sample.odp'
@@ -21,7 +23,7 @@ def upload(request, upload_folder):
     try:
         if "presentation" in request.files:
             file = request.files["presentation"]
-            if get_file_len(file) + get_storage() > app.config['MAX_GRIDFS_STORAGE']:
+            if get_file_len(file) + get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
                 return 'storage_overload'
             filename = join(upload_folder, file.filename)
             file.save(filename)
@@ -49,7 +51,7 @@ def upload(request, upload_folder):
         return str(checks_id)
     except Exception as e:
         print("\tПри обработке произошла ошибка: " + str(e))
-        return 'Not OK'
+        return 'Not OK, error: {}'.format(e)
 
 
 def remove_presentation(json):

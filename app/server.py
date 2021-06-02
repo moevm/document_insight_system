@@ -1,6 +1,7 @@
 import logging
 from sys import argv
 
+import bson
 from bson import ObjectId
 from flask import Flask, request, redirect, url_for, render_template, Response
 from flask_login import LoginManager, login_user, current_user, login_required
@@ -19,7 +20,7 @@ UPLOAD_FOLDER = './files'
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = str(uuid4())
-app.config.from_pyfile('ini_config.py')
+app.config.from_pyfile('settings.py')
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
@@ -81,7 +82,10 @@ def upload():
 @app.route("/results/<string:_id>", methods=["GET"])
 @login_required
 def results(_id):
-    oid = ObjectId(_id)
+    try:
+        oid = ObjectId(_id)
+    except bson.errors.InvalidId:
+        return 'Upload failed'
     c = get_check(oid)
     f = get_presentation_check(oid)
     if c is not None:
@@ -151,7 +155,6 @@ def presentations(username):
 
 @app.errorhandler(413)
 def request_entity_too_large(error):
-    #?
     return 'file too large', 413
 
 
@@ -165,7 +168,7 @@ def unauthorized_callback():
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
-    print("Старница /" + path + " не найдена!")
+    print("Страница /" + path + " не найдена!")
     return render_template("./404.html")
 
 

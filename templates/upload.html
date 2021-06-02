@@ -9,6 +9,9 @@
 {% block main %}
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row justify-content-center">
+    <script>
+      var file_upload_limit = {{ config.MAX_CONTENT_LENGTH | tojson }};
+    </script>
         <div class="col-11 col-sm-8 col-md-5 col-lg-4 my-auto">
             <h3 class="text-center ins" id="upload_title">Какую презентацию Вы хотите проверить?</h3>
 
