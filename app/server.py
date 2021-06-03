@@ -5,12 +5,14 @@ import bson
 from bson import ObjectId
 from flask import Flask, request, redirect, url_for, render_template, Response
 from flask_login import LoginManager, login_user, current_user, login_required
-from uuid import uuid4
 
 import app.servants.user as user
 from app.servants import data as data
 from app.bd_helper.bd_helper import get_user, get_check, get_presentation_check
 from app.servants import pre_luncher
+
+from logging import getLogger
+logger = getLogger('root')
 
 DEBUG = True
 
@@ -19,7 +21,6 @@ UPLOAD_FOLDER = './files'
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SECRET_KEY'] = str(uuid4())
 app.config.from_pyfile('settings.py')
 
 login_manager = LoginManager()
@@ -85,7 +86,8 @@ def results(_id):
     try:
         oid = ObjectId(_id)
     except bson.errors.InvalidId:
-        return 'Upload failed'
+        logger.error('_id exception:', exc_info=True)
+        return render_template("./404.html")
     c = get_check(oid)
     f = get_presentation_check(oid)
     if c is not None:
