@@ -3,7 +3,7 @@ from sys import argv
 
 import bson
 from bson import ObjectId
-from flask import Flask, request, redirect, url_for, render_template, Response
+from flask import Flask, request, redirect, url_for, render_template, Response, abort
 from flask_login import LoginManager, login_user, current_user, login_required
 
 import app.servants.user as user
@@ -11,8 +11,11 @@ from app.servants import data as data
 from app.bd_helper.bd_helper import get_user, get_check, get_presentation_check
 from app.servants import pre_luncher
 
+from flask_recaptcha import ReCaptcha
+
 from logging import getLogger
 logger = getLogger('root')
+
 
 DEBUG = True
 
@@ -20,6 +23,9 @@ ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
 UPLOAD_FOLDER = './files'
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
+app.config.from_pyfile('settings.py')
+app.recaptcha = ReCaptcha(app=app)
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config.from_pyfile('settings.py')
 
@@ -73,7 +79,10 @@ def interact():
 @login_required
 def upload():
     if request.method == "POST":
-        return data.upload(request, UPLOAD_FOLDER)
+        if app.recaptcha.verify():
+            return data.upload(request, UPLOAD_FOLDER)
+        else:
+            abort(401)
     elif request.method == "GET":
         return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name)
     elif request.method == "PUT":
@@ -202,7 +211,7 @@ if __name__ == '__main__':
         print("Используйте \"-d\" для запуска в отладочном режиме и \"-p\" для запуска в рабочем режиме")
         print("По умолчанию выбран отладочный режим...")
 
-    if pre_luncher.init(DEBUG):
+    if pre_luncher.init(app, DEBUG):
         port = 8080
         ip = '0.0.0.0'
         print("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +

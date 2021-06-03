@@ -31,9 +31,10 @@
                                 <div id="uploading_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%"></div>
                             </div>
                         </div>
+                        {{ recaptcha }}
                     </form>
                     <div class="row h-box">
-                        <button type="button" class="pale_button" id="upload_upload_button" disabled>Загрузить</button>
+                        <button type="button" class="pale_button" id="upload_upload_button">Загрузить</button>
                         <button type="button" class="pale_button" id="upload_criteria_button">Критерии</button>
                             {% if debug %}
                                 <button type="button" class="pale_button" id="upload_test_button">Тестирование</button>
