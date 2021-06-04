@@ -6,14 +6,26 @@ from flask_login import current_user
 from app.bd_helper.bd_helper import *
 from app.main.checker import check
 from app.main.parser import parse
+from app.server import logger
+from flask import current_app
+
+import os
 
 DEFAULT_PRESENTATION = 'sample.odp'
 
+def get_file_len(file):
+    file.seek(0, os.SEEK_END)
+    file_length = file.tell()
+    file.seek(0, 0)
+    return file_length
 
 def upload(request, upload_folder):
     try:
         if "presentation" in request.files:
             file = request.files["presentation"]
+            if get_file_len(file) + get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
+                logger.critical('Storage overload has occured')
+                return 'storage_overload'
             filename = join(upload_folder, file.filename)
             file.save(filename)
             delete = True
@@ -40,7 +52,7 @@ def upload(request, upload_folder):
         return str(checks_id)
     except Exception as e:
         print("\tПри обработке произошла ошибка: " + str(e))
-        return 'Not OK'
+        return 'Not OK, error: {}'.format(e)
 
 
 def remove_presentation(json):

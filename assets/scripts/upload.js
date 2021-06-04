@@ -10,6 +10,11 @@ checking_button.prop("disabled", true);
 
 file_input.change(() => {
     const fileName = file_input.val().split("\\")[2];
+    let file = file_input.prop("files")[0];
+    if (file.size > file_upload_limit){
+      $("#upload_file_label").html(`Exceeded the ${file_upload_limit/1024/1024} MB file limit.`);
+      return;
+    }
     $("#upload_file_label").html(fileName);
 });
 
@@ -31,13 +36,18 @@ async function upload(sample = false) {
     const response_text = await (await fetch("/upload", post_data)).text();
     console.log("Answer:", response_text);
     bar.css("width", "100%").attr('aria-valuenow', 100);
-    if (response_text === "") {
+    if (response_text == 'storage_overload') {
+        alert('Система перегружена, попробуйте повторить запрос позднее');
+        bar.addClass("bg-danger");
+        file_input.addClass("is-invalid");
+    } else if (response_text.includes('Not OK') || response_text == 'File exceeded the upload limit') {
+        alert(response_text);
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");
     } else {
-        upload_id = response_text;
-        bar.addClass("bg-success");
-        checking_button.prop("disabled", false);
+      upload_id = response_text;
+      bar.addClass("bg-success");
+      checking_button.prop("disabled", false);
     }
 }
 

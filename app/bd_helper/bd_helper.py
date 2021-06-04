@@ -162,3 +162,13 @@ def delete_check(presentation, checks_id):
         return presentation, checks
     else:
         return presentation, get_check(checks_id)
+
+
+# Return no of bytes stored in gridfs
+def get_storage():
+    files = db.fs.files.find()
+    ct = 0
+    for file in files:
+        ct += file['length']
+
+    return ct

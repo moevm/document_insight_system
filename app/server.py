@@ -1,6 +1,7 @@
 import logging
 from sys import argv
 
+import bson
 from bson import ObjectId
 from flask import Flask, request, redirect, url_for, render_template, Response, abort
 from flask_login import LoginManager, login_user, current_user, login_required
@@ -26,13 +27,14 @@ app.config.from_pyfile('settings.py')
 app.recaptcha = ReCaptcha(app=app)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config.from_pyfile('settings.py')
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.init_app(app)
 
 log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+log.setLevel(logging.DEBUG)
 
 
 @login_manager.user_loader
@@ -90,7 +92,11 @@ def upload():
 @app.route("/results/<string:_id>", methods=["GET"])
 @login_required
 def results(_id):
-    oid = ObjectId(_id)
+    try:
+        oid = ObjectId(_id)
+    except bson.errors.InvalidId:
+        logger.error('_id exception:', exc_info=True)
+        return render_template("./404.html")
     c = get_check(oid)
     f = get_presentation_check(oid)
     if c is not None:
@@ -156,6 +162,13 @@ def presentations(username):
         return render_template("./404.html")
 
 
+# Handle exceptions
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    return 'File exceeded the upload limit', 413
+
+
 # Redirection:
 
 @login_manager.unauthorized_handler
@@ -166,7 +179,7 @@ def unauthorized_callback():
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
-    print("Старница /" + path + " не найдена!")
+    print("Страница /" + path + " не найдена!")
     return render_template("./404.html")
 
 
