@@ -6,7 +6,7 @@ from flask_login import current_user
 from app.bd_helper.bd_helper import *
 from app.main.checker import check
 from app.main.parser import parse
-
+from app.server import logger
 from flask import current_app
 
 import os
@@ -24,6 +24,7 @@ def upload(request, upload_folder):
         if "presentation" in request.files:
             file = request.files["presentation"]
             if get_file_len(file) + get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
+                logger.critical('Storage overload has occured')
                 return 'storage_overload'
             filename = join(upload_folder, file.filename)
             file.save(filename)

@@ -40,7 +40,7 @@ async function upload(sample = false) {
         alert('Система перегружена, попробуйте повторить запрос позднее');
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");
-    } else if (response_text.includes('Not OK')) {
+    } else if (response_text.includes('Not OK') || response_text == 'File exceeded the upload limit') {
         alert(response_text);
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");

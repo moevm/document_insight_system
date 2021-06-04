@@ -166,7 +166,7 @@ def presentations(username):
 
 @app.errorhandler(413)
 def request_entity_too_large(error):
-    return 'file too large', 413
+    return 'File exceeded the upload limit', 413
 
 
 # Redirection:
