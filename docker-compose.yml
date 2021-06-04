@@ -15,4 +15,4 @@ services:
     image: mongo:4.0.17-xenial
     restart: always
     volumes:
-      - ../mongo_data:/data/db
+      - ../slides_checker_mongo_data:/data/db
