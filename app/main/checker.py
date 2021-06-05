@@ -1,7 +1,8 @@
 from re import split
 from app.nlp.similarity_of_texts import check_similarity
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
-
+from logging import getLogger
+logger = getLogger('root')
 
 def __answer(mod, value):
     return {
@@ -15,7 +16,7 @@ def __check_slides_number(presentation, number, conclusion_slide_number):
         conclusion_slide_number = len(presentation.slides)
     else:
         conclusion_slide_number = int(conclusion_slide_number['value'])
-    print("\tКоличество основных слайдов в презентации равно " + str(conclusion_slide_number))
+    logger.info("\tКоличество основных слайдов в презентации равно " + str(conclusion_slide_number))
     return __answer(int(number) >= conclusion_slide_number, conclusion_slide_number)
 
 
@@ -26,7 +27,7 @@ def __check_slides_enumeration(presentation):
     for i in range(1, len(presentation.slides)):
         if presentation.slides[i].page_number[0] != i + 1:
             error += str(i) + " "
-    print(("\tПлохо пронумерованные слайды: " + str(error)) if error != "" else "\tВсе слайды пронумерованы корректно")
+    logger.info(("\tПлохо пронумерованные слайды: " + str(error)) if error != "" else "\tВсе слайды пронумерованы корректно")
     return __answer(error == "", error)
 
 
@@ -47,7 +48,7 @@ def __check_title_size(presentation):
                     titles.append(t)
             if len(titles) > 2:
                 error_slides += str(i) + ' '
-    print(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides != ""
+    logger.info(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides != ""
           else "\tВсе слайды озаглавлены корректно")
     return __answer(error_slides == "", error_slides)
 
@@ -63,9 +64,9 @@ def __find_definite_slide(presentation, type_of_slide):
     for title in presentation.get_titles():
         i += 1
         if str(title).lower().find(str(type_of_slide).lower()) != -1:
-            print("\tСлайд " + type_of_slide + " найден")
+            logger.info("\tСлайд " + type_of_slide + " найден")
             return __answer(True, i), presentation.get_text_from_slides()[i - 1]
-    print("\tСлайд " + type_of_slide + " не найден")
+    logger.info("\tСлайд " + type_of_slide + " не найден")
     return __answer(False, ""), ""
 
 
@@ -77,9 +78,9 @@ def __check_actual_slide(presentation):
         if i > size:
             break
         if SLIDE_WITH_RELEVANCE.lower() in str(text).lower():
-            print("\tСлайд " + SLIDE_WITH_RELEVANCE + " найден")
+            logger.info("\tСлайд " + SLIDE_WITH_RELEVANCE + " найден")
             return __answer(True, i)
-    print("\tСлайд " + SLIDE_WITH_RELEVANCE + " не найден")
+    logger.info("\tСлайд " + SLIDE_WITH_RELEVANCE + " не найден")
     return __answer(False, "")
 
 
@@ -102,10 +103,10 @@ def __find_tasks_on_slides(presentation, goals, intersection_number):
     slides_with_tasks = find_tasks_on_slides(goals, titles, intersection_number)
 
     if slides_with_tasks == 0:
-        print("\tВсе заявленные задачи найдены на слайдах")
+        logger.info("\tВсе заявленные задачи найдены на слайдах")
         return __answer(True, "Все задачи найдены на слайдах")
     else:
-        print("\tНекоторые из заявленных задач на слайдах не найдены")
+        logger.info("\tНекоторые из заявленных задач на слайдах не найдены")
         return __answer(False, "Некоторые задачи на слайдах не найдены")
 
 
@@ -133,13 +134,13 @@ def check(presentation, checks):
     similar = __are_slides_similar(goals_array, conclusion_array, checks.conclusion_actual)
     if checks.conclusion_actual != -1:  # Соответствие закличения задачам
         if similar != -1:
-            print("\tОбозначенные цели совпадают с задачами на " + similar[0]['value'] + "%")
+            logger.info("\tОбозначенные цели совпадают с задачами на " + similar[0]['value'] + "%")
             checks.conclusion_actual = similar[0]
         else:
             checks.conclusion_actual = -1
     if checks.conclusion_along != -1:  # Наличие направлений дальнейшего развития
         if similar != -1:
-            print("\tНаправления дальнейшего развития " + ("" if similar[1]['value'] else "не ") + "найдены")
+            logger.info("\tНаправления дальнейшего развития " + ("" if similar[1]['value'] else "не ") + "найдены")
             checks.conclusion_along = similar[1]
         else:
             checks.conclusion_along = -1

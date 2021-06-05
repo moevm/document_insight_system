@@ -15,7 +15,7 @@ from flask_recaptcha import ReCaptcha
 
 from logging import getLogger
 logger = getLogger('root')
-
+logger.setLevel(logging.DEBUG)
 
 DEBUG = True
 
@@ -102,7 +102,7 @@ def results(_id):
     if c is not None:
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=c, id=_id, fi=f.name)
     else:
-        print("Запрошенная проверка не найдена: " + _id)
+        logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
 
 
@@ -120,7 +120,7 @@ def checks(_id):
             n = 'application/vnd.oasis.opendocument.presentation'
         return Response(f.read(), mimetype=n)
     else:
-        print("Запрошенная презентация не найдена: " + _id)
+        logger.info("Запрошенная презентация не найдена: " + _id)
 
 
 @app.route("/criteria", methods=["GET", "POST"])
@@ -143,7 +143,7 @@ def profile(username):
     if u is not None:
         return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
     else:
-        print("Запрошенный пользователь не найден: " + username)
+        logger.info("Запрошенный пользователь не найден: " + username)
         return render_template("./404.html")
 
 
@@ -158,7 +158,7 @@ def presentations(username):
     if u is not None:
         return render_template("./presentations.html", navi_upload=True, name=current_user.name, user=u, me=me)
     else:
-        print("Запрошенный пользователь не найден: " + username)
+        logger.info("Запрошенный пользователь не найден: " + username)
         return render_template("./404.html")
 
 
@@ -179,7 +179,7 @@ def unauthorized_callback():
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
-    print("Страница /" + path + " не найдена!")
+    logger.info("Страница /" + path + " не найдена!")
     return render_template("./404.html")
 
 
@@ -207,13 +207,13 @@ if __name__ == '__main__':
         elif argv[1] == '-p':
             DEBUG = False
     else:
-        print("Приложение принимает только один аргумент")
-        print("Используйте \"-d\" для запуска в отладочном режиме и \"-p\" для запуска в рабочем режиме")
-        print("По умолчанию выбран отладочный режим...")
+        logger.info("Приложение принимает только один аргумент")
+        logger.info("Используйте \"-d\" для запуска в отладочном режиме и \"-p\" для запуска в рабочем режиме")
+        logger.info("По умолчанию выбран отладочный режим...")
 
     if pre_luncher.init(app, DEBUG):
         port = 8080
         ip = '0.0.0.0'
-        print("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
+        logger.info("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
               ("отладочном" if DEBUG else "рабочем") + " режиме")
         app.run(debug=DEBUG, host=ip, port=8080, use_reloader=False)

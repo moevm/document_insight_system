@@ -2,10 +2,12 @@ from flask_login import logout_user, current_user
 
 from app.bd_helper.bd_helper import *
 
+from logging import getLogger
+logger = getLogger('root')
 
 def login(args):
     validation = validate_user(args['username'], args['password_hash'])
-    print("Запрошен вход пользователя " + args['username'] + ", " +
+    logger.info("Запрошен вход пользователя " + args['username'] + ", " +
           ("вход разрешен" if validation else "во входе отказано"))
     return validation
 
@@ -15,20 +17,20 @@ def signup(args):
     if user is not None:
         user.name = args['name']
         if edit_user(user):
-            print("Пользователь " + args['username'] + " зарегистрирован")
+            logger.info("Пользователь " + args['username'] + " зарегистрирован")
             return user
-    print("Не удалось зарегистрировать пользователя " + args['username'])
+    logger.info("Не удалось зарегистрировать пользователя " + args['username'])
     return None
 
 
 def logout():
-    print("Пользователь " + current_user.username + " вышел")
+    logger.info("Пользователь " + current_user.username + " вышел")
     logout_user()
     return 'OK'
 
 
 def signout():
-    print("Пользователь " + current_user.username + " удален")
+    logger.info("Пользователь " + current_user.username + " удален")
     delete_user(current_user.username)
     logout_user()
     return 'OK'
@@ -37,7 +39,7 @@ def signout():
 def edit(json):
     current_user.name = json['name']
     edited = edit_user(current_user)
-    print("Пользователь " + current_user.username + ("" if edited else " не") + " изменил имя на " + current_user.name)
+    logger.info("Пользователь " + current_user.username + ("" if edited else " не") + " изменил имя на " + current_user.name)
     return 'OK' if edited else 'Not OK'
 
 
@@ -53,6 +55,6 @@ def get_rich(username):
 def update_criteria(json):
     current_user.criteria = Checks(json)
     edited = edit_user(current_user)
-    print("Пользователь " + current_user.username + ("" if edited else " не") +
+    logger.info("Пользователь " + current_user.username + ("" if edited else " не") +
           " установил себе критерии проверки: " + str(current_user.criteria))
     return 'OK' if edited else 'Not OK'
