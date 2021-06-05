@@ -116,5 +116,5 @@ class Checks(Packable):
                 "actual_slide: " + str(self.actual_slide) + ", " +
                 "conclusion_slide: " + str(self.conclusion_slide) + ", " +
                 "conclusion_actual: " + str(self.conclusion_actual) + ", " +
-                "conclusion_actual: " + str(self.conclusion_along) + ", " +
-                "conclusion_actual: " + str(self.slide_every_task) + " }")
+                "conclusion_along: " + str(self.conclusion_along) + ", " +
+                "slide_every_task: " + str(self.slide_every_task) + " }")
