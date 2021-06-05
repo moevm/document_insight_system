@@ -6,7 +6,8 @@ import numpy as np
 
 from app import server
 from app.nlp.stemming import Stemming
-
+from logging import getLogger
+logger = getLogger('root')
 
 PATH = server.UPLOAD_FOLDER + '/workdir/'
 
@@ -48,5 +49,5 @@ def check_similarity(string1, string2):
     except OSError:
         if exists(PATH):
             rmtree(PATH)
-        print("Проблема с директорией ", PATH)
+        logger.info("Проблема с директорией ", PATH)
         return -1
