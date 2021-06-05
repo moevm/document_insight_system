@@ -109,7 +109,11 @@ def results(_id):
 @app.route("/checks/<string:_id>", methods=["GET"])
 @login_required
 def checks(_id):
-    f = get_presentation_check(ObjectId(_id))
+    try:
+        f = get_presentation_check(ObjectId(_id))
+    except bson.errors.InvalidId:
+        logger.error('_id exception in checks occured:', exc_info=True)
+        return render_template("./404.html")
     if f is not None:
         n = 'txt/plain'
         if f.name.endswith('.ppt'):
@@ -121,6 +125,7 @@ def checks(_id):
         return Response(f.read(), mimetype=n)
     else:
         print("Запрошенная презентация не найдена: " + _id)
+        return render_template("./404.html")
 
 
 @app.route("/criteria", methods=["GET", "POST"])
