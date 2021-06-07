@@ -2,7 +2,8 @@ import hashlib
 from pymongo.errors import ConnectionFailure
 
 from app.bd_helper.bd_helper import add_user, get_user, get_client, edit_user
-
+from logging import getLogger
+logger = getLogger('root')
 
 def get_hash(password): return hashlib.md5(password.encode()).hexdigest()
 
@@ -10,9 +11,9 @@ def get_hash(password): return hashlib.md5(password.encode()).hexdigest()
 def init(app, debug):
     try:
         get_client().admin.command('ismaster')
-        print("MongoDB работает!")
+        logger.info("MongoDB работает!")
     except ConnectionFailure:
-        print("MongoDB не доступна!")
+        logger.error("MongoDB не доступна!")
         return False
 
     cred_id = "admin"
@@ -25,6 +26,6 @@ def init(app, debug):
         user.is_admin = True
         edit_user(user)
 
-    print("Создан администратор по умолчанию: { логин: " + user.username + ", пароль уточняйте у разработчика }")
+    logger.info("Создан администратор по умолчанию: { логин: " + user.username + ", пароль уточняйте у разработчика }")
 
     return True
