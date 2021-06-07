@@ -6,9 +6,13 @@ from bson import ObjectId
 from flask import Flask, request, redirect, url_for, render_template, Response, abort
 from flask_login import LoginManager, login_user, current_user, login_required
 
+from datetime import datetime
+
 import app.servants.user as user
 from app.servants import data as data
-from app.bd_helper.bd_helper import get_user, get_check, get_presentation_check
+from app.bd_helper.bd_helper import (
+    get_user, get_check, get_presentation_check, users_collection,
+    presentations_collection, checks_collection)
 from app.servants import pre_luncher
 
 from flask_recaptcha import ReCaptcha
@@ -97,7 +101,7 @@ def results(_id):
     except bson.errors.InvalidId:
         logger.error('_id exception:', exc_info=True)
         return render_template("./404.html")
-    c = get_check(oid)
+    c = get_check(oid)                #
     f = get_presentation_check(oid)
     if c is not None:
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=c, id=_id, fi=f.name)
@@ -135,6 +139,27 @@ def criteria():
         return render_template("./criteria.html", navi_upload=True, name=current_user.name, crit=current_user.criteria)
     elif request.method == "POST":
         return user.update_criteria(request.json)
+
+@app.route("/stats", methods=["GET"])
+@login_required
+def stats():
+    #if current_user.is_admin:
+        get_all_users = users_collection.find({})
+        final = []
+        for user in get_all_users:
+            login = str(user['username'])
+            presentations = user['presentations']
+            for presentation in presentations:
+                id_presentation = ObjectId(presentation)
+                pr_obj = presentations_collection.find_one({'_id': id_presentation})
+                for checks in pr_obj['checks']:  #ierate through checks in presentation collection
+                    id_check = ObjectId(checks)
+                    time_added = checks.generation_time
+                    result = get_check(id_check)
+                    final.append([str(id_check), login, time_added.strftime("%H:%M:%S - %b %d %Y"), result.correct()])
+
+        return render_template("./stats.html", stats = final)
+
 
 
 @app.route('/profile', methods=["GET"], defaults={'username': ''})
