@@ -143,7 +143,7 @@ def criteria():
 @app.route("/stats", methods=["GET"])
 @login_required
 def stats():
-    #if current_user.is_admin:
+    if current_user.is_admin:
         get_all_users = users_collection.find({})
         final = []
         for user in get_all_users:
@@ -152,13 +152,28 @@ def stats():
             for presentation in presentations:
                 id_presentation = ObjectId(presentation)
                 pr_obj = presentations_collection.find_one({'_id': id_presentation})
-                for checks in pr_obj['checks']:  #ierate through checks in presentation collection
+                for checks in pr_obj['checks']:
                     id_check = ObjectId(checks)
                     time_added = checks.generation_time
                     result = get_check(id_check)
                     final.append([str(id_check), login, time_added.strftime("%H:%M:%S - %b %d %Y"), result.correct()])
 
         return render_template("./stats.html", stats = final)
+    else:
+         login = current_user.username
+         user = users_collection.find_one({'username': login})
+         presentations = user['presentations']
+         final = []
+         for presentation in presentations:
+             id_presentation = ObjectId(presentation)
+             pr_obj = presentations_collection.find_one({'_id': id_presentation})
+             for checks in pr_obj['checks']:
+                 id_check = ObjectId(checks)
+                 time_added = checks.generation_time
+                 result = get_check(id_check)
+                 final.append([str(id_check), login, time_added.strftime("%H:%M:%S - %b %d %Y"), result.correct()])
+
+         return render_template("./stats.html", stats = final)
 
 
 
