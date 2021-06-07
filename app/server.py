@@ -101,10 +101,13 @@ def results(_id):
     except bson.errors.InvalidId:
         logger.error('_id exception:', exc_info=True)
         return render_template("./404.html")
-    c = get_check(oid)                #
+    c = get_check(oid)
+    checks = checks_collection.find_one({'_id': oid})
+    logger.error(checks)
+    time_added = checks['_id'].generation_time               #
     f = get_presentation_check(oid)
     if c is not None:
-        return render_template("./results.html", navi_upload=True, name=current_user.name, results=c, id=_id, fi=f.name)
+        return render_template("./results.html", navi_upload=True, name=current_user.name, results=c, id=_id, fi=f.name, time_added = time_added.strftime("%H:%M:%S - %b %d %Y"))
     else:
         print("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")

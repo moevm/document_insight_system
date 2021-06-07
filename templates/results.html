@@ -9,8 +9,8 @@
 {% block main %}
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row" id="results_holder">
-        <h3 id="results_title" class="texteous ins">Результат проверки: {{ "" if results.correct() else "не" }} пройдена!</h3>
-
+        <h3 id="results_title" class="texteous ins">Результат проверки: {{ "" if results.correct() else "не" }} пройдена!</h3> <br>
+        <h5 id="time_title" class="texteous ins">Дата добавления: {{ time_added }}</h5>
         <table class="table table-striped table-hover" id="results_table">
             <thead>
                 <tr>
