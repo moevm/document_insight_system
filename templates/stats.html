@@ -1,0 +1,23 @@
+{# Accepts: header dependicies #}
+
+
+
+{% extends "root.html" %}
+
+{% block title %}Результаты проверок{% endblock %}
+
+{% block main %}
+<div class="header row">{% include "header.html" %}</div>
+
+    <table>
+      {% for row in stats %}
+      <tr>
+        <td>{{ row[0] }}</td>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+        <td>{{ row[3] }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <div class="footer row"></div>
+{% endblock %}
