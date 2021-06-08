@@ -1,4 +1,6 @@
 from app.nlp.stemming import Stemming
+from logging import getLogger
+logger = getLogger('root')
 
 Task = 'Задачи:'
 
@@ -54,7 +56,7 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
                 similarity = compare_task_and_title(task, title) * 100
                 if similarity >= intersection:
                     slides_with_task += 1
-                    print('\t\tВ презентации найдено описание задачи: ' + str(task))
+                    logger.info('\t\tВ презентации найдено описание задачи: ' + str(task))
                     break
         if task_count == slides_with_task:
             return 0

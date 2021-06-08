@@ -10,6 +10,9 @@ services:
       - mongodb
     env_file:
       - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONIOENCODING=UTF-8
 
   mongodb:
     image: mongo:4.0.17-xenial
