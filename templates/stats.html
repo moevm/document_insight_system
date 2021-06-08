@@ -8,16 +8,47 @@
 
 {% block main %}
 <div class="header row">{% include "header.html" %}</div>
+<style>
 
+            body{
+              overflow: auto;
+            }
+            tbody
+            {
+              width: 100%;
+              table-layout: fixed;
+            }
+            table, th, td
+            {
+                border: 1px	solid #E8E8E8;
+                border-collapse: collapse;
+                padding: 3px;
+                text-align: left;
+            }
+
+            table{
+              width: 100%;
+            }
+
+        </style>
     <table>
+      <thead>
+        <tr>
+          {% for item in columns %}
+          <th>{{ item }} </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
       {% for row in stats %}
       <tr>
-        <td>{{ row[0] }}</td>
+        <td><a class="id_check" href="{{ "/results/"  ~ row[0]}}">
+            {{ (row[0] | string)[-5:]}}</a></td>
         <td>{{ row[1] }}</td>
         <td>{{ row[2] }}</td>
         <td>{{ row[3] }}</td>
       </tr>
       {% endfor %}
+      </tbody>
     </table>
-    <div class="footer row"></div>
 {% endblock %}

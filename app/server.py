@@ -6,13 +6,12 @@ from bson import ObjectId
 from flask import Flask, request, redirect, url_for, render_template, Response, abort
 from flask_login import LoginManager, login_user, current_user, login_required
 
-from datetime import datetime
 
 import app.servants.user as user
 from app.servants import data as data
 from app.bd_helper.bd_helper import (
     get_user, get_check, get_presentation_check, users_collection,
-    presentations_collection, checks_collection)
+    get_stats, get_stats_for_one_submission)
 from app.servants import pre_luncher
 
 from flask_recaptcha import ReCaptcha
@@ -25,6 +24,7 @@ DEBUG = True
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
 UPLOAD_FOLDER = './files'
+columns = ['Solution', 'User', 'Check added', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config.from_pyfile('settings.py')
@@ -102,12 +102,10 @@ def results(_id):
         logger.error('_id exception:', exc_info=True)
         return render_template("./404.html")
     c = get_check(oid)
-    checks = checks_collection.find_one({'_id': oid})
-    logger.error(checks)
-    time_added = checks['_id'].generation_time               #
+    stats = get_stats_for_one_submission(oid, current_user.username)           #
     f = get_presentation_check(oid)
     if c is not None:
-        return render_template("./results.html", navi_upload=True, name=current_user.name, results=c, id=_id, fi=f.name, time_added = time_added.strftime("%H:%M:%S - %b %d %Y"))
+        return render_template("./results.html", navi_upload=True, name=current_user.name, results=c, id=_id, fi=f.name,columns=columns, stats = stats)
     else:
         print("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
@@ -148,35 +146,18 @@ def criteria():
 def stats():
     if current_user.is_admin:
         get_all_users = users_collection.find({})
-        final = []
+        stats = []
         for user in get_all_users:
             login = str(user['username'])
-            presentations = user['presentations']
-            for presentation in presentations:
-                id_presentation = ObjectId(presentation)
-                pr_obj = presentations_collection.find_one({'_id': id_presentation})
-                for checks in pr_obj['checks']:
-                    id_check = ObjectId(checks)
-                    time_added = checks.generation_time
-                    result = get_check(id_check)
-                    final.append([str(id_check), login, time_added.strftime("%H:%M:%S - %b %d %Y"), result.correct()])
+            temp = get_stats(user, login)
+            stats.extend(temp)
 
-        return render_template("./stats.html", stats = final)
+        return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
     else:
          login = current_user.username
          user = users_collection.find_one({'username': login})
-         presentations = user['presentations']
-         final = []
-         for presentation in presentations:
-             id_presentation = ObjectId(presentation)
-             pr_obj = presentations_collection.find_one({'_id': id_presentation})
-             for checks in pr_obj['checks']:
-                 id_check = ObjectId(checks)
-                 time_added = checks.generation_time
-                 result = get_check(id_check)
-                 final.append([str(id_check), login, time_added.strftime("%H:%M:%S - %b %d %Y"), result.correct()])
-
-         return render_template("./stats.html", stats = final)
+         stats = get_stats(user, login)
+         return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
 
 
 

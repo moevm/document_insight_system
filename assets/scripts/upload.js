@@ -63,5 +63,5 @@ $("#upload_upload_button").click(async () =>{
 
 
 $("#upload_test_button").click(async () => { await upload(true); });
-$("#upload_criteria_button").click(() => { window.location.href = "/criteria"; });
+$("#upload_criteria_button").click(() => { window.open("/criteria"); });
 checking_button.click(() => { window.location.href = "/results/" + upload_id; });
