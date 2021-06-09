@@ -6,9 +6,12 @@ from bson import ObjectId
 from flask import Flask, request, redirect, url_for, render_template, Response, abort
 from flask_login import LoginManager, login_user, current_user, login_required
 
+
 import app.servants.user as user
 from app.servants import data as data
-from app.bd_helper.bd_helper import get_user, get_check, get_presentation_check
+from app.bd_helper.bd_helper import (
+    get_user, get_check, get_presentation_check, users_collection,
+    get_stats, get_stats_for_one_submission)
 from app.servants import pre_luncher
 
 from flask_recaptcha import ReCaptcha
@@ -21,6 +24,7 @@ DEBUG = True
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
 UPLOAD_FOLDER = './files'
+columns = ['Solution', 'User', 'Check added', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config.from_pyfile('settings.py')
@@ -98,9 +102,10 @@ def results(_id):
         logger.error('_id exception:', exc_info=True)
         return render_template("./404.html")
     c = get_check(oid)
+    stats = get_stats_for_one_submission(oid, current_user.username)           #
     f = get_presentation_check(oid)
     if c is not None:
-        return render_template("./results.html", navi_upload=True, name=current_user.name, results=c, id=_id, fi=f.name)
+        return render_template("./results.html", navi_upload=True, name=current_user.name, results=c, id=_id, fi=f.name,columns=columns, stats = stats)
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
@@ -109,7 +114,11 @@ def results(_id):
 @app.route("/checks/<string:_id>", methods=["GET"])
 @login_required
 def checks(_id):
-    f = get_presentation_check(ObjectId(_id))
+    try:
+        f = get_presentation_check(ObjectId(_id))
+    except bson.errors.InvalidId:
+        logger.error('_id exception in checks occured:', exc_info=True)
+        return render_template("./404.html")
     if f is not None:
         n = 'txt/plain'
         if f.name.endswith('.ppt'):
@@ -121,6 +130,7 @@ def checks(_id):
         return Response(f.read(), mimetype=n)
     else:
         logger.info("Запрошенная презентация не найдена: " + _id)
+        return render_template("./404.html")
 
 
 @app.route("/criteria", methods=["GET", "POST"])
@@ -130,6 +140,25 @@ def criteria():
         return render_template("./criteria.html", navi_upload=True, name=current_user.name, crit=current_user.criteria)
     elif request.method == "POST":
         return user.update_criteria(request.json)
+
+@app.route("/stats", methods=["GET"])
+@login_required
+def stats():
+    if current_user.is_admin:
+        get_all_users = users_collection.find({})
+        stats = []
+        for user in get_all_users:
+            login = str(user['username'])
+            temp = get_stats(user, login)
+            stats.extend(temp)
+
+        return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
+    else:
+         login = current_user.username
+         user = users_collection.find_one({'username': login})
+         stats = get_stats(user, login)
+         return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
+
 
 
 @app.route('/profile', methods=["GET"], defaults={'username': ''})
