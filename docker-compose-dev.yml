@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+  web:
+    build: .
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONIOENCODING=UTF-8
+    volumes:
+      - ./:/usr/src/project 
+
+  mongodb:
+    image: mongo:4.0.17-xenial
+    restart: always
+    volumes:
+      - mongodata:/data/db
+      
+volumes:
+  mongodata:
