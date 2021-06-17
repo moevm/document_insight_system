@@ -14,6 +14,8 @@ from app.bd_helper.bd_helper import (
     get_stats, get_stats_for_one_submission)
 from app.servants import pre_luncher
 
+from app.utils.decorators import condition
+
 from flask_recaptcha import ReCaptcha
 
 from logging import getLogger
@@ -57,7 +59,7 @@ def login():
         return u.username if u is not None and login_user(u, remember=True) else ""
 
 
-@app.route("/signup", methods=["GET", "POST"])
+@condition(app.route("/signup", methods=["GET", "POST"]), app.config["SIGNUP_PAGE_ENABLED"])
 def signup():
     if request.method == "GET":
         return render_template("./signup.html", navi_upload=False)
