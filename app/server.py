@@ -160,6 +160,29 @@ def stats():
          return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
 
 
+@app.route("presentation_data", methods=["GET"])
+def presentation_data():
+    page = int(request.args.get("page"))
+    limit = int(request.args.get("limit"))
+
+    start = (page - 1) * limit
+    end = page * limit
+
+    results = {}
+    results["next"] = {
+        page: page + 1,
+        limit: limit
+    }
+    results["prev"] = {
+        page: page - 1,
+        limit: limit
+    }
+
+    # prepare collection
+    # slice collection
+    # put collection into results
+    # jsonify results
+
 
 @app.route('/profile', methods=["GET"], defaults={'username': ''})
 @app.route('/profile/<string:username>', methods=["GET"])
