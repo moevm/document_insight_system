@@ -185,11 +185,12 @@ def get_stats(user, login):
     for presentation in presentations:
         id_presentation = ObjectId(presentation)
         pr_obj = presentations_collection.find_one({'_id': id_presentation})
+        filename = pr_obj['name']
         for checks in pr_obj['checks']:
             id_check = ObjectId(checks)
             time_added = checks.generation_time
             result = get_check(id_check)
-            final.append([str(id_check), login, time_added.strftime("%H:%M:%S - %b %d %Y"), int(result.correct())])
+            final.append([str(id_check), login, filename, time_added.strftime("%H:%M:%S - %b %d %Y"), int(result.correct())])
 
     return final
 
@@ -197,6 +198,8 @@ def get_stats(user, login):
 
 def get_stats_for_one_submission(oid, login):
     checks = checks_collection.find_one({'_id': oid})
+    pr_obj = presentations_collection.find_one({'checks': oid})
+    filename = pr_obj['name']
     time_added = checks['_id'].generation_time
     result =  get_check(oid)
-    return [str(oid), login, time_added.strftime("%H:%M:%S - %b %d %Y"), int(result.correct())]
+    return [str(oid), login, filename, time_added.strftime("%H:%M:%S - %b %d %Y"), int(result.correct())]
