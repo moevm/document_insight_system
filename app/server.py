@@ -160,6 +160,18 @@ def stats():
          return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
 
 
+@app.route("/upload_list")
+@login_required
+def upload_list():
+    return render_template("./upload_list.html", show_user_column=current_user.is_admin)
+
+
+@app.route("/upload_list/data")
+@login_required
+def upload_list_data():
+    pass
+
+
 @app.route("presentation_data", methods=["GET"])
 def presentation_data():
     page = int(request.args.get("page"))
