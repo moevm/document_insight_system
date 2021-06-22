@@ -190,7 +190,8 @@ def get_stats(user, login):
             id_check = ObjectId(checks)
             time_added = checks.generation_time
             result = get_check(id_check)
-            final.append([str(id_check), login, filename, time_added.strftime("%H:%M:%S - %b %d %Y"), int(result.correct())])
+            score = (int(result.numerical_score()), int(result.enabled_checks()))
+            final.append([str(id_check), login, filename, time_added.strftime("%H:%M:%S - %b %d %Y"), score])
 
     return final
 
@@ -202,4 +203,5 @@ def get_stats_for_one_submission(oid, login):
     filename = pr_obj['name']
     time_added = checks['_id'].generation_time
     result =  get_check(oid)
-    return [str(oid), login, filename, time_added.strftime("%H:%M:%S - %b %d %Y"), int(result.correct())]
+    score = (int(result.numerical_score()), int(result.enabled_checks()))
+    return [str(oid), login, filename, time_added.strftime("%H:%M:%S - %b %d %Y"), score]

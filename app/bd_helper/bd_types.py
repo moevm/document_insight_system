@@ -106,6 +106,28 @@ class Checks(Packable):
             (self.slide_every_task == -1 or self.slide_every_task['pass'])
         )
 
+    def numerical_score(self):
+        return (
+            (self.slides_number != -1 and self.slides_number['pass']) +
+            (self.slides_enum != -1 and self.slides_enum['pass']) +
+            (self.slides_headers != -1 and self.slides_headers['pass']) +
+            (self.goals_slide != -1 and self.goals_slide['pass']) +
+            (self.probe_slide != -1 and self.probe_slide['pass']) +
+            (self.actual_slide != -1 and self.actual_slide['pass']) +
+            (self.conclusion_slide != -1 and self.conclusion_slide['pass']) +
+            (self.conclusion_actual != -1 and self.conclusion_actual['pass']) +
+            (self.conclusion_along != -1 and self.conclusion_along['pass']) +
+            (self.slide_every_task != -1 and self.slide_every_task['pass'])
+        )
+
+    def enabled_checks(self):
+        return(
+        (self.slides_number != -1) + (self.slides_enum != -1) + (self.slides_headers != -1)+
+        (self.goals_slide != -1) + (self.probe_slide != -1) + (self.actual_slide != -1) +
+        (self.conclusion_slide != -1) + (self.conclusion_actual != -1) + (self.conclusion_along != -1) +
+        (self.slide_every_task != -1)
+        )
+
     def __str__(self) -> str:
         return ("Checks: { " + (("_id: " + str(self._id) + ", ") if hasattr(self, "_id") else "") +
                 "slides_number: " + str(self.slides_number) + ", " +
