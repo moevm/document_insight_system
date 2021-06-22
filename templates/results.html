@@ -28,7 +28,7 @@
                 <td>{{ '{}/{}'.format(stats[4][0], stats[4][1]) }}</td>
               </tr>
             </tbody>
-        <h3 id="results_title" class="texteous ins">Результат проверки: {{ "" if results.correct() else "не" }} пройдена!</h3>
+        <h3 id="results_title" class="texteous ins">Результат проверки: {{ "" if stats[4][0] == stats[4][1] else "не" }} пройдена!</h3>
         <table class="table table-striped table-hover" id="results_table">
             <thead>
                 <tr>
