@@ -7,6 +7,9 @@ from app.bd_helper.bd_types import User, Presentation, Checks
 
 from datetime import datetime
 
+from logging import getLogger
+logger = getLogger('root')
+
 client = MongoClient("mongodb://mongodb:27017")
 db = client['pres-parser-db']
 fs = GridFSBucket(db)
@@ -175,16 +178,18 @@ def get_storage():
 
     return ct
 
-disabled_parameters = ['ObjectId']  #extend if non-criteria parameters are added to Checks
+disabled_parameters = ['_id']  #extend if non-criteria parameters are added to Checks
 
-def get_numerical_score(enabled_checks, disabled_parameters):
-    enabled_value = len([check for check in enabled_checks.values() if check !=-1]) - len(disabled_parameters)
+def get_numerical_score(all_checks, disabled_parameters):
+    enabled_checks = {key: all_checks[key] for key in all_checks if key not in disabled_parameters}
+    enabled_value = len([check for check in enabled_checks.values() if check !=-1])
     numerical_score = 0
     for check in enabled_checks.values():
         try:
             if check != -1 and check['pass']:
                 numerical_score += 1
         except TypeError:
+            logger.error('Try checking the disabled_parameters list, there might be a missing value')
             pass
 
     return (numerical_score, enabled_value)
@@ -203,8 +208,8 @@ def get_stats(user, login):
             id_check = ObjectId(checks)
             time_added = checks.generation_time
             result = get_check(id_check)
-            enabled_checks = vars(result)
-            score = get_numerical_score(enabled_checks, disabled_parameters)
+            all_checks = vars(result)
+            score = get_numerical_score(all_checks, disabled_parameters)
             final.append([str(id_check), login, filename, time_added.strftime("%H:%M:%S - %b %d %Y"), score])
 
     return final
@@ -217,6 +222,6 @@ def get_stats_for_one_submission(oid, login):
     filename = pr_obj['name']
     time_added = checks['_id'].generation_time
     result =  get_check(oid)
-    enabled_checks = vars(result)
-    score = get_numerical_score(enabled_checks, disabled_parameters)
+    all_checks = vars(result)
+    score = get_numerical_score(all_checks, disabled_parameters)
     return [str(oid), login, filename, time_added.strftime("%H:%M:%S - %b %d %Y"), score]
