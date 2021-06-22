@@ -92,6 +92,20 @@ class Checks(Packable):
             self.conclusion_along = dictionary['conclusion_along']
             self.slide_every_task = dictionary['slide_every_task']
 
+    def correct(self):
+        return (
+            (self.slides_number == -1 or self.slides_number['pass']) and
+            (self.slides_enum == -1 or self.slides_enum['pass']) and
+            (self.slides_headers == -1 or self.slides_headers['pass']) and
+            (self.goals_slide == -1 or self.goals_slide['pass']) and
+            (self.probe_slide == -1 or self.probe_slide['pass']) and
+            (self.actual_slide == -1 or self.actual_slide['pass']) and
+            (self.conclusion_slide == -1 or self.conclusion_slide['pass']) and
+            (self.conclusion_actual == -1 or self.conclusion_actual['pass']) and
+            (self.conclusion_along == -1 or self.conclusion_along['pass']) and
+            (self.slide_every_task == -1 or self.slide_every_task['pass'])
+        )
+
     def __str__(self) -> str:
         return ("Checks: { " + (("_id: " + str(self._id) + ", ") if hasattr(self, "_id") else "") +
                 "slides_number: " + str(self.slides_number) + ", " +
