@@ -1,4 +1,4 @@
-def condition(decorator, condition):
+def decorator_assertion(decorator, condition):
     if not condition:
         def inner(func):
             def wrapper(*args, **kwargs):
