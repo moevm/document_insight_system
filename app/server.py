@@ -103,7 +103,8 @@ def results(_id):
         return render_template("./404.html")
     check = get_check(oid)
     if check is not None:
-        return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id, fi=check.filename,columns=columns, stats = check.to_tuple())
+        return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id, fi=check.filename,
+                                columns=columns, stats = format_stats([check.pack()])[0])
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
