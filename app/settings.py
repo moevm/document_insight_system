@@ -11,7 +11,7 @@ config.read(ini_file)
 # read version file
 version_ph = os.path.dirname(current_ph)
 version_file = os.path.join(version_ph, "VERSION.json")
-try:
+if os.path.isfile(version_file):
     with open(version_file) as vfp:
         json_string = vfp.read()
         try:
@@ -20,9 +20,9 @@ try:
             VERSION_DATA = {
                 "error": str(error),
                 "data": json_string
-            }            
-except Exception as error:
-    VERSION_DATA = { "error": str(error) }
+            }
+else:
+    VERSION_DATA = { "error": f"File not found: '{version_file}'" }
 
 # setup variables
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '')
