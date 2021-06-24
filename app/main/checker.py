@@ -10,7 +10,6 @@ def __answer(mod, value):
         "value": str(value)
     }
 
-
 def __check_slides_number(presentation, number, conclusion_slide_number):
     if conclusion_slide_number == -1 or conclusion_slide_number['value'] == '':
         conclusion_slide_number = len(presentation.slides)
@@ -97,7 +96,7 @@ def __are_slides_similar(goals, conclusions, actual_number):
 
 def __find_tasks_on_slides(presentation, goals, intersection_number):
     if goals == "":
-        return -1
+        return __answer(False, 'Слайд "Задачи" не найден')
 
     titles = presentation.get_titles()
     slides_with_tasks = find_tasks_on_slides(goals, titles, intersection_number)
@@ -110,7 +109,7 @@ def __find_tasks_on_slides(presentation, goals, intersection_number):
         return __answer(False, "Некоторые задачи на слайдах не найдены")
 
 
-def check(presentation, checks):
+def check(presentation, checks, presentation_name, username):
     goals_array = ""
     conclusion_array = ""
 
@@ -137,15 +136,20 @@ def check(presentation, checks):
             logger.info("\tОбозначенные цели совпадают с задачами на " + similar[0]['value'] + "%")
             checks.conclusion_actual = similar[0]
         else:
-            checks.conclusion_actual = -1
+            checks.conclusion_actual = {'pass': False, 'value': 0}
     if checks.conclusion_along != -1:  # Наличие направлений дальнейшего развития
         if similar != -1:
             logger.info("\tНаправления дальнейшего развития " + ("" if similar[1]['value'] else "не ") + "найдены")
             checks.conclusion_along = similar[1]
         else:
-            checks.conclusion_along = -1
+            checks.conclusion_along = {'pass': False}
 
     if checks.slide_every_task != -1:  # Наличие слайдов соответстующих задачам
         checks.slide_every_task = __find_tasks_on_slides(presentation, goals_array, checks.slide_every_task)
+
+
+    checks.score = checks.calc_score()
+    checks.filename = presentation_name
+    checks.user = username
 
     return checks
