@@ -1,11 +1,30 @@
 import configparser
 import os
+import json
 
+# read ini file
 current_ph = os.path.dirname(os.path.abspath(__file__))
 ini_file = os.path.join(current_ph, 'config.ini')
 config = configparser.ConfigParser()
 config.read(ini_file)
 
+# read version file
+version_ph = os.path.dirname(current_ph)
+version_file = os.path.join(version_ph, "VERSION.json")
+try:
+    with open(version_file) as vfp:
+        json_string = vfp.read()
+        try:
+            VERSION_DATA = json.loads(json_string)
+        except Exception as error:
+            VERSION_DATA = {
+                "error": repr(error),
+                "data": json_string
+            }            
+except Exception as error:
+    VERSION_DATA = { "error": repr(error) }
+
+# setup variables
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '')
 
 RECAPTCHA_ENABLED = True
