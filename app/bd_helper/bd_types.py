@@ -128,7 +128,7 @@ class Checks(Packable):
         return (numerical_score, enabled_value)
 
     def correct(self):
-        return all([check == -1 or check['pass'] for check in self.get_checks()])
+        return all([check == -1 or check['pass'] for check in self.get_checks().values()])
 
     def __str__(self) -> str:
         return ("Checks: { " + (("_id: " + str(self._id) + ", ") if hasattr(self, "_id") else "") +
