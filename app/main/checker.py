@@ -165,9 +165,8 @@ def check(presentation, checks, presentation_name, username):
     if checks.slide_every_task != -1:  # Наличие слайдов соответстующих задачам
         checks.slide_every_task = __find_tasks_on_slides(presentation, goals_array, checks.slide_every_task)
 
-    all_checks = vars(checks)
-    numerical_score = get_numerical_score(all_checks, disabled_parameters)
-    checks.score = numerical_score
+    
+    checks.score = checks.calc_score()
     checks.filename = presentation_name
     checks.user = username
 

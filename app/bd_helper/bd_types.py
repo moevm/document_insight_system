@@ -1,5 +1,6 @@
 from flask_login import UserMixin
-
+from logging import getLogger
+logger = getLogger('root')
 
 class Packable:
     def __init__(self, dictionary):
@@ -78,7 +79,7 @@ class Checks(Packable):
             self.conclusion_actual = 50
             self.conclusion_along = 0
             self.slide_every_task = 50
-            self.score = 0
+            self.score = -1
             self.filename = ''
             self.user = ''
         else:
@@ -94,24 +95,40 @@ class Checks(Packable):
             self.conclusion_actual = dictionary['conclusion_actual']
             self.conclusion_along = dictionary['conclusion_along']
             self.slide_every_task = dictionary['slide_every_task']
-            self.score = 0
+            self.score = -1
             self.filename = ''
             self.user = ''
 
+    def get_checks(self):
+        return dict(
+            slides_number = self.slides_number,
+            slides_enum = self.slides_enum,
+            slides_headers = self.slides_headers,
+            goals_slide = self.goals_slide,
+            probe_slide = self.probe_slide,
+            actual_slide = self.actual_slide,
+            conclusion_slide = self.conclusion_slide,
+            conclusion_actual = self.conclusion_actual,
+            conclusion_along = self.conclusion_along,
+            slide_every_task = self.slide_every_task,
+        )
+
+    def calc_score(self):
+        enabled_checks = self.get_checks()
+        enabled_value = len([check for check in enabled_checks.values() if check != -1])
+        numerical_score = 0
+        for check in enabled_checks.values():
+            try:
+                if check != -1 and check['pass']:
+                    numerical_score += 1
+            except TypeError:
+                logger.error('Try checking the disabled_parameters list, there might be a missing value')
+                pass
+
+        return (numerical_score, enabled_value)
 
     def correct(self):
-        return (
-            (self.slides_number == -1 or self.slides_number['pass']) and
-            (self.slides_enum == -1 or self.slides_enum['pass']) and
-            (self.slides_headers == -1 or self.slides_headers['pass']) and
-            (self.goals_slide == -1 or self.goals_slide['pass']) and
-            (self.probe_slide == -1 or self.probe_slide['pass']) and
-            (self.actual_slide == -1 or self.actual_slide['pass']) and
-            (self.conclusion_slide == -1 or self.conclusion_slide['pass']) and
-            (self.conclusion_actual == -1 or self.conclusion_actual['pass']) and
-            (self.conclusion_along == -1 or self.conclusion_along['pass']) and
-            (self.slide_every_task == -1 or self.slide_every_task['pass'])
-        )
+        return all([check == -1 or check['pass'] for check in self.get_checks()])
 
     def __str__(self) -> str:
         return ("Checks: { " + (("_id: " + str(self._id) + ", ") if hasattr(self, "_id") else "") +

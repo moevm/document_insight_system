@@ -178,21 +178,6 @@ def get_storage():
 
     return ct
 
-disabled_parameters = ['_id', 'score', 'filename', 'user']  #extend if non-criteria parameters are added to Checks
-
-def get_numerical_score(all_checks, disabled_parameters):
-    enabled_checks = {key: all_checks[key] for key in all_checks if key not in disabled_parameters}
-    enabled_value = len([check for check in enabled_checks.values() if check != -1])
-    numerical_score = 0
-    for check in enabled_checks.values():
-        try:
-            if check != -1 and check['pass']:
-                numerical_score += 1
-        except TypeError:
-            logger.error('Try checking the disabled_parameters list, there might be a missing value')
-            pass
-
-    return (numerical_score, enabled_value)
 
 #Get stats for one user, return a list in the form
 #[check_id, login, time of check_id's creation, result(0/1)]
@@ -206,10 +191,11 @@ def get_stats(user, login):
         filename = pr_obj['name']
         for checks in pr_obj['checks']:
             id_check = ObjectId(checks)
+            logger.error(str(checks))
+            logger.error(str(type(checks)))
             time_added = checks.generation_time
             result = get_check(id_check)
-            all_checks = vars(result)
-            score = get_numerical_score(all_checks, disabled_parameters)
+            score = result.score
             final.append([str(id_check), login, filename, time_added.strftime("%H:%M:%S - %b %d %Y"), score])
 
     return final
@@ -222,6 +208,5 @@ def get_stats_for_one_submission(oid, login):
     filename = pr_obj['name']
     time_added = checks['_id'].generation_time
     result =  get_check(oid)
-    all_checks = vars(result)
-    score = get_numerical_score(all_checks, disabled_parameters)
+    score = result.score
     return [str(oid), login, filename, time_added.strftime("%H:%M:%S - %b %d %Y"), score]
