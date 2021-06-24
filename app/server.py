@@ -11,7 +11,7 @@ import app.servants.user as user
 from app.servants import data as data
 from app.bd_helper.bd_helper import (
     get_user, get_check, get_presentation_check, users_collection,
-    get_all_checks, get_user_checks, format_stats)
+    get_all_checks, get_user_checks, format_stats, format_check)
 from app.servants import pre_luncher
 
 from flask_recaptcha import ReCaptcha
@@ -104,7 +104,7 @@ def results(_id):
     check = get_check(oid)
     if check is not None:
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id, fi=check.filename,
-                                columns=columns, stats = format_stats([check.pack()])[0])
+                                columns=columns, stats = format_check(check.pack()))
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")

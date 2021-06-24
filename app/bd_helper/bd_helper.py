@@ -191,6 +191,9 @@ def get_user_checks(login):
 def get_check_stats(oid):
     return checks_collection.find_one({'_id': oid})
 
+def format_check(check):
+    return (str(check['_id']), check['user'], check['filename'], check['_id'].generation_time.strftime("%H:%M:%S - %b %d %Y"),
+                    check['score'])
+
 def format_stats(stats):
-    return ((str(check['_id']), check['user'], check['filename'], check['_id'].generation_time.strftime("%H:%M:%S - %b %d %Y"),
-                    check['score']) for check in stats)
+    return (format_check(check) for check in stats)
