@@ -178,36 +178,15 @@ def get_storage():
 
     return ct
 
+def get_all_checks():
+    return checks_collection.find()
 
 #Get stats for one user, return a list in the form
 #[check_id, login, time of check_id's creation, result(0/1)]
 #TODO : add lti/missing params from #80
-def get_stats(user, login):
-    presentations = user['presentations']
-    final = []
-    for presentation in presentations:
-        id_presentation = ObjectId(presentation)
-        pr_obj = presentations_collection.find_one({'_id': id_presentation})
-        filename = pr_obj['name']
-        for checks in pr_obj['checks']:
-            id_check = ObjectId(checks)
-            logger.error(str(checks))
-            logger.error(str(type(checks)))
-            logger.error(str(checks.generation_time))
-            time_added = checks.generation_time
-            result = get_check(id_check)
-            score = result.score
-            final.append([str(id_check), login, filename, time_added.strftime("%H:%M:%S - %b %d %Y"), score])
-
-    return final
+def get_user_checks(login):
+    return checks_collection.find({'user': login})
 
 
-
-def get_stats_for_one_submission(oid, login):
-    checks = checks_collection.find_one({'_id': oid})
-    pr_obj = presentations_collection.find_one({'checks': oid})
-    filename = pr_obj['name']
-    time_added = checks['_id'].generation_time
-    result =  get_check(oid)
-    score = result.score
-    return [str(oid), login, filename, time_added.strftime("%H:%M:%S - %b %d %Y"), score]
+def format_stats(stats):
+    return (check.to_tuple() for check in stats) 
