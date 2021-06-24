@@ -193,6 +193,7 @@ def get_stats(user, login):
             id_check = ObjectId(checks)
             logger.error(str(checks))
             logger.error(str(type(checks)))
+            logger.error(str(checks.generation_time))
             time_added = checks.generation_time
             result = get_check(id_check)
             score = result.score
