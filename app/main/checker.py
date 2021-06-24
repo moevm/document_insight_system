@@ -10,24 +10,6 @@ def __answer(mod, value):
         "value": str(value)
     }
 
-
-disabled_parameters = ['score', 'filename', 'user']  #extend if non-criteria parameters are added to Checks
-
-def get_numerical_score(all_checks, disabled_parameters):
-    enabled_checks = {key: all_checks[key] for key in all_checks if key not in disabled_parameters}
-    enabled_value = len([check for check in enabled_checks.values() if check != -1])
-    numerical_score = 0
-    for check in enabled_checks.values():
-        try:
-            if check != -1 and check['pass']:
-                numerical_score += 1
-        except TypeError:
-            logger.error('Try checking the disabled_parameters list, there might be a missing value')
-            pass
-
-    return "{:.3f}".format(numerical_score / enabled_value)
-
-
 def __check_slides_number(presentation, number, conclusion_slide_number):
     if conclusion_slide_number == -1 or conclusion_slide_number['value'] == '':
         conclusion_slide_number = len(presentation.slides)
@@ -165,7 +147,7 @@ def check(presentation, checks, presentation_name, username):
     if checks.slide_every_task != -1:  # Наличие слайдов соответстующих задачам
         checks.slide_every_task = __find_tasks_on_slides(presentation, goals_array, checks.slide_every_task)
 
-    
+
     checks.score = checks.calc_score()
     checks.filename = presentation_name
     checks.user = username
