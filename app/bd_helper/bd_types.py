@@ -122,10 +122,9 @@ class Checks(Packable):
                 if check != -1 and check['pass']:
                     numerical_score += 1
             except TypeError:
-                logger.error('Try checking the disabled_parameters list, there might be a missing value')
                 pass
 
-        return (numerical_score, enabled_value)
+        return float("{:.3f}".format(numerical_score / enabled_value))
 
     def correct(self):
         return all([check == -1 or check['pass'] for check in self.get_checks().values()])
