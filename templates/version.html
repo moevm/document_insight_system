@@ -34,7 +34,7 @@
                 </table>
             {% else %}
                 <div class="error">
-                    <pre class="bg-danger">{{ config["VERSION_DATA"]["error"] }}</pre>
+                    <pre class="px-2 py-1 rounded bg-danger">{{ config["VERSION_DATA"]["error"] }}</pre>
                     {% if "data" in config["VERSION_DATA"] %}
                         <pre class="line-numbers">{{ config["VERSION_DATA"]["data"] }}</pre>
                     {% endif %}
