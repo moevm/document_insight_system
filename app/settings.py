@@ -18,11 +18,11 @@ try:
             VERSION_DATA = json.loads(json_string)
         except Exception as error:
             VERSION_DATA = {
-                "error": repr(error),
+                "error": str(error),
                 "data": json_string
             }            
 except Exception as error:
-    VERSION_DATA = { "error": repr(error) }
+    VERSION_DATA = { "error": str(error) }
 
 # setup variables
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '')
