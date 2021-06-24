@@ -95,9 +95,9 @@ class Checks(Packable):
             self.conclusion_actual = dictionary['conclusion_actual']
             self.conclusion_along = dictionary['conclusion_along']
             self.slide_every_task = dictionary['slide_every_task']
-            self.score = -1
-            self.filename = ''
-            self.user = ''
+            self.score = dictionary.get('score', -1)
+            self.filename = dictionary.get('filename', '')
+            self.user = dictionary.get('user', '')
 
     def get_checks(self):
         return dict(
