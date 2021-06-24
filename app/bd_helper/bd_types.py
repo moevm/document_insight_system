@@ -130,9 +130,6 @@ class Checks(Packable):
     def correct(self):
         return all([check == -1 or check['pass'] for check in self.get_checks().values()])
 
-    def to_tuple(self):
-        return (str(self._id), self.user, self.filename, self._id.generation_time.strftime("%H:%M:%S - %b %d %Y"), self.score)
-
     def __str__(self) -> str:
         return ("Checks: { " + (("_id: " + str(self._id) + ", ") if hasattr(self, "_id") else "") +
                 "slides_number: " + str(self.slides_number) + ", " +
