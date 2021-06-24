@@ -159,7 +159,9 @@ def stats():
          stats = get_stats(user, login)
          return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
 
-
+@app.route("/version")
+def version():
+    return render_template("./version.html")
 
 @app.route('/profile', methods=["GET"], defaults={'username': ''})
 @app.route('/profile/<string:username>', methods=["GET"])
