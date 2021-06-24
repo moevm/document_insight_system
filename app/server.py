@@ -102,9 +102,9 @@ def results(_id):
         logger.error('_id exception:', exc_info=True)
         return render_template("./404.html")
     c = get_check(oid)
-    stats = get_stats_for_one_submission(oid, current_user.username)           #
+    stats = get_stats_for_one_submission(oid, current_user.username)
     f = get_presentation_check(oid)
-    if c is not None:
+    if c and f is not None:
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=c, id=_id, fi=f.name,columns=columns, stats = stats)
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)

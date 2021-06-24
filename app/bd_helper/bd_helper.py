@@ -178,11 +178,11 @@ def get_storage():
 
     return ct
 
-disabled_parameters = ['_id']  #extend if non-criteria parameters are added to Checks
+disabled_parameters = ['_id', 'score', 'filename', 'user']  #extend if non-criteria parameters are added to Checks
 
 def get_numerical_score(all_checks, disabled_parameters):
     enabled_checks = {key: all_checks[key] for key in all_checks if key not in disabled_parameters}
-    enabled_value = len([check for check in enabled_checks.values() if check !=-1])
+    enabled_value = len([check for check in enabled_checks.values() if check != -1])
     numerical_score = 0
     for check in enabled_checks.values():
         try:

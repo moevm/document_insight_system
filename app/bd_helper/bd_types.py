@@ -78,6 +78,9 @@ class Checks(Packable):
             self.conclusion_actual = 50
             self.conclusion_along = 0
             self.slide_every_task = 50
+            self.score = 0
+            self.filename = ''
+            self.user = ''
         else:
             if '_id' in dictionary:
                 self._id = dictionary['_id']
@@ -91,6 +94,10 @@ class Checks(Packable):
             self.conclusion_actual = dictionary['conclusion_actual']
             self.conclusion_along = dictionary['conclusion_along']
             self.slide_every_task = dictionary['slide_every_task']
+            self.score = 0
+            self.filename = ''
+            self.user = ''
+
 
     def correct(self):
         return (
@@ -117,4 +124,8 @@ class Checks(Packable):
                 "conclusion_slide: " + str(self.conclusion_slide) + ", " +
                 "conclusion_actual: " + str(self.conclusion_actual) + ", " +
                 "conclusion_along: " + str(self.conclusion_along) + ", " +
-                "slide_every_task: " + str(self.slide_every_task) + " }")
+                "slide_every_task: " + str(self.slide_every_task) + ", " +
+                "score: " + str(self.score) + ", " +
+                "filename: " + str(self.filename) + ", " +
+                "username: " + str( self.user) +
+                " }")
