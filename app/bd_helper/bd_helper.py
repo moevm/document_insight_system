@@ -7,6 +7,9 @@ from app.bd_helper.bd_types import User, Presentation, Checks
 
 from datetime import datetime
 
+from logging import getLogger
+logger = getLogger('root')
+
 client = MongoClient("mongodb://mongodb:27017")
 db = client['pres-parser-db']
 fs = GridFSBucket(db)
@@ -175,28 +178,22 @@ def get_storage():
 
     return ct
 
+def get_all_checks():
+    return checks_collection.find()
 
 #Get stats for one user, return a list in the form
 #[check_id, login, time of check_id's creation, result(0/1)]
 #TODO : add lti/missing params from #80
-def get_stats(user, login):
-    presentations = user['presentations']
-    final = []
-    for presentation in presentations:
-        id_presentation = ObjectId(presentation)
-        pr_obj = presentations_collection.find_one({'_id': id_presentation})
-        for checks in pr_obj['checks']:
-            id_check = ObjectId(checks)
-            time_added = checks.generation_time
-            result = get_check(id_check)
-            final.append([str(id_check), login, time_added.strftime("%H:%M:%S - %b %d %Y"), int(result.correct())])
-
-    return final
+def get_user_checks(login):
+    return checks_collection.find({'user': login})
 
 
+def get_check_stats(oid):
+    return checks_collection.find_one({'_id': oid})
 
-def get_stats_for_one_submission(oid, login):
-    checks = checks_collection.find_one({'_id': oid})
-    time_added = checks['_id'].generation_time
-    result =  get_check(oid)
-    return [str(oid), login, time_added.strftime("%H:%M:%S - %b %d %Y"), int(result.correct())]
+def format_check(check):
+    return (str(check['_id']), check['user'], check['filename'], check['_id'].generation_time.strftime("%H:%M:%S - %b %d %Y"),
+                    check['score'])
+
+def format_stats(stats):
+    return (format_check(check) for check in stats)

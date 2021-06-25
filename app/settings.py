@@ -32,6 +32,7 @@ RECAPTCHA_SITE_KEY = os.environ.get('RECAPTCHA_SITE_KEY', '')
 RECAPTCHA_SECRET_KEY = os.environ.get('RECAPTCHA_SECRET_KEY', '')
 
 SECRET_KEY = os.environ.get('SECRET_KEY', '')
+SIGNUP_PAGE_ENABLED = os.environ.get('SIGNUP_PAGE_ENABLED', 'True') == 'True'
 
 MAX_CONTENT_LENGTH = config.getint('consts', 'MAX_CONTENT_LENGTH')*1024*1024
 MAX_SYSTEM_STORAGE = config.getint('consts', 'MAX_SYSTEM_STORAGE')*1024*1024
