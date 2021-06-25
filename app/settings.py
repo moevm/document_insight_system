@@ -1,4 +1,5 @@
 import configparser
+from json.decoder import JSONDecodeError
 import os
 import json
 
@@ -11,18 +12,19 @@ config.read(ini_file)
 # read version file
 version_ph = os.path.dirname(current_ph)
 version_file = os.path.join(version_ph, "VERSION.json")
-if os.path.isfile(version_file):
+try:
     with open(version_file) as vfp:
         json_string = vfp.read()
-        try:
-            VERSION_DATA = json.loads(json_string)
-        except Exception as error:
-            VERSION_DATA = {
-                "error": str(error),
-                "data": json_string
-            }
-else:
-    VERSION_DATA = { "error": f"File not found: '{version_file}'" }
+        VERSION_DATA = json.loads(json_string)
+except JSONDecodeError as error:
+    VERSION_DATA = {
+        "error": str(error),
+        "data": error.doc
+    }
+except IOError as error:
+    VERSION_DATA = {"error": f"{error.strerror}: {error.filename}"}
+except Exception as error:
+    VERSION_DATA = { "error": repr(error) }
 
 # setup variables
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '')
