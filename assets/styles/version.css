@@ -1,0 +1,50 @@
+#version-table {
+    border-collapse: collapse;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#version-table td {
+    padding: 15px;
+    color: #636363;
+    border: 1px solid #54585d
+}
+
+#version-table td:nth-child(1)
+{
+    text-align: right;
+}
+
+#version-table tbody tr {
+    background-color: #f9fafb;
+}
+
+#version-table tbody tr:hover td {
+    background: #eaeaea;
+}
+
+#version-table tbody tr:nth-child(odd) {
+    background-color: #fff;
+}
+
+pre.line-numbers {
+    white-space: pre-wrap;
+}
+
+pre.line-numbers::before {
+    counter-reset: listing;
+}
+
+pre.line-numbers code {
+    counter-increment: listing;
+    text-align: left;
+    float: left;
+    clear: left;
+}
+
+pre.line-numbers code::before {
+    content: counter(listing) ". ";
+    display: inline-block;
+    padding-left: auto;
+    margin-left: auto;
+    text-align: right;
+}
