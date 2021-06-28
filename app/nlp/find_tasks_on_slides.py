@@ -1,5 +1,7 @@
 from app.nlp.stemming import Stemming
 from logging import getLogger
+import itertools
+from scipy.spatial import distance
 logger = getLogger('root')
 
 Task = 'Задачи:'
@@ -9,14 +11,10 @@ def compare_task_and_title(task, title):
     stemming = Stemming()
     parse_task = stemming.get_filtered_docs(task, False)
     parse_title = stemming.get_filtered_docs(title, False)
-    task_set = set()
-    title_set = set()
-    for sent in parse_task:
-        for word in sent:
-            task_set.add(word)
-    for sent in parse_title:
-        for word in sent:
-            title_set.add(word)
+
+    task_set = set(list(itertools.chain(*parse_task)))
+    title_set = set(list(itertools.chain(*parse_title)))
+
     l1 = []
     l2 = []
     rvector = task_set.union(title_set)
@@ -29,12 +27,9 @@ def compare_task_and_title(task, title):
             l2.append(1)
         else:
             l2.append(0)
-    c = 0
 
-    for i in range(len(rvector)):
-        c += l1[i] * l2[i]
-    cosine = c / float((sum(l1) * sum(l2)) ** 0.5)
-    return cosine
+    cosine_similarity = 1 - distance.cosine(l1, l2)
+    return cosine_similarity
 
 
 def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
@@ -61,5 +56,5 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
         if task_count == slides_with_task:
             return 0
         return -1
-    except:
-        return -1
+    except Exception as error:
+        return error
