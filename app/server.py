@@ -3,7 +3,7 @@ from sys import argv
 
 import bson
 from bson import ObjectId
-from flask import Flask, request, redirect, url_for, render_template, Response, abort
+from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify
 from flask_login import LoginManager, login_user, current_user, login_required
 
 
@@ -157,14 +157,20 @@ def stats():
 
 @app.route("/check_list")
 @login_required
-def upload_list():
+def check_list():
+    print("|||CHECK LIST|||")
     return render_template("./check_list.html")
 
 
-@app.route("/checks_list/data")
+@app.route("/check_list/data")
 @login_required
-def upload_list_data():
-    pass
+def check_list_data():
+    print("|||CHECK LIST DATA|||")
+    response = {
+        "total": 0,
+        "rows": []
+    }
+    return jsonify(response)
 
 
 @app.route("/version")
