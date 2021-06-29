@@ -11,8 +11,10 @@ import app.servants.user as user
 from app.servants import data as data
 from app.bd_helper.bd_helper import (
     get_user, get_check, get_presentation_check, users_collection,
-    get_stats, get_stats_for_one_submission)
+    get_all_checks, get_user_checks, format_stats, format_check)
 from app.servants import pre_luncher
+
+from app.utils.decorators import decorator_assertion
 
 from flask_recaptcha import ReCaptcha
 
@@ -24,7 +26,7 @@ DEBUG = True
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
 UPLOAD_FOLDER = './files'
-columns = ['Solution', 'User', 'Check added', 'Score']
+columns = ['Solution', 'User', 'File', 'Check added', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config.from_pyfile('settings.py')
@@ -57,7 +59,7 @@ def login():
         return u.username if u is not None and login_user(u, remember=True) else ""
 
 
-@app.route("/signup", methods=["GET", "POST"])
+@decorator_assertion(app.route("/signup", methods=["GET", "POST"]), app.config["SIGNUP_PAGE_ENABLED"])
 def signup():
     if request.method == "GET":
         return render_template("./signup.html", navi_upload=False)
@@ -101,11 +103,10 @@ def results(_id):
     except bson.errors.InvalidId:
         logger.error('_id exception:', exc_info=True)
         return render_template("./404.html")
-    c = get_check(oid)
-    stats = get_stats_for_one_submission(oid, current_user.username)           #
-    f = get_presentation_check(oid)
-    if c is not None:
-        return render_template("./results.html", navi_upload=True, name=current_user.name, results=c, id=_id, fi=f.name,columns=columns, stats = stats)
+    check = get_check(oid)
+    if check is not None:
+        return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id, fi=check.filename,
+                                columns=columns, stats = format_check(check.pack()))
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
@@ -145,18 +146,12 @@ def criteria():
 @login_required
 def stats():
     if current_user.is_admin:
-        get_all_users = users_collection.find({})
-        stats = []
-        for user in get_all_users:
-            login = str(user['username'])
-            temp = get_stats(user, login)
-            stats.extend(temp)
-
+        stats = format_stats(get_all_checks())
         return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
     else:
          login = current_user.username
          user = users_collection.find_one({'username': login})
-         stats = get_stats(user, login)
+         stats = format_stats(get_user_checks(login))
          return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
 
 
@@ -170,6 +165,11 @@ def upload_list():
 @login_required
 def upload_list_data():
     pass
+
+
+@app.route("/version")
+def version():
+    return render_template("./version.html")
 
 
 @app.route('/profile', methods=["GET"], defaults={'username': ''})

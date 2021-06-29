@@ -28,7 +28,9 @@
             <div class="row justify-content-center">
                 <div class="col-8 v-box">
                     <button type="button" class="btn btn-block blue_button" id="login_button">Войти</button>
-                    <a class="linked text-right" href="/signup" id="signup_link">Регистрация</a>
+                    {% if config.SIGNUP_PAGE_ENABLED %}
+                        <a class="linked text-right" href="/signup" id="signup_link">Регистрация</a>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -11,6 +11,7 @@ import './profile';
 import './results';
 import './signup';
 import './upload';
+import './version';
 
 import '../favicon.ico';
 import '../styles/404.css';
