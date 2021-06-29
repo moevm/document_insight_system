@@ -1,4 +1,4 @@
-const AJAX_URL = "/upload_list/data"
+const AJAX_URL = "/check_list/data"
 
 String.prototype.insert = function(index, string) {
     if (index > 0) {
@@ -46,7 +46,7 @@ $(()=>{
 })
 
 function isFloat(str) {
-    var floatRegex = /^-?\d+(?:[.,]\d*?)?$/;
+    const floatRegex = /^-?\d+(?:[.,]\d*?)?$/;
     if (!floatRegex.test(str))
         return false;
 
@@ -98,6 +98,9 @@ function initTable() {
         pageSize: parseInt(params.size) || 10,
         sortName: params.sort,
         sortOrder: params.order,
+
+        queryParams: queryParams,
+        ajax: ajaxRequest
     })
 
     // fill filters
@@ -113,8 +116,9 @@ function initTable() {
 function ajaxRequest(params) {
     const queryString = "?" + $.param(params.data)
     const url = AJAX_URL + queryString
+    console.log("ajax:", url, params);
     $.get(url).then(res => params.success(res))
-    console.log(url);
+    console.log("ajax completed");
 
     pushHistoryState(params)
 }
@@ -134,7 +138,7 @@ function pushHistoryState(params) {
 }
 
 function queryParams(params) {
-    query = {
+    const query = {
         limit: params.limit,
         offset: params.offset,
         sort: params.sort,

@@ -24,6 +24,8 @@
         data-side-pagination="server"
         data-icon-size="lg"
         data-show-filter-control-switch="true"
+        data-show-button-icons="false"
+        data-show-button-text="true"
     >
         <thead>
             <tr>
@@ -33,8 +35,8 @@
                 <th data-field="user"       data-filter-control="input" data-sortable="true">Username</th>
             {% endif %}
             <th data-field="upload-date"    data-filter-control="datepicker" data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}' data-sortable="true">Upload date</th>
-            <th data-field="check-date"     data-filter-control="datepicker" data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}' data-sortable="true">Check date</th>
-            <th data-field="moodle-date"    data-filter-control="datepicker" data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}' data-sortable="true">Moodle upload date</th>
+            <!-- <th data-field="check-date"     data-filter-control="datepicker" data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}' data-sortable="true">Check date</th> -->
+            <!-- <th data-field="moodle-date"    data-filter-control="datepicker" data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}' data-sortable="true">Moodle upload date</th> -->
             <th data-field="score"          data-filter-control="input" data-sortable="true">Result</th>
             </tr>
         </thead>
