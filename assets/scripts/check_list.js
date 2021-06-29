@@ -57,7 +57,7 @@ function isFloat(str) {
 }
 
 function initTable() {
-    const $table = $("#upload-list-table")
+    const $table = $("#check-list-table")
 
     // get query string
     const queryString = window.location.search
@@ -94,8 +94,8 @@ function initTable() {
 
     // activate bs table
     $table.bootstrapTable({
-        pageNumber: parseInt(params.page),
-        pageSize: parseInt(params.size),
+        pageNumber: parseInt(params.page) || 1,
+        pageSize: parseInt(params.size) || 10,
         sortName: params.sort,
         sortOrder: params.order,
     })

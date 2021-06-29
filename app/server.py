@@ -160,40 +160,16 @@ def stats():
          return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
 
 
-@app.route("/upload_list")
+@app.route("/check_list")
 @login_required
 def upload_list():
-    return render_template("./upload_list.html", show_user_column=current_user.is_admin)
+    return render_template("./check_list.html")
 
 
-@app.route("/upload_list/data")
+@app.route("/checks_list/data")
 @login_required
 def upload_list_data():
     pass
-
-
-@app.route("presentation_data", methods=["GET"])
-def presentation_data():
-    page = int(request.args.get("page"))
-    limit = int(request.args.get("limit"))
-
-    start = (page - 1) * limit
-    end = page * limit
-
-    results = {}
-    results["next"] = {
-        page: page + 1,
-        limit: limit
-    }
-    results["prev"] = {
-        page: page - 1,
-        limit: limit
-    }
-
-    # prepare collection
-    # slice collection
-    # put collection into results
-    # jsonify results
 
 
 @app.route('/profile', methods=["GET"], defaults={'username': ''})
