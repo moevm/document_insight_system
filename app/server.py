@@ -1,6 +1,8 @@
+from datetime import datetime
 import logging
 from sys import argv
 
+import json
 import bson
 from bson import ObjectId
 from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify
@@ -11,7 +13,7 @@ import app.servants.user as user
 from app.servants import data as data
 from app.bd_helper.bd_helper import (
     get_user, get_check, get_presentation_check, users_collection,
-    get_all_checks, get_user_checks, format_stats, format_check)
+    get_all_checks, get_user_checks, format_stats, format_check, checks_collection)
 from app.servants import pre_luncher
 
 from app.utils.decorators import decorator_assertion
@@ -158,18 +160,88 @@ def stats():
 @app.route("/check_list")
 @login_required
 def check_list():
-    print("|||CHECK LIST|||")
     return render_template("./check_list.html")
 
 
 @app.route("/check_list/data")
 @login_required
 def check_list_data():
-    print("|||CHECK LIST DATA|||")
+    # query necessary data from mongo
+    rows = checks_collection.find(
+        projection=["_id", "filename", "user", "score"]
+    )
+
+    # transform json filter into dict
+    filters = request.args.get("filter", "")
+    try:
+        filters = json.loads(filters)
+    except:
+        filters = {}
+
+    # apply filters to collection
+    f_id = filters.get("_id", "")
+    rows = rows.find({"_id": ObjectId(f_id)}) if f_id else rows
+
+    f_filename = filters.get("filename", "")
+    rows = rows.find({"filename": { "$regex": f_filename }}) if f_filename else rows
+
+    f_user = filters.get("user", "")
+    rows = rows.find({"user": { "$regex": f_user }}) if f_user else rows
+
+    try:
+        f_upload_date = list(filter(lambda val: val, filters.get("upload-date", "").split("-")))
+        if len(f_upload_date) == 1:
+            date = datetime.strptime(f_upload_date[0], "%d.%m.%Y")
+            rows = rows.find({"_id": ObjectId.from_datetime(date)})
+        elif len(f_upload_date) > 1:
+            b_date = datetime.strptime(f_upload_date[0], "%d.%m.%Y")
+            e_date = datetime.strptime(f_upload_date[1], "%d.%m.%Y")
+            rows = rows.find({"_id": {"$gte": ObjectId.from_datetime(b_date), "$lte": ObjectId.from_datetime(e_date)}})
+    except Exception as e:
+        print("ERROR::Cant apply upload-date filter")
+        print(repr(e))
+
+    try:
+        f_score = list(filter(lambda val: val, filters.get("score", "").split("-")))
+        if len(f_score) == 1:
+            score = float(f_score[0])
+            rows = rows.find({"score": score})
+        elif len(f_score) > 1:
+            b_score = float(f_score[0])
+            e_score = float(f_score[1])
+            rows = rows.find({"score": { "$gte": b_score, "$lte": e_score } })
+    except Exception as e:
+        print("ERROR::Cant apply score filter")
+        print(repr(e))
+        
+    # find docs for current non-admin user
+    if not current_user.is_admin:
+        rows = rows.find({"user": current_user.username})    
+    
+    # parse and validate rest query
+    limit = request.args.get("limit", "")
+    limit = int(limit) if limit.isnumeric() else 10
+
+    offset = request.args.get("offset", "")
+    offset = int(offset) if offset.isnumeric() else 0
+
+    sort = request.args.get("sort", "")
+    sort = sort if sort in ["_id", "filename", "user", "upload-date", "score"] else ""
+    
+    order = request.args.get("order", "")
+    order = order if order in ["asc", "desc"] else ""
+
+    if "" in [sort, order]:
+        sort = ""
+        order = ""
+
+    # cursor to list conversion
     response = {
         "total": 0,
         "rows": []
     }
+
+    # return json data
     return jsonify(response)
 
 
