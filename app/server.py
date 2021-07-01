@@ -236,7 +236,7 @@ def check_list_data():
             "_id": str(item["_id"]),
             "filename": item["filename"],
             "user": item["user"],
-            "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H.%M.%S"),
+            "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H:%M:%S"),
             "score": item["score"]
         } for item in rows]
     }
