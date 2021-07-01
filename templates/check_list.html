@@ -29,15 +29,15 @@
     >
         <thead>
             <tr>
-            <th data-field="_id"             data-filter-control="input" data-sortable="true">Upload ID</th>
-            <th data-field="filename"          data-filter-control="input" data-sortable="true">Title</th>
+            <th data-field="_id">Upload ID</th>
+            <th data-field="filename" data-filter-control="input" data-sortable="true">Title</th>
             {% if current_user.is_admin %}
-                <th data-field="user"       data-filter-control="input" data-sortable="true">Username</th>
+                <th data-field="user" data-filter-control="input" data-sortable="true">Username</th>
             {% endif %}
-            <th data-field="upload-date"    data-filter-control="datepicker" data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}' data-sortable="true">Upload date</th>
+            <th data-field="upload-date" data-filter-control="datepicker" data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}' data-sortable="true">Upload date</th>
             <!-- <th data-field="check-date"     data-filter-control="datepicker" data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}' data-sortable="true">Check date</th> -->
             <!-- <th data-field="moodle-date"    data-filter-control="datepicker" data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}' data-sortable="true">Moodle upload date</th> -->
-            <th data-field="score"          data-filter-control="input" data-sortable="true">Result</th>
+            <th data-field="score" data-filter-control="input" data-sortable="true">Result</th>
             </tr>
         </thead>
     </table>

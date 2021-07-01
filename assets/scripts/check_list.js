@@ -100,7 +100,12 @@ function initTable() {
         sortOrder: params.order,
 
         queryParams: queryParams,
-        ajax: ajaxRequest
+        ajax: ajaxRequest,
+
+        columns: [{
+            field: "_id",
+            formatter: idFormatter
+        }]
     })
 
     // fill filters
@@ -156,4 +161,8 @@ function queryParams(params) {
     }
 
     return query
+}
+
+function idFormatter(value, row, index, field) {
+    return `<a href="/results/${value}">${value.slice(0, 5)}-${value.slice(-5)}</a>`
 }
