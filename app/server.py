@@ -4,6 +4,7 @@ from sys import argv
 
 import json
 import bson
+import pymongo
 from bson import ObjectId
 from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify
 from flask_login import LoginManager, login_user, current_user, login_required
@@ -166,11 +167,6 @@ def check_list():
 @app.route("/check_list/data")
 @login_required
 def check_list_data():
-    # query necessary data from mongo
-    rows = checks_collection.find(
-        projection=["_id", "filename", "user", "score"]
-    )
-
     # transform json filter into dict
     filters = request.args.get("filter", "")
     try:
@@ -178,45 +174,50 @@ def check_list_data():
     except:
         filters = {}
 
-    # apply filters to collection
-    f_id = filters.get("_id", "")
-    rows = rows.find({"_id": ObjectId(f_id)}) if f_id else rows
+    # request filter to mongo query filter conversion 
+    filter_query = {}
+    if f_id := filters.get("_id", None):
+        filter_query["_id"] = ObjectId(f_id)
 
-    f_filename = filters.get("filename", "")
-    rows = rows.find({"filename": { "$regex": f_filename }}) if f_filename else rows
+    if f_filename := filters.get("filename", None):
+        filter_query["filename"] = { "$regex": f_filename }
 
-    f_user = filters.get("user", "")
-    rows = rows.find({"user": { "$regex": f_user }}) if f_user else rows
+    if f_user := filters.get("user", None):
+        filter_query["user"] = { "$regex": f_user }
 
-    try:
-        f_upload_date = list(filter(lambda val: val, filters.get("upload-date", "").split("-")))
-        if len(f_upload_date) == 1:
-            date = datetime.strptime(f_upload_date[0], "%d.%m.%Y")
-            rows = rows.find({"_id": ObjectId.from_datetime(date)})
-        elif len(f_upload_date) > 1:
-            b_date = datetime.strptime(f_upload_date[0], "%d.%m.%Y")
-            e_date = datetime.strptime(f_upload_date[1], "%d.%m.%Y")
-            rows = rows.find({"_id": {"$gte": ObjectId.from_datetime(b_date), "$lte": ObjectId.from_datetime(e_date)}})
-    except Exception as e:
-        print("ERROR::Cant apply upload-date filter")
-        print(repr(e))
+    if f_upload_date := filters.get("upload-date", None):
+        f_upload_date_list = list(filter(lambda val: val, f_upload_date.split("-")))
+        try:
+            if len(f_upload_date_list) == 1:
+                date = datetime.strptime(f_upload_date_list[0], "%d.%m.%Y")
+                filter_query["_id"] = ObjectId.from_datetime(date)
+            elif len(f_upload_date_list) > 1:
+                b_date = datetime.strptime(f_upload_date_list[0], "%d.%m.%Y")
+                e_date = datetime.strptime(f_upload_date_list[1], "%d.%m.%Y")
+                filter_query["_id"] = { "$gte": ObjectId.from_datetime(b_date), "$lte": ObjectId.from_datetime(e_date) }
+        except Exception as e:
+            logger.warning("Can't apply upload-date filter")
+            logger.warning(repr(e))
 
-    try:
-        f_score = list(filter(lambda val: val, filters.get("score", "").split("-")))
-        if len(f_score) == 1:
-            score = float(f_score[0])
-            rows = rows.find({"score": score})
-        elif len(f_score) > 1:
-            b_score = float(f_score[0])
-            e_score = float(f_score[1])
-            rows = rows.find({"score": { "$gte": b_score, "$lte": e_score } })
-    except Exception as e:
-        print("ERROR::Cant apply score filter")
-        print(repr(e))
+    if f_score := filters.get("score", None):
+        print(f"||| {f_score} |||")
+        f_score_list = list(filter(lambda val: val, f_score.split("-")))
+        print(f"||| LIST: {f_score_list} |||")
+        try:
+            if len(f_score_list) == 1:
+                score = float(f_score_list[0])
+                filter_query["score"] = score
+            elif len(f_score_list) > 1:
+                b_score = float(f_score_list[0])
+                e_score = float(f_score_list[1])
+                filter_query["score"] = { "$gte": b_score, "$lte": e_score }
+        except Exception as e:
+            logger.warning("Can't apply score filter")
+            logger.warning(repr(e))
         
-    # find docs for current non-admin user
+    # set user filter for current non-admin user
     if not current_user.is_admin:
-        rows = rows.find({"user": current_user.username})    
+        filter_query["user"] = current_user.username
     
     # parse and validate rest query
     limit = request.args.get("limit", "")
@@ -226,19 +227,31 @@ def check_list_data():
     offset = int(offset) if offset.isnumeric() else 0
 
     sort = request.args.get("sort", "")
-    sort = sort if sort in ["_id", "filename", "user", "upload-date", "score"] else ""
+    sort = sort if sort in ["_id", "filename", "user", "upload-date", "score"] else None
     
     order = request.args.get("order", "")
-    order = order if order in ["asc", "desc"] else ""
+    order = order if order in ["asc", "desc"] else None
 
-    if "" in [sort, order]:
-        sort = ""
-        order = ""
+    # find count of documents
+    count = checks_collection.count_documents(filter_query)
+    rows = checks_collection.find(filter_query)
 
-    # cursor to list conversion
+    # apply rest query
+    if sort and order:
+        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
+
+    rows = rows.skip(offset).limit(limit)
+
+    # construct response
     response = {
-        "total": 0,
-        "rows": []
+        "total": count,
+        "rows": [{
+            "_id": str(item["_id"]),
+            "filename": item["filename"],
+            "user": item["user"],
+            "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y"),
+            "score": item["score"]
+        } for item in rows]
     }
 
     # return json data
