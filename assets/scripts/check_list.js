@@ -1,5 +1,7 @@
 const AJAX_URL = "/check_list/data"
 
+history.replaceState(null, "")
+
 String.prototype.insert = function(index, string) {
     if (index > 0) {
         return this.substring(0, index) + string + this.substr(index)
@@ -148,16 +150,18 @@ function queryParams(params) {
         offset: params.offset,
         sort: params.sort,
         order: params.order,
-        filter: params.filter
     }
 
-    // if filter is empty, try to pull filter from address bar
-    if (!params.filter) {
+    // if there were not any ajax request then history state is empty
+    // if history state is empty, try to load filters from url
+    if (!history.state) {
         try {
-            const addrFilter = JSON.parse(decodeURI(new URLSearchParams(window.location.search).get("filter")))
+            const addrFilter = decodeURI(new URLSearchParams(window.location.search).get("filter"))
             query.filter = addrFilter
         }
         catch {}
+    } else if (params.filter) {
+        query.filter = params.filter
     }
 
     return query
