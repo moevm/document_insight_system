@@ -145,18 +145,6 @@ def criteria():
     elif request.method == "POST":
         return user.update_criteria(request.json)
 
-@app.route("/stats", methods=["GET"])
-@login_required
-def stats():
-    if current_user.is_admin:
-        stats = format_stats(get_all_checks())
-        return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
-    else:
-         login = current_user.username
-         user = users_collection.find_one({'username': login})
-         stats = format_stats(get_user_checks(login))
-         return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
-
 
 @app.route("/check_list")
 @login_required
