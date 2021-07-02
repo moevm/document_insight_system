@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from sys import argv
 
@@ -189,7 +189,11 @@ def check_list_data():
     f_upload_date_list = list(filter(lambda val: val, f_upload_date.split("-")))
     try:
         if len(f_upload_date_list) == 1:
-            filter_query["_id"] = ObjectId.from_datetime(datetime.strptime(f_upload_date_list[0], "%d.%m.%Y"))
+            date = datetime.strptime(f_upload_date_list[0], "%d.%m.%Y")
+            filter_query["_id"] = {
+                "$gte": ObjectId.from_datetime(date),
+                "$lte": ObjectId.from_datetime(date + timedelta(hours=23, minutes=59, seconds=59))
+            }
         elif len(f_upload_date_list) > 1:
             filter_query["_id"] = {
                 "$gte": ObjectId.from_datetime(datetime.strptime(f_upload_date_list[0], "%d.%m.%Y")),
