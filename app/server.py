@@ -171,6 +171,7 @@ def check_list_data():
     filters = request.args.get("filter", "")
     try:
         filters = json.loads(filters)
+        filters = filters if filters else {}
     except Exception as e:
         logger.warning("Can't parse filters")
         logger.warning(repr(e))
