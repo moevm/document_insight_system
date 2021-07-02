@@ -149,7 +149,7 @@ def criteria():
 @app.route("/check_list")
 @login_required
 def check_list():
-    return render_template("./check_list.html", name=current_user.name)
+    return render_template("./check_list.html", name=current_user.name, navi_upload=True)
 
 
 @app.route("/check_list/data")
