@@ -73,9 +73,8 @@ function initTable() {
     // check correct sort query
     if (params.sort !== "") {
         let match = false
-        $("#table th").each(function() {
-            if ($(this).data("field") === params.sort)
-            {
+        $table.find("th[data-sortable='true']").each(function() {
+            if ($(this).data("field") === params.sort) {
                 match = true
                 return false
             }
@@ -86,12 +85,24 @@ function initTable() {
         }
     }
 
+
     // check pair of sort and order
     if ([params.sort, params.order].includes("")) {
         params.sort = ""
         params.order = ""
     }
 
+    // Fill filters
+    $table.on("created-controls.bs.table", function() {
+        if (params.filter) {
+            params.filter = JSON.parse(decodeURI(params.filter))
+            for (const [key, value] of Object.entries(params.filter)) {
+                const $input = $(`.bootstrap-table-filter-control-${key}`)
+                $input.val(value)
+            }
+        }
+    })
+    
     // activate bs table
     $table.bootstrapTable({
         pageNumber: parseInt(params.page) || 1,
@@ -107,23 +118,13 @@ function initTable() {
             formatter: idFormatter
         }]
     })
-
-    // fill filters
-    if (params.filter) {
-        params.filter = JSON.parse(decodeURI(params.filter))
-        for (const [key, value] of Object.entries(params.filter)) {
-            const $input = $(`.bootstrap-table-filter-control-${key}`)
-            $input.val(value)
-        }
-    }
 }
 
 function ajaxRequest(params) {
     const queryString = "?" + $.param(params.data)
     const url = AJAX_URL + queryString
-    console.log("ajax:", url, params);
+    console.log("ajax:", url);
     $.get(url).then(res => params.success(res))
-    console.log("ajax completed");
 
     pushHistoryState(params)
 }
@@ -143,6 +144,15 @@ function pushHistoryState(params) {
 }
 
 function queryParams(params) {
+    filters = {}
+    $('.filter-control').each(function() {
+        const name = $(this).parents("th").data("field")
+        const val = this.querySelector("input").value
+        if (val){
+            filters[name] = val
+        }
+    })
+
     const query = {
         limit: params.limit,
         offset: params.offset,
@@ -150,23 +160,8 @@ function queryParams(params) {
         order: params.order,
     }
 
-    let paramsFilter
-    try {
-        paramsFilter = JSON.parse(params.filter)
-    } catch {
-        paramsFilter = {}
-    }
-
-    let urlFilter
-    try {
-        urlFilter = JSON.parse(decodeURI(new URLSearchParams(window.location.search).get("filter")))
-    } catch {
-        urlFilter = {};
-    }
-
-    const mergedFilter = {...urlFilter, ...paramsFilter}
-    if (!$.isEmptyObject(mergedFilter)) {
-        query.filter = JSON.stringify(mergedFilter)
+    if (!$.isEmptyObject(filters)) {
+        query.filter = JSON.stringify(filters)
     }
 
     return query
