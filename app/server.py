@@ -219,6 +219,8 @@ def check_list_data():
     sort = request.args.get("sort", "")
     order = request.args.get("order", "")
 
+    sort = "_id" if sort == "upload-date" else sort
+
     # get data and records count
     rows, count = get_checks_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
 
