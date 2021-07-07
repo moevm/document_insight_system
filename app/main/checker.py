@@ -24,7 +24,7 @@ def get_len_on_additional(presentation, slides_number):
     if len(find_additional) == 0:
         return __answer(len(presentation.slides) < slides_number, len(presentation.slides))
     else:
-        return __answer(find_additional[0] < slides_number, find_additional[0])
+        return __answer(find_additional[0] <= slides_number, find_additional[0])
 
 def __check_slides_enumeration(presentation):
     error = ""
@@ -113,7 +113,7 @@ def __find_tasks_on_slides(presentation, goals, intersection_number):
         return __answer(True, "Все задачи найдены на слайдах")
     else:
         logger.info("\tНекоторые из заявленных задач на слайдах не найдены")
-        return __answer(False, "Некоторые задачи на слайдах не найдены")
+        return {'pass': False, 'value': slides_with_tasks}
 
 
 def check(presentation, checks, presentation_name, username):

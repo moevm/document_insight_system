@@ -37,24 +37,28 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
         stemming = Stemming()
         tasks = stemming.get_sentences(slide_goal_and_tasks, True)
         if len(tasks) == 0:
-            return -1
+            return 'Задач не существует'
 
+        cleaned_tasks = []
+        found_descriptions = []
         task_count = 0
         slides_with_task = 0
         for task in tasks:
             if task == Task or task.isdigit():
                 continue
             task_count += 1
+            cleaned_tasks.append(task)
             for title in titles:
                 if title == '':
                     continue
                 similarity = compare_task_and_title(task, title) * 100
                 if similarity >= intersection:
                     slides_with_task += 1
+                    found_descriptions.append(task)
                     logger.info('\t\tВ презентации найдено описание задачи: ' + str(task))
                     break
         if task_count == slides_with_task:
             return 0
-        return -1
+        return slides_with_task, list(set(cleaned_tasks) - set(found_descriptions))
     except Exception as error:
         return error

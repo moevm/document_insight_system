@@ -91,7 +91,14 @@
                     <th scope="row" class="ins">8</th>
                     <td class="ins">Наличие слайдов, посвященных задачам</td>
                     <td class="{{ "table-secondary ins" if results.slide_every_task == -1 else ("table-success ins" if results.slide_every_task.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.slide_every_task == -1 else results.slide_every_task.value }}
+                        {% if results.slide_every_task.pass %}
+                            {{ results.slide_every_task.value }}
+                        {% elif results.slide_every_task == -1 %}
+                            {{ "Не проведена" }}
+                        {% else %}
+                            {{ "Всего найдено: " ~ results.slide_every_task.value[0] }}<br>
+                            {{ "Не найдены: " ~ results.slide_every_task.value[1]|join('; ') }}
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
