@@ -1,5 +1,15 @@
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+import 'bootstrap-table';
+import 'bootstrap-table/dist/bootstrap-table.min.css'
+
+import 'bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control'
+import 'bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.min.css'
+
+import 'bootstrap-datepicker';
+import 'bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css'
+
 import * as CryptoJS from "crypto-js";
 
 import '../styles/main.css';
@@ -12,6 +22,7 @@ import './results';
 import './signup';
 import './upload';
 import './version';
+import './check_list';
 
 import '../favicon.ico';
 import '../styles/404.css';

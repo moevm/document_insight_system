@@ -1,9 +1,12 @@
+from datetime import datetime, timedelta
 import logging
 from sys import argv
 
+import json
 import bson
+import pymongo
 from bson import ObjectId
-from flask import Flask, request, redirect, url_for, render_template, Response, abort
+from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify
 from flask_login import LoginManager, login_user, current_user, login_required
 
 
@@ -11,7 +14,7 @@ import app.servants.user as user
 from app.servants import data as data
 from app.bd_helper.bd_helper import (
     get_user, get_check, get_presentation_check, users_collection,
-    get_all_checks, get_user_checks, format_stats, format_check)
+    get_all_checks, get_user_checks, format_stats, format_check, get_checks_cursor)
 from app.servants import pre_luncher
 
 from app.utils.decorators import decorator_assertion
@@ -142,21 +145,105 @@ def criteria():
     elif request.method == "POST":
         return user.update_criteria(request.json)
 
-@app.route("/stats", methods=["GET"])
+
+@app.route("/check_list")
 @login_required
-def stats():
-    if current_user.is_admin:
-        stats = format_stats(get_all_checks())
-        return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
-    else:
-         login = current_user.username
-         user = users_collection.find_one({'username': login})
-         stats = format_stats(get_user_checks(login))
-         return render_template("./stats.html", name=current_user.name, columns = columns, stats = stats)
+def check_list():
+    return render_template("./check_list.html", name=current_user.name, navi_upload=True)
+
+
+@app.route("/check_list/data")
+@login_required
+def check_list_data():
+    # transform json filter into dict
+    filters = request.args.get("filter", "")
+    try:
+        filters = json.loads(filters)
+        filters = filters if filters else {}
+    except Exception as e:
+        logger.warning("Can't parse filters")
+        logger.warning(repr(e))
+        filters = {}
+
+    # request filter to mongo query filter conversion 
+    filter_query = {}
+    if f_filename := filters.get("filename", None):
+        filter_query["filename"] = { "$regex": f_filename }
+
+    if f_user := filters.get("user", None):
+        filter_query["user"] = { "$regex": f_user }
+
+    f_upload_date = filters.get("upload-date", "")
+    f_upload_date_list = list(filter(lambda val: val, f_upload_date.split("-")))
+    try:
+        if len(f_upload_date_list) == 1:
+            date = datetime.strptime(f_upload_date_list[0], "%d.%m.%Y")
+            filter_query["_id"] = {
+                "$gte": ObjectId.from_datetime(date),
+                "$lte": ObjectId.from_datetime(date + timedelta(hours=23, minutes=59, seconds=59))
+            }
+        elif len(f_upload_date_list) > 1:
+            filter_query["_id"] = {
+                "$gte": ObjectId.from_datetime(datetime.strptime(f_upload_date_list[0], "%d.%m.%Y")),
+                "$lte": ObjectId.from_datetime(datetime.strptime(f_upload_date_list[1], "%d.%m.%Y"))
+            }
+    except Exception as e:
+        logger.warning("Can't apply upload-date filter")
+        logger.warning(repr(e))
+
+    f_score = filters.get("score", "")
+    f_score_list = list(filter(lambda val: val, f_score.split("-")))
+    try:
+        if len(f_score_list) == 1:
+            filter_query["score"] = float(f_score_list[0])
+        elif len(f_score_list) > 1:
+            filter_query["score"] = {
+                "$gte": float(f_score_list[0]),
+                "$lte": float(f_score_list[1])
+            }
+    except Exception as e:
+        logger.warning("Can't apply score filter")
+        logger.warning(repr(e))
+        
+    # set user filter for current non-admin user
+    if not current_user.is_admin:
+        filter_query["user"] = current_user.username
+    
+    # parse and validate rest query
+    limit = request.args.get("limit", "")
+    limit = int(limit) if limit.isnumeric() else 10
+
+    offset = request.args.get("offset", "")
+    offset = int(offset) if offset.isnumeric() else 0
+
+    sort = request.args.get("sort", "")
+    order = request.args.get("order", "")
+
+    sort = "_id" if sort == "upload-date" else sort
+
+    # get data and records count
+    rows, count = get_checks_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+
+    # construct response
+    response = {
+        "total": count,
+        "rows": [{
+            "_id": str(item["_id"]),
+            "filename": item["filename"],
+            "user": item["user"],
+            "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H:%M:%S"),
+            "score": item["score"]
+        } for item in rows]
+    }
+
+    # return json data
+    return jsonify(response)
+
 
 @app.route("/version")
 def version():
     return render_template("./version.html")
+
 
 @app.route('/profile', methods=["GET"], defaults={'username': ''})
 @app.route('/profile/<string:username>', methods=["GET"])
