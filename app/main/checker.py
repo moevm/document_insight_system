@@ -18,6 +18,13 @@ def __check_slides_number(presentation, number, conclusion_slide_number):
     logger.info("\tКоличество основных слайдов в презентации равно " + str(conclusion_slide_number))
     return __answer(int(number) >= conclusion_slide_number, conclusion_slide_number)
 
+def get_len_on_additional(presentation, slides_number):
+    additional = 'Запасн'
+    find_additional = [i for i, header in enumerate(presentation.get_titles()) if additional in header]
+    if len(find_additional) == 0:
+        return __answer(len(presentation.slides) < slides_number, len(presentation.slides))
+    else:
+        return __answer(find_additional[0] < slides_number, find_additional[0])
 
 def __check_slides_enumeration(presentation):
     error = ""
@@ -128,7 +135,7 @@ def check(presentation, checks, presentation_name, username):
         checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION)
 
     if checks.slides_number != -1:  # Количество основных слайдов
-        checks.slides_number = __check_slides_number(presentation, checks.slides_number, checks.conclusion_slide)
+        checks.slides_number = get_len_on_additional(presentation, checks.slides_number)
 
     similar = __are_slides_similar(goals_array, conclusion_array, checks.conclusion_actual)
     if checks.conclusion_actual != -1:  # Соответствие закличения задачам
