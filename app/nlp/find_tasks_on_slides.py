@@ -59,6 +59,6 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
                     break
         if task_count == slides_with_task:
             return 0
-        return slides_with_task, list(set(cleaned_tasks) - set(found_descriptions))
+        return task_count, list(set(cleaned_tasks) - set(found_descriptions))
     except Exception as error:
         return error

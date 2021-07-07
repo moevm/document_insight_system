@@ -96,7 +96,7 @@
                         {% elif results.slide_every_task == -1 %}
                             {{ "Не проведена" }}
                         {% else %}
-                            {{ "Всего найдено: " ~ results.slide_every_task.value[0] }}<br>
+                            {{ "Всего задач: " ~ results.slide_every_task.value[0] }}<br>
                             {{ "Не найдены: " ~ results.slide_every_task.value[1]|join('; ') }}
                         {% endif %}
                     </td>
