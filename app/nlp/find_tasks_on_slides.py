@@ -44,7 +44,7 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
         task_count = 0
         slides_with_task = 0
         for task in tasks:
-            if task == Task or task.isdigit():
+            if task == Task or task.isdigit() or '‹#›' in task:
                 continue
             task_count += 1
             cleaned_tasks.append(task)
