@@ -61,4 +61,5 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
             return 0
         return task_count, list(set(cleaned_tasks) - set(found_descriptions))
     except Exception as error:
-        return error
+        logger.error(error, exc_info=True)
+        return str(error)

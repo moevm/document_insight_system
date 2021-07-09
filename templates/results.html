@@ -95,9 +95,11 @@
                             {{ results.slide_every_task.value }}
                         {% elif results.slide_every_task == -1 %}
                             {{ "Не проведена" }}
-                        {% else %}
+                        {% elif results.lslide_every_task.value|length == 2 %}
                             {{ "Всего задач: " ~ results.slide_every_task.value[0] }}<br>
                             {{ "Не найдены: " ~ results.slide_every_task.value[1]|join('; ') }}
+                        {% else %}
+                            {{ results.slide_every_task.value }}
                         {% endif %}
                     </td>
                 </tr>
@@ -112,7 +114,7 @@
                     <th scope="row" class="ins">10</th>
                     <td class="ins">Наличие направлений дальнейшего развития</td>
                     <td class="{{ "table-secondary ins" if results.conclusion_along == -1 else ("table-success ins" if results.conclusion_along.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.conclusion_along == -1 else ("Найдены" if results.conclusion_along.value else "Не найдены") }}
+                        {{ "Не проведена" if results.conclusion_along == -1 else ("Найдены" if results.conclusion_along.pass else "Не найдены") }}
                     </td>
                 </tr>
             </tbody>

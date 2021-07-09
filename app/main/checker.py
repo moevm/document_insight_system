@@ -1,4 +1,4 @@
-from re import split
+import re
 from app.nlp.similarity_of_texts import check_similarity
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
 from logging import getLogger
@@ -19,10 +19,10 @@ def __check_slides_number(presentation, number, conclusion_slide_number):
     return __answer(int(number) >= conclusion_slide_number, conclusion_slide_number)
 
 def get_len_on_additional(presentation, slides_number):
-    additional = 'Запасн'
-    find_additional = [i for i, header in enumerate(presentation.get_titles()) if additional in header]
+    additional = re.compile('[А-Я][а-я]*[\s]слайд[ы]?')
+    find_additional = [i for i, header in enumerate(presentation.get_titles()) if re.fullmatch(additional, header)]
     if len(find_additional) == 0:
-        return __answer(len(presentation.slides) < slides_number, len(presentation.slides))
+        return __answer(len(presentation.slides) <= slides_number, len(presentation.slides))
     else:
         return __answer(find_additional[0] <= slides_number, find_additional[0])
 
@@ -49,7 +49,7 @@ def __check_title_size(presentation):
         title = str(title).replace('\x0b', '\n')
         if '\n' in title or '\r' in title:
             titles = []
-            for t in split('\r|\n', title):
+            for t in re.split('\r|\n', title):
                 if t != '':
                     titles.append(t)
             if len(titles) > 2:
