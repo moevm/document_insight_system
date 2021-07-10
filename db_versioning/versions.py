@@ -27,12 +27,13 @@ version_1_1 = Version(
             'checks': {
                 '$set': {
                     'filename': '_.pptx',
-                    'user': 'moevm'
+                    'user': 'moevm',
+                    'score': -1
                 }
             }
         }
     },
-    info="В коллекцию checks добавлены поля filename и user. Для перехода с версии 1.0 необходимо заполнить поля"
+    info="В коллекцию checks добавлены поля filename, user и score. Для перехода с версии 1.0 необходимо заполнить поля"
 )
 
 versions = (version_1_0, version_1_1)
