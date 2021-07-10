@@ -1,11 +1,17 @@
+from json import dumps as json_dumps
+
 class Version:
-    def __init__(self, version='1.0', changes=None, info='First DB version'):
+    def __init__(self, version='1.0', changes='', info='First DB version'):
         self.version = version
         self.changes = changes
         self.info = info
 
     def to_dict(self):
-        return vars(self)
+        return dict(
+            version = self.version,
+            changes = json_dumps(self.changes),
+            info = self.info
+        )
 
 def get_version(versio_name):
     for version in versions:

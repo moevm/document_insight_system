@@ -26,13 +26,15 @@ class DBCollections:
 
 def add_version(version):
     version_doc = DBCollections.version_collection.insert_one(version.to_dict())
-    return dict(version_doc)
+    return version_doc.inserted_id
 
 def update_db_version():
     version_doc = DBCollections.version_collection.find_one()
     
     if not version_doc:
-        version_doc = add_version(versions[0])    # if no version == 1.0
+        version_doc_id = add_version(versions[0])    # if no version == 1.0
+        version_doc = DBCollections.version_collection.find_one({'_id': version_doc_id})
+    version_doc_id = version_doc['_id']
 
     last_version = versions[-1].version
     if version_doc['version'] == last_version:
@@ -47,7 +49,12 @@ def update_db_version():
         exit(1)
 
     for collection_name, changes in last_version.changes[cur_version_name].items():
-        make_changes(DBCollections.get_by_name(collection_name), changes)
+        if not changes:
+            make_changes(DBCollections.get_by_name(collection_name), changes)
+
+    print(f"Prev version: {version_doc}")
+    DBCollections.version_collection.update({'_id': version_doc_id}, last_version.to_dict())
+    print(f"New version: {DBCollections.version_collection.find_one({'_id': version_doc_id})}")
 
     print(f'Updated from {cur_version_name} to {last_version.version}')
 
