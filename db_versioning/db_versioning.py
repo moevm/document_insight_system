@@ -49,7 +49,7 @@ def update_db_version():
         exit(1)
 
     for collection_name, changes in last_version.changes[cur_version_name].items():
-        if not changes:
+        if changes:
             make_changes(DBCollections.get_by_name(collection_name), changes)
 
     print(f"Prev version: {version_doc}")
@@ -68,8 +68,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--mongo', default='mongodb://mongodb:27017', help='Mongo host')
     args = parser.parse_args()
-    print(args)
 
     DBCollections.init(args.mongo)
+    DBCollections.version_collection.drop()
 
     update_db_version()
