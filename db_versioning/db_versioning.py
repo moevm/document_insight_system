@@ -59,7 +59,7 @@ def make_changes(collection, changes):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Checks DB version, makes the necessary changes for the transition')
 
-    parser.add_argument('--mongo', help='Mongo host')
+    parser.add_argument('--mongo', default='mongodb://mongodb:27017', help='Mongo host')
     args = parser.parse_args()
     print(args)
 
