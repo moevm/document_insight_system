@@ -70,6 +70,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     DBCollections.init(args.mongo)
-    DBCollections.version_collection.drop()
 
     update_db_version()
