@@ -28,7 +28,7 @@ def compare_task_and_title(task, title):
         else:
             l2.append(0)
 
-    cosine_similarity = ((1 - distance.cosine(l1, l2)) + 1)/2 #normalize
+    cosine_similarity = 1 - distance.cosine(l1, l2)
     return cosine_similarity
 
 
