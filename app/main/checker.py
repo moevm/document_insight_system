@@ -29,10 +29,10 @@ def get_len_on_additional(presentation, slides_number):
 def __check_slides_enumeration(presentation):
     error = ""
     if presentation.slides[0].page_number[0] != -1:
-        error += "0 "
+        error += "1 "
     for i in range(1, len(presentation.slides)):
         if presentation.slides[i].page_number[0] != i + 1:
-            error += str(i) + " "
+            error += str(i+1) + " "
     logger.info(("\tПлохо пронумерованные слайды: " + str(error)) if error != "" else "\tВсе слайды пронумерованы корректно")
     return __answer(error == "", error)
 
