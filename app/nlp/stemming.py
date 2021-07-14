@@ -8,7 +8,6 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 
 TASKS = 'задачи:'
-FURTHER_DEVELOPMENT = 'дальнейшие'
 
 
 class Stemming:
@@ -29,10 +28,12 @@ class Stemming:
         return self.sentences
 
     def parse_text(self, string, flag):
+        morph = MorphAnalyzer()
+        FURTHER_DEVELOPMENT = morph.parse('дальнейшие'.lower())[0].normal_form
+        FURTHER_IMPROVEMENTS = morph.parse('улучшения'.lower())[0].normal_form
         self.sentences = []
         self.find_further_development = False
         self.filtered_docs = []
-        morph = MorphAnalyzer()
         stop_words = stopwords.words("russian")
         filtered_doc = []
         self.get_sentences(string, flag)
@@ -44,7 +45,7 @@ class Stemming:
                     if word not in stop_words:
                         w = morph.parse(word)[0].normal_form
                         filtered_doc.append(w)
-                        if w == morph.parse(FURTHER_DEVELOPMENT.lower())[0].normal_form and flag == False:
+                        if (w == FURTHER_DEVELOPMENT or w == FURTHER_IMPROVEMENTS) and flag == False:
                             self.find_further_development = True
             self.filtered_docs.append(filtered_doc)
             filtered_doc = []
@@ -55,4 +56,3 @@ class Stemming:
 
     def is_find_further_development_on_slide(self):
         return self.find_further_development
-
