@@ -40,9 +40,9 @@
             <tbody>
                 <tr>
                     <th scope="row" class="ins">1</th>
-                    <td class="ins">Количество основных слайдов</td>
+                    <td class="ins">Количество основных слайдов(До запасных слайдов)</td>
                     <td class="{{ "table-secondary ins" if results.slides_number == -1 else ("table-success ins" if results.slides_number.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.slides_number == -1 else ("Всего: " ~ results.slides_number.value) }}
+                        {{ "Не проведена" if results.slides_number == -1 else results.slides_number.value }}
                     </td>
                 </tr>
                 <tr>
