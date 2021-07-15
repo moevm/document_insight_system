@@ -42,18 +42,15 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
 
         task_count = len(cleaned_tasks)
         found_descriptions = []
-        slides_with_task = 0
+        cleaned_titles = list(filter(None, titles))
         for task in cleaned_tasks:
-            for title in titles:
-                if title == '':
-                    continue
+            for title in cleaned_titles:
                 similarity = compare_task_and_title(task, title) * 100
                 if similarity >= intersection:
-                    slides_with_task += 1
                     found_descriptions.append(task)
                     logger.info('\t\tВ презентации найдено описание задачи: ' + str(task))
                     break
-        if task_count == slides_with_task:
+        if task_count == len(found_descriptions):
             return 0
         return task_count, list(set(cleaned_tasks) - set(found_descriptions))
     except Exception as error:
