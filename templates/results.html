@@ -42,14 +42,29 @@
                     <th scope="row" class="ins">1</th>
                     <td class="ins">Количество основных слайдов(До запасных слайдов)</td>
                     <td class="{{ "table-secondary ins" if results.slides_number == -1 else ("table-success ins" if results.slides_number.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.slides_number == -1 else results.slides_number.value }}
+                        {% if results.slides_number == -1 %}
+                            {{ 'Не проведена' }}
+                        {% else %}
+                            {{ 'Всего: ' ~ results.slides_number.value }}<br>
+                            {% if not results.slides_number.pass %}
+                                {{ 'Проверьте существование неозаглавленных запасных слайдов' }}
+                            {% endif %}
+                        {% endif %}
+
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">2</th>
                     <td class="ins">Нумерация слайдов</td>
                     <td class="{{ "table-secondary ins" if results.slides_enum == -1 else ("table-success ins" if results.slides_enum.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.slides_enum == -1 else ("Пройдена!" if results.slides_enum.pass else ("Не пройдена, проблемные слайды: " + results.slides_enum.value)) }}
+                        {% if results.slides_enum == -1 %}
+                            {{ "Не проведена" }}
+                        {% elif results.slides_enum.pass %}
+                            {{ "Пройдена!" }}
+                        {% else %}
+                            {{ 'Не пройдена, проблемные слайды: ' ~ results.slides_enum.value }}<br>
+                            {{ 'Убедитесь в корректности формата Slide number в Placeholder'}}
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>

@@ -22,10 +22,7 @@ def get_len_on_additional(presentation, slides_number):
     additional = re.compile('[А-Я][а-я]*[\s]слайд[ы]?')
     find_additional = [i for i, header in enumerate(presentation.get_titles()) if re.fullmatch(additional, header)]
     if len(find_additional) == 0:
-        if len(presentation.slides) <= slides_number:
-            return __answer(True, len(presentation.slides))
-        else:
-            return __answer(False, 'Возможно существуют неозаглавленные запасные слайды')
+        return __answer(len(presentation.slides) <= slides_number, len(presentation.slides))
     else:
         return __answer(find_additional[0] <= slides_number, find_additional[0])
 

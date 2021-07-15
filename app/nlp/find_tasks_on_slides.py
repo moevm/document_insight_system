@@ -1,13 +1,12 @@
 from app.nlp.stemming import Stemming
+import re
 from logging import getLogger
+logger = getLogger('root')
 import itertools
 from scipy.spatial import distance
-logger = getLogger('root')
-
-Task = 'Задачи:'
-
 
 def compare_task_and_title(task, title):
+    #weak check, def doesn't work: CountVect/Tf-IdfVect
     stemming = Stemming()
     parse_task = stemming.get_filtered_docs(task, False)
     parse_title = stemming.get_filtered_docs(title, False)
@@ -36,18 +35,15 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
     try:
         stemming = Stemming()
         tasks = stemming.get_sentences(slide_goal_and_tasks, True)
-        if len(tasks) == 0:
+        ignore = re.compile('[0-9][.]?|Задачи:|‹#›')  #[:]?
+        cleaned_tasks = [task for task in tasks if not re.fullmatch(ignore, task)]
+        if len(cleaned_tasks) == 0:
             return 'Задач не существует'
 
-        cleaned_tasks = []
+        task_count = len(cleaned_tasks)
         found_descriptions = []
-        task_count = 0
         slides_with_task = 0
-        for task in tasks:
-            if task == Task or task.isdigit() or '‹#›' in task:
-                continue
-            task_count += 1
-            cleaned_tasks.append(task)
+        for task in cleaned_tasks:
             for title in titles:
                 if title == '':
                     continue
