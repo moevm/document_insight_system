@@ -62,7 +62,7 @@
                         {% elif results.slides_enum.pass %}
                             {{ "Пройдена!" }}
                         {% else %}
-                            {{ 'Не пройдена, проблемные слайды: ' ~ results.slides_enum.value }}<br>
+                            {{ 'Не пройдена, проблемные слайды: ' ~ results.slides_enum.value|join(', ') }}<br>
                             {{ 'Убедитесь в корректности формата Slide number в Placeholder'}}
                         {% endif %}
                     </td>

@@ -27,14 +27,14 @@ def get_len_on_additional(presentation, slides_number):
         return __answer(find_additional[0] <= slides_number, find_additional[0])
 
 def __check_slides_enumeration(presentation):
-    error = ""
+    error = []
     if presentation.slides[0].page_number[0] != -1:
-        error += "1 "
+        error.append(1)
     for i in range(1, len(presentation.slides)):
         if presentation.slides[i].page_number[0] != i + 1:
-            error += str(i+1) + " "
-    logger.info(("\tПлохо пронумерованные слайды: " + str(error)) if error != "" else "\tВсе слайды пронумерованы корректно")
-    return __answer(error == "", error)
+            error.append(i+1)
+    logger.info(("\tПлохо пронумерованные слайды: " + str(error)) if error != [] else "\tВсе слайды пронумерованы корректно")
+    return {'pass': error == [], 'value': error}
 
 
 def __check_title_size(presentation):
