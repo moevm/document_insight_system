@@ -67,13 +67,19 @@ SLIDE_WITH_RELEVANCE = 'Актуальность'
 
 def __find_definite_slide(presentation, type_of_slide):
     i = 0
+    found_slides = []
+    found_idxs = []
     for title in presentation.get_titles():
         i += 1
         if str(title).lower().find(str(type_of_slide).lower()) != -1:
             logger.info("\tСлайд " + type_of_slide + " найден")
-            return __answer(True, i), presentation.get_text_from_slides()[i - 1]
-    logger.info("\tСлайд " + type_of_slide + " не найден")
-    return __answer(False, ""), ""
+            found_slides.append(presentation.get_text_from_slides()[i - 1])
+            found_idxs.append(i)
+    if len(found_slides) == 0:
+        logger.info("\tСлайд " + type_of_slide + " не найден")
+        return __answer(False, ""), ""
+    else:
+        return {'pass': True, 'value': found_idxs}, ' '.join(found_slides)
 
 
 def __check_actual_slide(presentation):

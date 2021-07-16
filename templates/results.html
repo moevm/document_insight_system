@@ -78,28 +78,28 @@
                     <th scope="row" class="ins">4</th>
                     <td class="ins">Слайд "Цель и задачи"</td>
                     <td class="{{ "table-secondary ins" if results.goals_slide == -1 else ("table-success ins" if results.goals_slide.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.goals_slide == -1 else (("Найден под номером: " ~ results.goals_slide.value) if results.goals_slide.pass else "Не найден!") }}
+                        {{ "Не проведена" if results.goals_slide == -1 else (("Найден под номером: " ~ results.goals_slide.value|join(', ')) if results.goals_slide.pass else "Не найден!") }}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">5</th>
                     <td class="ins">Слайд "Апробация работы"</td>
                     <td class="{{ "table-secondary ins" if results.probe_slide == -1 else ("table-success ins" if results.probe_slide.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.probe_slide == -1 else (("Найден под номером: " ~ results.probe_slide.value) if results.probe_slide.pass else "Не найден!") }}
+                        {{ "Не проведена" if results.probe_slide == -1 else (("Найден под номером: " ~ results.probe_slide.value|join(', ')) if results.probe_slide.pass else "Не найден!") }}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">6</th>
                     <td class="ins">Слайд с описанием актуальности работы</td>
                     <td class="{{ "table-secondary ins" if results.actual_slide == -1 else ("table-success ins" if results.actual_slide.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.actual_slide == -1 else (("Найден под номером: " ~ results.actual_slide.value) if results.actual_slide.pass else "Не найден!") }}
+                        {{ "Не проведена" if results.actual_slide == -1 else (("Найден под номером: " ~ results.actual_slide.value|join(', ')) if results.actual_slide.pass else "Не найден!") }}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">7</th>
                     <td class="ins">Слайд с заключением</td>
                     <td class="{{ "table-secondary ins" if results.conclusion_slide == -1 else ("table-success ins" if results.conclusion_slide.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.conclusion_slide == -1 else (("Найден под номером: " ~ results.conclusion_slide.value) if results.conclusion_slide.pass else "Не найден!") }}
+                        {{ "Не проведена" if results.conclusion_slide == -1 else (("Найден под номером: " ~ results.conclusion_slide.value|join(', ')) if results.conclusion_slide.pass else "Не найден!") }}
                     </td>
                 </tr>
                 <tr>
