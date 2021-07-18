@@ -156,7 +156,7 @@ def check_list():
 @login_required
 def check_list_data():
     # transform json filter into dict
-    filters = request.args.get("filter", "")
+    filters = request.args.get("filter", "{}")
     try:
         filters = json.loads(filters)
         filters = filters if filters else {}
@@ -165,7 +165,7 @@ def check_list_data():
         logger.warning(repr(e))
         filters = {}
 
-    # request filter to mongo query filter conversion 
+    # request filter to mongo query filter conversion
     filter_query = {}
     if f_filename := filters.get("filename", None):
         filter_query["filename"] = { "$regex": f_filename }
@@ -204,11 +204,11 @@ def check_list_data():
     except Exception as e:
         logger.warning("Can't apply score filter")
         logger.warning(repr(e))
-        
+
     # set user filter for current non-admin user
     if not current_user.is_admin:
         filter_query["user"] = current_user.username
-    
+
     # parse and validate rest query
     limit = request.args.get("limit", "")
     limit = int(limit) if limit.isnumeric() else 10
