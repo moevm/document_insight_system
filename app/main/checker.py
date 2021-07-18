@@ -1,4 +1,5 @@
 import re
+import itertools
 from app.nlp.similarity_of_texts import check_similarity
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
 from logging import getLogger
@@ -39,11 +40,12 @@ def __check_slides_enumeration(presentation):
 
 def __check_title_size(presentation):
     i = 0
-    error_slides = ''
+    empty_headers = []
+    len_exceeded = []
     for title in presentation.get_titles():
         i += 1
         if title == "":
-            error_slides += str(i) + ' '
+            empty_headers.append(i)
             continue
 
         title = str(title).replace('\x0b', '\n')
@@ -53,10 +55,11 @@ def __check_title_size(presentation):
                 if t != '':
                     titles.append(t)
             if len(titles) > 2:
-                error_slides += str(i) + ' '
-    logger.info(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides != ""
+                len_exceeded.append(str(i))
+    error_slides = list(itertools.chain(empty_headers, len_exceeded))
+    logger.info(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides != []
           else "\tВсе слайды озаглавлены корректно")
-    return __answer(error_slides == "", error_slides)
+    return {'pass': error_slides == [], 'value': [empty_headers, len_exceeded]}
 
 
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
@@ -128,7 +131,7 @@ def check(presentation, checks, presentation_name, username):
 
     if checks.slides_enum != -1:  # Нумерация слайдов
         checks.slides_enum = __check_slides_enumeration(presentation)
-    if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк или заголовков нет
+    if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк и существуют
         checks.slides_headers = __check_title_size(presentation)
 
     if checks.goals_slide != -1:  # Слайд "Цель и задачи"
@@ -144,7 +147,7 @@ def check(presentation, checks, presentation_name, username):
         checks.slides_number = get_len_on_additional(presentation, checks.slides_number)
 
     similar = __are_slides_similar(goals_array, conclusion_array, checks.conclusion_actual)
-    if checks.conclusion_actual != -1:  # Соответствие закличения задачам
+    if checks.conclusion_actual != -1:  # Соответствие заключения задачам
         if similar != -1:
             logger.info("\tОбозначенные цели совпадают с задачами на " + similar[0]['value'] + "%")
             checks.conclusion_actual = similar[0]
