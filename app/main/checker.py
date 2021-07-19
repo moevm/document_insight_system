@@ -59,7 +59,7 @@ def __check_title_size(presentation):
     error_slides = list(itertools.chain(empty_headers, len_exceeded))
     logger.info(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides != []
           else "\tВсе слайды озаглавлены корректно")
-    return {'pass': error_slides == [], 'value': [empty_headers, len_exceeded]}
+    return {'pass': not bool(error_slides) , 'value': [empty_headers, len_exceeded]}
 
 
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
