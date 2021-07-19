@@ -34,7 +34,7 @@ class Stemming:
         self.sentences = []
         self.find_further_development = False
         self.filtered_docs = []
-        stop_words = stopwords.words("russian")
+        stop_words = set(stopwords.words("russian"))
         filtered_doc = []
         self.get_sentences(string, flag)
 
