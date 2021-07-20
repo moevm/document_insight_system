@@ -1,4 +1,5 @@
-from re import split
+import re
+import itertools
 from app.nlp.similarity_of_texts import check_similarity
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
 from logging import getLogger
@@ -18,38 +19,47 @@ def __check_slides_number(presentation, number, conclusion_slide_number):
     logger.info("\tКоличество основных слайдов в презентации равно " + str(conclusion_slide_number))
     return __answer(int(number) >= conclusion_slide_number, conclusion_slide_number)
 
+def get_len_on_additional(presentation, slides_number):
+    additional = re.compile('[А-Я][а-я]*[\s]слайд[ы]?')
+    find_additional = [i for i, header in enumerate(presentation.get_titles()) if re.fullmatch(additional, header)]
+    if len(find_additional) == 0:
+        return __answer(len(presentation.slides) <= slides_number, len(presentation.slides))
+    else:
+        return __answer(find_additional[0] <= slides_number, find_additional[0])
 
 def __check_slides_enumeration(presentation):
-    error = ""
+    error = []
     if presentation.slides[0].page_number[0] != -1:
-        error += "0 "
+        error.append(1)
     for i in range(1, len(presentation.slides)):
         if presentation.slides[i].page_number[0] != i + 1:
-            error += str(i) + " "
-    logger.info(("\tПлохо пронумерованные слайды: " + str(error)) if error != "" else "\tВсе слайды пронумерованы корректно")
-    return __answer(error == "", error)
+            error.append(i+1)
+    logger.info(("\tПлохо пронумерованные слайды: " + str(error)) if error != [] else "\tВсе слайды пронумерованы корректно")
+    return {'pass': error == [], 'value': error}
 
 
 def __check_title_size(presentation):
     i = 0
-    error_slides = ''
+    empty_headers = []
+    len_exceeded = []
     for title in presentation.get_titles():
         i += 1
         if title == "":
-            error_slides += str(i) + ' '
+            empty_headers.append(i)
             continue
 
         title = str(title).replace('\x0b', '\n')
         if '\n' in title or '\r' in title:
             titles = []
-            for t in split('\r|\n', title):
+            for t in re.split('\r|\n', title):
                 if t != '':
                     titles.append(t)
             if len(titles) > 2:
-                error_slides += str(i) + ' '
-    logger.info(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides != ""
+                len_exceeded.append(str(i))
+    error_slides = list(itertools.chain(empty_headers, len_exceeded))
+    logger.info(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides != []
           else "\tВсе слайды озаглавлены корректно")
-    return __answer(error_slides == "", error_slides)
+    return {'pass': not bool(error_slides) , 'value': [empty_headers, len_exceeded]}
 
 
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
@@ -60,13 +70,19 @@ SLIDE_WITH_RELEVANCE = 'Актуальность'
 
 def __find_definite_slide(presentation, type_of_slide):
     i = 0
+    found_slides = []
+    found_idxs = []
     for title in presentation.get_titles():
         i += 1
         if str(title).lower().find(str(type_of_slide).lower()) != -1:
             logger.info("\tСлайд " + type_of_slide + " найден")
-            return __answer(True, i), presentation.get_text_from_slides()[i - 1]
-    logger.info("\tСлайд " + type_of_slide + " не найден")
-    return __answer(False, ""), ""
+            found_slides.append(presentation.get_text_from_slides()[i - 1])
+            found_idxs.append(i)
+    if len(found_slides) == 0:
+        logger.info("\tСлайд " + type_of_slide + " не найден")
+        return __answer(False, ""), ""
+    else:
+        return {'pass': True, 'value': found_idxs}, ' '.join(found_slides)
 
 
 def __check_actual_slide(presentation):
@@ -106,7 +122,7 @@ def __find_tasks_on_slides(presentation, goals, intersection_number):
         return __answer(True, "Все задачи найдены на слайдах")
     else:
         logger.info("\tНекоторые из заявленных задач на слайдах не найдены")
-        return __answer(False, "Некоторые задачи на слайдах не найдены")
+        return {'pass': False, 'value': slides_with_tasks}
 
 
 def check(presentation, checks, presentation_name, username):
@@ -115,7 +131,7 @@ def check(presentation, checks, presentation_name, username):
 
     if checks.slides_enum != -1:  # Нумерация слайдов
         checks.slides_enum = __check_slides_enumeration(presentation)
-    if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк или заголовков нет
+    if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк и существуют
         checks.slides_headers = __check_title_size(presentation)
 
     if checks.goals_slide != -1:  # Слайд "Цель и задачи"
@@ -128,10 +144,10 @@ def check(presentation, checks, presentation_name, username):
         checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION)
 
     if checks.slides_number != -1:  # Количество основных слайдов
-        checks.slides_number = __check_slides_number(presentation, checks.slides_number, checks.conclusion_slide)
+        checks.slides_number = get_len_on_additional(presentation, checks.slides_number)
 
     similar = __are_slides_similar(goals_array, conclusion_array, checks.conclusion_actual)
-    if checks.conclusion_actual != -1:  # Соответствие закличения задачам
+    if checks.conclusion_actual != -1:  # Соответствие заключения задачам
         if similar != -1:
             logger.info("\tОбозначенные цели совпадают с задачами на " + similar[0]['value'] + "%")
             checks.conclusion_actual = similar[0]

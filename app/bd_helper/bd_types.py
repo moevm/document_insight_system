@@ -14,28 +14,16 @@ class Packable:
 class User(Packable, UserMixin):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
-        if dictionary is None:
-            self.username = ''
-            self.name = ''
-            self.password_hash = ''
-            self.presentations = []
-            self.criteria = Checks()
-            self.is_admin = False
-        else:
-            self.username = dictionary['username']
-            self.name = dictionary['name']
-            self.password_hash = dictionary['password_hash']
-            self.presentations = dictionary['presentations']
-            self.criteria = Checks(dictionary['criteria'])
-            self.is_admin = dictionary['is_admin']
+        dictionary = dictionary or {}
+        self.username = dictionary.get('username', '')
+        self.name = dictionary.get('name', '')
+        self.password_hash = dictionary.get('password_hash', '')
+        self.presentations = dictionary.get('presentations', [])
+        self.criteria = Checks(dictionary.get('criteria'))
+        self.is_admin = dictionary.get('is_admin', False)
 
     def __str__(self) -> str:
-        return ("User: { username: " + self.username + ", " +
-                "name: " + self.name + ", " +
-                "password_hash: " + str(self.password_hash) + ", " +
-                "presentations: " + str(self.presentations) + ", " +
-                "personal criteria: " + str(self.criteria) + ", " +
-                "is_admin: " + str(self.is_admin) + " }")
+        return f"User: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
 
     def pack(self):
         package = super(User, self).pack()
@@ -50,54 +38,36 @@ class User(Packable, UserMixin):
 class Presentation(Packable):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
-        if dictionary is None:
-            self.name = ''
-            self.checks = []
-        else:
-            self._id = dictionary['_id']
-            self.name = dictionary['name']
-            self.checks = dictionary['checks']
+        dictionary = dictionary or {}
+        if '_id' in dictionary:
+            self._id = dictionary.get('_id')
+        self.name = dictionary.get('name', '')
+        self.checks = dictionary.get('checks', [])
 
     def __str__(self) -> str:
-        return ("Presentation: { " + (("_id: " + str(self._id) + ", ") if hasattr(self, "_id") else "") +
-                "name: " + self.name + ", " +
-                "checks: " + str(self.checks) + " }")
+        return f"Presentation: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
 
 
 # You shouldn't create or change this explicitly
 class Checks(Packable):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
-        if dictionary is None:
-            self.slides_number = 12
-            self.slides_enum = 0
-            self.slides_headers = 0
-            self.goals_slide = 0
-            self.probe_slide = 0
-            self.actual_slide = 0
-            self.conclusion_slide = 0
-            self.conclusion_actual = 50
-            self.conclusion_along = 0
-            self.slide_every_task = 50
-            self.score = -1
-            self.filename = ''
-            self.user = ''
-        else:
-            if '_id' in dictionary:
-                self._id = dictionary['_id']
-            self.slides_number = dictionary['slides_number']
-            self.slides_enum = dictionary['slides_enum']
-            self.slides_headers = dictionary['slides_headers']
-            self.goals_slide = dictionary['goals_slide']
-            self.probe_slide = dictionary['probe_slide']
-            self.actual_slide = dictionary['actual_slide']
-            self.conclusion_slide = dictionary['conclusion_slide']
-            self.conclusion_actual = dictionary['conclusion_actual']
-            self.conclusion_along = dictionary['conclusion_along']
-            self.slide_every_task = dictionary['slide_every_task']
-            self.score = dictionary.get('score', -1)
-            self.filename = dictionary.get('filename', '')
-            self.user = dictionary.get('user', '')
+        dictionary = dictionary or {}
+        if '_id' in dictionary:
+            self._id = dictionary.get('_id', '')
+        self.slides_number = dictionary.get('slides_number', 12)
+        self.slides_enum = dictionary.get('slides_enum', 0)
+        self.slides_headers = dictionary.get('slides_headers', 0)
+        self.goals_slide = dictionary.get('goals_slide', 0)
+        self.probe_slide = dictionary.get('probe_slide', 0)
+        self.actual_slide = dictionary.get('actual_slide', 0)
+        self.conclusion_slide = dictionary.get('conclusion_slide', 0)
+        self.conclusion_actual = dictionary.get('conclusion_actual', 50)
+        self.conclusion_along = dictionary.get('conclusion_along', 0)
+        self.slide_every_task = dictionary.get('slide_every_task', 50)
+        self.score = dictionary.get('score', -1)
+        self.filename = dictionary.get('filename', '')
+        self.user = dictionary.get('user', '')
 
     def get_checks(self):
         return dict(
@@ -130,18 +100,4 @@ class Checks(Packable):
         return all([check == -1 or check['pass'] for check in self.get_checks().values()])
 
     def __str__(self) -> str:
-        return ("Checks: { " + (("_id: " + str(self._id) + ", ") if hasattr(self, "_id") else "") +
-                "slides_number: " + str(self.slides_number) + ", " +
-                "slides_enum: " + str(self.slides_enum) + ", " +
-                "slides_headers: " + str(self.slides_headers) + ", " +
-                "goals_slide: " + str(self.goals_slide) + ", " +
-                "probe_slide: " + str(self.probe_slide) + ", " +
-                "actual_slide: " + str(self.actual_slide) + ", " +
-                "conclusion_slide: " + str(self.conclusion_slide) + ", " +
-                "conclusion_actual: " + str(self.conclusion_actual) + ", " +
-                "conclusion_along: " + str(self.conclusion_along) + ", " +
-                "slide_every_task: " + str(self.slide_every_task) + ", " +
-                "score: " + str(self.score) + ", " +
-                "filename: " + str(self.filename) + ", " +
-                "username: " + str( self.user) +
-                " }")
+        return f"Checks: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"

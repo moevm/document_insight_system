@@ -40,7 +40,9 @@ def check_similarity(string1, string2):
             sum_of_sims = (np.sum(sims[query_doc_tf_idf], dtype=np.float32))
             avg = sum_of_sims / len(gen_docs)
             avg_sims.append(avg)
-        total_avg = np.sum(avg_sims, dtype=np.float)
+        total_avg = np.sum(avg_sims, dtype=np.float)/len(gen_docs1)
+        if total_avg > 1:
+            total_avg = 1
         percentage_of_similarity = round(float(total_avg) * 100)
 
         if exists(PATH):
