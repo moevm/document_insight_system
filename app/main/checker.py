@@ -11,21 +11,29 @@ def __answer(mod, value):
         "value": str(value)
     }
 
-def __check_slides_number(presentation, number, conclusion_slide_number):
-    if conclusion_slide_number == -1 or conclusion_slide_number['value'] == '':
-        conclusion_slide_number = len(presentation.slides)
+def get_sldnum_range(find_additional, slides_number, additional_case = None):
+    if slides_number - 2 <= find_additional <= slides_number:
+        return {'pass': True, 'value': find_additional,
+                'verdict': 'Количество слайдов в допустимых границах'}
+    elif find_additional <= slides_number - 2:
+        return {'pass': False, 'value': find_additional,
+                'verdict': 'Число слайдов меньше допустимого. Допустимые границы: {}'.format([slides_number - 2, slides_number])}
     else:
-        conclusion_slide_number = int(conclusion_slide_number['value'])
-    logger.info("\tКоличество основных слайдов в презентации равно " + str(conclusion_slide_number))
-    return __answer(int(number) >= conclusion_slide_number, conclusion_slide_number)
+        if additional_case:
+            return {'pass': False, 'value': find_additional,
+                    'verdict': 'Допустимые границы: {}. Проверьте неозаглавленные запасные слайды'.format([slides_number - 2, slides_number])}
+        else:
+            return {'pass': False, 'value': find_additional,
+                    'verdict': 'Число слайдов превышает допустимое. Допустимые границы: {}'.format([slides_number - 2, slides_number])}
 
 def get_len_on_additional(presentation, slides_number):
     additional = re.compile('[А-Я][а-я]*[\s]слайд[ы]?')
     find_additional = [i for i, header in enumerate(presentation.get_titles()) if re.fullmatch(additional, header)]
     if len(find_additional) == 0:
-        return __answer(len(presentation.slides) <= slides_number, len(presentation.slides))
+        return get_sldnum_range(len(presentation.slides), slides_number)
     else:
-        return __answer(find_additional[0] <= slides_number, find_additional[0])
+        additional_case = True
+        return get_sldnum_range(find_additional[0], slides_number, additional_case)
 
 def __check_slides_enumeration(presentation):
     error = []
