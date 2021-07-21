@@ -46,7 +46,7 @@
                             {{ 'Не проведена' }}
                         {% else %}
                             {{ 'Всего: ' ~ results.slides_number.value }}<br>
-                            {{ results.slides_number.verdict }}
+                            {{ results.slides_number.get('verdict', "Пройдена!" if results.slides_number.pass else "Не пройдена") }}
                         {% endif %}
 
                     </td>

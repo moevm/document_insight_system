@@ -12,19 +12,19 @@ def __answer(mod, value):
     }
 
 def get_sldnum_range(find_additional, slides_number, suspected_additional = None):
-    if slides_number - 2 <= find_additional <= slides_number:
+    if slides_number[0] <= find_additional <= slides_number[1]:
         return {'pass': True, 'value': find_additional,
                 'verdict': 'Количество слайдов в допустимых границах'}
-    elif find_additional <= slides_number - 2:
+    elif find_additional <= slides_number[0]:
         return {'pass': False, 'value': find_additional,
-                'verdict': 'Число слайдов меньше допустимого. Допустимые границы: {}'.format([slides_number - 2, slides_number])}
+                'verdict': 'Число слайдов меньше допустимого. Допустимые границы: {}'.format(slides_number)}
     else:
         if suspected_additional:
             return {'pass': False, 'value': find_additional,
-                    'verdict': 'Допустимые границы: {}. Проверьте неозаглавленные запасные слайды'.format([slides_number - 2, slides_number])}
+                    'verdict': 'Допустимые границы: {}. Проверьте неозаглавленные запасные слайды'.format(slides_number)}
         else:
             return {'pass': False, 'value': find_additional,
-                    'verdict': 'Число слайдов превышает допустимое. Допустимые границы: {}'.format([slides_number - 2, slides_number])}
+                    'verdict': 'Число слайдов превышает допустимое. Допустимые границы: {}'.format(slides_number)}
 
 def get_len_on_additional(presentation, slides_number):
     additional = re.compile('[А-Я][а-я]*[\s]слайд[ы]?')
