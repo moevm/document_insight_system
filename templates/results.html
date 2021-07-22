@@ -69,21 +69,12 @@
                     <th scope="row" class="ins">3</th>
                     <td class="ins">Заголовки слайдов присутствуют и занимают не более двух строк</td>
                     <td class="{{ "table-secondary ins" if results.slides_headers == -1 else ("table-success ins" if results.slides_headers.pass else "table-danger ins") }}">
-                        {% if results.slides_headers.pass %}
-                            {{ "Пройдена!" }}
-                        {% elif results.slides_headers == -1 %}
+                        {% if results.slides_headers == -1 %}
                             {{ "Не проведена" }}
-                        {% elif results.slides_headers.value[0]|length == 0 and results.slides_headers.value[1]|length != 0 %}
-                            {{ "Превышение длины: " ~ results.slides_headers.value[1]|join(', ') }}<br>
-                            {{ "Убедитесь, что контент слайда не в заголовке" }}
-                        {% elif results.slides_headers.value[0]|length != 0 and results.slides_headers.value[1]|length == 0 %}
-                            {{ "Заголовки не найдены: " ~ results.slides_headers.value[0]|join(', ') }}<br>
-                            {{ "Убедитесь, что слайд озаглавлен соответстующим элементом" }}
                         {% else %}
-                            {{ "Заголовки не найдены: " ~ results.slides_headers.value[0]|join(', ') }}<br>
-                            {{ "Убедитесь, что слайд озаглавлен соответстующим элементом" }}<br>
-                            {{ "Превышение длины: " ~ results.slides_headers.value[1]|join(', ') }}<br>
-                            {{ "Убедитесь, что контент слайда не в заголовке" }}
+                             {% for item in results.slides_headers.get('verdict', ["Пройдена!"] if results.slides_headers.pass else ["Не пройдена"]) %}
+                                 {{ item }}<br>
+                             {% endfor %}
                         {% endif %}
                     </td>
                 </tr>

@@ -62,12 +62,27 @@ def __check_title_size(presentation):
                 if t != '':
                     titles.append(t)
             if len(titles) > 2:
-                len_exceeded.append(str(i))
+                len_exceeded.append(i)
     error_slides = list(itertools.chain(empty_headers, len_exceeded))
     logger.info(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides != []
           else "\tВсе слайды озаглавлены корректно")
-    return {'pass': not bool(error_slides) , 'value': [empty_headers, len_exceeded]}
-
+    if not error_slides:
+        return {'pass': not bool(error_slides) , 'value': [empty_headers, len_exceeded],
+                'verdict': ["Пройдена!"]}
+    elif len(empty_headers) == 0 and len(len_exceeded) != 0:
+        return {'pass': False, 'value': len_exceeded,
+                'verdict': ['Превышение длины: {}'.format(', '.join(map(str, len_exceeded))),
+                            'Убедитесь в корректности заголовка и текста слайда']}
+    elif len(empty_headers) != 0 and len(len_exceeded) == 0:
+        return {'pass':False, 'value': empty_headers,
+                'verdict': ['Заголовки не найдены: {}.'.format(', '.join(map(str, empty_headers))),
+                            'Убедитесь, что слайд озаглавлен соответстующим элементом']}
+    else:
+        return {'pass':False, 'value': [empty_headers, len_exceeded],
+                'verdict': ['Заголовки не найдены: {}.'.format(', '.join(map(str, empty_headers))),
+                'Убедитесь, что слайд озаглавлен соответстующим элементом',
+                'Превышение длины: {}'.format(', '.join(map(str, len_exceeded))),
+                 'Убедитесь в корректности заголовка и текста слайда']}
 
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
 SLIDE_APPROBATION_OF_WORK = 'Апробация'
