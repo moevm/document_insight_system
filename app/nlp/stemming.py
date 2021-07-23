@@ -15,7 +15,7 @@ class Stemming:
         self.sentences = []
         self.find_further_development = False
         self.filtered_docs = []
-        self.further_dev_sentence = ''
+        self.further_dev_sentence = None
 
     def get_sentences(self, string, flag):
         self.sentences = []
@@ -57,4 +57,4 @@ class Stemming:
         return self.filtered_docs
 
     def further_dev(self):
-        return {'found_dev': self.find_further_development, 'dev_sentence': self.further_dev_sentence or None}
+        return {'found_dev': self.find_further_development, 'dev_sentence': self.further_dev_sentence}
