@@ -129,7 +129,7 @@ def __are_slides_similar(goals, conclusions, actual_number):
     if results == -1:
         return __answer(False, "Произошла ошибка!"), __answer(False, "Произошла ошибка!")
     else:
-        return __answer(results[0] >= actual_number, results[0]), __answer(results[1], results[1])
+        return __answer(results[0] >= actual_number, results[0]), __answer(results[1].get('found_dev'), results[1].get('dev_sentence'))
 
 
 def __find_tasks_on_slides(presentation, goals, intersection_number):
@@ -177,7 +177,7 @@ def check(presentation, checks, presentation_name, username):
             checks.conclusion_actual = {'pass': False, 'value': 0}
     if checks.conclusion_along != -1:  # Наличие направлений дальнейшего развития
         if similar != -1:
-            logger.info("\tНаправления дальнейшего развития " + ("" if similar[1]['value'] else "не ") + "найдены")
+            #logger.info("\tНаправления дальнейшего развития " + ("" if similar[1]['value'] else "не ") + "найдены")
             checks.conclusion_along = similar[1]
         else:
             checks.conclusion_along = {'pass': False}

@@ -136,7 +136,7 @@
                     <th scope="row" class="ins">10</th>
                     <td class="ins">Наличие направлений дальнейшего развития</td>
                     <td class="{{ "table-secondary ins" if results.conclusion_along == -1 else ("table-success ins" if results.conclusion_along.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.conclusion_along == -1 else ("Найдены" if results.conclusion_along.pass else "Не найдены") }}
+                        {{ "Не проведена" if results.conclusion_along == -1 else (results.conclusion_along.value if results.conclusion_along.pass else "Не найдены") }}
                     </td>
                 </tr>
             </tbody>

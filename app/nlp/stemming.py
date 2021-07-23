@@ -15,6 +15,7 @@ class Stemming:
         self.sentences = []
         self.find_further_development = False
         self.filtered_docs = []
+        self.further_dev_sentence = ''
 
     def get_sentences(self, string, flag):
         self.sentences = []
@@ -47,6 +48,7 @@ class Stemming:
                         filtered_doc.append(w)
                         if (w == FURTHER_DEVELOPMENT or w == FURTHER_IMPROVEMENTS) and flag == False:
                             self.find_further_development = True
+                            self.further_dev_sentence = sent
             self.filtered_docs.append(filtered_doc)
             filtered_doc = []
 
@@ -54,5 +56,5 @@ class Stemming:
         self.parse_text(string, flag)
         return self.filtered_docs
 
-    def is_find_further_development_on_slide(self):
-        return self.find_further_development
+    def further_dev(self):
+        return {'found_dev': self.find_further_development, 'dev_sentence': self.further_dev_sentence or None}
