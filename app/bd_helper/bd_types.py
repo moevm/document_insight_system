@@ -55,7 +55,7 @@ class Checks(Packable):
         dictionary = dictionary or {}
         if '_id' in dictionary:
             self._id = dictionary.get('_id', '')
-        self.slides_number = dictionary.get('slides_number', 12)
+        self.slides_number = dictionary.get('slides_number', [10, 12])
         self.slides_enum = dictionary.get('slides_enum', 0)
         self.slides_headers = dictionary.get('slides_headers', 0)
         self.goals_slide = dictionary.get('goals_slide', 0)

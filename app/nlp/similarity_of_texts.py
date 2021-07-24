@@ -31,7 +31,7 @@ def check_similarity(string1, string2):
 
 
         gen_docs1 = stemming.get_filtered_docs(string2, False)
-        is_further_development_on_slide = stemming.is_find_further_development_on_slide()
+        further_dev = stemming.further_dev()
 
 
         for g in gen_docs1:
@@ -47,7 +47,7 @@ def check_similarity(string1, string2):
 
         if exists(PATH):
             rmtree(PATH)
-        return percentage_of_similarity, is_further_development_on_slide
+        return percentage_of_similarity, further_dev
     except OSError:
         if exists(PATH):
             rmtree(PATH)

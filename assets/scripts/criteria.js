@@ -68,8 +68,8 @@ criteria_save_button.click(async function () {
     setTimeout(() => { $(this).popover("dispose"); }, 1000);
 
     if (criteria.slides_number !== -1) {
-        if ($("#bachelors").prop("checked")) criteria.slides_number = 12;
-        else if ($("#masters").prop("checked")) criteria.slides_number = 15;
+        if ($("#bachelors").prop("checked")) criteria.slides_number = [10, 12];
+        else if ($("#masters").prop("checked")) criteria.slides_number = [13, 15];
     }
     if (criteria.slide_every_task === 0) criteria.slide_every_task = Number.parseInt(every_task_percent.val());
     if (criteria.conclusion_actual === 0) criteria.conclusion_actual = Number.parseInt(actuality_percent.val());

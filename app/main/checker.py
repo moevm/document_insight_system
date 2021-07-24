@@ -11,21 +11,28 @@ def __answer(mod, value):
         "value": str(value)
     }
 
-def __check_slides_number(presentation, number, conclusion_slide_number):
-    if conclusion_slide_number == -1 or conclusion_slide_number['value'] == '':
-        conclusion_slide_number = len(presentation.slides)
+def get_sldnum_range(find_additional, slides_number, suspected_additional = None):
+    if slides_number[0] <= find_additional <= slides_number[1]:
+        return {'pass': True, 'value': find_additional,
+                'verdict': 'Количество слайдов в допустимых границах'}
+    elif find_additional <= slides_number[0]:
+        return {'pass': False, 'value': find_additional,
+                'verdict': 'Число слайдов меньше допустимого. Допустимые границы: {}'.format(slides_number)}
     else:
-        conclusion_slide_number = int(conclusion_slide_number['value'])
-    logger.info("\tКоличество основных слайдов в презентации равно " + str(conclusion_slide_number))
-    return __answer(int(number) >= conclusion_slide_number, conclusion_slide_number)
+        if suspected_additional:
+            return {'pass': False, 'value': find_additional,
+                    'verdict': 'Допустимые границы: {}. Проверьте неозаглавленные запасные слайды'.format(slides_number)}
+        else:
+            return {'pass': False, 'value': find_additional,
+                    'verdict': 'Число слайдов превышает допустимое. Допустимые границы: {}'.format(slides_number)}
 
 def get_len_on_additional(presentation, slides_number):
     additional = re.compile('[А-Я][а-я]*[\s]слайд[ы]?')
     find_additional = [i for i, header in enumerate(presentation.get_titles()) if re.fullmatch(additional, header)]
     if len(find_additional) == 0:
-        return __answer(len(presentation.slides) <= slides_number, len(presentation.slides))
+        return get_sldnum_range(len(presentation.slides), slides_number, suspected_additional = True)
     else:
-        return __answer(find_additional[0] <= slides_number, find_additional[0])
+        return get_sldnum_range(find_additional[0], slides_number)
 
 def __check_slides_enumeration(presentation):
     error = []
@@ -55,12 +62,27 @@ def __check_title_size(presentation):
                 if t != '':
                     titles.append(t)
             if len(titles) > 2:
-                len_exceeded.append(str(i))
+                len_exceeded.append(i)
     error_slides = list(itertools.chain(empty_headers, len_exceeded))
     logger.info(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides != []
           else "\tВсе слайды озаглавлены корректно")
-    return {'pass': not bool(error_slides) , 'value': [empty_headers, len_exceeded]}
-
+    if not error_slides:
+        return {'pass': not bool(error_slides) , 'value': [empty_headers, len_exceeded],
+                'verdict': ["Пройдена!"]}
+    elif len(empty_headers) == 0 and len(len_exceeded) != 0:
+        return {'pass': False, 'value': len_exceeded,
+                'verdict': ['Превышение длины: {}'.format(', '.join(map(str, len_exceeded))),
+                            'Убедитесь в корректности заголовка и текста слайда']}
+    elif len(empty_headers) != 0 and len(len_exceeded) == 0:
+        return {'pass':False, 'value': empty_headers,
+                'verdict': ['Заголовки не найдены: {}.'.format(', '.join(map(str, empty_headers))),
+                            'Убедитесь, что слайд озаглавлен соответстующим элементом']}
+    else:
+        return {'pass':False, 'value': [empty_headers, len_exceeded],
+                'verdict': ['Заголовки не найдены: {}.'.format(', '.join(map(str, empty_headers))),
+                'Убедитесь, что слайд озаглавлен соответстующим элементом',
+                'Превышение длины: {}'.format(', '.join(map(str, len_exceeded))),
+                 'Убедитесь в корректности заголовка и текста слайда']}
 
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
 SLIDE_APPROBATION_OF_WORK = 'Апробация'
@@ -107,7 +129,8 @@ def __are_slides_similar(goals, conclusions, actual_number):
     if results == -1:
         return __answer(False, "Произошла ошибка!"), __answer(False, "Произошла ошибка!")
     else:
-        return __answer(results[0] >= actual_number, results[0]), __answer(results[1], results[1])
+        return __answer(results[0] >= actual_number, results[0]),    \
+               {'pass': results[1].get('found_dev'), 'value': results[1].get('dev_sentence')}
 
 
 def __find_tasks_on_slides(presentation, goals, intersection_number):
