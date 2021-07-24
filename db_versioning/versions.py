@@ -112,6 +112,8 @@ class Version20(Version):
                     {'$set': {'criteria.slides_number': new_criteria}}
                 )
 
+            # causes unusual behavior - so, commented
+            """
             # add 'verdict' to all criterias in checks fields
             criterias = tuple(Checks().get_checks().keys())
             for criteria in criterias:
@@ -120,6 +122,7 @@ class Version20(Version):
                     {'$set': {f'{criteria}.verdict': ''}},
                     multi=True
                 )
+            """
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
