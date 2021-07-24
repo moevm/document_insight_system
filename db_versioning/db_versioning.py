@@ -1,66 +1,61 @@
 import argparse
 from pymongo import MongoClient
-from datetime import datetime
-from versions import versions, get_version
+from versions import LAST_VERSION, VERSIONS
 
 
 class DBCollections:
+    MONGO_URL = ''
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(DBCollections, cls).__new__(cls)
+            cls.instance.init()
+        return cls.instance
 
-    @classmethod
-    def init(cls, mongo_url):
-        cls.client = MongoClient(mongo_url)
-        cls.db = cls.client['pres-parser-db']
-        cls.users_collection = cls.db['users']
-        cls.presentations_collection = cls.db['presentations']
-        cls.checks_collection = cls.db['checks']
-        cls.version_collection = cls.db['db_version']
+    def init(self):
+        self.client = MongoClient(self.MONGO_URL)
+        self.db = self.client['pres-parser-db']
+        self.users = self.db['users']
+        self.presentations = self.db['presentations']
+        self.checks = self.db['checks']
+        self.db_version = self.db['db_version']
 
-    @classmethod
-    def get_by_name(cls, name):
+    def get_by_name(self, name):
         return dict(
-            users = cls.db['users'],
-            presentations = cls.db['presentations'],
-            checks = cls.db['checks']
+            users = self.db['users'],
+            presentations = self.db['presentations'],
+            checks = self.db['checks']
         ).get(name)
+
+    def to_dict(self):
+        return vars(self)
 
 
 def add_version(version):
-    version_doc = DBCollections.version_collection.insert_one(version.to_dict())
+    version_doc = DBCollections().db_version.insert_one(version.to_dict())
     return version_doc.inserted_id
 
 def update_db_version():
-    version_doc = DBCollections.version_collection.find_one()
+    version_doc = DBCollections().db_version.find_one()
     
     if not version_doc:
-        version_doc_id = add_version(versions[0])    # if no version == 1.0
-        version_doc = DBCollections.version_collection.find_one({'_id': version_doc_id})
+        version_doc_id = add_version(VERSIONS['1.0'])    # if no version == 1.0
+        version_doc = DBCollections().db_version.find_one({'_id': version_doc_id})
     version_doc_id = version_doc['_id']
 
-    last_version = versions[-1].version
-    if version_doc['version'] == last_version:
+    last_version = VERSIONS[LAST_VERSION]
+    if version_doc['version'] == last_version.VERSION_NAME:
         print(f'DB have last version ({last_version})')
         exit(0)
 
     cur_version_name = version_doc['version']
-    last_version = versions[-1]
 
-    if cur_version_name not in last_version.changes:
-        print(f"Last version {last_version.version} doesn't have changes for current {cur_version_name}")
-        exit(1)
-
-    for collection_name, changes in last_version.changes[cur_version_name].items():
-        if changes:
-            make_changes(DBCollections.get_by_name(collection_name), changes)
+    last_version.update_database(DBCollections().to_dict(), cur_version_name)
 
     print(f"Prev version: {version_doc}")
-    DBCollections.version_collection.update({'_id': version_doc_id}, last_version.to_dict())
-    print(f"New version: {DBCollections.version_collection.find_one({'_id': version_doc_id})}")
+    DBCollections().db_version.update({'_id': version_doc_id}, last_version.to_dict())
+    print(f"New version: {DBCollections().db_version.find_one({'_id': version_doc_id})}")
 
-    print(f'Updated from {cur_version_name} to {last_version.version}')
-
-def make_changes(collection, changes):
-    print(collection, changes)
-    collection.update_many({}, changes, False)
+    print(f'Updated from {cur_version_name} to {last_version.VERSION_NAME}')
 
 
 if __name__ == '__main__':
@@ -69,6 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('--mongo', default='mongodb://mongodb:27017', help='Mongo host')
     args = parser.parse_args()
 
-    DBCollections.init(args.mongo)
+    DBCollections.MONGO_URL = args.mongo
+    DBCollections()
 
     update_db_version()
