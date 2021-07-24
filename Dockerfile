@@ -13,6 +13,7 @@ WORKDIR /usr/src/project
 RUN npm install
 RUN npm install webpack
 
+RUN pip3 install --upgrade pip
 RUN  python3.8 -m pip install -r dependencies.txt
 ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project"
 
