@@ -9,8 +9,26 @@
 {% block main %}
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row" id="results_holder">
+      <table class="dataframe" id="stats_table" width="100%">
+        <thead>
+          <tr style="text-align: left;">
+            <tr>
+              {% for item in columns %}
+              <th>{{ item }} </th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a class="id_check" href="{{ "/results/"  ~ stats[0]}}">
+                {{ (stats[0] | string)[-5:]}}</a></td>
+                <td>{{ stats[1] }}</td>
+                <td>{{ stats[2] }}</td>
+                <td>{{ stats[3] }}</td>
+                <td>{{ stats[4] }}</td>
+              </tr>
+            </tbody>
         <h3 id="results_title" class="texteous ins">Результат проверки: {{ "" if results.correct() else "не" }} пройдена!</h3>
-
         <table class="table table-striped table-hover" id="results_table">
             <thead>
                 <tr>
@@ -22,58 +40,89 @@
             <tbody>
                 <tr>
                     <th scope="row" class="ins">1</th>
-                    <td class="ins">Количество основных слайдов</td>
+                    <td class="ins">Количество основных слайдов(до запасных слайдов)</td>
                     <td class="{{ "table-secondary ins" if results.slides_number == -1 else ("table-success ins" if results.slides_number.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.slides_number == -1 else ("Всего: " ~ results.slides_number.value) }}
+                        {% if results.slides_number == -1 %}
+                            {{ 'Не проведена' }}
+                        {% else %}
+                            {{ 'Всего: ' ~ results.slides_number.value }}<br>
+                            {{ results.slides_number.get('verdict', "Пройдена!" if results.slides_number.pass else "Не пройдена") }}
+                        {% endif %}
+
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">2</th>
                     <td class="ins">Нумерация слайдов</td>
                     <td class="{{ "table-secondary ins" if results.slides_enum == -1 else ("table-success ins" if results.slides_enum.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.slides_enum == -1 else ("Пройдена!" if results.slides_enum.pass else ("Не пройдена, проблемные слайды: " + results.slides_enum.value)) }}
+                        {% if results.slides_enum == -1 %}
+                            {{ "Не проведена" }}
+                        {% elif results.slides_enum.pass %}
+                            {{ "Пройдена!" }}
+                        {% else %}
+                            {{ 'Не пройдена, проблемные слайды: ' ~ results.slides_enum.value|join(', ') }}<br>
+                            {{ 'Убедитесь в корректности формата номеров слайдов'}}
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">3</th>
                     <td class="ins">Заголовки слайдов присутствуют и занимают не более двух строк</td>
                     <td class="{{ "table-secondary ins" if results.slides_headers == -1 else ("table-success ins" if results.slides_headers.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.slides_headers == -1 else ("Пройдена!" if results.slides_headers.pass else ("Не пройдена, проблемные слайды: " + results.slides_headers.value)) }}
+                        {% if results.slides_headers == -1 %}
+                            {{ "Не проведена" }}
+                        {% else %}
+                             {% for item in results.slides_headers.get('verdict', ["Пройдена!"] if results.slides_headers.pass else ["Не пройдена"]) %}
+                                 {{ item }}<br>
+                             {% endfor %}
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">4</th>
                     <td class="ins">Слайд "Цель и задачи"</td>
                     <td class="{{ "table-secondary ins" if results.goals_slide == -1 else ("table-success ins" if results.goals_slide.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.goals_slide == -1 else (("Найден под номером: " ~ results.goals_slide.value) if results.goals_slide.pass else "Не найден!") }}
+                        {{ "Не проведена" if results.goals_slide == -1 else (("Найден под номером: " ~ results.goals_slide.value|join(', ')) if results.goals_slide.pass else "Не найден!") }}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">5</th>
                     <td class="ins">Слайд "Апробация работы"</td>
                     <td class="{{ "table-secondary ins" if results.probe_slide == -1 else ("table-success ins" if results.probe_slide.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.probe_slide == -1 else (("Найден под номером: " ~ results.probe_slide.value) if results.probe_slide.pass else "Не найден!") }}
+                        {{ "Не проведена" if results.probe_slide == -1 else (("Найден под номером: " ~ results.probe_slide.value|join(', ')) if results.probe_slide.pass else "Не найден!") }}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">6</th>
                     <td class="ins">Слайд с описанием актуальности работы</td>
                     <td class="{{ "table-secondary ins" if results.actual_slide == -1 else ("table-success ins" if results.actual_slide.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.actual_slide == -1 else (("Найден под номером: " ~ results.actual_slide.value) if results.actual_slide.pass else "Не найден!") }}
+                        {{ "Не проведена" if results.actual_slide == -1 else (("Найден под номером: " ~ results.actual_slide.value|join(', ')) if results.actual_slide.pass else "Не найден!") }}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">7</th>
                     <td class="ins">Слайд с заключением</td>
                     <td class="{{ "table-secondary ins" if results.conclusion_slide == -1 else ("table-success ins" if results.conclusion_slide.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.conclusion_slide == -1 else (("Найден под номером: " ~ results.conclusion_slide.value) if results.conclusion_slide.pass else "Не найден!") }}
+                        {{ "Не проведена" if results.conclusion_slide == -1 else (("Найден под номером: " ~ results.conclusion_slide.value|join(', ')) if results.conclusion_slide.pass else "Не найден!") }}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">8</th>
                     <td class="ins">Наличие слайдов, посвященных задачам</td>
                     <td class="{{ "table-secondary ins" if results.slide_every_task == -1 else ("table-success ins" if results.slide_every_task.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.slide_every_task == -1 else results.slide_every_task.value }}
+                        {% if results.slide_every_task.pass %}
+                            {{ results.slide_every_task.value }}
+                        {% elif results.slide_every_task == -1 %}
+                            {{ "Не проведена" }}
+                        {% elif results.slide_every_task.value|length == 2 %}
+                            {{ "Всего задач: " ~ results.slide_every_task.value[0] }}<br>
+                            {{ "Не найдены: " }}
+                            {% for item in results.slide_every_task.value[1] %}
+                                 {{ item }}<br>
+                            {% endfor %}
+                        {% else %}
+                            {{ results.slide_every_task.value }}
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
@@ -87,13 +136,12 @@
                     <th scope="row" class="ins">10</th>
                     <td class="ins">Наличие направлений дальнейшего развития</td>
                     <td class="{{ "table-secondary ins" if results.conclusion_along == -1 else ("table-success ins" if results.conclusion_along.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.conclusion_along == -1 else ("Найдены" if results.conclusion_along.value else "Не найдены") }}
+                        {{ "Не проведена" if results.conclusion_along == -1 else (results.conclusion_along.value if results.conclusion_along.pass else "Не найдены") }}
                     </td>
                 </tr>
             </tbody>
         </table>
-
-        <a href="/checks/{{ id }}" id="presentation_download" class="col text-center" download="{{ fi }}">Загрузить презентацию</a>
+        <a href="/checks/{{ id }}" id="presentation_download" class="col text-center" download="{{ fi }}">Скачать презентацию</a>
     </div>
     <div class="footer row"></div>
 {% endblock %}

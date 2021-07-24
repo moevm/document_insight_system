@@ -6,7 +6,8 @@ import numpy as np
 
 from app import server
 from app.nlp.stemming import Stemming
-
+from logging import getLogger
+logger = getLogger('root')
 
 PATH = server.UPLOAD_FOLDER + '/workdir/'
 
@@ -30,7 +31,7 @@ def check_similarity(string1, string2):
 
 
         gen_docs1 = stemming.get_filtered_docs(string2, False)
-        is_further_development_on_slide = stemming.is_find_further_development_on_slide()
+        further_dev = stemming.further_dev()
 
 
         for g in gen_docs1:
@@ -39,14 +40,16 @@ def check_similarity(string1, string2):
             sum_of_sims = (np.sum(sims[query_doc_tf_idf], dtype=np.float32))
             avg = sum_of_sims / len(gen_docs)
             avg_sims.append(avg)
-        total_avg = np.sum(avg_sims, dtype=np.float)
+        total_avg = np.sum(avg_sims, dtype=np.float)/len(gen_docs1)
+        if total_avg > 1:
+            total_avg = 1
         percentage_of_similarity = round(float(total_avg) * 100)
 
         if exists(PATH):
             rmtree(PATH)
-        return percentage_of_similarity, is_further_development_on_slide
+        return percentage_of_similarity, further_dev
     except OSError:
         if exists(PATH):
             rmtree(PATH)
-        print("Проблема с директорией ", PATH)
+        logger.info("Проблема с директорией ", PATH)
         return -1

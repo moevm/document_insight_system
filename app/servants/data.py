@@ -6,14 +6,29 @@ from flask_login import current_user
 from app.bd_helper.bd_helper import *
 from app.main.checker import check
 from app.main.parser import parse
+from app.server import logger
+from flask import current_app
+
+import os
+from logging import getLogger
+logger = getLogger('root')
+
 
 DEFAULT_PRESENTATION = 'sample.odp'
 
+def get_file_len(file):
+    file.seek(0, os.SEEK_END)
+    file_length = file.tell()
+    file.seek(0, 0)
+    return file_length
 
 def upload(request, upload_folder):
     try:
         if "presentation" in request.files:
             file = request.files["presentation"]
+            if get_file_len(file) + get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
+                logger.critical('Storage overload has occured')
+                return 'storage_overload'
             filename = join(upload_folder, file.filename)
             file.save(filename)
             delete = True
@@ -22,7 +37,7 @@ def upload(request, upload_folder):
             delete = False
 
         presentation_name = basename(filename)
-        print("Обработка презентации " + presentation_name + " пользователя " +
+        logger.info("Обработка презентации " + presentation_name + " пользователя " +
               current_user.username + " проверками " + str(current_user.criteria))
         presentation = find_presentation(current_user, presentation_name)
         if presentation is None:
@@ -30,22 +45,22 @@ def upload(request, upload_folder):
             presentation = get_presentation(presentation_id)
 
         checks = create_check(current_user)
-        check(parse(filename), checks)
+        check(parse(filename), checks, presentation_name, current_user.username)
         presentation, checks_id = add_check(presentation, checks, filename)
 
         if delete and exists(filename):
             remove(filename)
 
-        print("\tОбработка завершена успешно!")
+        logger.info("\tОбработка завершена успешно!")
         return str(checks_id)
     except Exception as e:
-        print("\tПри обработке произошла ошибка: " + str(e))
-        return 'Not OK'
+        logger.error("\tПри обработке произошла ошибка: " + str(e), exc_info=True)
+        return 'Not OK, error: {}'.format(e)
 
 
 def remove_presentation(json):
     count = len(current_user.presentations)
     user, presentation = delete_presentation(current_user, ObjectId(json['presentation']))
     deleted = count == len(user.presentations) - 1
-    print("Презентация " + presentation.name + " пользователя " + user.username + " удалена со всеми проверками")
+    logger.info("Презентация " + presentation.name + " пользователя " + user.username + " удалена со всеми проверками")
     return 'OK' if deleted else 'Not OK'

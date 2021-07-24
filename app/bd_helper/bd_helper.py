@@ -1,10 +1,17 @@
 from os.path import basename
 from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
+from bson import ObjectId
+import pymongo
 
 from app.bd_helper.bd_types import User, Presentation, Checks
 
-client = MongoClient(serverSelectionTimeoutMS=500)
+from datetime import datetime
+
+from logging import getLogger
+logger = getLogger('root')
+
+client = MongoClient("mongodb://mongodb:27017")
 db = client['pres-parser-db']
 fs = GridFSBucket(db)
 
@@ -143,7 +150,7 @@ def get_check(checks_id):
         return None
 
 
-# Returns checks with given id or None
+# Returns presentation file with given id or None
 def get_presentation_check(checks_id):
     try:
         return fs.open_download_stream(checks_id)
@@ -161,3 +168,48 @@ def delete_check(presentation, checks_id):
         return presentation, checks
     else:
         return presentation, get_check(checks_id)
+
+
+# Return no of bytes stored in gridfs
+def get_storage():
+    files = db.fs.files.find()
+    ct = 0
+    for file in files:
+        ct += file['length']
+
+    return ct
+
+
+def get_all_checks():
+    return checks_collection.find()
+
+# get checks cursor with specified parameters
+def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
+    count = checks_collection.count_documents(filter)
+    rows = checks_collection.find(filter)
+
+    if sort and order in ("asc, desc"):
+        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
+
+    rows = rows.skip(offset) if offset else rows
+    rows = rows.limit(limit) if limit else rows
+
+    return rows, count
+
+
+#Get stats for one user, return a list in the form
+#[check_id, login, time of check_id's creation, result(0/1)]
+#TODO : add lti/missing params from #80
+def get_user_checks(login):
+    return checks_collection.find({'user': login})
+
+
+def get_check_stats(oid):
+    return checks_collection.find_one({'_id': oid})
+
+def format_check(check):
+    return (str(check['_id']), check['user'], check['filename'], check['_id'].generation_time.strftime("%H:%M:%S - %b %d %Y"),
+                    check['score'])
+
+def format_stats(stats):
+    return (format_check(check) for check in stats)

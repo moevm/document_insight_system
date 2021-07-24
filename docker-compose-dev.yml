@@ -13,9 +13,14 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONIOENCODING=UTF-8
+    volumes:
+      - ./:/usr/src/project 
 
   mongodb:
     image: mongo:4.0.17-xenial
     restart: always
     volumes:
-      - ../slides_checker_mongo_data:/data/db
+      - mongodata:/data/db
+      
+volumes:
+  mongodata:

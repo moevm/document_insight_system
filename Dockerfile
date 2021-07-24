@@ -1,12 +1,20 @@
-FROM python:3.8
+FROM ubuntu:18.04
+ENV LANG en_US.UTF-8
 
-RUN mkdir -p /usr/src/project
+RUN apt update
+RUN apt install -y curl gnupg
+RUN apt install -y python3-pip python3.8-dev
+RUN curl -sL https://deb.nodesource.com/setup_10.x  | bash -
+RUN apt install -y  nodejs   
+
+ADD . /usr/src/project
 WORKDIR /usr/src/project
+
+RUN npm install
+RUN npm install webpack
+
+RUN  python3.8 -m pip install -r dependencies.txt
 ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project"
 
-COPY . /usr/src/project
-RUN pip install -r dependencies
-
-EXPOSE 8080
-
-CMD ["python3", "./app/server.py"]
+RUN ./act.sh -b
+CMD ./scripts/local_start.sh

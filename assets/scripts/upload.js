@@ -7,21 +7,23 @@ const checking_button = $("#checking_button");
 const upload_button = $("#upload_upload_button");
 
 checking_button.prop("disabled", true);
-upload_button.prop("disabled", true);
 
 file_input.change(() => {
     const fileName = file_input.val().split("\\")[2];
+    let file = file_input.prop("files")[0];
+    if (file.size > file_upload_limit){
+      $("#upload_file_label").html(`Exceeded the ${file_upload_limit/1024/1024} MB file limit.`);
+      return;
+    }
     $("#upload_file_label").html(fileName);
-    upload_button.prop('disabled', false);
 });
 
-upload_button.click(async () => { await upload(false); });
-$("#upload_test_button").click(async () => { await upload(true); });
-
 async function upload(sample = false) {
+    let response = grecaptcha.getResponse();
     let presentation = file_input.prop("files")[0];
     let formData = new FormData();
     formData.append("presentation", presentation);
+    formData.append("g-recaptcha-response", response);
 
     const bar = $("#uploading_progress");
     $("#uploading_progress_holder").css("display", "block");
@@ -34,15 +36,32 @@ async function upload(sample = false) {
     const response_text = await (await fetch("/upload", post_data)).text();
     console.log("Answer:", response_text);
     bar.css("width", "100%").attr('aria-valuenow', 100);
-    if (response_text === "") {
+    if (response_text == 'storage_overload') {
+        alert('Система перегружена, попробуйте повторить запрос позднее');
+        bar.addClass("bg-danger");
+        file_input.addClass("is-invalid");
+    } else if (response_text.includes('Not OK') || response_text == 'File exceeded the upload limit') {
+        alert(response_text);
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");
     } else {
-        upload_id = response_text;
-        bar.addClass("bg-success");
-        checking_button.prop("disabled", false);
+      upload_id = response_text;
+      bar.addClass("bg-success");
+      checking_button.prop("disabled", false);
     }
 }
 
-$("#upload_criteria_button").click(() => { window.location.href = "/criteria"; });
+$("#upload_upload_button").click(async () =>{
+        let get_captcha_result = grecaptcha.getResponse().length;
+        if (get_captcha_result === 0){
+          alert('Check recaptcha to continue!');
+        }
+        else{
+          await upload(false);
+        }
+      });
+
+
+$("#upload_test_button").click(async () => { await upload(true); });
+$("#upload_criteria_button").click(() => { window.open("/criteria"); });
 checking_button.click(() => { window.location.href = "/results/" + upload_id; });

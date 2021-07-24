@@ -9,6 +9,9 @@
 {% block main %}
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row justify-content-center">
+    <script>
+      var file_upload_limit = {{ config.MAX_CONTENT_LENGTH | tojson }};
+    </script>
         <div class="col-11 col-sm-8 col-md-5 col-lg-4 my-auto">
             <h3 class="text-center ins" id="upload_title">Какую презентацию Вы хотите проверить?</h3>
 
@@ -20,7 +23,7 @@
                             <div id="uploading_form" class="custom-file">
                                 <input type="file" class="custom-file-input" id="upload_file" accept=".odp, .pptx, .ppt">
                                 <label class="custom-file-label" id="upload_file_label" for="upload_file">Выберите файл...</label>
-                                <div class="invalid-feedback ins">Плохой файл!</div>
+                                <div class="invalid-feedback ins">Возникла ошибка</div>
                             </div>
                         </div>
                         <div id="uploading_progress_holder" class="form-group" style="display: none">
@@ -28,9 +31,10 @@
                                 <div id="uploading_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%"></div>
                             </div>
                         </div>
+                        {{ recaptcha }}
                     </form>
                     <div class="row h-box">
-                        <button type="button" class="pale_button" id="upload_upload_button" disabled>Загрузить</button>
+                        <button type="button" class="pale_button" id="upload_upload_button">Загрузить</button>
                         <button type="button" class="pale_button" id="upload_criteria_button">Критерии</button>
                             {% if debug %}
                                 <button type="button" class="pale_button" id="upload_test_button">Тестирование</button>
