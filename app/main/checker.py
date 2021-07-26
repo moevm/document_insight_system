@@ -12,19 +12,22 @@ def __answer(mod, value):
     }
 
 def get_sldnum_range(find_additional, slides_number, suspected_additional = None):
+
+    def sldnum_verdict(find_additional, slides_number, msg):
+        return {'pass': False, 'value': find_additional,
+                'verdict': ['Всего: {}'.format(find_additional),
+                             '{}. Допустимые границы: {}'.format(msg, slides_number)]}
+
     if slides_number[0] <= find_additional <= slides_number[1]:
         return {'pass': True, 'value': find_additional,
-                'verdict': 'Количество слайдов в допустимых границах'}
+                'verdict': ['Количество слайдов в допустимых границах']}
     elif find_additional <= slides_number[0]:
-        return {'pass': False, 'value': find_additional,
-                'verdict': 'Число слайдов меньше допустимого. Допустимые границы: {}'.format(slides_number)}
+        return sldnum_verdict(find_additional, slides_number, 'Число слайдов меньше допустимого')
     else:
         if suspected_additional:
-            return {'pass': False, 'value': find_additional,
-                    'verdict': 'Допустимые границы: {}. Проверьте неозаглавленные запасные слайды'.format(slides_number)}
+            return sldnum_verdict(find_additional, slides_number, 'Проверьте неозаглавленные запасные слайды')
         else:
-            return {'pass': False, 'value': find_additional,
-                    'verdict': 'Число слайдов превышает допустимое. Допустимые границы: {}'.format(slides_number)}
+            return sldnum_verdict(find_additional, slides_number,'Число слайдов превышает допустимое')
 
 def get_len_on_additional(presentation, slides_number):
     additional = re.compile('[А-Я][а-я]*[\s]слайд[ы]?')
@@ -143,7 +146,7 @@ def __find_tasks_on_slides(presentation, goals, intersection_number):
 
     if slides_with_tasks == 0:
         logger.info("\tВсе заявленные задачи найдены на слайдах")
-        return {'pass': True, value: "Все задачи найдены на слайдах",
+        return {'pass': True, 'value': "Все задачи найдены на слайдах",
                 'verdict': ["Все задачи найдены на слайдах"]}
     elif len(slides_with_tasks) == 2 :
         logger.info("\tНекоторые из заявленных задач на слайдах не найдены")

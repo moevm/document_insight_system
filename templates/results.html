@@ -45,8 +45,9 @@
                         {% if results.slides_number == -1 %}
                             {{ 'Не проведена' }}
                         {% else %}
-                            {{ 'Всего: ' ~ results.slides_number.value }}<br>
-                            {{ results.slides_number.get('verdict', "Пройдена!" if results.slides_number.pass else "Не пройдена") }}
+                            {% for item in results.slides_number.get('verdict', "Пройдена!" if results.slides_number.pass else "Не пройдена") %}
+                                {{ item }}<br>
+                            {% endfor %}
                         {% endif %}
 
                     </td>
