@@ -19,3 +19,9 @@ class SlidePPTX(SlideBasic):
                 continue
             if hasattr(shape, "text"):
                 self.text += "\n" + shape.text
+
+        for shape in container.shapes:
+            if not shape.has_text_frame:
+                continue
+            for paragraph in shape.text_frame.paragraphs:
+                self.level_txt_map = {'lvl': paragraph.level, 'txt': paragraph.text}

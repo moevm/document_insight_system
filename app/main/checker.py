@@ -41,16 +41,14 @@ def __check_slides_enumeration(presentation):
     for i in range(1, len(presentation.slides)):
         if presentation.slides[i].page_number[0] != i + 1:
             error.append(i+1)
-    logger.info(("\tПлохо пронумерованные слайды: " + str(error)) if error != [] else "\tВсе слайды пронумерованы корректно")
-    return {'pass': error == [], 'value': error}
+    logger.info(("\tПлохо пронумерованные слайды: " + str(error)) if error else "\tВсе слайды пронумерованы корректно")
+    return {'pass': not error, 'value': error}
 
 
 def __check_title_size(presentation):
-    i = 0
     empty_headers = []
     len_exceeded = []
-    for title in presentation.get_titles():
-        i += 1
+    for i, title in enumerate(presentation.get_titles(), 1):
         if title == "":
             empty_headers.append(i)
             continue
@@ -64,25 +62,29 @@ def __check_title_size(presentation):
             if len(titles) > 2:
                 len_exceeded.append(i)
     error_slides = list(itertools.chain(empty_headers, len_exceeded))
-    logger.info(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides != []
+    logger.info(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides
           else "\tВсе слайды озаглавлены корректно")
+
+    def exceeded_verdict(len_exceeded):
+        return ['Превышение длины: {}'.format(', '.join(map(str, len_exceeded))),
+                'Убедитесь в корректности заголовка и текста слайда']
+
+    def empty_verdict(empty_headers):
+        return ['Заголовки не найдены: {}.'.format(', '.join(map(str, empty_headers))),
+                'Убедитесь, что слайд озаглавлен соответстующим элементом']
+
     if not error_slides:
         return {'pass': not bool(error_slides) , 'value': [empty_headers, len_exceeded],
                 'verdict': ["Пройдена!"]}
     elif len(empty_headers) == 0 and len(len_exceeded) != 0:
         return {'pass': False, 'value': len_exceeded,
-                'verdict': ['Превышение длины: {}'.format(', '.join(map(str, len_exceeded))),
-                            'Убедитесь в корректности заголовка и текста слайда']}
+                'verdict': exceeded_verdict(len_exceeded)}
     elif len(empty_headers) != 0 and len(len_exceeded) == 0:
         return {'pass':False, 'value': empty_headers,
-                'verdict': ['Заголовки не найдены: {}.'.format(', '.join(map(str, empty_headers))),
-                            'Убедитесь, что слайд озаглавлен соответстующим элементом']}
+                'verdict': empty_verdict(empty_headers)}
     else:
         return {'pass':False, 'value': [empty_headers, len_exceeded],
-                'verdict': ['Заголовки не найдены: {}.'.format(', '.join(map(str, empty_headers))),
-                'Убедитесь, что слайд озаглавлен соответстующим элементом',
-                'Превышение длины: {}'.format(', '.join(map(str, len_exceeded))),
-                 'Убедитесь в корректности заголовка и текста слайда']}
+                'verdict': list(itertools.chain(empty_verdict(empty_headers), exceeded_verdict(len_exceeded)))}
 
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
 SLIDE_APPROBATION_OF_WORK = 'Апробация'
@@ -91,11 +93,9 @@ SLIDE_WITH_RELEVANCE = 'Актуальность'
 
 
 def __find_definite_slide(presentation, type_of_slide):
-    i = 0
     found_slides = []
     found_idxs = []
-    for title in presentation.get_titles():
-        i += 1
+    for i, title in enumerate(presentation.get_titles(), 1):
         if str(title).lower().find(str(type_of_slide).lower()) != -1:
             logger.info("\tСлайд " + type_of_slide + " найден")
             found_slides.append(presentation.get_text_from_slides()[i - 1])
@@ -108,12 +108,7 @@ def __find_definite_slide(presentation, type_of_slide):
 
 
 def __check_actual_slide(presentation):
-    i = 0
-    size = presentation.get_len_slides()
-    for text in presentation.get_text_from_slides():
-        i += 1
-        if i > size:
-            break
+    for i, text in enumerate(presentation.get_text_from_slides(), 1):
         if SLIDE_WITH_RELEVANCE.lower() in str(text).lower():
             logger.info("\tСлайд " + SLIDE_WITH_RELEVANCE + " найден")
             return __answer(True, i)
