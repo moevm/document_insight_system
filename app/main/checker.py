@@ -42,7 +42,13 @@ def __check_slides_enumeration(presentation):
         if presentation.slides[i].page_number[0] != i + 1:
             error.append(i+1)
     logger.info(("\tПлохо пронумерованные слайды: " + str(error)) if error else "\tВсе слайды пронумерованы корректно")
-    return {'pass': not error, 'value': error}
+    if not error:
+        return {'pass': True, 'value': error,
+                'verdict': ["Пройдена!"]}
+    else:
+        return {'pass': False, 'value': error,
+                'verdict': ['Не пройдена, проблемные слайды: {}'.format(', '.join(map(str, error))),
+                            'Убедитесь в корректности формата номеров слайдов']}
 
 
 def __check_title_size(presentation):
@@ -137,10 +143,18 @@ def __find_tasks_on_slides(presentation, goals, intersection_number):
 
     if slides_with_tasks == 0:
         logger.info("\tВсе заявленные задачи найдены на слайдах")
-        return __answer(True, "Все задачи найдены на слайдах")
-    else:
+        return {'pass': True, value: "Все задачи найдены на слайдах",
+                'verdict': ["Все задачи найдены на слайдах"]}
+    elif len(slides_with_tasks) == 2 :
         logger.info("\tНекоторые из заявленных задач на слайдах не найдены")
-        return {'pass': False, 'value': slides_with_tasks}
+        swt_verdict = ['Всего задач: {}'.format(slides_with_tasks.get('count')),
+                       'Не найдены: ']
+        swt_verdict.extend(slides_with_tasks.get('not_found'))
+        return {'pass': False, 'value': slides_with_tasks,
+                'verdict': swt_verdict}
+    else:
+        return {'pass': False, 'value': slides_with_tasks,
+                'verdict': slides_with_tasks}
 
 
 def check(presentation, checks, presentation_name, username):

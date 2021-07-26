@@ -57,11 +57,10 @@
                     <td class="{{ "table-secondary ins" if results.slides_enum == -1 else ("table-success ins" if results.slides_enum.pass else "table-danger ins") }}">
                         {% if results.slides_enum == -1 %}
                             {{ "Не проведена" }}
-                        {% elif results.slides_enum.pass %}
-                            {{ "Пройдена!" }}
                         {% else %}
-                            {{ 'Не пройдена, проблемные слайды: ' ~ results.slides_enum.value|join(', ') }}<br>
-                            {{ 'Убедитесь в корректности формата номеров слайдов'}}
+                             {% for item in results.slides_enum.get('verdict', ["Пройдена!"] if results.slides_enum.pass else ["Не пройдена"]) %}
+                                 {{ item }}<br>
+                             {% endfor %}
                         {% endif %}
                     </td>
                 </tr>
@@ -110,18 +109,12 @@
                     <th scope="row" class="ins">8</th>
                     <td class="ins">Наличие слайдов, посвященных задачам</td>
                     <td class="{{ "table-secondary ins" if results.slide_every_task == -1 else ("table-success ins" if results.slide_every_task.pass else "table-danger ins") }}">
-                        {% if results.slide_every_task.pass %}
-                            {{ results.slide_every_task.value }}
-                        {% elif results.slide_every_task == -1 %}
+                        {% if results.slide_every_task == -1 %}
                             {{ "Не проведена" }}
-                        {% elif results.slide_every_task.value|length == 2 %}
-                            {{ "Всего задач: " ~ results.slide_every_task.value[0] }}<br>
-                            {{ "Не найдены: " }}
-                            {% for item in results.slide_every_task.value[1] %}
-                                 {{ item }}<br>
-                            {% endfor %}
                         {% else %}
-                            {{ results.slide_every_task.value }}
+                            {% for item in results.slide_every_task.get('verdict', ["Пройдена!"] if results.slide_every_task.pass else ["Не пройдена"]) %}
+                                {{ item }}<br>
+                            {% endfor %}
                         {% endif %}
                     </td>
                 </tr>
