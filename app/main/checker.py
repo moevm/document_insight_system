@@ -5,29 +5,28 @@ from app.nlp.find_tasks_on_slides import find_tasks_on_slides
 from logging import getLogger
 logger = getLogger('root')
 
-def __answer(mod, value):
+def answer(mod, value, verdict):
     return {
-        "pass": bool(mod),
-        "value": str(value)
+        'pass': bool(mod),
+        'value': value,
+        'verdict': verdict
     }
 
 def get_sldnum_range(find_additional, slides_number, suspected_additional = None):
 
     def sldnum_verdict(find_additional, slides_number, msg):
-        return {'pass': False, 'value': find_additional,
-                'verdict': ['Всего: {}'.format(find_additional),
-                             '{}. Допустимые границы: {}'.format(msg, slides_number)]}
+        return answer(False, find_additional, ['Всего: {}'.format(find_additional),
+                                               '{}. Допустимые границы: {}'.format(msg, slides_number)])
 
     if slides_number[0] <= find_additional <= slides_number[1]:
-        return {'pass': True, 'value': find_additional,
-                'verdict': ['Количество слайдов в допустимых границах']}
+        return answer(True, find_additional, ['Количество слайдов в допустимых границах'])
     elif find_additional <= slides_number[0]:
         return sldnum_verdict(find_additional, slides_number, 'Число слайдов меньше допустимого')
     else:
         if suspected_additional:
             return sldnum_verdict(find_additional, slides_number, 'Проверьте неозаглавленные запасные слайды')
         else:
-            return sldnum_verdict(find_additional, slides_number,'Число слайдов превышает допустимое')
+            return sldnum_verdict(find_additional, slides_number, 'Число слайдов превышает допустимое')
 
 def get_len_on_additional(presentation, slides_number):
     additional = re.compile('[А-Я][а-я]*[\s]слайд[ы]?')
@@ -46,17 +45,13 @@ def __check_slides_enumeration(presentation):
             error.append(i+1)
     logger.info(("\tПлохо пронумерованные слайды: " + str(error)) if error else "\tВсе слайды пронумерованы корректно")
     if not error:
-        return {'pass': True, 'value': error,
-                'verdict': ["Пройдена!"]}
+        return answer(True, error, ["Пройдена!"])
     else:
-        return {'pass': False, 'value': error,
-                'verdict': ['Не пройдена, проблемные слайды: {}'.format(', '.join(map(str, error))),
-                            'Убедитесь в корректности формата номеров слайдов']}
-
+        return answer(False, error, ['Не пройдена, проблемные слайды: {}'.format(', '.join(map(str, error))),
+                                     'Убедитесь в корректности формата номеров слайдов'])
 
 def __check_title_size(presentation):
-    empty_headers = []
-    len_exceeded = []
+    empty_headers, len_exceeded = [], []
     for i, title in enumerate(presentation.get_titles(), 1):
         if title == "":
             empty_headers.append(i)
@@ -64,10 +59,7 @@ def __check_title_size(presentation):
 
         title = str(title).replace('\x0b', '\n')
         if '\n' in title or '\r' in title:
-            titles = []
-            for t in re.split('\r|\n', title):
-                if t != '':
-                    titles.append(t)
+            titles = [t for t in re.split('\r|\n', title) if t != '']
             if len(titles) > 2:
                 len_exceeded.append(i)
     error_slides = list(itertools.chain(empty_headers, len_exceeded))
@@ -83,17 +75,14 @@ def __check_title_size(presentation):
                 'Убедитесь, что слайд озаглавлен соответстующим элементом']
 
     if not error_slides:
-        return {'pass': not bool(error_slides) , 'value': [empty_headers, len_exceeded],
-                'verdict': ["Пройдена!"]}
+        return answer(not bool(error_slides), [empty_headers, len_exceeded], ["Пройдена!"])
     elif len(empty_headers) == 0 and len(len_exceeded) != 0:
-        return {'pass': False, 'value': len_exceeded,
-                'verdict': exceeded_verdict(len_exceeded)}
+        return answer(False, len_exceeded, exceeded_verdict(len_exceeded))
     elif len(empty_headers) != 0 and len(len_exceeded) == 0:
-        return {'pass':False, 'value': empty_headers,
-                'verdict': empty_verdict(empty_headers)}
+        return answer(False, empty_headers, empty_verdict(empty_headers))
     else:
-        return {'pass':False, 'value': [empty_headers, len_exceeded],
-                'verdict': list(itertools.chain(empty_verdict(empty_headers), exceeded_verdict(len_exceeded)))}
+        return answer(False, [empty_headers, len_exceeded],
+               list(itertools.chain(empty_verdict(empty_headers), exceeded_verdict(len_exceeded))))
 
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
 SLIDE_APPROBATION_OF_WORK = 'Апробация'
@@ -102,8 +91,7 @@ SLIDE_WITH_RELEVANCE = 'Актуальность'
 
 
 def __find_definite_slide(presentation, type_of_slide):
-    found_slides = []
-    found_idxs = []
+    found_slides, found_idxs  = [], []
     for i, title in enumerate(presentation.get_titles(), 1):
         if str(title).lower().find(str(type_of_slide).lower()) != -1:
             logger.info("\tСлайд " + type_of_slide + " найден")
@@ -111,35 +99,35 @@ def __find_definite_slide(presentation, type_of_slide):
             found_idxs.append(i)
     if len(found_slides) == 0:
         logger.info("\tСлайд " + type_of_slide + " не найден")
-        return __answer(False, ""), ""
+        return answer(False, None, ['Слайд не найден'])
     else:
-        return {'pass': True, 'value': found_idxs}, ' '.join(found_slides)
+        return answer(True, found_idxs, ['Слайд найден']), ' '.join(found_slides)
 
 
 def __check_actual_slide(presentation):
     for i, text in enumerate(presentation.get_text_from_slides(), 1):
         if SLIDE_WITH_RELEVANCE.lower() in str(text).lower():
             logger.info("\tСлайд " + SLIDE_WITH_RELEVANCE + " найден")
-            return __answer(True, i)
+            return answer(True, i, ['Найден под номером: {}'.format(i)])
     logger.info("\tСлайд " + SLIDE_WITH_RELEVANCE + " не найден")
-    return __answer(False, "")
+    return answer(False, None, ['Слайд не найден'])
 
 
 def __are_slides_similar(goals, conclusions, actual_number):
     if goals == "" or conclusions == "":
-        return -1
+        return answer(False, None, ['Задач или заключения не существует'])
 
     results = check_similarity(goals, conclusions)
     if results == -1:
-        return __answer(False, "Произошла ошибка!"), __answer(False, "Произошла ошибка!")
+        return answer(False, None, ["Произошла ошибка!"]), answer(False, None, ["Произошла ошибка!"])
     else:
-        return __answer(results[0] >= actual_number, results[0]),    \
-               {'pass': results[1].get('found_dev'), 'value': results[1].get('dev_sentence')}
+        return (answer(results[0] >= actual_number, results[0], ['Соответствует на {}%'.format(results[0])]),
+                answer(results[1].get('found_dev'), results[1].get('dev_sentence'), [results[1].get('dev_sentence')]))
 
 
 def __find_tasks_on_slides(presentation, goals, intersection_number):
     if goals == "":
-        return __answer(False, 'Слайд "Задачи" не найден')
+        return answer(False, None, ['Слайд "Задачи" не найден'])
 
     titles = presentation.get_titles()
     slides_with_tasks = find_tasks_on_slides(goals, titles, intersection_number)
@@ -153,16 +141,13 @@ def __find_tasks_on_slides(presentation, goals, intersection_number):
         swt_verdict = ['Всего задач: {}'.format(slides_with_tasks.get('count')),
                        'Не найдены: ']
         swt_verdict.extend(slides_with_tasks.get('not_found'))
-        return {'pass': False, 'value': slides_with_tasks,
-                'verdict': swt_verdict}
+        return answer(False, slides_with_tasks, swt_verdict)
     else:
-        return {'pass': False, 'value': slides_with_tasks,
-                'verdict': slides_with_tasks}
+        return answer(False, slides_with_tasks, slides_with_tasks)
 
 
 def check(presentation, checks, presentation_name, username):
-    goals_array = ""
-    conclusion_array = ""
+    goals_array, conclusion_array = "", ""
 
     if checks.slides_enum != -1:  # Нумерация слайдов
         checks.slides_enum = __check_slides_enumeration(presentation)
@@ -184,13 +169,11 @@ def check(presentation, checks, presentation_name, username):
     similar = __are_slides_similar(goals_array, conclusion_array, checks.conclusion_actual)
     if checks.conclusion_actual != -1:  # Соответствие заключения задачам
         if similar != -1:
-            logger.info("\tОбозначенные цели совпадают с задачами на " + similar[0]['value'] + "%")
             checks.conclusion_actual = similar[0]
         else:
             checks.conclusion_actual = {'pass': False, 'value': 0}
     if checks.conclusion_along != -1:  # Наличие направлений дальнейшего развития
         if similar != -1:
-            logger.info("\tНаправления дальнейшего развития " + ("" if similar[1]['value'] else "не ") + "найдены")
             checks.conclusion_along = similar[1]
         else:
             checks.conclusion_along = {'pass': False}

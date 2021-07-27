@@ -14,8 +14,7 @@ def compare_task_and_title(task, title):
     task_set = set(list(itertools.chain(*parse_task)))
     title_set = set(list(itertools.chain(*parse_title)))
 
-    l1 = []
-    l2 = []
+    l1, l2 = [], []
     rvector = task_set.union(title_set)
     for w in rvector:
         if w in task_set:
