@@ -2,39 +2,9 @@ import re
 import itertools
 from app.nlp.similarity_of_texts import check_similarity
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
+from app.main.checker_util import SldNumCheck, answer
 from logging import getLogger
 logger = getLogger('root')
-
-def answer(mod, value, verdict):
-    return {
-        'pass': bool(mod),
-        'value': value,
-        'verdict': verdict
-    }
-
-def get_sldnum_range(find_additional, slides_number, suspected_additional = None):
-
-    def sldnum_verdict(find_additional, slides_number, msg):
-        return answer(False, find_additional, ['Всего: {}'.format(find_additional),
-                                               '{}. Допустимые границы: {}'.format(msg, slides_number)])
-
-    if slides_number[0] <= find_additional <= slides_number[1]:
-        return answer(True, find_additional, ['Количество слайдов в допустимых границах'])
-    elif find_additional <= slides_number[0]:
-        return sldnum_verdict(find_additional, slides_number, 'Число слайдов меньше допустимого')
-    else:
-        if suspected_additional:
-            return sldnum_verdict(find_additional, slides_number, 'Проверьте неозаглавленные запасные слайды')
-        else:
-            return sldnum_verdict(find_additional, slides_number, 'Число слайдов превышает допустимое')
-
-def get_len_on_additional(presentation, slides_number):
-    additional = re.compile('[А-Я][а-я]*[\s]слайд[ы]?')
-    find_additional = [i for i, header in enumerate(presentation.get_titles()) if re.fullmatch(additional, header)]
-    if len(find_additional) == 0:
-        return get_sldnum_range(len(presentation.slides), slides_number, suspected_additional = True)
-    else:
-        return get_sldnum_range(find_additional[0], slides_number)
 
 def __check_slides_enumeration(presentation):
     error = []
@@ -164,7 +134,7 @@ def check(presentation, checks, presentation_name, username):
         checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION)
 
     if checks.slides_number != -1:  # Количество основных слайдов
-        checks.slides_number = get_len_on_additional(presentation, checks.slides_number)
+        checks.slides_number = SldNumCheck(presentation, checks.slides_number).get_len_on_additional()
 
     similar = __are_slides_similar(goals_array, conclusion_array, checks.conclusion_actual)
     if checks.conclusion_actual != -1:  # Соответствие заключения задачам
