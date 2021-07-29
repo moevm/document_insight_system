@@ -82,28 +82,52 @@
                     <th scope="row" class="ins">4</th>
                     <td class="ins">Слайд "Цель и задачи"</td>
                     <td class="{{ "table-secondary ins" if results.goals_slide == -1 else ("table-success ins" if results.goals_slide.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.goals_slide == -1 else (("Найден под номером: " ~ results.goals_slide.value|join(', ')) if results.goals_slide.pass else "Не найден!") }}
+                        {% if results.goals_slide == -1 %}
+                            {{ "Не проведена" }}
+                        {% else %}
+                             {% for item in results.goals_slide.get('verdict', ["Найден"] if results.goals_slide.pass else ["Не найден!"]) %}
+                                 {{ item }}<br>
+                             {% endfor %}
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">5</th>
                     <td class="ins">Слайд "Апробация работы"</td>
                     <td class="{{ "table-secondary ins" if results.probe_slide == -1 else ("table-success ins" if results.probe_slide.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.probe_slide == -1 else (("Найден под номером: " ~ results.probe_slide.value|join(', ')) if results.probe_slide.pass else "Не найден!") }}
+                        {% if results.probe_slide == -1 %}
+                            {{ "Не проведена" }}
+                        {% else %}
+                             {% for item in results.probe_slide.get('verdict', ["Найден"] if results.probe_slide.pass else ["Не найден!"]) %}
+                                 {{ item }}<br>
+                             {% endfor %}
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">6</th>
                     <td class="ins">Слайд с описанием актуальности работы</td>
                     <td class="{{ "table-secondary ins" if results.actual_slide == -1 else ("table-success ins" if results.actual_slide.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.actual_slide == -1 else (("Найден под номером: " ~ results.actual_slide.value|join(', ')) if results.actual_slide.pass else "Не найден!") }}
+                        {% if results.actual_slide == -1 %}
+                            {{ "Не проведена" }}
+                        {% else %}
+                             {% for item in results.actual_slide.get('verdict', ["Найден"] if results.actual_slide.pass else ["Не найден!"]) %}
+                                 {{ item }}<br>
+                             {% endfor %}
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">7</th>
                     <td class="ins">Слайд с заключением</td>
                     <td class="{{ "table-secondary ins" if results.conclusion_slide == -1 else ("table-success ins" if results.conclusion_slide.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.conclusion_slide == -1 else (("Найден под номером: " ~ results.conclusion_slide.value|join(', ')) if results.conclusion_slide.pass else "Не найден!") }}
+                        {% if results.conclusion_slide == -1 %}
+                            {{ "Не проведена" }}
+                        {% else %}
+                             {% for item in results.conclusion_slide.get('verdict', ["Найден"] if results.conclusion_slide.pass else ["Не найден!"]) %}
+                                 {{ item }}<br>
+                             {% endfor %}
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
@@ -123,14 +147,26 @@
                     <th scope="row" class="ins">9</th>
                     <td class="ins">Соответствие заключения задачам</td>
                     <td class="{{ "table-secondary ins" if results.conclusion_actual == -1 else ("table-success ins" if results.conclusion_actual.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.conclusion_actual == -1 else ("Соответствует на " ~ results.conclusion_actual.value ~ "%") }}
+                        {% if results.conclusion_actual == -1 %}
+                            {{ "Не проведена" }}
+                        {% else %}
+                            {% for item in results.conclusion_actual.get('verdict', ["Пройдена!"] if results.conclusion_actual.pass else ["Не пройдена"]) %}
+                                {{ item }}<br>
+                            {% endfor %}
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
                     <th scope="row" class="ins">10</th>
                     <td class="ins">Наличие направлений дальнейшего развития</td>
                     <td class="{{ "table-secondary ins" if results.conclusion_along == -1 else ("table-success ins" if results.conclusion_along.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.conclusion_along == -1 else (results.conclusion_along.value if results.conclusion_along.pass else "Не найдены") }}
+                        {% if results.conclusion_along == -1 %}
+                            {{ "Не проведена" }}
+                        {% else %}
+                            {% for item in results.conclusion_along.get('verdict', ["Пройдена!"] if results.conclusion_along.pass else ["Не пройдена"]) %}
+                                {{ item }}<br>
+                            {% endfor %}
+                        {% endif %}
                     </td>
                 </tr>
             </tbody>

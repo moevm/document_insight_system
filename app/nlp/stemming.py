@@ -15,7 +15,7 @@ class Stemming:
         self.sentences = []
         self.find_further_development = False
         self.filtered_docs = []
-        self.further_dev_sentence = None
+        self.further_dev_sentence = 'Не найдены'
 
     def get_sentences(self, string, flag):
         self.sentences = []
