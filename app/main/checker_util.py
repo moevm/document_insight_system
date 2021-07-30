@@ -4,7 +4,7 @@ def answer(mod, value, *args):
     return {
         'pass': bool(mod),
         'value': value,
-        'verdict': (*args, )
+        'verdict': (args)
     }
 
 class BaseCheck:
