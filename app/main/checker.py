@@ -2,7 +2,7 @@ import re
 import itertools
 from app.nlp.similarity_of_texts import check_similarity
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
-from app.main.checker_util import SldNumCheck, answer
+from app.main.checker_util import SldNumCheck, TitleFormatCheck, answer
 from logging import getLogger
 logger = getLogger('root')
 
@@ -20,39 +20,6 @@ def __check_slides_enumeration(presentation):
         return answer(False, error, 'Не пройдена, проблемные слайды: {}'.format(', '.join(map(str, error))), \
                                     'Убедитесь в корректности формата номеров слайдов')
 
-def __check_title_size(presentation):
-    empty_headers, len_exceeded = [], []
-    for i, title in enumerate(presentation.get_titles(), 1):
-        if title == "":
-            empty_headers.append(i)
-            continue
-
-        title = str(title).replace('\x0b', '\n')
-        if '\n' in title or '\r' in title:
-            titles = [t for t in re.split('\r|\n', title) if t != '']
-            if len(titles) > 2:
-                len_exceeded.append(i)
-    error_slides = list(itertools.chain(empty_headers, len_exceeded))
-    logger.info(("\tПлохо озаглавленные слайды: " + str(error_slides)) if error_slides
-          else "\tВсе слайды озаглавлены корректно")
-
-    def exceeded_verdict(len_exceeded):
-        return 'Превышение длины: {}'.format(', '.join(map(str, len_exceeded))), \
-               'Убедитесь в корректности заголовка и текста слайда'
-
-    def empty_verdict(empty_headers):
-        return 'Заголовки не найдены: {}.'.format(', '.join(map(str, empty_headers))), \
-               'Убедитесь, что слайд озаглавлен соответстующим элементом'
-
-    if not error_slides:
-        return answer(not bool(error_slides), [empty_headers, len_exceeded], "Пройдена!")
-    elif len(empty_headers) == 0 and len(len_exceeded) != 0:
-        return answer(False, len_exceeded, *exceeded_verdict(len_exceeded))
-    elif len(empty_headers) != 0 and len(len_exceeded) == 0:
-        return answer(False, empty_headers, *empty_verdict(empty_headers))
-    else:
-        return answer(False, [empty_headers, len_exceeded],
-               *list(itertools.chain(empty_verdict(empty_headers), exceeded_verdict(len_exceeded))))
 
 SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
 SLIDE_APPROBATION_OF_WORK = 'Апробация'
@@ -119,7 +86,7 @@ def check(presentation, checks, presentation_name, username):
     if checks.slides_enum != -1:  # Нумерация слайдов
         checks.slides_enum = __check_slides_enumeration(presentation)
     if checks.slides_headers != -1:  # Заголовки слайдов занимают не более двух строк и существуют
-        checks.slides_headers = __check_title_size(presentation)
+        checks.slides_headers = TitleFormatCheck(presentation).check()
 
     if checks.goals_slide != -1:  # Слайд "Цель и задачи"
         checks.goals_slide, goals_array = __find_definite_slide(presentation, SLIDE_GOALS_AND_TASKS)
