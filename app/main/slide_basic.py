@@ -4,7 +4,6 @@ class SlideBasic:
         self.text = ""  # Maybe should be a list for multiple text nodes.
         self.page_number = [-1, -1, -1]
         self.dimensions = [-1, -1]
-        self.level_txt_map = {}
 
     def get_title(self):
         return self.title
@@ -14,6 +13,3 @@ class SlideBasic:
 
     def get_page_number(self):
         return self.page_number
-
-    def get_lvl_txt_map(self):
-        return self.level_txt_map
