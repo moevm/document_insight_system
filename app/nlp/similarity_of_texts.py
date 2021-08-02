@@ -1,6 +1,7 @@
 from os import mkdir
 from os.path import exists
 from shutil import rmtree
+import re
 import gensim
 import numpy as np
 
@@ -32,6 +33,10 @@ def check_similarity(string1, string2):
 
         gen_docs1 = stemming.get_filtered_docs(string2, False)
         further_dev = stemming.further_dev()
+        base_conclusions = stemming.get_sentences(string2, False)
+        ignore = re.compile('[0-9]+[.]?|Заключение|‹#›')
+        clear_conclusions = [ch for ch in base_conclusions if not re.fullmatch(ignore, ch)]
+        recognized_conclusions = [s for s in clear_conclusions if s != further_dev.get('dev_sentence')]
 
 
         for g in gen_docs1:
@@ -47,7 +52,7 @@ def check_similarity(string1, string2):
 
         if exists(PATH):
             rmtree(PATH)
-        return percentage_of_similarity, further_dev
+        return percentage_of_similarity, further_dev, recognized_conclusions
     except OSError:
         if exists(PATH):
             rmtree(PATH)

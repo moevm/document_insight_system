@@ -58,7 +58,7 @@ def __are_slides_similar(goals, conclusions, actual_number):
     if results == -1:
         return answer(False, None, "Произошла ошибка!"), answer(False, None, "Произошла ошибка!")
     else:
-        return (answer(results[0] >= actual_number, results[0], 'Соответствует на {}%'.format(results[0])),
+        return (answer(results[0] >= actual_number, results[0], 'Соответствует на {}%'.format(results[0]), 'Распознанные заключения: ', *results[2]),
                 answer(results[1].get('found_dev'), results[1].get('dev_sentence'), results[1].get('dev_sentence')))
 
 
