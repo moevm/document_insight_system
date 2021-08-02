@@ -72,11 +72,12 @@ def __find_tasks_on_slides(presentation, goals, intersection_number):
     if slides_with_tasks == 0:
         logger.info("\tВсе заявленные задачи найдены на слайдах")
         return answer(True, "Все задачи найдены на слайдах", "Все задачи найдены на слайдах")
-    elif len(slides_with_tasks) == 2 :
+    elif len(slides_with_tasks) == 3 :
         logger.info("\tНекоторые из заявленных задач на слайдах не найдены")
         return answer(False, slides_with_tasks, 'Всего задач: {}'.format(slides_with_tasks.get('count')), \
+                                                'Распознанные задачи: ', *slides_with_tasks.get('recognized'), \
                                                 'Не найдены: ', *slides_with_tasks.get('not_found'))
-    else:
+    elif len(slides_with_tasks) == 1:
         return answer(False, slides_with_tasks, slides_with_tasks)
 
 

@@ -52,6 +52,7 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
         if task_count == len(found_descriptions):
             return 0
         return {'count': task_count,
+                'recognized': cleaned_tasks,
                 'not_found': list(set(cleaned_tasks) - set(found_descriptions))}
     except Exception as error:
         logger.error(error, exc_info=True)
