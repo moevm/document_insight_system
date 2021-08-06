@@ -2,7 +2,9 @@ import re
 import itertools
 from app.nlp.similarity_of_texts import check_similarity
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
-from app.main.checker_util import SldNumCheck, TitleFormatCheck, answer
+from app.main.checks.sld_num import SldNumCheck
+from app.main.checks.title_format import TitleFormatCheck
+from app.main.checks.base_check import answer
 from logging import getLogger
 logger = getLogger('root')
 
