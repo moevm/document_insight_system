@@ -3,7 +3,7 @@ const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
-    entry: ["@babel/polyfill", "./assets/scripts/main.js"],
+    entry: ['core-js/stable', 'regenerator-runtime/runtime', "./assets/scripts/main.js"],
     output: {
         path: path.join(__dirname, './src/'),
         filename: "./all.min.js"
