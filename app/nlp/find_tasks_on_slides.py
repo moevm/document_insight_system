@@ -14,8 +14,7 @@ def compare_task_and_title(task, title):
     task_set = set(list(itertools.chain(*parse_task)))
     title_set = set(list(itertools.chain(*parse_title)))
 
-    l1 = []
-    l2 = []
+    l1, l2 = [], []
     rvector = task_set.union(title_set)
     for w in rvector:
         if w in task_set:
@@ -52,7 +51,9 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
                     break
         if task_count == len(found_descriptions):
             return 0
-        return task_count, list(set(cleaned_tasks) - set(found_descriptions))
+        return {'count': task_count,
+                'recognized': cleaned_tasks,
+                'not_found': list(set(cleaned_tasks) - set(found_descriptions))}
     except Exception as error:
         logger.error(error, exc_info=True)
         return str(error)
