@@ -2,6 +2,7 @@ import configparser
 from json.decoder import JSONDecodeError
 import os
 import json
+from tempfile import mkdtemp
 
 # read ini file
 current_ph = os.path.dirname(os.path.abspath(__file__))
@@ -38,3 +39,13 @@ SIGNUP_PAGE_ENABLED = os.environ.get('SIGNUP_PAGE_ENABLED', 'True') == 'True'
 
 MAX_CONTENT_LENGTH = config.getint('consts', 'MAX_CONTENT_LENGTH')*1024*1024
 MAX_SYSTEM_STORAGE = config.getint('consts', 'MAX_SYSTEM_STORAGE')*1024*1024
+
+CACHE_TYPE = 'simple'
+CACHE_DEFAULT_TIMEOUT = 600
+SESSION_TYPE = 'filesystem'
+SESSION_FILE_DIR = mkdtemp()
+
+SESSION_COOKIE_NAME = 'flask-session-id'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False   # should be True in case of HTTPS usage (production)
+SESSION_COOKIE_SAMESITE = None  # should be 'None' in case of HTTPS usage (production)

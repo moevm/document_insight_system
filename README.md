@@ -1,20 +1,9 @@
-# mse_auto_checking_slides_vaganov
-## Таск-трекер: [[link]](https://github.com/moevm/mse_auto_checking_slides_vaganov/projects/1)  
-Скринкаст первой итерации (прототип): [[link]](https://yadi.sk/i/59qktvtQMWLZyw)  
-Скринкаст второй итерации: [[link]](https://yadi.sk/i/zHboIWHajNgnKg)  
-Скринкаст финальной итерации: [[link]](https://drive.google.com/file/d/1JuTmW1nTFn5pWT72HhZlyj1bzGfbjv8D/view?usp=sharing)
-#### Инструкция запуска приложения:  
-Протестировано для Ubuntu 18.04.  
-```bash
-git clone https://github.com/moevm/mse_auto_checking_slides_vaganov.git
-cd mse_auto_checking_slides_vaganov/
-sudo apt install git curl python3-pip python3-venv npm mongodb
-python3 -m pip install virtualenv
-python3 -m venv venv
-source venv/bin/activate
-curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
-sudo apt install -y nodejs
-./act.sh -i -b -d
-```  
-Далее в терминале отобразится адрес, по которому можно получить доступ к приложению. До первой проверки необходимо установить критерии. Для debug-режима по умолчанию доступен пользователь admin с паролем admin.
- 
+#### LTI1.3 test implementation:  
+
+test platform: https://lti-ri.imsglobal.org/platforms/2426
+test tool: https://lti-ri.imsglobal.org/lti/tools/2153
+
+To test launch, go to platform -> resource links -> select user -> oidc login -> etc.
+
+Base implementation would include 3 routes: /lti_login/(tool's initiation url), /launch/(tool link's url), /jwks/(keys).
+1.3 requires usage of HTTPS

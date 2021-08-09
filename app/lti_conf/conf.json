@@ -1,0 +1,24 @@
+{
+    "https://lti-ri.imsglobal.org": [{
+        "default": true,
+        "client_id": "12345",
+        "auth_login_url": "https://lti-ri.imsglobal.org/platforms/2426/authorizations/new",
+        "auth_token_url": "https://lti-ri.imsglobal.org/platforms/2426/access_tokens",
+        "key_set_url": "https://lti-ri.imsglobal.org/platforms/2426/platform_keys/2246.json",
+        "key_set": {
+            "keys": [
+                {
+                    "kty": "RSA",
+                    "e": "AQAB",
+                    "n": "oy1XdThGZBtd41crk-cWQvwB1KMQTkUgPg1zjItq7i0aqXJy3xVYB0uM3KKY6QuHv58ImXqXvsMqvbngT5-_HlgV28WYNCvNVAA73Ax4DaTckaXtmPWAFrqp1XTOPckdTqY9dCWY0p6xovkeNos7qhamVLxM9zr3dVw6nKnS-PxnCIiUdsTlVe1d7u62j0H_TeZSSGd6wgIpMO1P_ivMfiRfICORRnh6XmQC46CkmcsUFg_kVSxUmb2u56P9IHVOsqLGPwzQIkR1QwbRSxtTojWbyCruE8bXfjIEdIr6o1OUbkGI1VQ7NgRa8P6v1F4mUXf_DOxBxYGiBEKOOp17fw",
+                    "kid": "wqvr8zBjlm4x7-HYst_IOKFgKUr46mlnTFhr0YFqq60",
+                    "alg": "RS256",
+                    "use": "sig"
+                }
+            ]
+        },
+        "private_key_file": "private.key",
+        "public_key_file": "public.key",
+        "deployment_ids": ["1"]
+    }]
+}
