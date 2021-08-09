@@ -1,6 +1,6 @@
 #### LTI1.3 test implementation:  
 
-test platform: https://lti-ri.imsglobal.org/platforms/2426
+test platform: https://lti-ri.imsglobal.org/platforms/2426; 
 test tool: https://lti-ri.imsglobal.org/lti/tools/2153
 
 To test launch, go to platform -> resource links -> select user -> oidc login -> etc.
