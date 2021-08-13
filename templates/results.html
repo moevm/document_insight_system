@@ -6,7 +6,7 @@
 {% block title %}Результаты проверки{% endblock %}
 
 {% block main %}
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
     <style>
     .hiddenRow {
      padding: 0 !important;
@@ -46,7 +46,7 @@
             </thead>
             <tbody>
                 <tr data-toggle="collapse" data-target="#verd1" class="accordion-toggle">
-                    <td><button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span></button></td>
+                    <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">1</th>
                     <td class="ins">Количество основных слайдов(до запасных слайдов)</td>
                     <td class="{{ "table-secondary ins" if results.slides_number == -1 else ("table-success ins" if results.slides_number.pass else "table-danger ins") }}">
@@ -63,7 +63,7 @@
                     {% endif %}
                 </div></td></tr>
                 <tr data-toggle="collapse" data-target="#verd2" class="accordion-toggle">
-                    <td><button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span></button></td>
+                    <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">2</th>
                     <td class="ins">Нумерация слайдов</td>
                     <td class="{{ "table-secondary ins" if results.slides_enum == -1 else ("table-success ins" if results.slides_enum.pass else "table-danger ins") }}">
@@ -80,7 +80,7 @@
                     {% endif %}
                </div></td></tr>
                 <tr data-toggle="collapse" data-target="#verd3" class="accordion-toggle">
-                    <td><button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span></button></td>
+                    <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">3</th>
                     <td class="ins">Заголовки слайдов присутствуют и занимают не более двух строк</td>
                     <td class="{{ "table-secondary ins" if results.slides_headers == -1 else ("table-success ins" if results.slides_headers.pass else "table-danger ins") }}">
@@ -97,7 +97,7 @@
                     {% endif %}
                 </div></td></tr>
                 <tr data-toggle="collapse" data-target="#verd4" class="accordion-toggle">
-                    <td><button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span></button></td>
+                    <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">4</th>
                     <td class="ins">Слайд "Цель и задачи"</td>
                     <td class="{{ "table-secondary ins" if results.goals_slide == -1 else ("table-success ins" if results.goals_slide.pass else "table-danger ins") }}">
@@ -114,7 +114,7 @@
                      {% endif %}
                 </div></td></tr>
                 <tr data-toggle="collapse" data-target="#verd5" class="accordion-toggle">
-                    <td><button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span></button></td>
+                    <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">5</th>
                     <td class="ins">Слайд "Апробация работы"</td>
                     <td class="{{ "table-secondary ins" if results.probe_slide == -1 else ("table-success ins" if results.probe_slide.pass else "table-danger ins") }}">
@@ -131,7 +131,7 @@
                     {% endif %}
                 </div></td></tr>
                 <tr data-toggle="collapse" data-target="#verd6" class="accordion-toggle">
-                    <td><button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span></button></td>
+                    <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">6</th>
                     <td class="ins">Слайд с описанием актуальности работы</td>
                     <td class="{{ "table-secondary ins" if results.actual_slide == -1 else ("table-success ins" if results.actual_slide.pass else "table-danger ins") }}">
@@ -148,7 +148,7 @@
                     {% endif %}
                 </div></td></tr>
                 <tr data-toggle="collapse" data-target="#verd7" class="accordion-toggle">
-                    <td><button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span></button></td>
+                    <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">7</th>
                     <td class="ins">Слайд с заключением</td>
                     <td class="{{ "table-secondary ins" if results.conclusion_slide == -1 else ("table-success ins" if results.conclusion_slide.pass else "table-danger ins") }}">
@@ -165,7 +165,7 @@
                     {% endif %}
                 </div></td></tr>
                 <tr data-toggle="collapse" data-target="#verd8" class="accordion-toggle">
-                    <td><button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span></button></td>
+                    <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">8</th>
                     <td class="ins">Наличие слайдов, посвященных задачам</td>
                     <td class="{{ "table-secondary ins" if results.slide_every_task == -1 else ("table-success ins" if results.slide_every_task.pass else "table-danger ins") }}">
@@ -182,7 +182,7 @@
                     {% endif %}
                 </div></td></tr>
                 <tr data-toggle="collapse" data-target="#verd9" class="accordion-toggle">
-                    <td><button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span></button></td>
+                    <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">9</th>
                     <td class="ins">Соответствие заключения задачам</td>
                     <td class="{{ "table-secondary ins" if results.conclusion_actual == -1 else ("table-success ins" if results.conclusion_actual.pass else "table-danger ins") }}">
@@ -199,7 +199,7 @@
                     {% endif %}
                 </div></td></tr>
                 <tr data-toggle="collapse" data-target="#verd10" class="accordion-toggle">
-                    <td><button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span></button></td>
+                    <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">10</th>
                     <td class="ins">Наличие направлений дальнейшего развития</td>
                     <td class="{{ "table-secondary ins" if results.conclusion_along == -1 else ("table-success ins" if results.conclusion_along.pass else "table-danger ins") }}">
