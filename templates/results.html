@@ -177,11 +177,7 @@
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.slide_every_task.get('verdict', ["Пройдена!"] if results.slide_every_task.pass else ["Не пройдена"]) %}
-                            {% if item.startswith('Распознанные задачи') or item.startswith('Все задачи найдены на') or item.startswith('Всего задач:') or item.startswith('Не найдены:') %}
-                                {{ item }}<br>
-                            {% else %}
-                                 <div style="margin-left: 2em;">{{ item }}<br></div>
-                            {% endif %}
+                                {{ item|safe }}
                         {% endfor %}
                     {% endif %}
                 </div></td></tr>
@@ -198,11 +194,7 @@
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.conclusion_actual.get('verdict', ["Пройдена!"] if results.conclusion_actual.pass else ["Не пройдена"]) %}
-                            {% if item.startswith('Распознанные заключения') or item.startswith('Соответствует на') %}
-                                {{ item }}<br>
-                            {% else %}
-                                <div style="margin-left: 2em;">{{ item }}<br></div>
-                            {% endif %}
+                                {{ item|safe }}
                         {% endfor %}
                     {% endif %}
                 </div></td></tr>

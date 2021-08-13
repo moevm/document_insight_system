@@ -2,6 +2,7 @@ import re
 import itertools
 from app.nlp.similarity_of_texts import check_similarity
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
+from app.utils.parse_for_html import find_tasks_on_slides_feedback, tasks_conclusions_feedback
 from app.main.checks.sld_num import SldNumCheck
 from app.main.checks.title_format import TitleFormatCheck
 from app.main.checks.base_check import answer
@@ -60,7 +61,7 @@ def __are_slides_similar(goals, conclusions, actual_number):
     if results == -1:
         return answer(False, None, "Произошла ошибка!"), answer(False, None, "Произошла ошибка!")
     else:
-        return (answer(results[0] >= actual_number, results[0], 'Соответствует на {}%'.format(results[0]), 'Распознанные заключения: ', *results[2]),
+        return (answer(results[0] >= actual_number, results[0], *tasks_conclusions_feedback(results)),
                 answer(results[1].get('found_dev'), results[1].get('dev_sentence'), results[1].get('dev_sentence')))
 
 
@@ -76,9 +77,7 @@ def __find_tasks_on_slides(presentation, goals, intersection_number):
         return answer(True, "Все задачи найдены на слайдах", "Все задачи найдены на слайдах")
     elif len(slides_with_tasks) == 3 :
         logger.info("\tНекоторые из заявленных задач на слайдах не найдены")
-        return answer(False, slides_with_tasks, 'Всего задач: {}'.format(slides_with_tasks.get('count')), \
-                                                'Распознанные задачи: ', *slides_with_tasks.get('recognized'), \
-                                                'Не найдены: ', *slides_with_tasks.get('not_found'))
+        return answer(False, slides_with_tasks, *find_tasks_on_slides_feedback(slides_with_tasks))
     elif len(slides_with_tasks) == 1:
         return answer(False, slides_with_tasks, slides_with_tasks)
 
