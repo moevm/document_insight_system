@@ -7,6 +7,8 @@ import 'bootstrap-table/dist/bootstrap-table.min.css'
 import 'bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control'
 import 'bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.min.css'
 
+import 'bootstrap-icons/font/bootstrap-icons.css'
+
 import 'bootstrap-datepicker';
 import 'bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css'
 

@@ -10,7 +10,13 @@
     width: 45%;
 }
 
+.hiddenRow {
+    padding: 0 !important;
+ }
 
+ .format_description {
+    margin-left: 2em;
+ }
 
 #results_holder {
     overflow: auto;
