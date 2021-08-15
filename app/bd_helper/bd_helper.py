@@ -225,7 +225,7 @@ class ConsumersDBManager:
         consumer = Consumer()
         consumer.consumer_key = consumer_key
         consumer.consumer_secret = consumer_secret
-        if users_collection.find_one({'username': username}) is not None:
+        if consumers_collection.find_one({'consumer_key': consumer_key}) is not None:
             return None
         else:
             consumers_collection.insert_one(consumer.pack())
