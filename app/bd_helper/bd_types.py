@@ -51,10 +51,9 @@ class Sessions(Packable):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
         dictionary = dictionary or {}
-        session_id = dictionary.get('session_id', '')
-        consumer_key = dictionary.get('consumer_key', '')
-        tasks = dictionary.get('tasks', [])
-        is_admin = dictionary.get('is_admin', False)
+        self.session_id = dictionary.get('session_id', '')
+        self.tasks = dictionary.get('tasks', [])
+        self.is_admin = dictionary.get('is_admin', False)
 
     def __str__(self) -> str:
         return f"Session: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"

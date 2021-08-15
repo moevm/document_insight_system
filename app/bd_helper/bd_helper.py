@@ -265,3 +265,27 @@ class ConsumersDBManager:
             return consumer
         else:
             return
+
+class SessionsDBManager:
+
+    @staticmethod
+    def add_session(session_id, task, params_for_passback, admin=False):
+        existing_session = SessionsDBManager.get_session(session_id)
+        task_info = {task: {'params_for_passback': params_for_passback}}
+        new_session = Sessions()
+        new_session.session_id = session_id
+        new_session.tasks = task_info
+        new_session.is_admin = admin
+
+        if existing_session:
+            pass
+        else:
+            sessions_collection.insert_one(new_session.pack())
+
+    @staticmethod
+    def get_session(session_id):
+        session = sessions_collection.find_one({'session_id ': session_id})
+        if session is not None:
+            return session
+        else:
+            return None

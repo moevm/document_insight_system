@@ -14,10 +14,12 @@ import app.servants.user as user
 from app.servants import data as data
 from app.bd_helper.bd_helper import (
     get_user, get_check, get_presentation_check, users_collection,
-    get_all_checks, get_user_checks, format_stats, format_check, get_checks_cursor)
+    get_all_checks, get_user_checks, format_stats, format_check, get_checks_cursor, ConsumersDBManager, SessionsDBManager)
 from app.servants import pre_luncher
 
 from app.utils.decorators import decorator_assertion
+from app.lti_session_passback.check_request import check_request
+from lti_session_passback.lti import utils
 
 from flask_recaptcha import ReCaptcha
 
@@ -52,6 +54,30 @@ def load_user(user_id):
 
 
 # User pages request handlers:
+@app.route('/lti', methods=['POST'])
+def lti():
+    params = request.form
+    consumer_key = params.get('oauth_consumer_key', '')
+    consumer_secret = ConsumersDBManager.get_secret(consumer_key)
+    request_info = dict(
+        headers=dict(request.headers),
+        data=params,
+        url=request.url,
+        secret=consumer_secret
+    )
+    if check_request(request_info):
+        username = utils.get_username(params)
+        custom_params = utils.get_custom_params(params)
+        task_id = custom_params.get('task_id', 'default_task_id')
+        role = utils.get_role(params)
+        params_for_passback = utils.extract_passback_params(params)
+
+        SessionsDBManager.add_session(username, task_id, params_for_passback, role)
+
+        return redirect(url_for('upload'))
+    else:
+        abort(403)
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
