@@ -279,7 +279,7 @@ class SessionsDBManager:
 
         if existing_session:
             existing_session.get('tasks') = task_info
-            existing_session.get('is_admin') = is_admin
+            existing_session.get('is_admin') = admin
             sessions_collection.find_one_and_replace({'session_id ': session_id}, existing_session.pack())
         else:
             sessions_collection.insert_one(new_session.pack())
