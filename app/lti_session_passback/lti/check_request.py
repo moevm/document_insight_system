@@ -4,6 +4,7 @@ from app.utils.mock_lti_auth import mock_lti_auth
 
 
 def check_request(request_info):
+    print('mock lti auth', mock_lti_auth())
     if not mock_lti_auth():
         return _check_request(request_info)
     else:

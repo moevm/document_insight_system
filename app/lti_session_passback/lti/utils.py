@@ -7,6 +7,7 @@ ADMIN_ROLE = 'Instructor'
 CUSTOM_PARAM_PREFIX = 'custom_'
 PASSBACK_PARAMS = ('lis_outcome_service_url', 'lis_result_sourcedid', 'oauth_consumer_key')
 
+from app.bd_helper.bd_helper import ConsumersDBManager
 
 def get_param(data, key):
     if key in data:
@@ -25,6 +26,11 @@ def get_username(data): return get_param(data, USERNAME)
 
 
 def get_person_name(data): return get_param(data, PERSON_NAME)
+
+
+def create_consumers(consumer_dict):
+    for key, secret in consumer_dict.items():
+        ConsumersDBManager.add_consumer(key, secret)
 
 
 def get_role(data, default_role=False):
