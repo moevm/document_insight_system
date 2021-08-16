@@ -52,7 +52,7 @@ class Sessions(Packable):
         super().__init__(dictionary)
         dictionary = dictionary or {}
         self.session_id = dictionary.get('session_id', '')
-        self.tasks = dictionary.get('tasks', [])
+        self.tasks = dictionary.get('tasks', {})
         self.is_admin = dictionary.get('is_admin', False)
 
     def __str__(self) -> str:
