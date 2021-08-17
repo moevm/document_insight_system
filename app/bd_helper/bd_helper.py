@@ -30,11 +30,9 @@ def get_client():
 def add_user(username, password_hash = '', is_LTI = False):
     user = User()
     user.username = username
+    user.is_LTI = is_LTI
     if not is_LTI:
         user.password_hash = password_hash
-        user.is_LTI = is_LTI
-    else:
-        user.is_LTI = is_LTI
     if users_collection.find_one({'username': username}) is not None:
         return None
     else:
@@ -275,25 +273,8 @@ class SessionsDBManager:
 
     @staticmethod
     def add_session(session_id, task, params_for_passback, admin=False):
-        existing_session = sessions_collection.find_one({'session_id ': session_id})
-        task_info = {task: {'params_for_passback': params_for_passback}}
-        new_session = Sessions()
-        new_session.session_id = session_id
-        new_session.tasks = task_info
-        new_session.is_admin = admin
-
-        if existing_session is not None:
-            existing_session.tasks = task_info
-            existing_session.is_admin = admin
-            upd_session = Sessions(existing_session)
-            sessions_collection.find_one_and_replace({'session_id ': session_id}, upd_session.pack())
-        else:
-            sessions_collection.insert_one(new_session.pack())
+        pass
 
     @staticmethod
     def get_session(session_id):
-        session = sessions_collection.find_one({'session_id ': session_id})
-        if session is not None:
-            return Session(session)
-        else:
-            return None
+        pass
