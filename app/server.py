@@ -80,7 +80,7 @@ def lti():
             user = get_user(username)
 
         login_user(user)
-        
+
         return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=user.name)
     else:
         abort(403)
@@ -362,5 +362,5 @@ if __name__ == '__main__':
         ip = '0.0.0.0'
         logger.info("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
               ("отладочном" if DEBUG else "рабочем") + " режиме")
-        utils.create_consumers({'consumerkeyconsumerkey':'consumersecretconsumersecret'})
+        utils.create_consumers(app.config['LTI_CONSUMERS'])
         app.run(debug=DEBUG, host=ip, port=8080, use_reloader=False)

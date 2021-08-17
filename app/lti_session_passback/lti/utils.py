@@ -32,7 +32,15 @@ def create_consumers(consumer_dict):
     for key, secret in consumer_dict.items():
         ConsumersDBManager.add_consumer(key, secret)
 
+def parse_consumer_info(key_str, secret_str):
+    keys = key_str.split(',')
+    secrets = secret_str.split(',')
 
+    if len(keys) != len(secrets):
+        raise Exception(f"len(consumer_keys) != len(consumer_secrets): '{key_str}' vs '{secret_str}'")
+
+    return { key: secret for key, secret in zip(keys, secrets) }
+    
 def get_role(data, default_role=False):
     try:
         return get_param(data, ROLES).split(',')[0] == ADMIN_ROLE
