@@ -41,7 +41,7 @@ class Consumers(Packable):
         dictionary = dictionary or {}
         self.consumer_key = dictionary.get('consumer_key', '')
         self.consumer_secret = dictionary.get('consumer_secret', '')
-        self.timestamp_and_nonce = dictionary.get('timestamp_and_nonce', '')
+        self.timestamp_and_nonce = dictionary.get('timestamp_and_nonce', [])
 
     def __str__(self) -> str:
         return f"Consumer: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
@@ -93,6 +93,9 @@ class Checks(Packable):
         self.score = dictionary.get('score', -1)
         self.filename = dictionary.get('filename', '')
         self.user = dictionary.get('user', '')
+        #self.task_id = dictionary.get('task_id', '')
+        #self.passback_params = dictionary.get('passback_params', '')
+        #self.is_passbacked = dictionary.get('is_passbacked', '')
 
     def get_checks(self):
         return dict(

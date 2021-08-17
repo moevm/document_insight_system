@@ -18,7 +18,7 @@ from app.bd_helper.bd_helper import (
 from app.servants import pre_luncher
 
 from app.utils.decorators import decorator_assertion
-from app.lti_session_passback.check_request import check_request
+from app.lti_session_passback.lti.check_request import check_request
 from lti_session_passback.lti import utils
 
 from flask_recaptcha import ReCaptcha
@@ -56,21 +56,15 @@ def load_user(user_id):
 # User pages request handlers:
 @app.route('/lti', methods=['POST'])
 def lti():
-    params = request.form
-    consumer_key = params.get('oauth_consumer_key', '')
-    consumer_secret = ConsumersDBManager.get_secret(consumer_key)
-    request_info = dict(
-        headers=dict(request.headers),
-        data=params,
-        url=request.url,
-        secret=consumer_secret
-    )
-    if check_request(request_info):
-        username = utils.get_username(params)
-        custom_params = utils.get_custom_params(params)
-        task_id = custom_params.get('task_id', 'default_task_id')
-        role = utils.get_role(params)
-        params_for_passback = utils.extract_passback_params(params)
+    if check_request(request):
+        temporary_user_params = request.form
+        username = temporary_user_params.get('ext_user_username')
+        user_id = f"{username}_{temporary_user_params.get('tool_consumer_instance_guid', '')}"
+        params_for_passback = utils.extract_passback_params(temporary_user_params)
+        custom_params = utils.get_custom_params(temporary_user_params)
+        role = utils.get_role(temporary_user_params)
+        task_id = custom_params.get('task_id',
+                  f"{temporary_user_params.get('user_id')}-{temporary_user_params.get('resource_link_id')}")
 
         SessionsDBManager.add_session(username, task_id, params_for_passback, role)
 
@@ -355,4 +349,5 @@ if __name__ == '__main__':
         ip = '0.0.0.0'
         logger.info("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
               ("отладочном" if DEBUG else "рабочем") + " режиме")
+        #utils.create_consumers()
         app.run(debug=DEBUG, host=ip, port=8080, use_reloader=False)

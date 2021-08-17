@@ -222,7 +222,7 @@ class ConsumersDBManager:
 
     @staticmethod
     def add_consumer(consumer_key, consumer_secret, timestamp_and_nonce = []):
-        consumer = Consumer()
+        consumer = Consumers()
         consumer.consumer_key = consumer_key
         consumer.consumer_secret = consumer_secret
         if consumers_collection.find_one({'consumer_key': consumer_key}) is not None:
@@ -261,26 +261,28 @@ class ConsumersDBManager:
         consumer = consumers_collection.find_one({'consumer_key': key})
         if consumer is not None:
             consumer.get('timestamp_and_nonce').append((timestamp, nonce))
-            consumers_collection.find_one_and_replace({'consumer_key': key}, consumer.pack())
+            upd_consumer = Consumers(consumer)
+            consumers_collection.find_one_and_replace({'consumer_key': key}, upd_consumer.pack())
             return consumer
         else:
-            return
+            return None
 
 class SessionsDBManager:
 
     @staticmethod
     def add_session(session_id, task, params_for_passback, admin=False):
-        existing_session = SessionsDBManager.get_session(session_id)
+        existing_session = sessions_collection.find_one({'session_id ': session_id})
         task_info = {task: {'params_for_passback': params_for_passback}}
         new_session = Sessions()
         new_session.session_id = session_id
         new_session.tasks = task_info
         new_session.is_admin = admin
 
-        if existing_session:
-            existing_session.get('tasks') = task_info
-            existing_session.get('is_admin') = admin
-            sessions_collection.find_one_and_replace({'session_id ': session_id}, existing_session.pack())
+        if existing_session is not None:
+            existing_session.tasks = task_info
+            existing_session.is_admin = admin
+            upd_session = Sessions(existing_session)
+            sessions_collection.find_one_and_replace({'session_id ': session_id}, upd_session.pack())
         else:
             sessions_collection.insert_one(new_session.pack())
 
@@ -288,6 +290,6 @@ class SessionsDBManager:
     def get_session(session_id):
         session = sessions_collection.find_one({'session_id ': session_id})
         if session is not None:
-            return session
+            return Session(session)
         else:
             return None

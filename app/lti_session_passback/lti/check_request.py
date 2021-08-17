@@ -1,25 +1,20 @@
-from lti.tool_provider import ToolProvider
+from lti.contrib.flask import FlaskToolProvider
 from .lti_validator import LTIRequestValidator
 from app.utils.mock_lti_auth import mock_lti_auth
+from app.bd_helper.bd_helper import ConsumersDBManager
 
 
-def check_request(request_info):
-    print('mock lti auth', mock_lti_auth())
+def check_request(request):
     if not mock_lti_auth():
-        return _check_request(request_info)
+        return _check_request(request)
     else:
-        return _mock_check_request(request_info)
+        return _mock_check_request(request)
 
 
-def _check_request(request_info):
-    provider = ToolProvider.from_unpacked_request(
-        secret=request_info.get('secret', None),
-        params=request_info.get('data', {}),
-        headers=request_info.get('headers', {}),
-        url=request_info.get('url', '')
-    )
+def _check_request(request):
+    provider = FlaskToolProvider.from_flask_request(request = request)
     return provider.is_valid_request(LTIRequestValidator())
 
 
-def _mock_check_request(request_info):
+def _mock_check_request(request):
     return True
