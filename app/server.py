@@ -6,8 +6,8 @@ import json
 import bson
 import pymongo
 from bson import ObjectId
-from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify
-from flask_login import LoginManager, login_user, current_user, login_required
+from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify, session
+from flask_login import LoginManager, login_user, current_user, login_required, logout_user
 
 
 import app.servants.user as user
@@ -38,7 +38,6 @@ app.config.from_pyfile('settings.py')
 app.recaptcha = ReCaptcha(app=app)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config.from_pyfile('settings.py')
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
@@ -59,6 +58,7 @@ def lti():
     if check_request(request):
         temporary_user_params = request.form
         username = temporary_user_params.get('ext_user_username')
+        person_name = utils.get_person_name(temporary_user_params)
         user_id = f"{username}_{temporary_user_params.get('tool_consumer_instance_guid', '')}"
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
@@ -66,9 +66,21 @@ def lti():
         task_id = custom_params.get('task_id',
                   f"{temporary_user_params.get('user_id')}-{temporary_user_params.get('resource_link_id')}")
 
-        SessionsDBManager.add_session(username, task_id, params_for_passback, role)
+        logout_user()
+        session.clear()
 
-        return redirect(url_for('upload'))
+        SessionsDBManager.add_session(username, task_id, params_for_passback, role)
+        session['session_id'] = username
+        from app.bd_helper.bd_helper import add_user
+        user = add_user(username, is_LTI = True, person_name = person_name)
+        if user is not None:
+            login_user(user)
+        else:
+            from app.bd_helper.bd_helper import get_user
+            user = get_user(username)
+            login_user(user)
+
+        return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=user.name)
     else:
         abort(403)
 
