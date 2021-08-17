@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from bson import ObjectId
 import pymongo
 
-from app.bd_helper.bd_types import User, Presentation, Checks, Consumers, Sessions
+from app.bd_helper.bd_types import User, Presentation, Checks, Consumers
 
 from datetime import datetime
 
@@ -268,13 +268,3 @@ class ConsumersDBManager:
             return consumer
         else:
             return None
-
-class SessionsDBManager:
-
-    @staticmethod
-    def add_session(session_id, task, params_for_passback, admin=False):
-        pass
-
-    @staticmethod
-    def get_session(session_id):
-        pass

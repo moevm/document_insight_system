@@ -22,6 +22,7 @@ class User(Packable, UserMixin):
         self.criteria = Checks(dictionary.get('criteria'))
         self.is_LTI = dictionary.get('is_LTI', False)
         self.is_admin = dictionary.get('is_admin', False)
+        self.tasks = dictionary.get('tasks', {})
 
     def __str__(self) -> str:
         return f"User: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
@@ -45,18 +46,6 @@ class Consumers(Packable):
 
     def __str__(self) -> str:
         return f"Consumer: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
-
-
-class Sessions(Packable):
-    def __init__(self, dictionary=None):
-        super().__init__(dictionary)
-        dictionary = dictionary or {}
-        self.session_id = dictionary.get('session_id', '')
-        self.tasks = dictionary.get('tasks', {})
-        self.is_admin = dictionary.get('is_admin', False)
-
-    def __str__(self) -> str:
-        return f"Session: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
 
 
 # You shouldn't create or change this explicitly

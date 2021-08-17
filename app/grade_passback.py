@@ -1,7 +1,7 @@
 import sys
 from time import sleep
 from lti.contrib.flask import FlaskToolProvider
-from app.bd_helper.bd_helper import ConsumersDBManager, SessionsDBManager
+from app.bd_helper.bd_helper import ConsumersDBManager
 from lti.outcome_request import OutcomeRequest, REPLACE_REQUEST
 from app.utils.mock_lti_auth import mock_lti_auth
 
