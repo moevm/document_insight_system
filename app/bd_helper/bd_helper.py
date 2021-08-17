@@ -27,7 +27,7 @@ def get_client():
 
 
 # Returns user if user was created and None if already exists
-def add_user(username, password_hash = '', is_LTI = False, person_name = ''):
+def add_user(username, password_hash = '', is_LTI = False):
     user = User()
     user.username = username
     if not is_LTI:
@@ -35,7 +35,6 @@ def add_user(username, password_hash = '', is_LTI = False, person_name = ''):
         user.is_LTI = is_LTI
     else:
         user.is_LTI = is_LTI
-        user.name = person_name
     if users_collection.find_one({'username': username}) is not None:
         return None
     else:

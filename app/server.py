@@ -71,9 +71,12 @@ def lti():
 
         SessionsDBManager.add_session(username, task_id, params_for_passback, role)
         session['session_id'] = username
-        from app.bd_helper.bd_helper import add_user
-        user = add_user(username, is_LTI = True, person_name = person_name)
+        from app.bd_helper.bd_helper import add_user, edit_user
+        user = add_user(username, is_LTI = True)
         if user is not None:
+            user.name = person_name
+            user.is_admin = role
+            edit_user(user)
             login_user(user)
         else:
             from app.bd_helper.bd_helper import get_user
@@ -361,5 +364,5 @@ if __name__ == '__main__':
         ip = '0.0.0.0'
         logger.info("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
               ("отладочном" if DEBUG else "рабочем") + " режиме")
-        #utils.create_consumers()
+        utils.create_consumers({'consumerkeyconsumerkey':'consumersecretconsumersecret'})
         app.run(debug=DEBUG, host=ip, port=8080, use_reloader=False)
