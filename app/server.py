@@ -14,7 +14,7 @@ import app.servants.user as user
 from app.servants import data as data
 from app.bd_helper.bd_helper import (
     get_user, get_check, get_presentation_check, users_collection,
-    get_all_checks, get_user_checks, format_stats, format_check, get_checks_cursor, ConsumersDBManager, SessionsDBManager)
+    get_all_checks, get_user_checks, format_stats, format_check, get_checks_cursor, add_user, edit_user, ConsumersDBManager, SessionsDBManager)
 from app.servants import pre_luncher
 
 from app.utils.decorators import decorator_assertion
@@ -71,18 +71,16 @@ def lti():
 
         SessionsDBManager.add_session(username, task_id, params_for_passback, role)
         session['session_id'] = username
-        from app.bd_helper.bd_helper import add_user, edit_user
         user = add_user(username, is_LTI = True)
         if user is not None:
             user.name = person_name
             user.is_admin = role
             edit_user(user)
-            login_user(user)
         else:
-            from app.bd_helper.bd_helper import get_user
             user = get_user(username)
-            login_user(user)
 
+        login_user(user)
+        
         return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=user.name)
     else:
         abort(403)
