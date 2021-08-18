@@ -12,9 +12,7 @@ from flask_login import LoginManager, login_user, current_user, login_required, 
 
 import app.servants.user as user
 from app.servants import data as data
-from app.bd_helper.bd_helper import (
-    get_user, get_check, get_presentation_check, users_collection,
-    get_all_checks, get_user_checks, format_stats, format_check, get_checks_cursor, add_user, edit_user, ConsumersDBManager)
+from app.bd_helper import bd_helper
 from app.servants import pre_luncher
 
 from app.utils.decorators import decorator_assertion
@@ -49,7 +47,7 @@ log.setLevel(logging.DEBUG)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return get_user(user_id)
+    return bd_helper.get_user(user_id)
 
 
 # User pages request handlers:
@@ -70,16 +68,16 @@ def lti():
         session.clear()
 
         session['session_id'] = username
-        user = add_user(username, is_LTI = True)
+        user = bd_helper.add_user(username, is_LTI = True)
         if user:
             user.name = person_name
             user.is_admin = role
             user.tasks = {task_id: {'passback': params_for_passback}}
         else:
-            user = get_user(username)
+            user = bd_helper.get_user(username)
             user.tasks[task_id] = {'passback': params_for_passback}
 
-        edit_user(user)
+        bd_helper.edit_user(user)
 
         login_user(user)
 
@@ -141,10 +139,10 @@ def results(_id):
     except bson.errors.InvalidId:
         logger.error('_id exception:', exc_info=True)
         return render_template("./404.html")
-    check = get_check(oid)
+    check = bd_helper.get_check(oid)
     if check is not None:
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id, fi=check.filename,
-                                columns=columns, stats = format_check(check.pack()))
+                                columns=columns, stats = bd_helper.format_check(check.pack()))
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
@@ -154,7 +152,7 @@ def results(_id):
 @login_required
 def checks(_id):
     try:
-        f = get_presentation_check(ObjectId(_id))
+        f = bd_helper.get_presentation_check(ObjectId(_id))
     except bson.errors.InvalidId:
         logger.error('_id exception in checks occured:', exc_info=True)
         return render_template("./404.html")
@@ -257,7 +255,7 @@ def check_list_data():
     sort = "_id" if sort == "upload-date" else sort
 
     # get data and records count
-    rows, count = get_checks_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+    rows, count = bd_helper.get_checks_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
 
     # construct response
     response = {
@@ -286,7 +284,7 @@ def version():
 def profile(username):
     if username == '':
         return redirect(url_for("profile", username=current_user.username))
-    u = get_user(username)
+    u = bd_helper.get_user(username)
     me = True if username == current_user.username else False
     if u is not None:
         return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
