@@ -6,18 +6,18 @@ import json
 import bson
 import pymongo
 from bson import ObjectId
-from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify
-from flask_login import LoginManager, login_user, current_user, login_required
+from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify, session
+from flask_login import LoginManager, login_user, current_user, login_required, logout_user
 
 
 import app.servants.user as user
 from app.servants import data as data
-from app.bd_helper.bd_helper import (
-    get_user, get_check, get_presentation_check, users_collection,
-    get_all_checks, get_user_checks, format_stats, format_check, get_checks_cursor)
+from app.bd_helper import bd_helper
 from app.servants import pre_luncher
 
 from app.utils.decorators import decorator_assertion
+from app.lti_session_passback.lti.check_request import check_request
+from lti_session_passback.lti import utils
 
 from flask_recaptcha import ReCaptcha
 
@@ -36,7 +36,6 @@ app.config.from_pyfile('settings.py')
 app.recaptcha = ReCaptcha(app=app)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config.from_pyfile('settings.py')
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
@@ -48,10 +47,41 @@ log.setLevel(logging.DEBUG)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return get_user(user_id)
+    return bd_helper.get_user(user_id)
 
 
 # User pages request handlers:
+@app.route('/lti', methods=['POST'])
+def lti():
+    if check_request(request):
+        temporary_user_params = request.form
+        username = temporary_user_params.get('ext_user_username')
+        person_name = utils.get_person_name(temporary_user_params)
+        user_id = f"{username}_{temporary_user_params.get('tool_consumer_instance_guid', '')}"
+        params_for_passback = utils.extract_passback_params(temporary_user_params)
+        custom_params = utils.get_custom_params(temporary_user_params)
+        role = utils.get_role(temporary_user_params)
+        task_id = custom_params.get('task_id',
+                  f"{temporary_user_params.get('user_id')}-{temporary_user_params.get('resource_link_id')}")
+
+        logout_user()
+
+        user = bd_helper.add_user(user_id, is_LTI = True)
+        if user:
+            user.name = person_name
+            user.is_admin = role
+            user.tasks = {task_id: {'passback': params_for_passback}}
+        else:
+            user = bd_helper.get_user(user_id)
+            user.tasks[task_id] = {'passback': params_for_passback}
+
+        bd_helper.edit_user(user)
+
+        login_user(user)
+        return redirect(url_for('upload'))
+    else:
+        abort(403)
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -106,10 +136,10 @@ def results(_id):
     except bson.errors.InvalidId:
         logger.error('_id exception:', exc_info=True)
         return render_template("./404.html")
-    check = get_check(oid)
+    check = bd_helper.get_check(oid)
     if check is not None:
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id, fi=check.filename,
-                                columns=columns, stats = format_check(check.pack()))
+                                columns=columns, stats = bd_helper.format_check(check.pack()))
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
@@ -119,7 +149,7 @@ def results(_id):
 @login_required
 def checks(_id):
     try:
-        f = get_presentation_check(ObjectId(_id))
+        f = bd_helper.get_presentation_check(ObjectId(_id))
     except bson.errors.InvalidId:
         logger.error('_id exception in checks occured:', exc_info=True)
         return render_template("./404.html")
@@ -222,7 +252,7 @@ def check_list_data():
     sort = "_id" if sort == "upload-date" else sort
 
     # get data and records count
-    rows, count = get_checks_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+    rows, count = bd_helper.get_checks_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
 
     # construct response
     response = {
@@ -251,7 +281,7 @@ def version():
 def profile(username):
     if username == '':
         return redirect(url_for("profile", username=current_user.username))
-    u = get_user(username)
+    u = bd_helper.get_user(username)
     me = True if username == current_user.username else False
     if u is not None:
         return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
@@ -329,4 +359,5 @@ if __name__ == '__main__':
         ip = '0.0.0.0'
         logger.info("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
               ("отладочном" if DEBUG else "рабочем") + " режиме")
+        utils.create_consumers(app.config['LTI_CONSUMERS'])
         app.run(debug=DEBUG, host=ip, port=8080, use_reloader=False)

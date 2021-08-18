@@ -11,11 +11,11 @@ ADD . /usr/src/project
 WORKDIR /usr/src/project
 
 RUN npm install
+RUN npm audit fix
 RUN npm install webpack
 
 RUN  python3.8 -m pip install -r dependencies.txt
 ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project"
 
 RUN ./act.sh -b
-RUN npm audit fix
 CMD ./scripts/local_start.sh

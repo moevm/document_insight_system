@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from bson import ObjectId
 import pymongo
 
-from app.bd_helper.bd_types import User, Presentation, Checks
+from app.bd_helper.bd_types import User, Presentation, Checks, Consumers
 
 from datetime import datetime
 
@@ -18,6 +18,8 @@ fs = GridFSBucket(db)
 users_collection = db['users']
 presentations_collection = db['presentations']
 checks_collection = db['checks']
+consumers_collection = db['consumers']
+sessions_collection = db['sessions']
 
 
 def get_client():
@@ -25,10 +27,12 @@ def get_client():
 
 
 # Returns user if user was created and None if already exists
-def add_user(username, password_hash):
+def add_user(username, password_hash = '', is_LTI = False):
     user = User()
     user.username = username
-    user.password_hash = password_hash
+    user.is_LTI = is_LTI
+    if not is_LTI:
+        user.password_hash = password_hash
     if users_collection.find_one({'username': username}) is not None:
         return None
     else:
@@ -213,3 +217,54 @@ def format_check(check):
 
 def format_stats(stats):
     return (format_check(check) for check in stats)
+
+
+#LTI
+class ConsumersDBManager:
+
+    @staticmethod
+    def add_consumer(consumer_key, consumer_secret, timestamp_and_nonce = []):
+        consumer = Consumers()
+        consumer.consumer_key = consumer_key
+        consumer.consumer_secret = consumer_secret
+        if consumers_collection.find_one({'consumer_key': consumer_key}) is not None:
+            return None
+        else:
+            consumers_collection.insert_one(consumer.pack())
+            return consumer
+
+    @staticmethod
+    def get_secret(key):
+        consumer = consumers_collection.find_one({'consumer_key': key})
+        if consumer is not None:
+            return consumer.get('consumer_secret')
+        else:
+            return None
+
+    @staticmethod
+    def is_key_valid(key):
+        consumer = consumers_collection.find_one({'consumer_key': key})
+        if consumer is not None:
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def has_timestamp_and_nonce(key, timestamp, nonce):
+        consumer = consumers_collection.find_one({'consumer_key': key})
+        if consumer is not None:
+            entries = consumer.get('timestamp_and_nonce')
+            return (timestamp, nonce) in entries
+        else:
+            return False
+
+    @staticmethod
+    def add_timestamp_and_nonce(key, timestamp, nonce):
+        consumer = consumers_collection.find_one({'consumer_key': key})
+        if consumer is not None:
+            consumer.get('timestamp_and_nonce').append((timestamp, nonce))
+            upd_consumer = Consumers(consumer)
+            consumers_collection.find_one_and_replace({'consumer_key': key}, upd_consumer.pack())
+            return consumer
+        else:
+            return None

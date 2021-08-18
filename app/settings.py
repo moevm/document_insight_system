@@ -2,6 +2,7 @@ import configparser
 from json.decoder import JSONDecodeError
 import os
 import json
+from lti_session_passback.lti.utils import parse_consumer_info
 
 # read ini file
 current_ph = os.path.dirname(os.path.abspath(__file__))
@@ -38,3 +39,10 @@ SIGNUP_PAGE_ENABLED = os.environ.get('SIGNUP_PAGE_ENABLED', 'True') == 'True'
 
 MAX_CONTENT_LENGTH = config.getint('consts', 'MAX_CONTENT_LENGTH')*1024*1024
 MAX_SYSTEM_STORAGE = config.getint('consts', 'MAX_SYSTEM_STORAGE')*1024*1024
+
+DEBUG_AUTH = False
+consumer_keys = os.environ.get('CONSUMER_KEY', '')
+consumer_secrets = os.environ.get('CONSUMER_SECRET', '')
+if consumer_keys == '' or consumer_secrets == '':
+    raise Exception('Required CONSUMER_KEY or CONSUMER_SECRET missing')
+LTI_CONSUMERS = parse_consumer_info(consumer_keys, consumer_secrets)

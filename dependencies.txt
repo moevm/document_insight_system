@@ -8,4 +8,6 @@ numpy==1.19.4
 gensim==3.8.3
 pymorphy2==0.9.1
 nltk==3.5
-flask-recaptcha==0.4.2 
+flask-recaptcha==0.4.2
+lti==0.9.5
+flask-security==3.0.0
