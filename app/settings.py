@@ -43,4 +43,6 @@ MAX_SYSTEM_STORAGE = config.getint('consts', 'MAX_SYSTEM_STORAGE')*1024*1024
 DEBUG_AUTH = False
 consumer_keys = os.environ.get('CONSUMER_KEY', '')
 consumer_secrets = os.environ.get('CONSUMER_SECRET', '')
+if consumer_keys == '' or consumer_secrets == '':
+    raise Exception('Required CONSUMER_KEY or CONSUMER_SECRET missing')
 LTI_CONSUMERS = parse_consumer_info(consumer_keys, consumer_secrets)
