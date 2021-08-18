@@ -9,6 +9,9 @@ class Packable:
     def pack(self):
         return dict(vars(self))
 
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
+
 
 # You shouldn't create this or change username and presentations explicitly
 class User(Packable, UserMixin):
@@ -23,9 +26,6 @@ class User(Packable, UserMixin):
         self.is_LTI = dictionary.get('is_LTI', False)
         self.is_admin = dictionary.get('is_admin', False)
         self.tasks = dictionary.get('tasks', {})
-
-    def __str__(self) -> str:
-        return f"User: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
 
     def pack(self):
         package = super(User, self).pack()
@@ -44,9 +44,6 @@ class Consumers(Packable):
         self.consumer_secret = dictionary.get('consumer_secret', '')
         self.timestamp_and_nonce = dictionary.get('timestamp_and_nonce', [])
 
-    def __str__(self) -> str:
-        return f"Consumer: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
-
 
 # You shouldn't create or change this explicitly
 class Presentation(Packable):
@@ -57,9 +54,6 @@ class Presentation(Packable):
             self._id = dictionary.get('_id')
         self.name = dictionary.get('name', '')
         self.checks = dictionary.get('checks', [])
-
-    def __str__(self) -> str:
-        return f"Presentation: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
 
 
 # You shouldn't create or change this explicitly
@@ -82,9 +76,6 @@ class Checks(Packable):
         self.score = dictionary.get('score', -1)
         self.filename = dictionary.get('filename', '')
         self.user = dictionary.get('user', '')
-        #self.task_id = dictionary.get('task_id', '')
-        #self.passback_params = dictionary.get('passback_params', '')
-        #self.is_passbacked = dictionary.get('is_passbacked', '')
 
     def get_checks(self):
         return dict(
@@ -115,6 +106,3 @@ class Checks(Packable):
 
     def correct(self):
         return all([check == -1 or check['pass'] for check in self.get_checks().values()])
-
-    def __str__(self) -> str:
-        return f"Checks: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
