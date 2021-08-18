@@ -65,23 +65,20 @@ def lti():
                   f"{temporary_user_params.get('user_id')}-{temporary_user_params.get('resource_link_id')}")
 
         logout_user()
-        session.clear()
 
-        session['session_id'] = username
-        user = bd_helper.add_user(username, is_LTI = True)
+        user = bd_helper.add_user(user_id, is_LTI = True)
         if user:
             user.name = person_name
             user.is_admin = role
             user.tasks = {task_id: {'passback': params_for_passback}}
         else:
-            user = bd_helper.get_user(username)
+            user = bd_helper.get_user(user_id)
             user.tasks[task_id] = {'passback': params_for_passback}
 
         bd_helper.edit_user(user)
 
         login_user(user)
-
-        return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=user.name)
+        return redirect(url_for('upload'))
     else:
         abort(403)
 
