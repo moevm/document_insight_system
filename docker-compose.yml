@@ -19,3 +19,10 @@ services:
     restart: always
     volumes:
       - ../slides_checker_mongo_data:/data/db
+
+  passback_grades:
+    build: .
+    command: python3 ./app/passback_grades.py
+    restart: always
+    depends_on:
+      - mongodb

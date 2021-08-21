@@ -174,6 +174,21 @@ def delete_check(presentation, checks_id):
         return presentation, get_check(checks_id)
 
 
+def get_unpassed_checks():
+    return checks_collection.find({'is_passbacked': False})
+
+
+def set_passbacked_flag(checks_id, flag):
+    check = checks_collection.find_one({'_id': checks_id})
+    if check:
+        check['is_passbacked'] = flag
+        upd_check = Checks(check)
+        checks_collection.find_one_and_replace({'_id': checks_id}, upd_check.pack())
+        return upd_check
+    else:
+        return None
+
+
 # Return no of bytes stored in gridfs
 def get_storage():
     files = db.fs.files.find()

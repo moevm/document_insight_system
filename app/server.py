@@ -19,6 +19,7 @@ from app.utils.decorators import decorator_assertion
 from app.lti_session_passback.lti.check_request import check_request
 from lti_session_passback.lti import utils
 
+from app.grade_passback import put_unsend_result
 from flask_recaptcha import ReCaptcha
 
 from logging import getLogger
@@ -65,15 +66,17 @@ def lti():
                   f"{temporary_user_params.get('user_id')}-{temporary_user_params.get('resource_link_id')}")
 
         logout_user()
+        session.clear()
+
+        session['user_id'] = user_id
+        session['params_for_passback'] = params_for_passback
 
         user = bd_helper.add_user(user_id, is_LTI = True)
         if user:
             user.name = person_name
             user.is_admin = role
-            user.tasks = {task_id: {'passback': params_for_passback}}
         else:
             user = bd_helper.get_user(user_id)
-            user.tasks[task_id] = {'passback': params_for_passback}
 
         bd_helper.edit_user(user)
 
@@ -118,8 +121,8 @@ def interact():
 @login_required
 def upload():
     if request.method == "POST":
-        if app.recaptcha.verify():
-            return data.upload(request, UPLOAD_FOLDER)
+        if app.recaptcha.verify() or current_user.is_LTI:
+            return data.upload(request, UPLOAD_FOLDER, session)
         else:
             abort(401)
     elif request.method == "GET":

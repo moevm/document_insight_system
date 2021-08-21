@@ -82,7 +82,7 @@ def __find_tasks_on_slides(presentation, goals, intersection_number):
         return answer(False, slides_with_tasks, slides_with_tasks)
 
 
-def check(presentation, checks, presentation_name, username):
+def check(presentation, checks, presentation_name, username, session):
     goals_array, conclusion_array = "", ""
 
     if checks.slides_enum != -1:  # Нумерация слайдов
@@ -121,5 +121,8 @@ def check(presentation, checks, presentation_name, username):
     checks.score = checks.calc_score()
     checks.filename = presentation_name
     checks.user = username
+    if 'params_for_passback' in session:
+        checks.params_for_passback = session.get('params_for_passback')
+        checks.is_passbacked = False
 
     return checks
