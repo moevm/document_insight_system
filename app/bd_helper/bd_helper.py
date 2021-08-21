@@ -6,7 +6,7 @@ import pymongo
 
 from app.bd_helper.bd_types import User, Presentation, Checks, Consumers
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from logging import getLogger
 logger = getLogger('root')
@@ -182,6 +182,7 @@ def set_passbacked_flag(checks_id, flag):
     check = checks_collection.find_one({'_id': checks_id})
     if check:
         check['is_passbacked'] = flag
+        check['lms_passback_time'] = datetime.now(timezone.utc)
         upd_check = Checks(check)
         checks_collection.find_one_and_replace({'_id': checks_id}, upd_check.pack())
         return upd_check

@@ -19,7 +19,6 @@ from app.utils.decorators import decorator_assertion
 from app.lti_session_passback.lti.check_request import check_request
 from lti_session_passback.lti import utils
 
-from app.grade_passback import put_unsend_result
 from flask_recaptcha import ReCaptcha
 
 from logging import getLogger

@@ -77,6 +77,7 @@ class Checks(Packable):
         self.user = dictionary.get('user', '')
         self.params_for_passback = dictionary.get('params_for_passback', None)
         self.is_passbacked = dictionary.get('is_passbacked', None)
+        self.lms_passback_time = dictionary.get('lms_passback_time', None)
 
 
     def get_checks(self):
