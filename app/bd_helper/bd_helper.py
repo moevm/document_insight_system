@@ -230,7 +230,7 @@ def get_check_stats(oid):
 def format_check(check):
     try:
         grade_passback_ts = check['lms_passback_time'].strftime("%H:%M:%S - %b %d %Y")
-    except KeyError:
+    except AttributeError:
         grade_passback_ts = None
     return (str(check['_id']), check['user'], check['filename'], check['_id'].generation_time.strftime("%H:%M:%S - %b %d %Y"),
                     grade_passback_ts, check['score'])
