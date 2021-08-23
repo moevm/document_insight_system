@@ -25,6 +25,7 @@ class User(Packable, UserMixin):
         self.criteria = Checks(dictionary.get('criteria'))
         self.is_LTI = dictionary.get('is_LTI', False)
         self.is_admin = dictionary.get('is_admin', False)
+        self.params_for_passback = dictionary.get('params_for_passback', None)
 
     def pack(self):
         package = super(User, self).pack()
@@ -75,7 +76,6 @@ class Checks(Packable):
         self.score = dictionary.get('score', -1)
         self.filename = dictionary.get('filename', '')
         self.user = dictionary.get('user', '')
-        self.params_for_passback = dictionary.get('params_for_passback', None)
         self.is_passbacked = dictionary.get('is_passbacked', None)
         self.lms_passback_time = dictionary.get('lms_passback_time', None)
 

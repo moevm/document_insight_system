@@ -6,7 +6,7 @@ import json
 import bson
 import pymongo
 from bson import ObjectId
-from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify, session
+from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify
 from flask_login import LoginManager, login_user, current_user, login_required, logout_user
 
 
@@ -61,14 +61,8 @@ def lti():
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
         role = utils.get_role(temporary_user_params)
-        task_id = custom_params.get('task_id',
-                  f"{temporary_user_params.get('user_id')}-{temporary_user_params.get('resource_link_id')}")
 
         logout_user()
-        session.clear()
-
-        session['user_id'] = user_id
-        session['params_for_passback'] = params_for_passback
 
         user = bd_helper.add_user(user_id, is_LTI = True)
         if user:
@@ -77,6 +71,7 @@ def lti():
         else:
             user = bd_helper.get_user(user_id)
 
+        user.params_for_passback = params_for_passback
         bd_helper.edit_user(user)
 
         login_user(user)
@@ -120,8 +115,8 @@ def interact():
 @login_required
 def upload():
     if request.method == "POST":
-        if app.recaptcha.verify() or current_user.is_LTI:
-            return data.upload(request, UPLOAD_FOLDER, session)
+        if current_user.is_LTI or app.recaptcha.verify() :
+            return data.upload(request, UPLOAD_FOLDER)
         else:
             abort(401)
     elif request.method == "GET":

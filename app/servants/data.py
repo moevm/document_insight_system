@@ -22,7 +22,7 @@ def get_file_len(file):
     file.seek(0, 0)
     return file_length
 
-def upload(request, upload_folder, session = None):
+def upload(request, upload_folder):
     try:
         if "presentation" in request.files:
             file = request.files["presentation"]
@@ -45,7 +45,7 @@ def upload(request, upload_folder, session = None):
             presentation = get_presentation(presentation_id)
 
         checks = create_check(current_user)
-        check(parse(filename), checks, presentation_name, current_user.username, session)
+        check(parse(filename), checks, presentation_name, current_user.username)
         presentation, checks_id = add_check(presentation, checks, filename)
 
         if delete and exists(filename):

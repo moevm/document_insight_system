@@ -1,7 +1,7 @@
 import sys
 from time import sleep
 from lti.tool_provider import ToolProvider
-from app.bd_helper.bd_helper import ConsumersDBManager, get_unpassed_checks, set_passbacked_flag
+from app.bd_helper.bd_helper import ConsumersDBManager, get_unpassed_checks, set_passbacked_flag, get_user
 from app.utils.repeated_timer import RepeatedTimer
 from logging import getLogger
 logger = getLogger('root')
@@ -11,7 +11,8 @@ class ChecksPassBack:
         self._timeout_seconds = timeout_seconds
 
     def grade_passback(self, check):
-        passback_params = check.get('params_for_passback', {})
+        user = check.get('user')
+        passback_params = get_user(user).params_for_passback
         if not passback_params:
             return
 
