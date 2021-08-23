@@ -182,7 +182,7 @@ def set_passbacked_flag(checks_id, flag):
     check = checks_collection.find_one({'_id': checks_id})
     if check:
         check['is_passbacked'] = flag
-        check['lms_passback_time'] = datetime.now(timezone.utc).strftime("%H:%M:%S - %b %d %Y")
+        check['lms_passback_time'] = datetime.now(timezone.utc)
         upd_check = Checks(check)
         checks_collection.find_one_and_replace({'_id': checks_id}, upd_check.pack())
         return upd_check
@@ -229,7 +229,7 @@ def get_check_stats(oid):
 
 def format_check(check):
     try:
-        grade_passback_ts = check['lms_passback_time']
+        grade_passback_ts = check['lms_passback_time'].strftime("%H:%M:%S - %b %d %Y")
     except KeyError:
         grade_passback_ts = None
     return (str(check['_id']), check['user'], check['filename'], check['_id'].generation_time.strftime("%H:%M:%S - %b %d %Y"),
