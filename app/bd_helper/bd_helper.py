@@ -228,8 +228,12 @@ def get_check_stats(oid):
     return checks_collection.find_one({'_id': oid})
 
 def format_check(check):
+    try:
+        grade_passback_ts = check['lms_passback_time']
+    except KeyError:
+        grade_passback_ts = None
     return (str(check['_id']), check['user'], check['filename'], check['_id'].generation_time.strftime("%H:%M:%S - %b %d %Y"),
-                    check['lms_passback_time'], check['score'])
+                    grade_passback_ts, check['score'])
 
 def format_stats(stats):
     return (format_check(check) for check in stats)
