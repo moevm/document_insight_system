@@ -53,19 +53,12 @@ async function upload(sample = false) {
 }
 
 $("#upload_upload_button").click(async () =>{
-     if ($('div.g-recaptcha').length){
-        let get_captcha_result = grecaptcha.getResponse().length;
-        if (get_captcha_result === 0){
+     if ($('div.g-recaptcha').length && grecaptcha.getResponse().length === 0){
           alert('Check recaptcha to continue!');
         }
         else{
           await upload(false);
-        }
-      }
-    else{
-      await upload(false);
     }});
-
 
 $("#upload_test_button").click(async () => { await upload(true); });
 $("#upload_criteria_button").click(() => { window.open("/criteria"); });
