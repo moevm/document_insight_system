@@ -4,6 +4,10 @@ from lti.tool_provider import ToolProvider
 from app.bd_helper.bd_helper import ConsumersDBManager, get_unpassed_checks, set_passbacked_flag, get_user
 from app.utils.repeated_timer import RepeatedTimer
 from logging import getLogger
+import configparser
+
+config = configparser.ConfigParser()
+config.read('app/config.ini')
 logger = getLogger('root')
 
 class ChecksPassBack:
@@ -33,5 +37,5 @@ class ChecksPassBack:
         RepeatedTimer(self._timeout_seconds, self._run)
 
 if __name__ == "__main__":
-    passback_checks = ChecksPassBack()
+    passback_checks = ChecksPassBack(config.getint('consts', 'PASSBACK_TIMER'))
     passback_checks.run()
