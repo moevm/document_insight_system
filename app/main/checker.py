@@ -1,5 +1,6 @@
 import re
 import itertools
+from flask_login import current_user
 from app.nlp.similarity_of_texts import check_similarity
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
 from app.utils.parse_for_html import find_tasks_on_slides_feedback, tasks_conclusions_feedback
@@ -121,5 +122,7 @@ def check(presentation, checks, presentation_name, username):
     checks.score = checks.calc_score()
     checks.filename = presentation_name
     checks.user = username
+    if current_user.params_for_passback:
+        checks.is_passbacked = False
 
     return checks

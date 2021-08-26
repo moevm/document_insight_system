@@ -22,10 +22,9 @@
             <tr>
               <td><a class="id_check" href="{{ "/results/"  ~ stats[0]}}">
                 {{ (stats[0] | string)[-5:]}}</a></td>
-                <td>{{ stats[1] }}</td>
-                <td>{{ stats[2] }}</td>
-                <td>{{ stats[3] }}</td>
-                <td>{{ stats[4] }}</td>
+                {% for item in stats[1:] %}
+                    <td>{{ item }}</td>
+                {% endfor %}
               </tr>
             </tbody>
         <h3 id="results_title" class="texteous ins">Результат проверки: {{ "" if results.correct() else "не" }} пройдена!</h3>

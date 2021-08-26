@@ -19,11 +19,12 @@ file_input.change(() => {
 });
 
 async function upload(sample = false) {
-    let response = grecaptcha.getResponse();
     let presentation = file_input.prop("files")[0];
     let formData = new FormData();
     formData.append("presentation", presentation);
-    formData.append("g-recaptcha-response", response);
+    if ($('div.g-recaptcha').length){
+        let response = grecaptcha.getResponse();
+        formData.append("g-recaptcha-response", response);};
 
     const bar = $("#uploading_progress");
     $("#uploading_progress_holder").css("display", "block");
@@ -52,15 +53,12 @@ async function upload(sample = false) {
 }
 
 $("#upload_upload_button").click(async () =>{
-        let get_captcha_result = grecaptcha.getResponse().length;
-        if (get_captcha_result === 0){
+     if ($('div.g-recaptcha').length && grecaptcha.getResponse().length === 0){
           alert('Check recaptcha to continue!');
         }
         else{
           await upload(false);
-        }
-      });
-
+    }});
 
 $("#upload_test_button").click(async () => { await upload(true); });
 $("#upload_criteria_button").click(() => { window.open("/criteria"); });

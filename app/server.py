@@ -6,7 +6,7 @@ import json
 import bson
 import pymongo
 from bson import ObjectId
-from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify, session
+from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify
 from flask_login import LoginManager, login_user, current_user, login_required, logout_user
 
 
@@ -29,7 +29,7 @@ DEBUG = True
 
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
 UPLOAD_FOLDER = './files'
-columns = ['Solution', 'User', 'File', 'Check added', 'Score']
+columns = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config.from_pyfile('settings.py')
@@ -61,8 +61,6 @@ def lti():
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
         role = utils.get_role(temporary_user_params)
-        task_id = custom_params.get('task_id',
-                  f"{temporary_user_params.get('user_id')}-{temporary_user_params.get('resource_link_id')}")
 
         logout_user()
 
@@ -70,11 +68,10 @@ def lti():
         if user:
             user.name = person_name
             user.is_admin = role
-            user.tasks = {task_id: {'passback': params_for_passback}}
         else:
             user = bd_helper.get_user(user_id)
-            user.tasks[task_id] = {'passback': params_for_passback}
 
+        user.params_for_passback = params_for_passback
         bd_helper.edit_user(user)
 
         login_user(user)
@@ -118,7 +115,7 @@ def interact():
 @login_required
 def upload():
     if request.method == "POST":
-        if app.recaptcha.verify():
+        if current_user.is_LTI or app.recaptcha.verify() :
             return data.upload(request, UPLOAD_FOLDER)
         else:
             abort(401)

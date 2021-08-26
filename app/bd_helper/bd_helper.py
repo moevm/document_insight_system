@@ -6,7 +6,7 @@ import pymongo
 
 from app.bd_helper.bd_types import User, Presentation, Checks, Consumers
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from logging import getLogger
 logger = getLogger('root')
@@ -19,7 +19,6 @@ users_collection = db['users']
 presentations_collection = db['presentations']
 checks_collection = db['checks']
 consumers_collection = db['consumers']
-sessions_collection = db['sessions']
 
 
 def get_client():
@@ -174,6 +173,15 @@ def delete_check(presentation, checks_id):
         return presentation, get_check(checks_id)
 
 
+def get_unpassed_checks():
+    return checks_collection.find({'is_passbacked': False})
+
+
+def set_passbacked_flag(checks_id, flag):
+    upd_check = {"$set": {'is_passbacked': flag, 'lms_passback_time': datetime.now(timezone.utc)}}
+    check = checks_collection.update_one({'_id': checks_id}, upd_check)
+    return check if check else None
+
 # Return no of bytes stored in gridfs
 def get_storage():
     files = db.fs.files.find()
@@ -203,7 +211,6 @@ def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
 
 #Get stats for one user, return a list in the form
 #[check_id, login, time of check_id's creation, result(0/1)]
-#TODO : add lti/missing params from #80
 def get_user_checks(login):
     return checks_collection.find({'user': login})
 
@@ -212,8 +219,10 @@ def get_check_stats(oid):
     return checks_collection.find_one({'_id': oid})
 
 def format_check(check):
+    grade_passback_time = check['lms_passback_time']
+    grade_passback_ts = grade_passback_time.strftime("%H:%M:%S - %b %d %Y") if grade_passback_time else '-'
     return (str(check['_id']), check['user'], check['filename'], check['_id'].generation_time.strftime("%H:%M:%S - %b %d %Y"),
-                    check['score'])
+                    grade_passback_ts, check['score'])
 
 def format_stats(stats):
     return (format_check(check) for check in stats)
@@ -260,11 +269,6 @@ class ConsumersDBManager:
 
     @staticmethod
     def add_timestamp_and_nonce(key, timestamp, nonce):
-        consumer = consumers_collection.find_one({'consumer_key': key})
-        if consumer is not None:
-            consumer.get('timestamp_and_nonce').append((timestamp, nonce))
-            upd_consumer = Consumers(consumer)
-            consumers_collection.find_one_and_replace({'consumer_key': key}, upd_consumer.pack())
-            return consumer
-        else:
-            return None
+        upd_consumer = {"$push": {'timestamp_and_nonce': (timestamp, nonce)}}
+        consumer = consumers_collection.update_one({'consumer_key': key}, upd_consumer)
+        return consumer if consumer else None
