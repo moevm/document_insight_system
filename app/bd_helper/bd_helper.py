@@ -105,13 +105,6 @@ def find_presentation(user, presentation_name):
         return None
 
 
-def __edit_presentation(presentation):
-    if presentations_collection.find_one_and_replace({'_id': presentation._id}, presentation.pack()) is not None:
-        return True
-    else:
-        return False
-
-
 # Deletes presentation with given id, deleting also its checks, returns presentation
 def delete_presentation(user, presentation_id):
     if presentation_id in user.presentations:
@@ -134,8 +127,7 @@ def create_check(user):
 # Adds checks to given presentation, updates presentation, returns presentation and checks id
 def add_check(presentation, checks, presentation_file):
     checks_id = checks_collection.insert_one(checks.pack()).inserted_id
-    presentation.checks.append(checks_id)
-    __edit_presentation(presentation)
+    upd_presentation = presentations_collection.update_one({'_id': presentation._id}, {"$push": {'checks': checks_id}})
 
     grid_in = fs.open_upload_stream_with_id(checks_id, basename(presentation_file))
     grid_in.write(open(presentation_file, 'rb'))
@@ -164,8 +156,7 @@ def get_presentation_check(checks_id):
 # Deletes checks with given id, returns presentation
 def delete_check(presentation, checks_id):
     if checks_id in presentation.checks:
-        presentation.checks.remove(checks_id)
-        __edit_presentation(presentation)
+        upd_presentation = presentations_collection.update_one({'_id': presentation._id}, {"$pull": {'checks': checks_id}})
         checks = Checks(checks_collection.find_one_and_delete({'_id': checks_id}))
         fs.delete(checks_id)
         return presentation, checks

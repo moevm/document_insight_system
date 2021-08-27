@@ -3,6 +3,7 @@ version: '2'
 services:
   web:
     build: .
+    image: slides_checker_base_image
     restart: always
     ports:
       - "8080:8080"
@@ -21,7 +22,7 @@ services:
       - ../slides_checker_mongo_data:/data/db
 
   passback_grades:
-    build: .
+    image: slides_checker_base_image
     command: python3 ./app/passback_grades.py
     restart: always
     depends_on:
