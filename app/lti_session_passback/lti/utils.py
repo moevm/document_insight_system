@@ -40,7 +40,7 @@ def parse_consumer_info(key_str, secret_str):
         raise Exception(f"len(consumer_keys) != len(consumer_secrets): '{key_str}' vs '{secret_str}'")
 
     return { key: secret for key, secret in zip(keys, secrets) }
-    
+
 def get_role(data, default_role=False):
     try:
         return get_param(data, ROLES).split(',')[0] == ADMIN_ROLE
@@ -49,7 +49,7 @@ def get_role(data, default_role=False):
 
 
 def get_custom_params(data):
-    return { key[len(CUSTOM_PARAM_PREFIX):]: data[key] for key in data if key.startswith(CUSTOM_PARAM_PREFIX) }
+    return { key[len(CUSTOM_PARAM_PREFIX):]: eval(data[key]) for key in data if key.startswith(CUSTOM_PARAM_PREFIX) }
 
 
 def extract_passback_params(data):

@@ -1,5 +1,6 @@
 import re
 import itertools
+from argparse import Namespace
 from flask_login import current_user
 from app.nlp.similarity_of_texts import check_similarity
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
@@ -9,6 +10,10 @@ from app.main.checks.title_format import TitleFormatCheck
 from app.main.checks.base_check import answer
 from logging import getLogger
 logger = getLogger('root')
+
+key_slides = {'goals_and_tasks': 'Цель и задачи', 'approbation': 'Апробация', \
+              'conclusion': 'Заключение', 'relevance': 'Актуальность'}
+key_slide = Namespace(**key_slides)
 
 def __check_slides_enumeration(presentation):
     error = []
@@ -23,12 +28,6 @@ def __check_slides_enumeration(presentation):
     else:
         return answer(False, error, 'Не пройдена, проблемные слайды: {}'.format(', '.join(map(str, error))), \
                                     'Убедитесь в корректности формата номеров слайдов')
-
-
-SLIDE_GOALS_AND_TASKS = 'Цель и задачи'
-SLIDE_APPROBATION_OF_WORK = 'Апробация'
-SLIDE_CONCLUSION = 'Заключение'
-SLIDE_WITH_RELEVANCE = 'Актуальность'
 
 
 def __find_definite_slide(presentation, type_of_slide):
@@ -47,10 +46,10 @@ def __find_definite_slide(presentation, type_of_slide):
 
 def __check_actual_slide(presentation):
     for i, text in enumerate(presentation.get_text_from_slides(), 1):
-        if SLIDE_WITH_RELEVANCE.lower() in str(text).lower():
-            logger.info("\tСлайд " + SLIDE_WITH_RELEVANCE + " найден")
+        if key_slide.relevance.lower() in str(text).lower():
+            logger.info("\tСлайд " + key_slide.relevance + " найден")
             return answer(True, i, 'Найден под номером: {}'.format(i))
-    logger.info("\tСлайд " + SLIDE_WITH_RELEVANCE + " не найден")
+    logger.info("\tСлайд " + key_slide.relevance + " не найден")
     return answer(False, None, 'Слайд не найден')
 
 
@@ -92,13 +91,13 @@ def check(presentation, checks, presentation_name, username):
         checks.slides_headers = TitleFormatCheck(presentation).check()
 
     if checks.goals_slide != -1:  # Слайд "Цель и задачи"
-        checks.goals_slide, goals_array = __find_definite_slide(presentation, SLIDE_GOALS_AND_TASKS)
+        checks.goals_slide, goals_array = __find_definite_slide(presentation, key_slide.goals_and_tasks)
     if checks.probe_slide != -1:  # Слайд "Апробация работы"
-        checks.probe_slide, aprobation_array = __find_definite_slide(presentation, SLIDE_APPROBATION_OF_WORK)
+        checks.probe_slide, aprobation_array = __find_definite_slide(presentation, key_slide.approbation)
     if checks.actual_slide != -1:  # Слайд с описанием актуальности работы
         checks.actual_slide = __check_actual_slide(presentation)
     if checks.conclusion_slide != -1:  # Слайд с заключением
-        checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, SLIDE_CONCLUSION)
+        checks.conclusion_slide, conclusion_array = __find_definite_slide(presentation, key_slide.conclusion)
 
     if checks.slides_number != -1:  # Количество основных слайдов
         checks.slides_number = SldNumCheck(presentation, checks.slides_number).check()

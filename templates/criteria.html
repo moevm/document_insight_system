@@ -16,6 +16,8 @@
                 <div class="col-auto col-sm-6">
                     <h4 class="criteria_header texteous ins" id="simple_criteria">Простые критерии</h4>
                     <div class="criteria_container" id="simple_criteria_container">
+                      <label for="pack_name">Название пакета</label>
+                      <input type="text" id="pack_name" class="inputous form-control" name="pack_name">
                         <div class="form-check" id="slides_count_check">
                             <input class="form-check-input" type="checkbox" value="" id="slides_number" {% if crit.slides_number != -1 %}checked{% endif %}>
                             <label class="form-check-label" for="slides_number">Количество основных слайдов</label>

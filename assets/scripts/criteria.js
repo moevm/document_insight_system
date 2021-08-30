@@ -1,3 +1,5 @@
+import {collect_values_if_possible} from "./main";
+
 import '../styles/criteria.css';
 
 const goals_slide = $("#goals_slide");
@@ -61,7 +63,7 @@ criteria_save_button.click(async function () {
     const necessary_fields = $("input[type=checkbox]");
     const criteria = Object();
     for (const field of necessary_fields) criteria[field.id] = $(field).prop("checked") ? 0 : -1;
-
+    const criteria_pack_name = collect_values_if_possible("pack_name");
     if (Object.values(criteria).every(x => (x === -1))) $(this).popover(save_button_popover("Сохранена проверка без критериев!"));
     else $(this).popover(save_button_popover("Проверка сохранена!"));
     $(this).popover("show");
@@ -77,7 +79,7 @@ criteria_save_button.click(async function () {
     const post_data = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(criteria)
+        body: JSON.stringify({criteria: criteria, pack_name: criteria_pack_name['pack_name']})
     };
     await fetch("/criteria", post_data);
 });
