@@ -62,7 +62,7 @@ def check_dependency(check):
         upd_criteria = users_collection.update_one({'username': current_user.username}, disable_conclusion_dependent)
         logger.warning('Disabling conclusion_slide check has disabled conclusion_along and conclusion_actual')
 
-    return upd_criteria
+    return
 
 def update_criteria(json):
     current_user.criteria = Checks(json)
