@@ -11,6 +11,7 @@ from flask_login import LoginManager, login_user, current_user, login_required, 
 
 
 import app.servants.user as user
+from app.servants.user import update_criteria
 from app.servants import data as data
 from app.bd_helper import bd_helper
 from app.servants import pre_luncher
@@ -30,6 +31,9 @@ DEBUG = True
 ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
 UPLOAD_FOLDER = './files'
 columns = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
+launch_criteria = ['slides_number', 'slides_enum', 'slides_headers', 'goals_slide', \
+                       'probe_slide', 'actual_slide', '.conclusion_slide', 'conclusion_actual', \
+                       'conclusion_along', 'slide_every_task']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
 app.config.from_pyfile('settings.py')
@@ -60,6 +64,7 @@ def lti():
         user_id = f"{username}_{temporary_user_params.get('tool_consumer_instance_guid', '')}"
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
+        criteria_from_custom_params = dict((k, v) for k, v in custom_params.items() if k in set(launch_criteria))
         role = utils.get_role(temporary_user_params)
 
         logout_user()
@@ -75,6 +80,7 @@ def lti():
         bd_helper.edit_user(user)
 
         login_user(user)
+        update_criteria(criteria_from_custom_params)
         return redirect(url_for('upload'))
     else:
         abort(403)

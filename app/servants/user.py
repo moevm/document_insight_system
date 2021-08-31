@@ -52,9 +52,22 @@ def get_rich(username):
     return u
 
 
+def check_dependency(check):
+    if check.goals_slide == -1:
+        disable_goal_dependent = {"$set": {'criteria.slide_every_task': -1, 'criteria.conclusion_along': -1, 'criteria.conclusion_actual': -1}}
+        upd_criteria = users_collection.update_one({'username': current_user.username}, disable_goal_dependent)
+        logger.warning('Disabling goals_slide check has disabled slide_every_task, conclusion_along and conclusion_actual')
+    if check.conclusion_slide == -1:
+        disable_conclusion_dependent = {"$set": {'criteria.conclusion_actual': -1, 'criteria.conclusion_along': -1}}
+        upd_criteria = users_collection.update_one({'username': current_user.username}, disable_conclusion_dependent)
+        logger.warning('Disabling conclusion_slide check has disabled conclusion_along and conclusion_actual')
+
+    return upd_criteria
+
 def update_criteria(json):
     current_user.criteria = Checks(json)
     edited = edit_user(current_user)
+    check_dependency(current_user.criteria)
     logger.info("Пользователь " + current_user.username + ("" if edited else " не") +
           " установил себе критерии проверки: " + str(current_user.criteria))
     return 'OK' if edited else 'Not OK'
