@@ -40,7 +40,7 @@ def __find_definite_slide(presentation, type_of_slide):
             found_idxs.append(i)
     if len(found_slides) == 0:
         logger.info("\tСлайд " + type_of_slide + " не найден")
-        return answer(False, None, 'Слайд не найден')
+        return answer(False, None, 'Слайд не найден'), ''
     else:
         return answer(True, found_idxs, 'Найден под номером: {}'.format(', '.join(map(str, found_idxs)))), ' '.join(found_slides)
 
@@ -56,7 +56,7 @@ def __check_actual_slide(presentation):
 
 def __are_slides_similar(goals, conclusions, actual_number):
     if goals == "" or conclusions == "":
-        return answer(False, None, 'Задач или заключения не существует')
+        return answer(False, 0, 'Задач или заключения не существует'), answer(False, 0, 'Задач или заключения не существует')
 
     results = check_similarity(goals, conclusions)
     if results == -1:
