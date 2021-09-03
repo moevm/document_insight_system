@@ -10,6 +10,7 @@ from app.main.checks.find_def_sld import FindDefSld
 from app.main.checks.sld_enum import SldEnumCheck
 from app.main.checks.sld_similarity import SldSimilarity
 from app.main.checks.title_format import TitleFormatCheck
+from app.main.checks.further_dev import FurtherDev
 
 from app.main.checks.base_check import answer
 from logging import getLogger
@@ -28,25 +29,22 @@ def check(presentation, checks, presentation_name, username):
         checks.slides_headers = TitleFormatCheck(presentation).check()
 
     if checks.goals_slide != -1:  # Слайд "Цель и задачи"
-        checks.goals_slide, goals_array = FindDefSld(presentation, key_slide.goals_and_tasks).check()
+        checks.goals_slide = FindDefSld(presentation, key_slide.goals_and_tasks).check()
     if checks.probe_slide != -1:  # Слайд "Апробация работы"
-        checks.probe_slide, aprobation_array = FindDefSld(presentation, key_slide.approbation).check()
+        checks.probe_slide = FindDefSld(presentation, key_slide.approbation).check()
     if checks.actual_slide != -1:  # Слайд с описанием актуальности работы
         checks.actual_slide = SearchKeyWord(presentation, key_slide.relevance).check()
     if checks.conclusion_slide != -1:  # Слайд с заключением
-        checks.conclusion_slide, conclusion_array = FindDefSld(presentation, key_slide.conclusion).check()
+        checks.conclusion_slide = FindDefSld(presentation, key_slide.conclusion).check()
 
     if checks.slides_number != -1:  # Количество основных слайдов
         checks.slides_number = SldNumCheck(presentation, checks.slides_number).check()
-
-    similar = SldSimilarity(presentation, goals_array, conclusion_array, checks.conclusion_actual).check()
     if checks.conclusion_actual != -1:  # Соответствие заключения задачам
-        checks.conclusion_actual = similar[0]
+        checks.conclusion_actual =  SldSimilarity(presentation, key_slide.goals_and_tasks, key_slide.conclusion, checks.conclusion_actual).check()
     if checks.conclusion_along != -1:  # Наличие направлений дальнейшего развития
-        checks.conclusion_along = similar[1]
-
+        checks.conclusion_along = FurtherDev(presentation, key_slide.goals_and_tasks, key_slide.conclusion).check()
     if checks.slide_every_task != -1:  # Наличие слайдов соответстующих задачам
-        checks.slide_every_task = FindTasks(presentation, goals_array, checks.slide_every_task).check()
+        checks.slide_every_task = FindTasks(presentation, key_slide.goals_and_tasks, checks.slide_every_task).check()
 
 
     checks.score = checks.calc_score()

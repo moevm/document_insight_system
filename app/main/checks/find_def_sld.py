@@ -12,6 +12,6 @@ class FindDefSld(BaseCheck):
                 found_slides.append(self.presentation.get_text_from_slides()[i - 1])
                 found_idxs.append(i)
         if len(found_slides) == 0:
-            return answer(False, None, 'Слайд не найден'), ''
+            return answer(False, None, 'Слайд не найден')
         else:
-            return answer(True, found_idxs, 'Найден под номером: {}'.format(', '.join(map(str, found_idxs)))), ' '.join(found_slides)
+            return answer(True, found_idxs, 'Найден под номером: {}'.format(', '.join(map(str, found_idxs))))

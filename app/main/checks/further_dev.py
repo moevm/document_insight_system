@@ -3,12 +3,11 @@ from app.nlp.similarity_of_texts import check_similarity
 from app.utils.parse_for_html import find_tasks_on_slides_feedback, tasks_conclusions_feedback
 from app.utils.get_text_from_slides import get_text_from_slides
 
-class SldSimilarity(BaseCheck):
-    def __init__(self, presentation, goals, conclusion, actual_number):
+class FurtherDev(BaseCheck):
+    def __init__(self, presentation, goals, conclusion):
         super().__init__(presentation)
         self.goals = goals
         self.conclusion = conclusion
-        self.actual_number = actual_number
 
     def check(self):
         goals = get_text_from_slides(self.presentation, self.goals)
@@ -20,4 +19,4 @@ class SldSimilarity(BaseCheck):
         if results == -1:
             return answer(False, None, "Произошла ошибка!")
         else:
-            return answer(results[0] >= self.actual_number, results[0], *tasks_conclusions_feedback(results))
+            return answer(results[1].get('found_dev'), results[1].get('dev_sentence'), results[1].get('dev_sentence'))
