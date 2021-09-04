@@ -14,10 +14,10 @@ class SldSimilarity(BaseCheck):
         goals = get_text_from_slides(self.presentation, self.goals)
         conclusions = get_text_from_slides(self.presentation, self.conclusion)
         if goals == "" or conclusions == "":
-            return answer(False, None, 'Задач или заключения не существует')
+            return answer(False, 0, 'Задач или заключения не существует')
 
         results = check_similarity(goals, conclusions)
         if results == -1:
-            return answer(False, None, "Произошла ошибка!")
+            return answer(False, 0, "Произошла ошибка!")
         else:
             return answer(results[0] >= self.actual_number, results[0], *tasks_conclusions_feedback(results))
