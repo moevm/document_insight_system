@@ -3,16 +3,9 @@ import itertools
 from argparse import Namespace
 from flask_login import current_user
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
-from app.main.checks.sld_num import SldNumCheck
-from app.main.checks.search_keyword import SearchKeyWord
-from app.main.checks.find_tasks import FindTasks
-from app.main.checks.find_def_sld import FindDefSld
-from app.main.checks.sld_enum import SldEnumCheck
-from app.main.checks.sld_similarity import SldSimilarity
-from app.main.checks.title_format import TitleFormatCheck
-from app.main.checks.further_dev import FurtherDev
+from app.main.checks import SldNumCheck, SearchKeyWord, FindTasks, FindDefSld, \
+                            SldEnumCheck, SldSimilarity, TitleFormatCheck, FurtherDev
 
-from app.main.checks.base_check import answer
 from logging import getLogger
 logger = getLogger('root')
 
@@ -21,7 +14,6 @@ key_slides = {'goals_and_tasks': 'Цель и задачи', 'approbation': 'А�
 key_slide = Namespace(**key_slides)
 
 def check(presentation, checks, presentation_name, username):
-    goals_array, conclusion_array = "", ""
 
     if checks.slides_enum != -1:  # Нумерация слайдов
         checks.slides_enum = SldEnumCheck(presentation).check()
