@@ -97,9 +97,9 @@ class Checks(Packable):
             probe_slide = self.probe_slide,
             actual_slide = self.actual_slide,
             conclusion_slide = self.conclusion_slide,
+            slide_every_task = self.slide_every_task,
             conclusion_actual = self.conclusion_actual,
             conclusion_along = self.conclusion_along,
-            slide_every_task = self.slide_every_task,
         )
 
     def calc_score(self):
