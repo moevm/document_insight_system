@@ -167,30 +167,6 @@ def delete_check(presentation, checks_id):
 def get_unpassed_checks():
     return checks_collection.find({'is_passbacked': False})
 
-'''
-def check_dependency(check):
-    if check.goal_slide == -1:
-        disable_goal_dependent = {"$set": {'slide_every_task': -1, 'conclusion_along': -1, 'conclusion_actual': -1}}
-        checks = checks_collection.update_one({'_id': check._id}, disable_goal_dependent)
-    if check.conclusion_slide == -1:
-        disable_conclusion_dependent = {"$set": {'conclusion_actual': -1, 'conclusion_along': -1}}
-        checks = checks_collection.update_one({'_id': check._id}, disable_conclusion_dependent)
-
-    return checks'''
-
-
-def create_pack(dict):
-    new_pack = CriteriaPack()
-    new_pack.pack_name = dict.get('pack_name')
-    new_pack.enabled_checks = dict.get('criteria')
-    pack_name = dict.get('pack_name')
-    if criteria_pack_collection.find_one({'pack_name': pack_name}) is not None:
-        criteria_pack_collection.update_one({'pack_name': pack_name}, {"$set": {'enabled_checks': dict}})
-    else:
-        criteria_pack_collection.insert_one(new_pack.pack())
-    return 'ok'
-
-
 def set_passbacked_flag(checks_id, flag):
     upd_check = {"$set": {'is_passbacked': flag, 'lms_passback_time': datetime.now(timezone.utc)}}
     check = checks_collection.update_one({'_id': checks_id}, upd_check)

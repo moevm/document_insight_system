@@ -172,7 +172,7 @@ def criteria():
     if request.method == "GET":
         return render_template("./criteria.html", navi_upload=True, name=current_user.name, crit=current_user.criteria)
     elif request.method == "POST":
-        return bd_helper.create_pack(request.json)
+        return user.update_criteria(request.json)
 
 
 @app.route("/check_list")
