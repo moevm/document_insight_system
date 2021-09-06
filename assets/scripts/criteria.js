@@ -61,6 +61,7 @@ criteria_save_button.click(async function () {
     const necessary_fields = $("input[type=checkbox]");
     const criteria = Object();
     for (const field of necessary_fields) criteria[field.id] = $(field).prop("checked") ? 0 : -1;
+    
     if (Object.values(criteria).every(x => (x === -1))) $(this).popover(save_button_popover("Сохранена проверка без критериев!"));
     else $(this).popover(save_button_popover("Проверка сохранена!"));
     $(this).popover("show");
