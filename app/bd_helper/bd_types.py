@@ -45,6 +45,14 @@ class Consumers(Packable):
         self.timestamp_and_nonce = dictionary.get('timestamp_and_nonce', [])
 
 
+class CriteriaPack(Packable):
+    def __init__(self, dictionary=None):
+        super().__init__(dictionary)
+        dictionary = dictionary or {}
+        self.pack_name = dictionary.get('pack_name', '')
+        self.enabled_checks = dictionary.get('enabled_checks', '')
+
+
 # You shouldn't create or change this explicitly
 class Presentation(Packable):
     def __init__(self, dictionary=None):
@@ -89,9 +97,9 @@ class Checks(Packable):
             probe_slide = self.probe_slide,
             actual_slide = self.actual_slide,
             conclusion_slide = self.conclusion_slide,
+            slide_every_task = self.slide_every_task,
             conclusion_actual = self.conclusion_actual,
             conclusion_along = self.conclusion_along,
-            slide_every_task = self.slide_every_task,
         )
 
     def calc_score(self):

@@ -14,6 +14,7 @@ import app.servants.user as user
 from app.servants import data as data
 from app.bd_helper import bd_helper
 from app.servants import pre_luncher
+from app.servants.user import update_criteria
 
 from app.utils.decorators import decorator_assertion
 from app.lti_session_passback.lti.check_request import check_request
@@ -75,6 +76,7 @@ def lti():
         bd_helper.edit_user(user)
 
         login_user(user)
+        update_criteria(custom_params)
         return redirect(url_for('upload'))
     else:
         abort(403)
@@ -259,6 +261,7 @@ def check_list_data():
             "filename": item["filename"],
             "user": item["user"],
             "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H:%M:%S"),
+            "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get('lms_passback_time') else '-',
             "score": item["score"]
         } for item in rows]
     }
