@@ -261,7 +261,7 @@ def check_list_data():
             "filename": item["filename"],
             "user": item["user"],
             "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H:%M:%S"),
-            "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if 'lms_passback_time' in item and item['lms_passback_time'] else '-',
+            "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get('lms_passback_time') else '-',
             "score": item["score"]
         } for item in rows]
     }
