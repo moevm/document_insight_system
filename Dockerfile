@@ -2,10 +2,13 @@ FROM ubuntu:20.04
 ENV LANG en_US.UTF-8
 
 RUN apt update
+RUN apt-get install -y software-properties-common
 RUN apt install -y curl gnupg
 RUN apt install -y python3-pip python3.8-dev
 RUN curl -sL https://deb.nodesource.com/setup_16.x  | bash -
 RUN apt install -y  nodejs
+RUN add-apt-repository ppa:libreoffice/ppa
+RUN apt install -y unoconv
 
 ADD . /usr/src/project
 WORKDIR /usr/src/project
