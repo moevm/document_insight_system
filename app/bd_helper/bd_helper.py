@@ -5,6 +5,7 @@ from bson import ObjectId
 import pymongo
 
 from app.bd_helper.bd_types import User, Presentation, Checks, Consumers, CriteriaPack
+from app.utils.pdf_converter import convert_to_pdf
 
 from datetime import datetime, timezone
 
@@ -134,6 +135,17 @@ def add_check(presentation, checks, presentation_file):
     grid_in.close()
 
     return presentation, checks_id
+
+def write_pdf(file):
+    extension = file.filename.rsplit('.', 1)[-1].lower()
+    converted = 'pdf'.join(file.filename.rsplit(extension, 1))
+    convert2pdf = convert_to_pdf(file)
+
+    id = ObjectId()
+    grid_in = fs.open_upload_stream_with_id(id, converted)
+    grid_in.write(convert2pdf)
+    grid_in.close()
+    return id
 
 
 # Returns checks with given id or None

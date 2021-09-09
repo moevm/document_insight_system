@@ -83,6 +83,7 @@ class Checks(Packable):
         self.slide_every_task = dictionary.get('slide_every_task', 50)
         self.score = dictionary.get('score', -1)
         self.filename = dictionary.get('filename', '')
+        self.conv_pdf_fs_id = dictionary.get('conv_pdf_fs_id', '')
         self.user = dictionary.get('user', '')
         self.is_passbacked = dictionary.get('is_passbacked', None)
         self.lms_passback_time = dictionary.get('lms_passback_time', None)

@@ -3,6 +3,7 @@ version: '2'
 services:
   web:
     build: .
+    image: slides_checker_base_image
     restart: always
     ports:
       - "8080:8080"
@@ -14,13 +15,20 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONIOENCODING=UTF-8
     volumes:
-      - ./:/usr/src/project 
+      - ./:/usr/src/project
 
   mongodb:
     image: mongo:4.0.17-xenial
     restart: always
     volumes:
       - mongodata:/data/db
+
+  passback_grades:
+    image: slides_checker_base_image
+    command: python3 ./app/passback_grades.py
+    restart: always
+    depends_on:
+      - mongodb
       
 volumes:
   mongodata:
