@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 from logging import getLogger
+from app.main.checks_config.parser import sld_num_bsc
 logger = getLogger('root')
 
 class Packable:
@@ -71,7 +72,7 @@ class Checks(Packable):
         dictionary = dictionary or {}
         if '_id' in dictionary:
             self._id = dictionary.get('_id', '')
-        self.slides_number = dictionary.get('slides_number', {'sld_num': [10, 12], 'detect_additional': True})
+        self.slides_number = dictionary.get('slides_number', {'sld_num': sld_num_bsc, 'detect_additional': True})
         self.slides_enum = dictionary.get('slides_enum', True)
         self.slides_headers = dictionary.get('slides_headers', True)
         self.goals_slide = dictionary.get('goals_slide', True)
