@@ -71,16 +71,16 @@ class Checks(Packable):
         dictionary = dictionary or {}
         if '_id' in dictionary:
             self._id = dictionary.get('_id', '')
-        self.slides_number = dictionary.get('slides_number', [10, 12])
-        self.slides_enum = dictionary.get('slides_enum', 0)
-        self.slides_headers = dictionary.get('slides_headers', 0)
-        self.goals_slide = dictionary.get('goals_slide', 0)
-        self.probe_slide = dictionary.get('probe_slide', 0)
-        self.actual_slide = dictionary.get('actual_slide', 0)
-        self.conclusion_slide = dictionary.get('conclusion_slide', 0)
-        self.conclusion_actual = dictionary.get('conclusion_actual', 50)
-        self.conclusion_along = dictionary.get('conclusion_along', 0)
-        self.slide_every_task = dictionary.get('slide_every_task', 50)
+        self.slides_number = dictionary.get('slides_number', {'sld_num': [10, 12], 'detect_additional': True})
+        self.slides_enum = dictionary.get('slides_enum', True)
+        self.slides_headers = dictionary.get('slides_headers', True)
+        self.goals_slide = dictionary.get('goals_slide', True)
+        self.probe_slide = dictionary.get('probe_slide', True)
+        self.actual_slide = dictionary.get('actual_slide', True)
+        self.conclusion_slide = dictionary.get('conclusion_slide', True)
+        self.conclusion_actual = dictionary.get('conclusion_actual', 50) #
+        self.conclusion_along = dictionary.get('conclusion_along', True)
+        self.slide_every_task = dictionary.get('slide_every_task', 50)   #
         self.score = dictionary.get('score', -1)
         self.filename = dictionary.get('filename', '')
         self.conv_pdf_fs_id = dictionary.get('conv_pdf_fs_id', '')
@@ -105,11 +105,11 @@ class Checks(Packable):
 
     def calc_score(self):
         enabled_checks = self.get_checks()
-        enabled_value = len([check for check in enabled_checks.values() if check != -1])
+        enabled_value = len([check for check in enabled_checks.values() if check])
         numerical_score = 0
         for check in enabled_checks.values():
             try:
-                if check != -1 and check['pass']:
+                if check.get('pass'):
                     numerical_score += 1
             except TypeError:
                 pass
@@ -117,4 +117,4 @@ class Checks(Packable):
         return float("{:.3f}".format(numerical_score / enabled_value))
 
     def correct(self):
-        return all([check == -1 or check['pass'] for check in self.get_checks().values()])
+        return all([check == False or check['pass'] for check in self.get_checks().values()])

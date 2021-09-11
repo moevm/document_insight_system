@@ -4,7 +4,8 @@ import re
 class SldNumCheck(BaseCheck):
     def __init__(self, presentation, slides_number):
         super().__init__(presentation)
-        self.slides_number = slides_number
+        self.slides_number = slides_number.get('sld_num')
+        self.detect_additional = slides_number.get('detect_additional', True)
 
     RANGE_VERDICTS = {
         'in_range': 'Количество слайдов в допустимых границах',
@@ -23,15 +24,18 @@ class SldNumCheck(BaseCheck):
         elif find_additional <= self.slides_number[0]:
             return self.sldnum_verdict(find_additional, self.RANGE_VERDICTS.get('lt_min'))
         else:
-            if suspected_additional:
+            if suspected_additional and self.detect_additional:
                 return self.sldnum_verdict(find_additional, self.RANGE_VERDICTS.get('gt_max_suspected'))
             else:
                 return self.sldnum_verdict(find_additional, self.RANGE_VERDICTS.get('gt_max'))
 
     def check(self):
-        additional = re.compile('[А-Я][а-я]*[\s]слайд[ы]?')
-        find_additional = [i for i, header in enumerate(self.presentation.get_titles()) if re.fullmatch(additional, header)]
-        if len(find_additional) == 0:
-            return self.get_sldnum_range(len(self.presentation.slides), suspected_additional = True)
+        if self.detect_additional:
+            additional = re.compile('[А-Я][а-я]*[\s]слайд[ы]?')
+            find_additional = [i for i, header in enumerate(self.presentation.get_titles()) if re.fullmatch(additional, header)]
+            if len(find_additional) == 0:
+                return self.get_sldnum_range(len(self.presentation.slides), suspected_additional = True)
+            else:
+                return self.get_sldnum_range(find_additional[0])
         else:
-            return self.get_sldnum_range(find_additional[0])
+            return self.get_sldnum_range(self.presentation.get_len_slides())
