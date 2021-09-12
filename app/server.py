@@ -61,6 +61,7 @@ def lti():
         user_id = f"{username}_{temporary_user_params.get('tool_consumer_instance_guid', '')}"
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
+        custom_criteria = utils.get_criteria_from_launch(temporary_user_params)
         role = utils.get_role(temporary_user_params)
 
         logout_user()
@@ -76,7 +77,7 @@ def lti():
         bd_helper.edit_user(user)
 
         login_user(user)
-        update_criteria(custom_params)
+        update_criteria(custom_criteria)
         return redirect(url_for('upload'))
     else:
         abort(403)

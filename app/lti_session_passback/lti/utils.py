@@ -1,3 +1,5 @@
+from app.main.checks_config.parser import sld_num
+
 TITLE = 'context_title'
 RETURN_URL = 'launch_presentation_return_url'
 USERNAME = 'ext_user_username'
@@ -49,8 +51,18 @@ def get_role(data, default_role=False):
 
 
 def get_custom_params(data):
-    return { key[len(CUSTOM_PARAM_PREFIX):]: eval(data[key]) for key in data if key.startswith(CUSTOM_PARAM_PREFIX) }
+    return { key[len(CUSTOM_PARAM_PREFIX):]: data[key] for key in data if key.startswith(CUSTOM_PARAM_PREFIX) }
 
+def get_criteria_from_launch(data):
+    all_checks = ('slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
+                  'probe_slide', 'actual_slide', 'conclusion_slide', 'slide_every_task',
+                  'conclusion_actual', 'conclusion_along')
+    custom = get_custom_params(data)
+    detect_additional = custom.get('detect_additional', True)
+    criteria = dict((k, custom[k]) for k in all_checks if k in custom)
+    eval_criteria = dict((key, eval(value)) for key, value in criteria.items() if key != 'slides_number')
+    eval_criteria['slides_number'] = {'sld_num': sld_num[criteria.get('slides_number')], 'detect_additional': eval(detect_additional)}
+    return eval_criteria
 
 def extract_passback_params(data):
     params = {}
