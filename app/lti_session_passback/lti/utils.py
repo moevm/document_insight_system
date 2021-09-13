@@ -58,10 +58,10 @@ def get_criteria_from_launch(data):
                   'probe_slide', 'actual_slide', 'conclusion_slide', 'slide_every_task',
                   'conclusion_actual', 'conclusion_along')
     custom = get_custom_params(data)
-    detect_additional = custom.get('detect_additional', True)
+    detect_additional = custom.get('detect_additional', 'True')
     criteria = dict((k, custom[k]) for k in all_checks if k in custom)
     eval_criteria = dict((key, eval(value)) for key, value in criteria.items() if key != 'slides_number')
-    eval_criteria['slides_number'] = {'sld_num': sld_num[criteria.get('slides_number')], 'detect_additional': eval(detect_additional)}
+    eval_criteria['slides_number'] = {'sld_num': sld_num[criteria.get('slides_number', 'bsc')], 'detect_additional': eval(detect_additional)}
     return eval_criteria
 
 def extract_passback_params(data):
