@@ -105,7 +105,7 @@ class Checks(Packable):
         )
 
     def calc_score(self):
-        enabled_checks = self.get_checks()
+        enabled_checks = dict((k, v) for k, v in self.get_checks().items() if v)
         enabled_value = len([check for check in enabled_checks.values() if check])
         numerical_score = 0
         for check in enabled_checks.values():
