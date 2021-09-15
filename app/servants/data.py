@@ -48,7 +48,6 @@ def upload(request, upload_folder):
         checks = create_check(current_user)
         check(parse(filename), checks, presentation_name)
         checks.conv_pdf_fs_id = converted_id
-        checks.user = current_user.username
         presentation, checks_id = add_check(presentation, checks, filename)
 
         if delete and exists(filename):

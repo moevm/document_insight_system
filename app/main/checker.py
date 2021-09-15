@@ -25,6 +25,7 @@ def check(presentation, checks, presentation_name):
 
     checks.score = checks.calc_score()
     checks.filename = presentation_name
+    checks.user = current_user.username
     if current_user.params_for_passback:
         checks.is_passbacked = False
 
