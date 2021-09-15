@@ -10,7 +10,7 @@ key_slides = {'goals_and_tasks': 'Цель и задачи', 'approbation': 'А�
               'conclusion': 'Заключение', 'relevance': 'Актуальность'}
 key_slide = Namespace(**key_slides)
 
-def check(presentation, checks, presentation_name, username, pdf_id):
+def check(presentation, checks, presentation_name):
     check_names = checks.get_checks().keys()
     check_classes = [SldNumCheck(presentation, checks.slides_number), SldEnumCheck(presentation), TitleFormatCheck(presentation), \
                      FindDefSld(presentation, key_slide.goals_and_tasks), FindDefSld(presentation, key_slide.approbation), \
@@ -25,8 +25,6 @@ def check(presentation, checks, presentation_name, username, pdf_id):
 
     checks.score = checks.calc_score()
     checks.filename = presentation_name
-    checks.conv_pdf_fs_id = pdf_id
-    checks.user = username
     if current_user.params_for_passback:
         checks.is_passbacked = False
 
