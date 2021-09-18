@@ -210,7 +210,8 @@
                 </div></td></tr>
             </tbody>
         </table>
-        <div style = "text-align:center;">
+        {% if results.conv_pdf_fs_id %}
+        <div style = "text-align:center; width:100%">
           <div class="top-bar">
               <button class="btn" id="prev-page"><i class="bi bi-arrow-left"></i></button>
               <button class="btn" id="next-page"><i class="bi bi-arrow-right"></i></button>
@@ -220,6 +221,7 @@
           </div>
          <canvas id="the-canvas" style="border: 1px solid #000000; direction: ltr;"></canvas>
        </div>
+       {% endif %}
         <a href="{{url_for("checks", _id=id)}}" id="presentation_download" class="col text-center" download="{{ fi }}">Скачать презентацию</a>
         {% if results.conv_pdf_fs_id %}
             <a href="{{url_for("get_pdf", _id=id)}}" id="pdf" class="col text-center">PDF</a>
