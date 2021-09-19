@@ -29,6 +29,7 @@ def upload(request, upload_folder):
             if get_file_len(file) + get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
                 logger.critical('Storage overload has occured')
                 return 'storage_overload'
+            converted_id = write_pdf(file)
             filename = join(upload_folder, file.filename)
             file.save(filename)
             delete = True
@@ -45,7 +46,8 @@ def upload(request, upload_folder):
             presentation = get_presentation(presentation_id)
 
         checks = create_check(current_user)
-        check(parse(filename), checks, presentation_name, current_user.username)
+        check(parse(filename), checks, presentation_name)
+        checks.conv_pdf_fs_id = converted_id
         presentation, checks_id = add_check(presentation, checks, filename)
 
         if delete and exists(filename):
