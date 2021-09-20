@@ -31,7 +31,10 @@
     margin-bottom: 0.5rem;
 }
 
-
+#pdf {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
 
 .table {
     margin-bottom: 0 !important;
