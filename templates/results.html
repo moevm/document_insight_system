@@ -41,13 +41,13 @@
                 <tr data-toggle="collapse" data-target="#verd1" class="accordion-toggle">
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">1</th>
-                    <td class="ins">Количество основных слайдов(до запасных слайдов)</td>
-                    <td class="{{ "table-secondary ins" if results.slides_number == -1 else ("table-success ins" if results.slides_number.pass else "table-danger ins") }}">
-                       {{ "Не проведена" if results.slides_number == -1 else ("Пройдена" if results.slides_number.pass else "Не пройдена") }}
+                    <td class="ins">Количество основных слайдов</td>
+                    <td class="{{ "table-secondary ins" if not results.slides_number else ("table-success ins" if results.slides_number.pass else "table-danger ins") }}">
+                       {{ "Не проведена" if not results.slides_number else ("Пройдена" if results.slides_number.pass else "Не пройдена") }}
                     </td>
                 </tr>
                 <tr><td colspan="4" class="hiddenRow"><div id="verd1" class="accordian-body collapse" style="margin-left: 2em;">
-                    {% if results.slides_number == -1 %}
+                    {% if not results.slides_number %}
                         {{ 'Не проведена' }}
                     {% else %}
                         {% for item in results.slides_number.get('verdict', ["Пройдена!"] if results.slides_number.pass else ["Не пройдена"]) %}
@@ -59,12 +59,12 @@
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">2</th>
                     <td class="ins">Нумерация слайдов</td>
-                    <td class="{{ "table-secondary ins" if results.slides_enum == -1 else ("table-success ins" if results.slides_enum.pass else "table-danger ins") }}">
-                      {{ "Не проведена" if results.slides_enum == -1 else ("Пройдена!" if results.slides_enum.pass else "Не пройдена") }}
+                    <td class="{{ "table-secondary ins" if not results.slides_enum else ("table-success ins" if results.slides_enum.pass else "table-danger ins") }}">
+                      {{ "Не проведена" if not results.slides_enum else ("Пройдена!" if results.slides_enum.pass else "Не пройдена") }}
                     </td>
                 </tr>
                 <tr><td colspan="4" class="hiddenRow"><div id="verd2" class="accordian-body collapse" style="margin-left: 2em;">
-                    {% if results.slides_enum == -1 %}
+                    {% if not results.slides_enum %}
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.slides_enum.get('verdict', ["Пройдена!"] if results.slides_enum.pass else ["Не пройдена"]) %}
@@ -76,12 +76,12 @@
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">3</th>
                     <td class="ins">Заголовки слайдов присутствуют и занимают не более двух строк</td>
-                    <td class="{{ "table-secondary ins" if results.slides_headers == -1 else ("table-success ins" if results.slides_headers.pass else "table-danger ins") }}">
-                    {{ "Не проведена" if results.slides_headers == -1 else ("Пройдена!" if results.slides_headers.pass else "Не пройдена") }}
+                    <td class="{{ "table-secondary ins" if not results.slides_headers else ("table-success ins" if results.slides_headers.pass else "table-danger ins") }}">
+                    {{ "Не проведена" if not results.slides_headers else ("Пройдена!" if results.slides_headers.pass else "Не пройдена") }}
                     </td>
                 </tr>
                 <tr><td colspan="4" class="hiddenRow"><div id="verd3" class="accordian-body collapse" style="margin-left: 2em;">
-                    {% if results.slides_headers == -1 %}
+                    {% if not results.slides_headers %}
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.slides_headers.get('verdict', ["Пройдена!"] if results.slides_headers.pass else ["Не пройдена"]) %}
@@ -93,12 +93,12 @@
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">4</th>
                     <td class="ins">Слайд "Цель и задачи"</td>
-                    <td class="{{ "table-secondary ins" if results.goals_slide == -1 else ("table-success ins" if results.goals_slide.pass else "table-danger ins") }}">
-                    {{ "Не проведена" if results.goals_slide == -1 else ("Найден" if results.goals_slide.pass else "Не найден") }}
+                    <td class="{{ "table-secondary ins" if not results.goals_slide else ("table-success ins" if results.goals_slide.pass else "table-danger ins") }}">
+                    {{ "Не проведена" if not results.goals_slide else ("Найден" if results.goals_slide.pass else "Не найден") }}
                     </td>
                 </tr>
                 <tr><td colspan="4" class="hiddenRow"><div id="verd4" class="accordian-body collapse" style="margin-left: 2em;">
-                     {% if results.goals_slide == -1 %}
+                     {% if not results.goals_slide %}
                          {{ "Не проведена" }}
                      {% else %}
                          {% for item in results.goals_slide.get('verdict', ["Найден"] if results.goals_slide.pass else ["Не найден!"]) %}
@@ -110,12 +110,12 @@
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">5</th>
                     <td class="ins">Слайд "Апробация работы"</td>
-                    <td class="{{ "table-secondary ins" if results.probe_slide == -1 else ("table-success ins" if results.probe_slide.pass else "table-danger ins") }}">
-                    {{ "Не проведена" if results.probe_slide == -1 else ("Найден" if results.probe_slide.pass else "Не найден") }}
+                    <td class="{{ "table-secondary ins" if not results.probe_slide else ("table-success ins" if results.probe_slide.pass else "table-danger ins") }}">
+                    {{ "Не проведена" if not results.probe_slide else ("Найден" if results.probe_slide.pass else "Не найден") }}
                     </td>
                 </tr>
                 <tr><td colspan="4" class="hiddenRow"><div id="verd5" class="accordian-body collapse" style="margin-left: 2em;">
-                    {% if results.probe_slide == -1 %}
+                    {% if not results.probe_slide %}
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.probe_slide.get('verdict', ["Найден"] if results.probe_slide.pass else ["Не найден!"]) %}
@@ -127,12 +127,12 @@
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">6</th>
                     <td class="ins">Слайд с описанием актуальности работы</td>
-                    <td class="{{ "table-secondary ins" if results.actual_slide == -1 else ("table-success ins" if results.actual_slide.pass else "table-danger ins") }}">
-                    {{ "Не проведена" if results.actual_slide == -1 else ("Найден" if results.actual_slide.pass else "Не найден") }}
+                    <td class="{{ "table-secondary ins" if not results.actual_slide else ("table-success ins" if results.actual_slide.pass else "table-danger ins") }}">
+                    {{ "Не проведена" if not results.actual_slide else ("Найден" if results.actual_slide.pass else "Не найден") }}
                     </td>
                 </tr>
                 <tr><td colspan="4" class="hiddenRow"><div id="verd6" class="accordian-body collapse" style="margin-left: 2em;">
-                    {% if results.actual_slide == -1 %}
+                    {% if not results.actual_slide %}
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.actual_slide.get('verdict', ["Найден"] if results.actual_slide.pass else ["Не найден!"]) %}
@@ -144,12 +144,12 @@
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">7</th>
                     <td class="ins">Слайд с заключением</td>
-                    <td class="{{ "table-secondary ins" if results.conclusion_slide == -1 else ("table-success ins" if results.conclusion_slide.pass else "table-danger ins") }}">
-                    {{ "Не проведена" if results.conclusion_slide == -1 else ("Найден" if results.conclusion_slide.pass else "Не найден") }}
+                    <td class="{{ "table-secondary ins" if not results.conclusion_slide else ("table-success ins" if results.conclusion_slide.pass else "table-danger ins") }}">
+                    {{ "Не проведена" if not results.conclusion_slide else ("Найден" if results.conclusion_slide.pass else "Не найден") }}
                     </td>
                 </tr>
                 <tr><td colspan="4" class="hiddenRow"><div id="verd7" class="accordian-body collapse" style="margin-left: 2em;">
-                    {% if results.conclusion_slide == -1 %}
+                    {% if not results.conclusion_slide %}
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.conclusion_slide.get('verdict', ["Найден"] if results.conclusion_slide.pass else ["Не найден!"]) %}
@@ -161,12 +161,12 @@
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">8</th>
                     <td class="ins">Наличие слайдов, посвященных задачам</td>
-                    <td class="{{ "table-secondary ins" if results.slide_every_task == -1 else ("table-success ins" if results.slide_every_task.pass else "table-danger ins") }}">
-                    {{ "Не проведена" if results.slide_every_task == -1 else ("Пройдена!" if results.slide_every_task.pass else "Не пройдена") }}
+                    <td class="{{ "table-secondary ins" if not results.slide_every_task else ("table-success ins" if results.slide_every_task.pass else "table-danger ins") }}">
+                    {{ "Не проведена" if not results.slide_every_task else ("Пройдена!" if results.slide_every_task.pass else "Не пройдена") }}
                     </td>
                 </tr>
                 <tr><td colspan="4" class="hiddenRow"><div id="verd8" class="accordian-body collapse" style="margin-left: 2em;">
-                    {% if results.slide_every_task == -1 %}
+                    {% if not results.slide_every_task %}
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.slide_every_task.get('verdict', ["Пройдена!"] if results.slide_every_task.pass else ["Не пройдена"]) %}
@@ -178,12 +178,12 @@
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">9</th>
                     <td class="ins">Соответствие заключения задачам</td>
-                    <td class="{{ "table-secondary ins" if results.conclusion_actual == -1 else ("table-success ins" if results.conclusion_actual.pass else "table-danger ins") }}">
-                         {{ "Не проведена" if results.conclusion_actual == -1 else ("Соответствует на " ~ results.conclusion_actual.value ~ "%") }}
+                    <td class="{{ "table-secondary ins" if not results.conclusion_actual else ("table-success ins" if results.conclusion_actual.pass else "table-danger ins") }}">
+                         {{ "Не проведена" if not results.conclusion_actual else ("Соответствует на " ~ results.conclusion_actual.value ~ "%") }}
                     </td>
                 </tr>
                 <tr><td colspan="4" class="hiddenRow"><div id="verd9" class="accordian-body collapse" style="margin-left: 2em;">
-                    {% if results.conclusion_actual == -1 %}
+                    {% if not results.conclusion_actual %}
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.conclusion_actual.get('verdict', ["Пройдена!"] if results.conclusion_actual.pass else ["Не пройдена"]) %}
@@ -195,12 +195,12 @@
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">10</th>
                     <td class="ins">Наличие направлений дальнейшего развития</td>
-                    <td class="{{ "table-secondary ins" if results.conclusion_along == -1 else ("table-success ins" if results.conclusion_along.pass else "table-danger ins") }}">
-                        {{ "Не проведена" if results.conclusion_along == -1 else ("Найдены" if results.conclusion_along.pass else "Не найдены") }}
+                    <td class="{{ "table-secondary ins" if not results.conclusion_along else ("table-success ins" if results.conclusion_along.pass else "table-danger ins") }}">
+                        {{ "Не проведена" if not results.conclusion_along else ("Найдены" if results.conclusion_along.pass else "Не найдены") }}
                     </td>
                 </tr>
                 <tr><td colspan="4" class="hiddenRow"><div id="verd10" class="accordian-body collapse" style="margin-left: 2em;">
-                    {% if results.conclusion_along == -1 %}
+                    {% if not results.conclusion_along %}
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.conclusion_along.get('verdict', ["Пройдена!"] if results.conclusion_along.pass else ["Не пройдена"]) %}
