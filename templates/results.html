@@ -68,14 +68,7 @@
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.slides_enum.get('verdict', ["Пройдена!"] if results.slides_enum.pass else ["Не пройдена"]) %}
-                            {{ item }}<br>
-                        {% endfor %}
-                    {% endif %}
-                    {% if results.conv_pdf_fs_id and not results.slides_enum.pass %}
-                    {{ "Открыть в новой вкладке: " }}
-                        {% for item in results.slides_enum.get('value') %}
-                            <a href="{{ url_for("get_pdf", _id=id) ~ "#page=" ~ item }}" target="_blank" rel="noopener">{{ item }}<a>
-                            {{ ", " if not loop.last else "" }}
+                            {{ item|safe }}<br>
                         {% endfor %}
                     {% endif %}
                </div></td></tr>
@@ -92,14 +85,7 @@
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.slides_headers.get('verdict', ["Пройдена!"] if results.slides_headers.pass else ["Не пройдена"]) %}
-                            {{ item }}<br>
-                        {% endfor %}
-                    {% endif %}
-                    {% if results.conv_pdf_fs_id and not results.slides_headers.pass %}
-                    {{ "Открыть в новой вкладке: " }}
-                        {% for item in results.slides_headers.get('value') %}
-                            <a href="{{ url_for("get_pdf", _id=id) ~ "#page=" ~ item }}" target="_blank" rel="noopener">{{ item }}<a>
-                            {{ "," if not loop.last else "" }}
+                            {{ item|safe }}<br>
                         {% endfor %}
                     {% endif %}
                 </div></td></tr>
@@ -116,7 +102,7 @@
                          {{ "Не проведена" }}
                      {% else %}
                          {% for item in results.goals_slide.get('verdict', ["Найден"] if results.goals_slide.pass else ["Не найден!"]) %}
-                              {{ item }}<br>
+                              {{ item|safe }}<br>
                          {% endfor %}
                      {% endif %}
                 </div></td></tr>
@@ -133,7 +119,7 @@
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.probe_slide.get('verdict', ["Найден"] if results.probe_slide.pass else ["Не найден!"]) %}
-                            {{ item }}<br>
+                            {{ item|safe }}<br>
                         {% endfor %}
                     {% endif %}
                 </div></td></tr>
@@ -150,7 +136,7 @@
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.actual_slide.get('verdict', ["Найден"] if results.actual_slide.pass else ["Не найден!"]) %}
-                            {{ item }}<br>
+                            {{ item|safe }}<br>
                         {% endfor %}
                     {% endif %}
                 </div></td></tr>
@@ -167,7 +153,7 @@
                         {{ "Не проведена" }}
                     {% else %}
                         {% for item in results.conclusion_slide.get('verdict', ["Найден"] if results.conclusion_slide.pass else ["Не найден!"]) %}
-                            {{ item }}<br>
+                            {{ item|safe }}<br>
                         {% endfor %}
                     {% endif %}
                 </div></td></tr>
@@ -238,7 +224,7 @@
        {% endif %}
         <a href="{{url_for("checks", _id=id)}}" id="presentation_download" class="col text-center" download="{{ fi }}">Скачать презентацию</a>
         {% if results.conv_pdf_fs_id %}
-            <a href="{{url_for("get_pdf", _id=id)}}" id="pdf" class="col text-center">PDF</a>
+            <a href="{{url_for("get_pdf", _id=results.conv_pdf_fs_id)}}" id="pdf" class="col text-center">PDF</a>
         {% endif %}
     </div>
     <div class="footer row"></div>
