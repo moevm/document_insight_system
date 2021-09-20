@@ -71,6 +71,13 @@
                             {{ item }}<br>
                         {% endfor %}
                     {% endif %}
+                    {% if results.conv_pdf_fs_id and not results.slides_enum.pass %}
+                    {{ "Открыть в новой вкладке: " }}
+                        {% for item in results.slides_enum.get('value') %}
+                            <a href="{{ url_for("get_pdf", _id=id) ~ "#page=" ~ item }}" target="_blank" rel="noopener">{{ item }}<a>
+                            {{ ", " if not loop.last else "" }}
+                        {% endfor %}
+                    {% endif %}
                </div></td></tr>
                 <tr data-toggle="collapse" data-target="#verd3" class="accordion-toggle">
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
@@ -86,6 +93,13 @@
                     {% else %}
                         {% for item in results.slides_headers.get('verdict', ["Пройдена!"] if results.slides_headers.pass else ["Не пройдена"]) %}
                             {{ item }}<br>
+                        {% endfor %}
+                    {% endif %}
+                    {% if results.conv_pdf_fs_id and not results.slides_headers.pass %}
+                    {{ "Открыть в новой вкладке: " }}
+                        {% for item in results.slides_headers.get('value') %}
+                            <a href="{{ url_for("get_pdf", _id=id) ~ "#page=" ~ item }}" target="_blank" rel="noopener">{{ item }}<a>
+                            {{ "," if not loop.last else "" }}
                         {% endfor %}
                     {% endif %}
                 </div></td></tr>
