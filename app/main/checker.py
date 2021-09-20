@@ -19,7 +19,7 @@ def check(presentation, checks, presentation_name):
                      SldSimilarity(presentation, key_slide.goals_and_tasks, key_slide.conclusion, checks.conclusion_actual),
                      FurtherDev(presentation, key_slide.goals_and_tasks, key_slide.conclusion)]
     set_checks = dict(zip(check_names, check_classes))
-    enabled_checks = dict((key, value) for key, value in checks.get_checks().items() if value != -1)
+    enabled_checks = dict((key, value) for key, value in checks.get_checks().items() if value)
     for ch in enabled_checks:
         setattr(checks, ch, set_checks[ch].check())
 

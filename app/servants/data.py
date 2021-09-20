@@ -26,7 +26,7 @@ def upload(request, upload_folder):
     try:
         if "presentation" in request.files:
             file = request.files["presentation"]
-            if get_file_len(file) + get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
+            if get_file_len(file)*2 + get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
                 logger.critical('Storage overload has occured')
                 return 'storage_overload'
             converted_id = write_pdf(file)
