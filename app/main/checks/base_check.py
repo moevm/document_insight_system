@@ -16,8 +16,5 @@ class BaseCheck:
 
     def format_page_link(self, error):
         base_pdf_link = url_for('get_pdf', _id=self.pdf_id)
-        res = []
-        for err in error:
-            page = base_pdf_link + "#page=" + str(err)
-            res.append('<a href='+ '"' + page + '"'+ 'target="_blank" rel="noopener">' + str(err) + '<a>')
-        return res
+        page = lambda err: f'{base_pdf_link}#page={str(err)}'
+        return [f'<a href="{page(e)}"target="_blank" rel="noopener">{str(e)}<a>' for e in error]
