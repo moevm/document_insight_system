@@ -207,6 +207,13 @@
                             {{ item }}<br>
                         {% endfor %}
                     {% endif %}
+                    {% if results.conv_pdf_fs_id and results.conclusion_along.pass %}
+                    {{ "Найдено на странице: " }}
+                          {% for item in results.conclusion_slide.get('value') %}
+                              {{ item|safe }}
+                              {{ ", " if not loop.last else "" }}
+                          {% endfor %}
+                    {% endif %}
                 </div></td></tr>
             </tbody>
         </table>
