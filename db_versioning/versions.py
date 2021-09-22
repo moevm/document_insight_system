@@ -146,7 +146,7 @@ class Version21(Version):
             for user in collections['users'].find():
                 criteria_dt = Checks(user['criteria']).get_checks()
                 upd_criteria = {k: False if v == -1 else True for k, v in criteria_dt.items()}
-                upd_criteria['slides_number'] = {"sld_num": [10, 12], "detect_additional": True} if upd_criteria['slides_number'] else False
+                upd_criteria['slides_number'] = {"sld_num": criteria_dt['slides_number'], "detect_additional": True} if upd_criteria['slides_number'] else False
                 collections['users'].update(
                                    {'_id': user['_id']},
                                    {'$set': {'criteria': upd_criteria}}
