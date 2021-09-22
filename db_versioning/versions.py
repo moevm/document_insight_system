@@ -8,13 +8,13 @@ class Version:
     @classmethod
     def update_database(cls, collections, prev_version):
         """
-        <collections> must contains (objects from pymongo) 
+        <collections> must contains (objects from pymongo)
         - users
         - presentations
         - checks
         """
         raise NotImplementedError()
-    
+
     @classmethod
     def to_dict(cls):
         return dict(
@@ -27,7 +27,7 @@ class Version:
         for version in VERSIONS:
             if version.version == version_name:
                 return version
-        return None 
+        return None
 
 
 class Version10(Version):
@@ -69,7 +69,7 @@ class Version20(Version):
     @classmethod
     def update_database(cls, collections, prev_version):
         if prev_version in (Version10.VERSION_NAME, Version11.VERSION_NAME):
-            # process all checks of pres and set filename + user 
+            # process all checks of pres and set filename + user
             for presentation in collections['presentations'].find({}):
                 filename = presentation['name']
                 user_doc = collections['users'].find_one({'presentations': presentation['_id'] })
@@ -79,7 +79,7 @@ class Version20(Version):
                         {"_id": check_id},
                         { '$set': { 'filename': filename, 'user': user } }
                     )
-            
+
             # if we have checks without presentation == after prev loop it doesn't include filename/user field
             # set default user='moevm', filename='_.pptx'
             collections['checks'].update(
@@ -126,13 +126,42 @@ class Version20(Version):
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
+class Version21(Version):
+    VERSION_NAME = '2.1'
+    CHANGES = '0/1 -> T/F; criteria.slides_number: [] -> {}'
+
+    @classmethod
+    def update_database(cls, collections, prev_version):
+        if prev_version in (Version10.VERSION_NAME, Version11.VERSION_NAME, Version20.VERSION_NAME):
+
+            #mv from 0/-1 -> T/F
+            for check in collections['checks'].find({}):
+                check_dt = Checks(check).get_checks().items()
+                upd_check = {k: False if v == -1 else v for k, v in check_dt}
+                collections['checks'].update(
+                    {'_id': check['_id']},
+                    {'$set': upd_check}
+                )
+
+            for user in collections['users'].find():
+                criteria_dt = Checks(user['criteria']).get_checks()
+                upd_criteria = {k: False if v == -1 else True for k, v in criteria_dt.items()}
+                upd_criteria['slides_number'] = {"sld_num": [10, 12], "detect_additional": True} if upd_criteria['slides_number'] else False
+                collections['users'].update(
+                                   {'_id': user['_id']},
+                                   {'$set': {'criteria': upd_criteria}}
+                               )
+
+        else:
+            raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
 VERSIONS = {
     '1.0': Version10,
     '1.1': Version11,
     '2.0': Version20,
+    '2.1': Version21,
 }
-LAST_VERSION = '2.0'
+LAST_VERSION = '2.1'
 
 
 for _, ver in VERSIONS.items():
