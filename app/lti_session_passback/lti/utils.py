@@ -61,7 +61,10 @@ def get_criteria_from_launch(data):
     detect_additional = custom.get('detect_additional', 'True')
     criteria = dict((k, custom[k]) for k in all_checks if k in custom)
     eval_criteria = dict((key, eval(value)) for key, value in criteria.items() if key != 'slides_number')
-    eval_criteria['slides_number'] = {'sld_num': sld_num[criteria.get('slides_number', 'bsc')], 'detect_additional': eval(detect_additional)}
+    if criteria.get('slides_number') not in ['bsc', 'msc']:
+        eval_criteria['slides_number'] = {'sld_num': eval(criteria.get('slides_number')), 'detect_additional': eval(detect_additional)}
+    else:
+        eval_criteria['slides_number'] = {'sld_num': sld_num[criteria.get('slides_number', 'bsc')], 'detect_additional': eval(detect_additional)}
     return eval_criteria
 
 def extract_passback_params(data):
