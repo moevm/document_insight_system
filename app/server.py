@@ -171,7 +171,7 @@ def checks(_id):
 @login_required
 def get_pdf(_id):
     try:
-        file = bd_helper.get_checks_pdf(ObjectId(_id))
+        file = bd_helper.find_pdf_by_file_id(ObjectId(_id))
     except bson.errors.InvalidId:
         logger.error('_id exception in fetching pdf occured:', exc_info=True)
         return render_template("./404.html")
