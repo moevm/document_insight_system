@@ -3,17 +3,18 @@ import re
 import itertools
 
 class TitleFormatCheck(BaseCheck):
-    def __init__(self, presentation):
+    def __init__(self, presentation, pdf_id):
         super().__init__(presentation)
         self.empty_headers = []
         self.len_exceeded = []
+        self.pdf_id = pdf_id
 
     def exceeded_verdict(self):
-        return 'Превышение длины: {}'.format(', '.join(map(str, self.len_exceeded))), \
+        return 'Превышение длины: {}'.format(', '.join(map(str,  self.format_page_link(self.len_exceeded)))), \
                'Убедитесь в корректности заголовка и текста слайда'
 
     def empty_verdict(self):
-        return 'Заголовки не найдены: {}.'.format(', '.join(map(str, self.empty_headers))), \
+        return 'Заголовки не найдены: {}.'.format(', '.join(map(str,  self.format_page_link(self.empty_headers)))), \
                'Убедитесь, что слайд озаглавлен соответстующим элементом'
 
     def get_failing_headers(self):
