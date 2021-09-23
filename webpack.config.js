@@ -7,10 +7,19 @@ module.exports = {
     entry: ['core-js/stable', 'regenerator-runtime/runtime', "./assets/scripts/main.js"],
     output: {
         path: path.join(__dirname, './src/'),
-        filename: "./all.min.js"
+        filename: "./[name].js"
     },
     optimization: {
-        minimize: true
+      splitChunks: {
+        cacheGroups: {
+          vendor: {
+            name: 'vendors',
+            test: /node_modules/,
+            chunks: 'all',
+            enforce: true
+          }
+        }
+      }
     },
     module: {
         rules: [
