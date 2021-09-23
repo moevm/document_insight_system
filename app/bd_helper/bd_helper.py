@@ -174,6 +174,13 @@ def get_checks_pdf(checks_id):
         return None
 
 
+def find_pdf_by_file_id(file_id):
+    try:
+        return fs.open_download_stream(file_id)
+    except NoFile:
+        return None
+
+
 # Deletes checks with given id, returns presentation
 def delete_check(presentation, checks_id):
     if checks_id in presentation.checks:

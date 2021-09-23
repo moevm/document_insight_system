@@ -13,6 +13,7 @@ import 'bootstrap-datepicker';
 import 'bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css'
 
 import * as CryptoJS from "crypto-js";
+import * as pdfjsLib from 'pdfjs-dist';
 
 import '../styles/main.css';
 

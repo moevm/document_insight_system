@@ -3,8 +3,9 @@ import re
 
 
 class SldEnumCheck(BaseCheck):
-    def __init__(self, presentation):
+    def __init__(self, presentation, pdf_id):
         super().__init__(presentation)
+        self.pdf_id = pdf_id
 
     def check(self):
         error = []
@@ -16,5 +17,6 @@ class SldEnumCheck(BaseCheck):
         if not error:
             return answer(True, error, "Пройдена!")
         else:
+            error =  self.format_page_link(error)
             return answer(False, error, 'Не пройдена, проблемные слайды: {}'.format(', '.join(map(str, error))), \
                                         'Убедитесь в корректности формата номеров слайдов')

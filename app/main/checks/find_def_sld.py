@@ -1,9 +1,10 @@
 from app.main.checks.base_check import BaseCheck, answer
 
 class FindDefSld(BaseCheck):
-    def __init__(self, presentation, type_of_slide):
+    def __init__(self, presentation, type_of_slide, pdf_id):
         super().__init__(presentation)
         self.type_of_slide = type_of_slide
+        self.pdf_id = pdf_id
 
     def check(self):
         found_slides, found_idxs  = [], []
@@ -14,4 +15,5 @@ class FindDefSld(BaseCheck):
         if len(found_slides) == 0:
             return answer(False, None, 'Слайд не найден')
         else:
+            found_idxs = self.format_page_link(found_idxs)
             return answer(True, found_idxs, 'Найден под номером: {}'.format(', '.join(map(str, found_idxs))))

@@ -12,9 +12,9 @@ key_slide = Namespace(**key_slides)
 
 def check(presentation, checks, presentation_name):
     check_names = checks.get_checks().keys()
-    check_classes = [SldNumCheck(presentation, checks.slides_number), SldEnumCheck(presentation), TitleFormatCheck(presentation), \
-                     FindDefSld(presentation, key_slide.goals_and_tasks), FindDefSld(presentation, key_slide.approbation), \
-                     SearchKeyWord(presentation, key_slide.relevance), FindDefSld(presentation, key_slide.conclusion), \
+    check_classes = [SldNumCheck(presentation, checks.slides_number), SldEnumCheck(presentation, checks.conv_pdf_fs_id), TitleFormatCheck(presentation, checks.conv_pdf_fs_id), \
+                     FindDefSld(presentation, key_slide.goals_and_tasks, checks.conv_pdf_fs_id), FindDefSld(presentation, key_slide.approbation, checks.conv_pdf_fs_id), \
+                     SearchKeyWord(presentation, key_slide.relevance, checks.conv_pdf_fs_id), FindDefSld(presentation, key_slide.conclusion, checks.conv_pdf_fs_id), \
                      FindTasks(presentation, key_slide.goals_and_tasks, checks.slide_every_task), \
                      SldSimilarity(presentation, key_slide.goals_and_tasks, key_slide.conclusion, checks.conclusion_actual),
                      FurtherDev(presentation, key_slide.goals_and_tasks, key_slide.conclusion)]
