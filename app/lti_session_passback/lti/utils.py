@@ -1,3 +1,6 @@
+from logging import getLogger
+logger = getLogger('root')
+
 from app.main.checks_config.parser import sld_num
 
 TITLE = 'context_title'
@@ -56,15 +59,12 @@ def get_custom_params(data):
 def get_criteria_from_launch(data):
     all_checks = ('slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
                   'probe_slide', 'actual_slide', 'conclusion_slide', 'slide_every_task',
-                  'conclusion_actual', 'conclusion_along')
+                  'conclusion_actual', 'conclusion_along', 'detect_additional')
     custom = get_custom_params(data)
     detect_additional = custom.get('detect_additional', 'True')
     criteria = dict((k, custom[k]) for k in all_checks if k in custom)
-    eval_criteria = dict((key, eval(value)) for key, value in criteria.items() if key != 'slides_number')
-    if criteria.get('slides_number') not in ['bsc', 'msc']:
-        eval_criteria['slides_number'] = {'sld_num': eval(criteria.get('slides_number')), 'detect_additional': eval(detect_additional)}
-    else:
-        eval_criteria['slides_number'] = {'sld_num': sld_num[criteria.get('slides_number', 'bsc')], 'detect_additional': eval(detect_additional)}
+    eval_criteria = launch_sanity_check(criteria, detect_additional)
+
     return eval_criteria
 
 def extract_passback_params(data):
@@ -75,3 +75,31 @@ def extract_passback_params(data):
         else:
             raise KeyError("{} doesn't include {}. Must inslude: {}".format(data, param_key, PASSBACK_PARAMS))
     return params
+
+def launch_sanity_check(criteria, detect_additional):
+    try:
+        eval_criteria = dict((key, eval(value)) for key, value in criteria.items() if key != 'slides_number')
+    except NameError:
+        logger.warning(f"Error in declared launch values is present, user's checks will be set to default values")
+        return dict()
+
+    check_types = {
+        **dict.fromkeys(['slides_enum', 'slides_headers', 'goals_slide', 'detect_additional', 'probe_slide',
+                         'actual_slide', 'conclusion_slide', 'conclusion_along'], (bool)),
+        **dict.fromkeys(['slide_every_task', 'conclusion_actual'], (int, bool))
+        }
+
+    failed_types = [k for k, v in eval_criteria.items() if not isinstance(v, check_types[k]) and k != 'slides_number']
+    slides_number = criteria.get('slides_number')
+    detect_additional = True if not isinstance(eval(detect_additional), bool) else eval(detect_additional)
+    if slides_number not in ['bsc', 'msc', 'False'] and not isinstance(eval(slides_number), (list)):
+        failed_types.append('slides_number')
+    else:
+        eval_criteria['slides_number'] = {'sld_num': sld_num.get(slides_number, None) or eval(slides_number),
+                                          'detect_additional': detect_additional} if slides_number != 'False' else False
+
+    if failed_types:
+        [eval_criteria.pop(key, None) for key in failed_types]
+        logger.warning(f"The following check types don't match their designated types and will be set to default: {', '.join(failed_types)}")
+
+    return eval_criteria
