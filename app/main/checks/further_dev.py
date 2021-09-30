@@ -16,7 +16,5 @@ class FurtherDev(BaseCheck):
             return answer(False, None, 'Задач или заключения не существует')
 
         results = check_similarity(goals, conclusions)
-        if results == -1:
-            return answer(False, None, "Произошла ошибка!")
-        else:
-            return answer(results[1].get('found_dev'), results[1].get('dev_sentence'), results[1].get('dev_sentence'))
+
+        return answer(results[1].get('found_dev'), results[1].get('dev_sentence'), results[1].get('dev_sentence'))
