@@ -90,7 +90,7 @@ def launch_sanity_check(criteria, detect_additional):
         }
 
     failed_types = [k for k, v in eval_criteria.items() if not isinstance(v, check_types[k]) and k != 'slides_number']
-    slides_number = criteria.get('slides_number')
+    slides_number = criteria.get('slides_number', 'bsc')
     detect_additional = True if not isinstance(eval(detect_additional), bool) else eval(detect_additional)
     if slides_number not in ['bsc', 'msc', 'False'] and not isinstance(eval(slides_number), (list)):
         failed_types.append('slides_number')
