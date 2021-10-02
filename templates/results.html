@@ -6,7 +6,7 @@
 {% block title %}Результаты проверки{% endblock %}
 
 {% block main %}
-{% set hr_checks = ['', 'Количество основных слайдов', 'Нумерация слайдов', 'Заголовки слайдов присутствуют и занимают не более двух строк',
+{% set hr_checks = ['Количество основных слайдов', 'Нумерация слайдов', 'Заголовки слайдов присутствуют и занимают не более двух строк',
                     'Слайд "Цель и задачи"', 'Слайд "Апробация работы"', 'Слайд с описанием актуальности работы',
                     'Слайд с заключением', 'Наличие слайдов, посвященных задачам', 'Соответствие заключения задачам',
                     'Наличие направлений дальнейшего развития'] %}
@@ -46,7 +46,7 @@
                 <tr data-toggle="collapse" data-target="#verd{{ loop.index }}" class="accordion-toggle">
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">{{ loop.index }}</th>
-                    <td class="ins">{{ hr_checks[loop.index] }}</td>
+                    <td class="ins">{{ hr_checks[loop.index0] }}</td>
                     <td class="{{ "table-secondary ins" if not results[key] else ("table-success ins" if results[key].pass else "table-danger ins") }}">
                        {{ "Не проведена" if not results[key] else ("Пройдена" if results[key].pass else "Не пройдена") }}
                     </td>
@@ -56,7 +56,7 @@
                         {{ 'Не проведена' }}
                     {% else %}
                         {% for item in results[key].get('verdict', ["Пройдена!"] if results[key].pass else ["Не пройдена"]) %}
-                            {{ item|safe }}<br>
+                            {{ item|safe }}
                         {% endfor %}
                     {% endif %}
                 </div></td></tr>

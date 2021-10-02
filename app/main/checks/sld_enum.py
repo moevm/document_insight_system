@@ -1,4 +1,5 @@
 from app.main.checks.base_check import BaseCheck, answer
+from app.utils.parse_for_html import format_header
 import re
 
 
@@ -18,5 +19,5 @@ class SldEnumCheck(BaseCheck):
             return answer(True, error, "Пройдена!")
         else:
             error =  self.format_page_link(error)
-            return answer(False, error, 'Не пройдена, проблемные слайды: {}'.format(', '.join(map(str, error))), \
+            return answer(False, error, format_header('Не пройдена, проблемные слайды: {}'.format(', '.join(map(str, error)))), \
                                         'Убедитесь в корректности формата номеров слайдов')

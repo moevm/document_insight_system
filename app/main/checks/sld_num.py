@@ -1,4 +1,5 @@
 from app.main.checks.base_check import BaseCheck, answer
+from app.utils.parse_for_html import format_header
 import re
 
 class SldNumCheck(BaseCheck):
@@ -15,7 +16,7 @@ class SldNumCheck(BaseCheck):
         }
 
     def sldnum_verdict(self, find_additional, msg):
-        return answer(False, find_additional, 'Всего: {}'.format(find_additional), \
+        return answer(False, find_additional, format_header('Всего: {}'.format(find_additional)), \
                                               '{}. Допустимые границы: {}'.format(msg, self.slides_number))
 
     def get_sldnum_range(self, find_additional, suspected_additional = None):
