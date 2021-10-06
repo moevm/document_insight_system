@@ -4,7 +4,7 @@ import re
 class SldNumCheck(BaseCheck):
     def __init__(self, presentation, slides_number):
         super().__init__(presentation)
-        self.slides_number = slides_number.get('sld_num')
+        self.slides_number = slides_number.get('sld_num', 12)
         self.detect_additional = slides_number.get('detect_additional', True)
 
     RANGE_VERDICTS = {
