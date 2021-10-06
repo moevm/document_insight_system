@@ -40,15 +40,13 @@ class Stemming:
         self.get_sentences(string, flag)
 
         for sent in self.sentences:
-            for word in word_tokenize(sent):
-                if word.isalpha():
-                    word = word.lower()
-                    if word not in stop_words:
-                        w = morph.parse(word)[0].normal_form
-                        filtered_doc.append(w)
-                        if (w == FURTHER_DEVELOPMENT or w == FURTHER_IMPROVEMENTS) and flag == False:
-                            self.find_further_development = True
-                            self.further_dev_sentence = sent
+            token_sent = [w.lower() for w in word_tokenize(sent) if w.lower() not in stop_words]
+            for word in token_sent:
+                w = morph.parse(word)[0].normal_form
+                filtered_doc.append(w)
+                if w in [FURTHER_DEVELOPMENT, FURTHER_IMPROVEMENTS] and not flag:
+                    self.find_further_development = True
+                    self.further_dev_sentence = sent
             self.filtered_docs.append(filtered_doc)
             filtered_doc = []
 
