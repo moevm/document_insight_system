@@ -5,7 +5,7 @@ tag = Namespace(**tags)
 def format_descriptions(desc_list, open_tag = '', close_tag = ''):
     return list(map(lambda item: f"{open_tag}{item}{close_tag}", desc_list))
 
-def format_header(header, close_tag = ''):
+def format_header(header, close_tag = tag.br):
     return f"{header}{close_tag}"
 
 def find_tasks_on_slides_feedback(slides_with_tasks):

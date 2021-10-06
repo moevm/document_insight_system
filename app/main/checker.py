@@ -17,7 +17,7 @@ def check(presentation, checks, presentation_name):
                      SearchKeyWord(presentation, key_slide.relevance, checks.conv_pdf_fs_id), FindDefSld(presentation, key_slide.conclusion, checks.conv_pdf_fs_id), \
                      FindTasks(presentation, key_slide.goals_and_tasks, checks.slide_every_task), \
                      SldSimilarity(presentation, key_slide.goals_and_tasks, key_slide.conclusion, checks.conclusion_actual),
-                     FurtherDev(presentation, key_slide.goals_and_tasks, key_slide.conclusion)]
+                     FurtherDev(presentation, key_slide.goals_and_tasks, key_slide.conclusion, checks.conv_pdf_fs_id)]
     set_checks = dict(zip(check_names, check_classes))
     enabled_checks = dict((key, value) for key, value in checks.get_checks().items() if value)
     for ch in enabled_checks:
