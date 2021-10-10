@@ -5,6 +5,7 @@ let upload_id;
 const file_input = $("#upload_file");
 const upload_button = $("#upload_upload_button");
 
+upload_button.prop("disabled", true);
 
 file_input.change(() => {
     const fileName = file_input.val().split("\\")[2];
@@ -14,6 +15,7 @@ file_input.change(() => {
       return;
     }
     $("#upload_file_label").html(fileName);
+    upload_button.prop("disabled", false);
 });
 
 async function upload(sample = false) {

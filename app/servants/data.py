@@ -14,8 +14,6 @@ from logging import getLogger
 logger = getLogger('root')
 
 
-DEFAULT_PRESENTATION = 'sample.odp'
-
 def get_file_len(file):
     file.seek(0, os.SEEK_END)
     file_length = file.tell()
@@ -24,18 +22,14 @@ def get_file_len(file):
 
 def upload(request, upload_folder):
     try:
-        if "presentation" in request.files:
-            file = request.files["presentation"]
-            if get_file_len(file)*2 + get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
-                logger.critical('Storage overload has occured')
-                return 'storage_overload'
-            converted_id = write_pdf(file)
-            filename = join(upload_folder, file.filename)
-            file.save(filename)
-            delete = True
-        else:
-            filename = join(upload_folder, DEFAULT_PRESENTATION)
-            delete = False
+        file = request.files["presentation"]
+        if get_file_len(file)*2 + get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
+            logger.critical('Storage overload has occured')
+            return 'storage_overload'
+        converted_id = write_pdf(file)
+        filename = join(upload_folder, file.filename)
+        file.save(filename)
+        delete = True
 
         presentation_name = basename(filename)
         logger.info("Обработка презентации " + presentation_name + " пользователя " +
