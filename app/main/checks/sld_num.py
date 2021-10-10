@@ -5,12 +5,11 @@ import re
 class SldNumCheck(BaseCheck):
     def __init__(self, presentation, slides_number):
         super().__init__(presentation)
-        try:
+        if not isinstance(slides_number, (dict)):
+            self.slides_number = slides_number
+        else:
             self.slides_number = slides_number.get('sld_num')
             self.detect_additional = slides_number.get('detect_additional', True)
-        except AttributeError:
-            self.slides_number = False
-            self.detect_additional = False
 
 
     RANGE_VERDICTS = {
