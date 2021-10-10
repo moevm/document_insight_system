@@ -3,10 +3,8 @@ import '../styles/upload.css';
 
 let upload_id;
 const file_input = $("#upload_file");
-const checking_button = $("#checking_button");
 const upload_button = $("#upload_upload_button");
 
-checking_button.prop("disabled", true);
 
 file_input.change(() => {
     const fileName = file_input.val().split("\\")[2];
@@ -48,7 +46,7 @@ async function upload(sample = false) {
     } else {
       upload_id = response_text;
       bar.addClass("bg-success");
-      checking_button.prop("disabled", false);
+      window.location.replace("/results/" + upload_id);
     }
 }
 
@@ -62,4 +60,3 @@ $("#upload_upload_button").click(async () =>{
 
 $("#upload_test_button").click(async () => { await upload(true); });
 $("#upload_criteria_button").click(() => { window.open("/criteria"); });
-checking_button.click(() => { window.location.href = "/results/" + upload_id; });
