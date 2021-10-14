@@ -236,6 +236,24 @@ def check_list_data():
         logger.warning("Can't apply upload-date filter")
         logger.warning(repr(e))
 
+    f_moodle_date = filters.get("moodle-date", "")
+    f_moodle_date_list = list(filter(lambda val: val, f_moodle_date.split("-")))
+    try:
+        if len(f_moodle_date_list) == 1:
+            date = datetime.strptime(f_moodle_date_list[0], "%d.%m.%Y")
+            filter_query['lms_passback_time'] = {
+                "$gte": date,
+                "$lte": date + timedelta(hours=23, minutes=59, seconds=59)
+            }
+        elif len(f_moodle_date_list) > 1:
+            filter_query['lms_passback_time'] = {
+                "$gte": datetime.strptime(f_moodle_date_list[0], "%d.%m.%Y"),
+                "$lte": datetime.strptime(f_moodle_date_list[1], "%d.%m.%Y")
+            }
+    except Exception as e:
+        logger.warning("Can't apply moodle-date filter")
+        logger.warning(repr(e))
+
     f_score = filters.get("score", "")
     f_score_list = list(filter(lambda val: val, f_score.split("-")))
     try:
@@ -262,7 +280,10 @@ def check_list_data():
     offset = int(offset) if offset.isnumeric() else 0
 
     sort = request.args.get("sort", "")
+    sort = 'upload-date' if not sort else sort
+
     order = request.args.get("order", "")
+    order = 'desc' if not order else order
 
     sort = "_id" if sort == "upload-date" else sort
 
