@@ -215,6 +215,8 @@ def get_all_checks():
 
 # get checks cursor with specified parameters
 def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
+    sort = 'lms_passback_time' if sort == 'moodle-date' else sort
+
     count = checks_collection.count_documents(filter)
     rows = checks_collection.find(filter)
 
