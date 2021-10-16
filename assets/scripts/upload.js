@@ -57,6 +57,7 @@ $("#upload_upload_button").click(async () =>{
           alert('Check recaptcha to continue!');
         }
         else{
+          upload_button.prop("disabled", true);
           await upload(false);
     }});
 
