@@ -5,8 +5,12 @@ import re
 class SldNumCheck(BaseCheck):
     def __init__(self, presentation, slides_number):
         super().__init__(presentation)
-        self.slides_number = slides_number.get('sld_num')
-        self.detect_additional = slides_number.get('detect_additional', True)
+        if not isinstance(slides_number, (dict)):
+            self.slides_number = slides_number
+        else:
+            self.slides_number = slides_number.get('sld_num')
+            self.detect_additional = slides_number.get('detect_additional', True)
+
 
     RANGE_VERDICTS = {
         'in_range': 'Количество слайдов в допустимых границах',
