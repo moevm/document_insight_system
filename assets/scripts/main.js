@@ -19,7 +19,6 @@ import '../styles/main.css';
 
 import './criteria';
 import './login';
-import './presentations';
 import './profile';
 import './results';
 import './signup';
