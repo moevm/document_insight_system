@@ -59,6 +59,7 @@ def lti():
         username = temporary_user_params.get('ext_user_username')
         person_name = utils.get_person_name(temporary_user_params)
         user_id = f"{username}_{temporary_user_params.get('tool_consumer_instance_guid', '')}"
+        lms_user_id = temporary_user_params.get('user_id', '')
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
         custom_criteria = utils.get_criteria_from_launch(temporary_user_params)
@@ -74,6 +75,7 @@ def lti():
             user = bd_helper.get_user(user_id)
 
         user.params_for_passback = params_for_passback
+        user.lms_user_id = lms_user_id
         bd_helper.edit_user(user)
 
         login_user(user)
@@ -297,6 +299,7 @@ def check_list_data():
             "_id": str(item["_id"]),
             "filename": item["filename"],
             "user": item["user"],
+            "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
             "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H:%M:%S"),
             "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get('lms_passback_time') else '-',
             "score": item["score"]
