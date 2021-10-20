@@ -9,8 +9,11 @@ import 'bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-co
 
 import 'bootstrap-icons/font/bootstrap-icons.css'
 
+import 'bootstrap-table/dist/extensions/export/bootstrap-table-export'
 import 'bootstrap-datepicker';
 import 'bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css'
+
+import * as tableExport from 'tableexport.jquery.plugin'
 
 import * as CryptoJS from "crypto-js";
 import * as pdfjsLib from 'pdfjs-dist';
