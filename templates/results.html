@@ -31,7 +31,7 @@
                 {% endfor %}
               </tr>
             </tbody>
-        <h3 id="results_title" class="texteous ins">Результат проверки: {{ "" if results.correct() else "не" }} пройдена!</h3>
+        <h3 id="results_title" class="texteous ins">Результат проверки: {{ "" if results else "не" }} пройдена!</h3>
         <table class="table table-striped table-hover" id="results_table">
             <thead>
                 <tr>
@@ -42,20 +42,20 @@
                 </tr>
             </thead>
             <tbody>
-             {% for key, value in current_user.criteria.get_checks().items() %}
+              {% for key, value in results.enabled_checks.items() %}
                 <tr data-toggle="collapse" data-target="#verd{{ loop.index }}" class="accordion-toggle">
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">{{ loop.index }}</th>
                     <td class="ins">{{ hr_checks[loop.index0] }}</td>
-                    <td class="{{ "table-secondary ins" if not results[key] else ("table-success ins" if results[key].pass else "table-danger ins") }}">
-                       {{ "Не проведена" if not results[key] else ("Пройдена" if results[key].pass else "Не пройдена") }}
+                    <td class="{{ "table-secondary ins" if not results.enabled_checks[key] else ("table-success ins" if results.enabled_checks[key].pass else "table-danger ins") }}">
+                       {{ "Не проведена" if not results.enabled_checks[key] else ("Пройдена" if results.enabled_checks[key].pass else "Не пройдена") }}
                     </td>
                 </tr>
                 <tr><td colspan="4" class="hiddenRow"><div id="verd{{ loop.index }}" class="accordian-body collapse" style="margin-left: 2em;">
-                    {% if not results[key] %}
+                    {% if not results.enabled_checks[key] %}
                         {{ 'Не проведена' }}
                     {% else %}
-                        {% for item in results[key].get('verdict', ["Пройдена!"] if results[key].pass else ["Не пройдена"]) %}
+                        {% for item in results.enabled_checks[key].get('verdict', ["Пройдена!"] if results.enabled_checks[key].pass else ["Не пройдена"]) %}
                             {{ item|safe }}
                         {% endfor %}
                     {% endif %}

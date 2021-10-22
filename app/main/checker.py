@@ -11,18 +11,19 @@ key_slides = {'goals_and_tasks': 'Цель и задачи', 'approbation': 'А�
 key_slide = Namespace(**key_slides)
 
 def check(presentation, checks, presentation_name):
-    check_names = checks.get_checks().keys()
-    check_classes = [SldNumCheck(presentation, checks.slides_number), SldEnumCheck(presentation, checks.conv_pdf_fs_id), TitleFormatCheck(presentation, checks.conv_pdf_fs_id), \
+    check_names = checks.enabled_checks.keys()
+    check_classes = [SldNumCheck(presentation, checks.enabled_checks['slides_number']), SldEnumCheck(presentation, checks.conv_pdf_fs_id), TitleFormatCheck(presentation, checks.conv_pdf_fs_id), \
                      FindDefSld(presentation, key_slide.goals_and_tasks, checks.conv_pdf_fs_id), FindDefSld(presentation, key_slide.approbation, checks.conv_pdf_fs_id), \
                      SearchKeyWord(presentation, key_slide.relevance, checks.conv_pdf_fs_id), FindDefSld(presentation, key_slide.conclusion, checks.conv_pdf_fs_id), \
-                     FindTasks(presentation, key_slide.goals_and_tasks, checks.slide_every_task), \
-                     SldSimilarity(presentation, key_slide.goals_and_tasks, key_slide.conclusion, checks.conclusion_actual),
+                     FindTasks(presentation, key_slide.goals_and_tasks, checks.enabled_checks['slide_every_task']), \
+                     SldSimilarity(presentation, key_slide.goals_and_tasks, key_slide.conclusion, checks.enabled_checks['conclusion_actual']),
                      FurtherDev(presentation, key_slide.goals_and_tasks, key_slide.conclusion, checks.conv_pdf_fs_id)]
     set_checks = dict(zip(check_names, check_classes))
-    enabled_checks = dict((key, value) for key, value in checks.get_checks().items() if value)
-    for ch in enabled_checks:
-        setattr(checks, ch, set_checks[ch].check())
+    enabled_checks = dict((key, value) for key, value in checks.enabled_checks.items() if value)
+    for k, v in enabled_checks.items():
+        enabled_checks[k] = set_checks[k].check()
 
+    checks.enabled_checks = enabled_checks
     checks.score = checks.calc_score()
     checks.filename = presentation_name
     checks.user = current_user.username

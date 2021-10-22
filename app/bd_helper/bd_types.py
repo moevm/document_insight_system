@@ -73,16 +73,10 @@ class Checks(Packable):
         if '_id' in dictionary:
             self._id = dictionary.get('_id', '')
 
-        self.slides_number = dictionary.get('slides_number', {'sld_num': sld_num['bsc'], 'detect_additional': True})
-        self.slides_enum = dictionary.get('slides_enum', True)
-        self.slides_headers = dictionary.get('slides_headers', True)
-        self.goals_slide = dictionary.get('goals_slide', True)
-        self.probe_slide = dictionary.get('probe_slide', True)
-        self.actual_slide = dictionary.get('actual_slide', True)
-        self.conclusion_slide = dictionary.get('conclusion_slide', True)
-        self.conclusion_actual = dictionary.get('conclusion_actual', 50) #
-        self.conclusion_along = dictionary.get('conclusion_along', True)
-        self.slide_every_task = dictionary.get('slide_every_task', 50)   #
+        self.enabled_checks = dictionary.get('enabled_checks', {'slides_number': {'sld_num': sld_num['bsc'], 'detect_additional': True},
+                                              'slides_enum': True, 'slides_headers': True, 'goals_slide': True, 'probe_slide': True,
+                                              'actual_slide': True, 'conclusion_slide': True, 'conclusion_actual': 50, 'conclusion_along': True,
+                                              'slide_every_task': 50}) #?
         self.score = dictionary.get('score', -1)
         self.filename = dictionary.get('filename', '')
         self.conv_pdf_fs_id = dictionary.get('conv_pdf_fs_id', '')
@@ -90,23 +84,8 @@ class Checks(Packable):
         self.is_passbacked = dictionary.get('is_passbacked', None)
         self.lms_passback_time = dictionary.get('lms_passback_time', None)
 
-
-    def get_checks(self):
-        return dict(
-            slides_number = self.slides_number,
-            slides_enum = self.slides_enum,
-            slides_headers = self.slides_headers,
-            goals_slide = self.goals_slide,
-            probe_slide = self.probe_slide,
-            actual_slide = self.actual_slide,
-            conclusion_slide = self.conclusion_slide,
-            slide_every_task = self.slide_every_task,
-            conclusion_actual = self.conclusion_actual,
-            conclusion_along = self.conclusion_along,
-        )
-
     def calc_score(self):
-        enabled_checks = dict((k, v) for k, v in self.get_checks().items() if v)
+        enabled_checks = dict((k, v) for k, v in self.enabled_checks.items() if v)
         enabled_value = len([check for check in enabled_checks.values() if check])
         numerical_score = 0
         for check in enabled_checks.values():
@@ -119,4 +98,4 @@ class Checks(Packable):
         return float("{:.3f}".format(numerical_score / enabled_value))
 
     def correct(self):
-        return all([check == False or check['pass'] for check in self.get_checks().values()])
+        return all([check == False or check['pass'] for check in self.enabled_checks.values()])
