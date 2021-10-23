@@ -31,7 +31,7 @@
                 {% endfor %}
               </tr>
             </tbody>
-        <h3 id="results_title" class="texteous ins">Результат проверки: {{ "" if results else "не" }} пройдена!</h3>
+        <h3 id="results_title" class="texteous ins">Результат проверки: {{ "" if results.correct() else "не" }} пройдена!</h3>
         <table class="table table-striped table-hover" id="results_table">
             <thead>
                 <tr>

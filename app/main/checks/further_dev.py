@@ -17,9 +17,9 @@ class FurtherDev(BaseCheck):
         goals = get_text_from_slides(self.presentation, self.goals)
         conclusions = get_text_from_slides(self.presentation, self.conclusion)
         if goals == "" or conclusions == "":
-            return answer(False, None, 'Задач или заключения не существует')
+            return answer(False, 'Задач или заключения не существует')
 
         results = check_similarity(goals, conclusions)
 
-        return answer(results[1].get('found_dev'), results[1].get('dev_sentence'),
+        return answer(results[1].get('found_dev'),
                       format_header(results[1].get('dev_sentence')), *concl_sld['verdict'])

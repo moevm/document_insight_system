@@ -46,7 +46,7 @@ def upload(request, upload_folder):
             presentation = get_presentation(presentation_id)
 
         checks = create_check(current_user)
-        print(checks)
+
         checks.conv_pdf_fs_id = converted_id
         check(parse(filename), checks, presentation_name)
         presentation, checks_id = add_check(presentation, checks, filename)

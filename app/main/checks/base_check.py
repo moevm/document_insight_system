@@ -1,9 +1,8 @@
 from flask import url_for
 
-def answer(mod, value, *args):
+def answer(mod, *args):
     return {
         'pass': bool(mod),
-        'value': value,
         'verdict': (args)
     }
 

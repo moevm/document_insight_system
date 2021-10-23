@@ -36,11 +36,11 @@ class TitleFormatCheck(BaseCheck):
         self.get_failing_headers()
         error_slides = list(itertools.chain(self.empty_headers, self.len_exceeded))
         if not error_slides:
-            return answer(not bool(error_slides), [self.empty_headers, self.len_exceeded], "Пройдена!")
+            return answer(not bool(error_slides), "Пройдена!")
         elif len(self.empty_headers) == 0 and len(self.len_exceeded) != 0:
-            return answer(False, self.len_exceeded, *self.exceeded_verdict())
+            return answer(False, *self.exceeded_verdict())
         elif len(self.empty_headers) != 0 and len(self.len_exceeded) == 0:
-            return answer(False, self.empty_headers, *self.empty_verdict())
+            return answer(False, *self.empty_verdict())
         else:
-            return answer(False, [self.empty_headers, self.len_exceeded],
+            return answer(False,
                    *list(itertools.chain(self.empty_verdict(), self.exceeded_verdict())))

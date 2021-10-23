@@ -17,5 +17,5 @@ class SldSimilarity(BaseCheck):
             return answer(False, 0, 'Задач или заключения не существует')
 
         results = check_similarity(goals, conclusions)
-        
-        return answer(results[0] >= self.actual_number, results[0], *tasks_conclusions_feedback(results))
+
+        return answer(results[0] >= self.actual_number, *tasks_conclusions_feedback(results))

@@ -13,7 +13,7 @@ class FindDefSld(BaseCheck):
                 found_slides.append(self.presentation.get_text_from_slides()[i - 1])
                 found_idxs.append(i)
         if len(found_slides) == 0:
-            return answer(False, None, 'Слайд не найден')
+            return answer(False, 'Слайд не найден')
         else:
             found_idxs = self.format_page_link(found_idxs)
-            return answer(True, found_idxs, 'Найден под номером: {}'.format(', '.join(map(str, found_idxs))))
+            return answer(True, 'Найден под номером: {}'.format(', '.join(map(str, found_idxs))))
