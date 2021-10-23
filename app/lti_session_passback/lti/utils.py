@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from logging import getLogger
 logger = getLogger('root')
 
@@ -89,8 +87,8 @@ def launch_sanity_check(criteria, detect_additional, task_info):
         order =  ['slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
                   'probe_slide', 'actual_slide', 'conclusion_slide', 'conclusion_actual', 'conclusion_along',
                   'slide_every_task'] #
-        
-        eval_criteria = OrderedDict((key, eval(value)) for key, value in criteria.items() if key not in ('slides_number', 'detect_additional'))
+
+        eval_criteria = dict((key, eval(value)) for key, value in criteria.items() if key not in ('slides_number', 'detect_additional'))
     except NameError:
         logger.warning("Error in declared launch values is present in {0}(id={1}). {2}'s checks will be defaulted".format(*task_info.values()))
         return dict()
@@ -110,9 +108,8 @@ def launch_sanity_check(criteria, detect_additional, task_info):
     if slides_number not in ['bsc', 'msc', 'False'] and not isinstance(eval(slides_number), (list)):
         failed_types.append('slides_number')
     else:
-        eval_criteria.update({'slides_number': {'sld_num': sld_num.get(slides_number, None) or eval(slides_number),
-                                          'detect_additional': detect_additional} if slides_number != 'False' else False})
-        eval_criteria.move_to_end('slides_number', last = False)
+        eval_criteria['slides_number'] = {'sld_num': sld_num.get(slides_number, None) or eval(slides_number),
+                                          'detect_additional': detect_additional} if slides_number != 'False' else False
 
     if failed_types:
         [eval_criteria.pop(key, None) for key in failed_types] #

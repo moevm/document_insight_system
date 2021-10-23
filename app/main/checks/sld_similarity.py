@@ -14,7 +14,7 @@ class SldSimilarity(BaseCheck):
         goals = get_text_from_slides(self.presentation, self.goals)
         conclusions = get_text_from_slides(self.presentation, self.conclusion)
         if goals == "" or conclusions == "":
-            return answer(False, 0, 'Задач или заключения не существует')
+            return answer(False, 'Задач или заключения не существует')
 
         results = check_similarity(goals, conclusions)
 
