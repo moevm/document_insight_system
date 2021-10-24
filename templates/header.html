@@ -12,11 +12,9 @@
     <div class="offset-sm-4 offset-md-3 offset-lg-2 col-sm-4 col-md-6 col-lg-8 my-auto text-right dropdown">
         <h4 class="text-right my-auto" id="user_info" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ name }}</h4>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" href="/profile">Мой профиль</a>
-            <a class="dropdown-item" href="/presentations">Мои презентации</a>
             <a class="dropdown-item" href="/check_list">Статистика</a>
-
             {% if current_user.is_admin %}
+                <a class="dropdown-item" href="/profile">Мой профиль</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="/version" target="_blank" rel="noopener noreferrer">Version</a>
             {% endif %}
