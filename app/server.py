@@ -185,10 +185,13 @@ def get_pdf(_id):
 @app.route("/criteria", methods=["GET", "POST"])
 @login_required
 def criteria():
-    if request.method == "GET":
-        return render_template("./criteria.html", navi_upload=True, name=current_user.name, crit=current_user.criteria)
-    elif request.method == "POST":
-        return user.update_criteria(request.json)
+    if current_user.is_admin:
+        if request.method == "GET":
+            return render_template("./criteria.html", navi_upload=True, name=current_user.name, crit=current_user.criteria)
+        elif request.method == "POST":
+            return user.update_criteria(request.json)
+    else:
+        abort(403)
 
 
 @app.route("/check_list")
@@ -316,30 +319,18 @@ def version():
 @app.route('/profile/<string:username>', methods=["GET"])
 @login_required
 def profile(username):
-    if username == '':
-        return redirect(url_for("profile", username=current_user.username))
-    u = bd_helper.get_user(username)
-    me = True if username == current_user.username else False
-    if u is not None:
-        return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
+    if current_user.is_admin:
+        if username == '':
+            return redirect(url_for("profile", username=current_user.username))
+        u = bd_helper.get_user(username)
+        me = True if username == current_user.username else False
+        if u is not None:
+            return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
+        else:
+            logger.info("Запрошенный пользователь не найден: " + username)
+            return render_template("./404.html")
     else:
-        logger.info("Запрошенный пользователь не найден: " + username)
-        return render_template("./404.html")
-
-
-@app.route("/presentations", methods=["GET"], defaults={'username': ''})
-@app.route('/presentations/<string:username>', methods=["GET"])
-@login_required
-def presentations(username):
-    if username == '':
-        return redirect(url_for("presentations", username=current_user.username))
-    u = user.get_rich(username)
-    me = True if username == current_user.username else False
-    if u is not None:
-        return render_template("./presentations.html", navi_upload=True, name=current_user.name, user=u, me=me)
-    else:
-        logger.info("Запрошенный пользователь не найден: " + username)
-        return render_template("./404.html")
+        abort(403)
 
 
 # Handle exceptions
