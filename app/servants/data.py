@@ -26,7 +26,11 @@ def upload(request, upload_folder):
         if get_file_len(file)*2 + get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
             logger.critical('Storage overload has occured')
             return 'storage_overload'
-        converted_id = write_pdf(file)
+        try:
+            converted_id = write_pdf(file)
+        except TypeError:
+            return 'Not OK, pdf converter refuses connection. Try reloading.'
+
         filename = join(upload_folder, file.filename)
         file.save(filename)
         delete = True
