@@ -112,9 +112,9 @@ def launch_sanity_check(criteria, detect_additional, task_info):
                                           'detect_additional': detect_additional} if slides_number != 'False' else False
 
     if failed_types:
-        [eval_criteria.pop(key, None) for key in failed_types] #
+        [eval_criteria.pop(key, None) for key in failed_types]
         logger.warning(f"The following check types don't match their designated types: {', '.join(failed_types)}.")
-        logger.warning("They will be set to default for task {0}(id={1}) in {2}'s checks".format(*task_info.values()))
+        logger.warning("They will be disabled for task {0}(id={1}) in {2}'s checks".format(*task_info.values()))
 
     reordered_dict = {k: eval_criteria.get(k, False) for k in order}
 
