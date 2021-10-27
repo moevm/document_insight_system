@@ -53,7 +53,7 @@ def get_rich(username):
 
 
 def update_criteria(json):
-    current_user.criteria = Checks({'enabled_checks': json})
+    current_user.criteria = json
     edited = edit_user(current_user)
     logger.info("Пользователь " + current_user.username + ("" if edited else " не") +
           " установил себе критерии проверки: " + str(current_user.criteria))

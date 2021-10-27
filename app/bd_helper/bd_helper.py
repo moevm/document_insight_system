@@ -122,7 +122,7 @@ def delete_presentation(user, presentation_id):
 
 # Creates checks from given user check-list
 def create_check(user):
-    return Checks({'enabled_checks': user.criteria.enabled_checks})
+    return Checks({'enabled_checks': user.criteria})
 
 
 # Adds checks to given presentation, updates presentation, returns presentation and checks id

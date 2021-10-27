@@ -23,14 +23,14 @@ class User(Packable, UserMixin):
         self.name = dictionary.get('name', '')
         self.password_hash = dictionary.get('password_hash', '')
         self.presentations = dictionary.get('presentations', [])
-        self.criteria = Checks(dictionary.get('criteria'))
+        self.criteria = dictionary.get('criteria')
         self.is_LTI = dictionary.get('is_LTI', False)
         self.is_admin = dictionary.get('is_admin', False)
         self.params_for_passback = dictionary.get('params_for_passback', None)
 
     def pack(self):
         package = super(User, self).pack()
-        package['criteria'] = self.criteria.pack()
+        package['criteria'] = self.criteria
         return package
 
     def get_id(self):
@@ -76,7 +76,7 @@ class Checks(Packable):
         self.enabled_checks = dictionary.get('enabled_checks', {'slides_number': {'sld_num': sld_num['bsc'], 'detect_additional': True},
                                               'slides_enum': True, 'slides_headers': True, 'goals_slide': True, 'probe_slide': True,
                                               'actual_slide': True, 'conclusion_slide': True, 'conclusion_actual': 50, 'conclusion_along': True,
-                                              'slide_every_task': 50}) #?
+                                              'slide_every_task': 50})
         self.score = dictionary.get('score', -1)
         self.filename = dictionary.get('filename', '')
         self.conv_pdf_fs_id = dictionary.get('conv_pdf_fs_id', '')
