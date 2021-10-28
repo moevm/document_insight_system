@@ -42,7 +42,7 @@
                 </tr>
             </thead>
             <tbody>
-              {% for key, value in results.enabled_checks.items() %}
+              {% for key in current_user.criteria.keys() %}
                 <tr data-toggle="collapse" data-target="#verd{{ loop.index }}" class="accordion-toggle">
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">{{ loop.index }}</th>
@@ -69,7 +69,7 @@
               <button class="btn" id="prev-page"><i class="bi bi-arrow-left"></i></button>
               <button class="btn" id="next-page"><i class="bi bi-arrow-right"></i></button>
               <span class="page-info">
-               Страница <span id="page-num"></span> из <span id="page-count"></span>
+               Слайд <span id="page-num"></span> из <span id="page-count"></span>
               </span>
           </div>
          <canvas id="the-canvas" style="border: 1px solid #000000; direction: ltr;"></canvas>
