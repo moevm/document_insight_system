@@ -62,14 +62,9 @@ def get_custom_params(data):
     return { key[len(CUSTOM_PARAM_PREFIX):]: data[key] for key in data if key.startswith(CUSTOM_PARAM_PREFIX) }
 
 def get_criteria_from_launch(data):
-    all_checks = ('slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
-                  'probe_slide', 'actual_slide', 'conclusion_slide', 'slide_every_task',
-                  'conclusion_actual', 'conclusion_along', 'detect_additional')
     custom = get_custom_params(data)
     task_info = get_exc_info(data)
-    detect_additional = custom.get('detect_additional', 'True')
-    criteria = dict((k, custom[k]) for k in all_checks if k in custom)
-    eval_criteria = launch_sanity_check(criteria, detect_additional, task_info)
+    eval_criteria = launch_sanity_check(custom, task_info)
 
     return eval_criteria
 
@@ -82,13 +77,14 @@ def extract_passback_params(data):
             raise KeyError("{} doesn't include {}. Must inslude: {}".format(data, param_key, PASSBACK_PARAMS))
     return params
 
-def launch_sanity_check(criteria, detect_additional, task_info):
+def launch_sanity_check(custom, task_info):
     try:
-        order =  ['slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
-                  'probe_slide', 'actual_slide', 'conclusion_slide', 'conclusion_actual', 'conclusion_along',
-                  'slide_every_task'] #
-
-        eval_criteria = dict((key, eval(value)) for key, value in criteria.items() if key not in ('slides_number', 'detect_additional'))
+        order = ('slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
+                  'probe_slide', 'actual_slide', 'conclusion_slide', 'conclusion_actual',
+                  'conclusion_along', 'slide_every_task')
+        detect_additional = custom.get('detect_additional', 'True')
+        slides_number = custom.get('slides_number', 'bsc')
+        eval_criteria = dict((k, eval(custom[k])) for k in order if k in custom and k != 'slides_number')
     except NameError:
         logger.warning("Error in declared launch values is present in {0}(id={1}). {2}'s checks will be defaulted".format(*task_info.values()))
         return dict()
@@ -101,9 +97,8 @@ def launch_sanity_check(criteria, detect_additional, task_info):
         }
 
     failed_types = [k for k, v in eval_criteria.items() if not isinstance(v, check_types[k]) and k != 'slides_number']
-    [failed_types.append(check) for check in int_false_checks if criteria.get(check) == 'True']
+    [failed_types.append(check) for check in int_false_checks if custom.get(check) == 'True']
 
-    slides_number = criteria.get('slides_number', 'bsc')
     detect_additional = True if not isinstance(eval(detect_additional), bool) else eval(detect_additional)
     if slides_number not in ['bsc', 'msc', 'False'] and not isinstance(eval(slides_number), (list)):
         failed_types.append('slides_number')
