@@ -1,5 +1,5 @@
 from app.bd_helper.bd_types import Checks
-
+from collections import OrderedDict
 
 class Version:
     VERSION_NAME = '0.1'
@@ -155,13 +155,36 @@ class Version21(Version):
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
+class Version22(Version):
+    VERSION_NAME = '2.2'
+    CHANGES = 'Changes criteria field in user to dict with enabled values\n' \
+              '(affects Checks init). Moves criteria fields in existing Checks\n' \
+              'into a signle dict.'
+
+    @classmethod
+    def update_database(cls, collections, prev_version):
+        if prev_version in (Version10.VERSION_NAME, Version11.VERSION_NAME, Version20.VERSION_NAME, Version21.VERSION_NAME): #?emun
+            criteria_keys = ('slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
+                             'probe_slide', 'actual_slide', 'conclusion_slide', 'conclusion_actual',
+                             'conclusion_along', 'slide_every_task') #gets duplicated too much
+            check_info = ('score', 'filename', 'conv_pdf_fs_id', 'user',
+                          'is_passbacked', 'lms_passback_time')
+
+            unset_fields_keys = [f'criteria.{k}' for k in check_info]
+            unset_fields = dict.fromkeys(unset_fields_keys, 1)
+            collections['users'].update_many({}, {"$unset": unset_fields})
+        else:
+            raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
+
+
 VERSIONS = {
     '1.0': Version10,
     '1.1': Version11,
     '2.0': Version20,
     '2.1': Version21,
+    '2.2': Version22,
 }
-LAST_VERSION = '2.1'
+LAST_VERSION = '2.2'
 
 
 for _, ver in VERSIONS.items():
