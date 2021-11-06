@@ -173,6 +173,14 @@ class Version22(Version):
             unset_fields_keys = [f'criteria.{k}' for k in check_info]
             unset_fields = dict.fromkeys(unset_fields_keys, 1)
             collections['users'].update_many({}, {"$unset": unset_fields})
+
+            for check in collections['checks'].find({}):
+                enabled_checks = dict((k, check[k]) for k in criteria_keys)
+                collections['checks'].update(
+                        {'_id': check['_id']},
+                        { '$set': {'enabled_checks': enabled_checks}}
+                        )
+            collections['checks'].update_many({}, {"$unset": dict.fromkeys(criteria_keys, 1)})
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
