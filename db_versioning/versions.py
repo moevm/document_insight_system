@@ -59,8 +59,8 @@ class Version11(Version):
 
 class Version20(Version):
     VERSION_NAME = '2.0'
-    CHANGES = "Изменен подход в версионированию БД: исправляются минусы предыдущих версий " \
-              "(поля filename/user/score заполняются верными значениямм).\n" \
+    CHANGES = "Изменен подход к версионированию БД: исправляются минусы предыдущих версий " \
+              "(поля filename/user/score заполняются верными значениями).\n" \
               "Также в критерий на количество слайдов добавлена нижняя граница. " \
               "Для перехода с версии 1.1 и ниже необходимо изменить значения поля criteria.slides_number у users " \
               "в зависимости от выбранных опций: 12 -> [10, 12], 15 -> [13, 15].\n" \
@@ -165,8 +165,8 @@ class Version22(Version):
     def update_database(cls, collections, prev_version):
         if prev_version in (Version10.VERSION_NAME, Version11.VERSION_NAME, Version20.VERSION_NAME, Version21.VERSION_NAME): #?emun
             criteria_keys = ('slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
-                             'probe_slide', 'actual_slide', 'conclusion_slide', 'conclusion_actual',
-                             'conclusion_along', 'slide_every_task') #gets duplicated too much
+                             'probe_slide', 'actual_slide', 'conclusion_slide', 'slide_every_task',
+                             'conclusion_actual', 'conclusion_along') #gets duplicated too much
             check_info = ('score', 'filename', 'conv_pdf_fs_id', 'user',
                           'is_passbacked', 'lms_passback_time')
 

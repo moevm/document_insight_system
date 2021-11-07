@@ -80,8 +80,8 @@ def extract_passback_params(data):
 def launch_sanity_check(custom, task_info):
     try:
         order = ('slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
-                  'probe_slide', 'actual_slide', 'conclusion_slide', 'conclusion_actual',
-                  'conclusion_along', 'slide_every_task')
+                  'probe_slide', 'actual_slide', 'conclusion_slide', 'slide_every_task',
+                  'conclusion_actual', 'conclusion_along')
         detect_additional = custom.get('detect_additional', 'True')
         slides_number = custom.get('slides_number', 'bsc')
         eval_criteria = dict((k, eval(custom[k])) for k in order if k in custom and k != 'slides_number')
