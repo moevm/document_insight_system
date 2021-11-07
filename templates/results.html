@@ -42,7 +42,7 @@
                 </tr>
             </thead>
             <tbody>
-              {% for key in current_user.criteria.keys() %}
+              {% for key in results.enabled_checks.keys() %}
                 <tr data-toggle="collapse" data-target="#verd{{ loop.index }}" class="accordion-toggle">
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">{{ loop.index }}</th>

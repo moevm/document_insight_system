@@ -78,8 +78,8 @@ class Checks(Packable):
 
         self.enabled_checks = dictionary.get('enabled_checks', {'slides_number': {'sld_num': sld_num['bsc'], 'detect_additional': True},
                                               'slides_enum': True, 'slides_headers': True, 'goals_slide': True, 'probe_slide': True,
-                                              'actual_slide': True, 'conclusion_slide': True, 'conclusion_actual': 50, 'conclusion_along': True,
-                                              'slide_every_task': 50})
+                                              'actual_slide': True, 'conclusion_slide': True, 'slide_every_task': 50,
+                                              'conclusion_actual': 50, 'conclusion_along': True})
         self.score = dictionary.get('score', -1)
         self.filename = dictionary.get('filename', '')
         self.conv_pdf_fs_id = dictionary.get('conv_pdf_fs_id', '')
