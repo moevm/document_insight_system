@@ -163,17 +163,23 @@ class Version22(Version):
 
     @classmethod
     def update_database(cls, collections, prev_version):
-        if prev_version in (Version10.VERSION_NAME, Version11.VERSION_NAME, Version20.VERSION_NAME, Version21.VERSION_NAME): #?emun
+        if prev_version in (Version10.VERSION_NAME, Version11.VERSION_NAME, Version20.VERSION_NAME, Version21.VERSION_NAME):
             criteria_keys = ('slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
                              'probe_slide', 'actual_slide', 'conclusion_slide', 'slide_every_task',
-                             'conclusion_actual', 'conclusion_along') #gets duplicated too much
+                             'conclusion_actual', 'conclusion_along')
             check_info = ('score', 'filename', 'conv_pdf_fs_id', 'user',
                           'is_passbacked', 'lms_passback_time')
 
             unset_fields_keys = [f'criteria.{k}' for k in check_info]
             unset_fields = dict.fromkeys(unset_fields_keys, 1)
+            for user in collections['users'].find():
+                criteria = user['criteria']
+                reorder_criteria = {k: criteria.get(k, False) for k in criteria_keys}
+                collections['users'].update_one(
+                        {'_id': user['_id']},
+                        {'$set': {'criteria': reorder_criteria}}
+                        )
             collections['users'].update_many({}, {"$unset": unset_fields})
-
             for check in collections['checks'].find({}):
                 enabled_checks = dict((k, check[k]) for k in criteria_keys)
                 collections['checks'].update_one(
