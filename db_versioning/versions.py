@@ -180,13 +180,11 @@ class Version22(Version):
                         {'$set': {'criteria': reorder_criteria}}
                         )
             collections['users'].update_many({}, {"$unset": unset_fields})
-            for check in collections['checks'].find({}):
-                enabled_checks = dict((k, check[k]) for k in criteria_keys)
-                collections['checks'].update_one(
-                        {'_id': check['_id']},
-                        { '$set': {'enabled_checks': enabled_checks},
-                          '$unset': dict.fromkeys(criteria_keys, 1)}
-                        )
+
+            pipeline = [{'$project': {'enabled_checks': dict((f'{k}', f'${k}') for k in criteria_keys),
+                                                        **dict.fromkeys(check_info, 1)}},
+                        {'$out': 'checks'}]
+            collections['checks'].aggregate(pipeline = pipeline)
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
