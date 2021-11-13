@@ -16,8 +16,8 @@ class SldEnumCheck(BaseCheck):
             if self.presentation.slides[i].page_number[0] != i + 1:
                 error.append(i+1)
         if not error:
-            return answer(True, error, "Пройдена!")
+            return answer(True, "Пройдена!")
         else:
             error =  self.format_page_link(error)
-            return answer(False, error, format_header('Не пройдена, проблемные слайды: {}'.format(', '.join(map(str, error)))), \
+            return answer(False, format_header('Не пройдена, проблемные слайды: {}'.format(', '.join(map(str, error)))), \
                                         'Убедитесь в корректности формата номеров слайдов')

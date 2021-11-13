@@ -10,5 +10,5 @@ class SearchKeyWord(BaseCheck):
         for i, text in enumerate(self.presentation.get_text_from_slides(), 1):
             if self.key_slide.lower() in str(text).lower():
                 found = self.format_page_link([i])
-                return answer(True, i, 'Найден под номером: {}'.format(', '.join(map(str, found))))
-        return answer(False, None, 'Слайд не найден')
+                return answer(True, 'Найден под номером: {}'.format(', '.join(map(str, found))))
+        return answer(False, 'Слайд не найден')

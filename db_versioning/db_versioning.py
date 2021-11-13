@@ -36,7 +36,7 @@ def add_version(version):
 
 def update_db_version():
     version_doc = DBCollections().db_version.find_one()
-    
+
     if not version_doc:
         version_doc_id = add_version(VERSIONS['1.0'])    # if no version == 1.0
         version_doc = DBCollections().db_version.find_one({'_id': version_doc_id})
@@ -44,7 +44,7 @@ def update_db_version():
 
     last_version = VERSIONS[LAST_VERSION]
     if version_doc['version'] == last_version.VERSION_NAME:
-        print(f'DB have last version ({last_version})')
+        print(f'DB has the latest version ({last_version})')
         exit(0)
 
     cur_version_name = version_doc['version']

@@ -20,12 +20,12 @@ class SldNumCheck(BaseCheck):
         }
 
     def sldnum_verdict(self, find_additional, msg):
-        return answer(False, find_additional, format_header('Всего: {}'.format(find_additional)), \
+        return answer(False, format_header('Всего: {}'.format(find_additional)), \
                                               '{}. Допустимые границы: {}'.format(msg, self.slides_number))
 
     def get_sldnum_range(self, find_additional, suspected_additional = None):
         if self.slides_number[0] <= find_additional <= self.slides_number[1]:
-            return answer(True, find_additional, self.RANGE_VERDICTS.get('in_range'))
+            return answer(True, self.RANGE_VERDICTS.get('in_range'))
         elif find_additional <= self.slides_number[0]:
             return self.sldnum_verdict(find_additional, self.RANGE_VERDICTS.get('lt_min'))
         else:

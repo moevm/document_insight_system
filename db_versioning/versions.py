@@ -1,5 +1,5 @@
 from app.bd_helper.bd_types import Checks
-
+from collections import OrderedDict
 
 class Version:
     VERSION_NAME = '0.1'
@@ -59,8 +59,8 @@ class Version11(Version):
 
 class Version20(Version):
     VERSION_NAME = '2.0'
-    CHANGES = "Изменен подход в версионированию БД: исправляются минусы предыдущих версий " \
-              "(поля filename/user/score заполняются верными значениямм).\n" \
+    CHANGES = "Изменен подход к версионированию БД: исправляются минусы предыдущих версий " \
+              "(поля filename/user/score заполняются верными значениями).\n" \
               "Также в критерий на количество слайдов добавлена нижняя граница. " \
               "Для перехода с версии 1.1 и ниже необходимо изменить значения поля criteria.slides_number у users " \
               "в зависимости от выбранных опций: 12 -> [10, 12], 15 -> [13, 15].\n" \
@@ -155,13 +155,48 @@ class Version21(Version):
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
+class Version22(Version):
+    VERSION_NAME = '2.2'
+    CHANGES = 'Changes criteria field in user to dict with enabled values\n' \
+              '(affects Checks init). Moves criteria fields in existing Checks\n' \
+              'into a signle dict.'
+
+    @classmethod
+    def update_database(cls, collections, prev_version):
+        if prev_version in (Version10.VERSION_NAME, Version11.VERSION_NAME, Version20.VERSION_NAME, Version21.VERSION_NAME):
+            criteria_keys = ('slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
+                             'probe_slide', 'actual_slide', 'conclusion_slide', 'slide_every_task',
+                             'conclusion_actual', 'conclusion_along')
+            check_info = ('score', 'filename', 'conv_pdf_fs_id', 'user',
+                          'is_passbacked', 'lms_passback_time')
+
+            unset_fields_keys = [f'criteria.{k}' for k in check_info]
+            unset_fields = dict.fromkeys(unset_fields_keys, 1)
+            for user in collections['users'].find():
+                criteria = user['criteria']
+                reorder_criteria = {k: criteria.get(k, False) for k in criteria_keys}
+                collections['users'].update_one(
+                        {'_id': user['_id']},
+                        {'$set': {'criteria': reorder_criteria}}
+                        )
+            collections['users'].update_many({}, {"$unset": unset_fields})
+
+            pipeline = [{'$project': {'enabled_checks': dict((f'{k}', f'${k}') for k in criteria_keys),
+                                                        **dict.fromkeys(check_info, 1)}},
+                        {'$out': 'checks'}]
+            collections['checks'].aggregate(pipeline = pipeline)
+        else:
+            raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
+
+
 VERSIONS = {
     '1.0': Version10,
     '1.1': Version11,
     '2.0': Version20,
     '2.1': Version21,
+    '2.2': Version22,
 }
-LAST_VERSION = '2.1'
+LAST_VERSION = '2.2'
 
 
 for _, ver in VERSIONS.items():
