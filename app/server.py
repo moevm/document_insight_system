@@ -182,6 +182,20 @@ def get_pdf(_id):
         return render_template("./404.html")
 
 
+@app.route("/check_info/<string:_id>", methods=["GET"])
+@login_required
+def get_check_info(_id):
+    try:
+        check_info = bd_helper.get_check(ObjectId(_id))
+        if check_info:
+            info = ['score', 'status']
+            return jsonify({item: getattr(check_info, item, None) for item in info})
+        else:
+            return jsonify({'not_found': f"Check with id={_id} doesn't exist"})
+    except bson.errors.InvalidId:
+        return jsonify({'error': '_id exception has occured'})
+
+
 @app.route("/criteria", methods=["GET", "POST"])
 @login_required
 def criteria():

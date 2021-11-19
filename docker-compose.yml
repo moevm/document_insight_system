@@ -23,7 +23,7 @@ services:
 
   passback_grades:
     image: slides_checker_base_image
-    command: python3 ./app/passback_grades.py
+    command: python3 ./app/lti_session_passback/passback_grades.py
     restart: always
     depends_on:
       - mongodb

@@ -36,8 +36,6 @@ def upload(request, upload_folder):
         delete = True
 
         presentation_name = basename(filename)
-        logger.info("Обработка презентации " + presentation_name + " пользователя " +
-              current_user.username + " проверками " + str(current_user.criteria))
         presentation = find_presentation(current_user, presentation_name)
         if presentation is None:
             user, presentation_id = add_presentation(current_user, presentation_name)
@@ -52,16 +50,7 @@ def upload(request, upload_folder):
         if delete and exists(filename):
             remove(filename)
 
-        logger.info("\tОбработка завершена успешно!")
         return str(checks_id)
     except Exception as e:
         logger.error("\tПри обработке произошла ошибка: " + str(e), exc_info=True)
         return 'Not OK, error: {}'.format(e)
-
-
-def remove_presentation(json):
-    count = len(current_user.presentations)
-    user, presentation = delete_presentation(current_user, ObjectId(json['presentation']))
-    deleted = count == len(user.presentations) - 1
-    logger.info("Презентация " + presentation.name + " пользователя " + user.username + " удалена со всеми проверками")
-    return 'OK' if deleted else 'Not OK'

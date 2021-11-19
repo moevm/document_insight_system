@@ -81,6 +81,7 @@ class Checks(Packable):
                                               'actual_slide': True, 'conclusion_slide': True, 'slide_every_task': 50,
                                               'conclusion_actual': 50, 'conclusion_along': True})
         self.score = dictionary.get('score', -1)
+        self.status = dictionary.get('status', None)
         self.filename = dictionary.get('filename', '')
         self.conv_pdf_fs_id = dictionary.get('conv_pdf_fs_id', '')
         self.user = dictionary.get('user', '')
