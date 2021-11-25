@@ -302,6 +302,81 @@ def check_list_data():
     return jsonify(response)
 
 
+@app.route("/logs")
+@login_required
+def logs():
+    return render_template("./logs.html", name=current_user.name, navi_upload=True)
+
+
+@app.route("/logs/data")
+@login_required
+def logs_data():
+    filters = request.args.get("filter", "{}")
+    try:
+        filters = json.loads(filters)
+        filters = filters if filters else {}
+    except Exception as e:
+        logger.warning("Can't parse filters")
+        logger.warning(repr(e))
+        filters = {}
+
+    # request filter to mongo query filter conversion
+    filter_query = {}
+
+    f_timestamp = filters.get("timestamp", "")
+    f_timestamp_list = list(filter(lambda val: val, f_timestamp.split("-")))
+    try:
+        if len(f_timestamp_list) == 1:
+            date = datetime.strptime(f_timestamp_list[0], "%d.%m.%Y")
+            filter_query['timestamp'] = {
+                "$gte": date,
+                "$lte": date + timedelta(hours=23, minutes=59, seconds=59)
+            }
+        elif len(f_timestamp_list) > 1:
+            filter_query['timestamp'] = {
+                "$gte": datetime.strptime(f_timestamp_list[0], "%d.%m.%Y"),
+                "$lte": datetime.strptime(f_timestamp_list[1], "%d.%m.%Y")
+            }
+    except Exception as e:
+        logger.warning("Can't apply timestamp filter")
+        logger.warning(repr(e))
+
+    # parse and validate rest query
+    limit = request.args.get("limit", "")
+    limit = int(limit) if limit.isnumeric() else 10
+
+    offset = request.args.get("offset", "")
+    offset = int(offset) if offset.isnumeric() else 0
+
+    sort = request.args.get("sort", "")
+    sort = 'timestamp' if not sort else sort
+
+    order = request.args.get("order", "")
+    order = 'desc' if not order else order
+
+    # get data and records count
+    rows, count = bd_helper.get_logs_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+
+    # construct response
+    response = {
+        "total": count,
+        "rows": [{
+            "timestamp": item["timestamp"].strftime("%d.%m.%Y %H:%M:%S"),
+            "service-name": item["serviceName"],
+            "levelname": item["levelname"],
+            "levelno": item["levelno"],
+            "message": item["message"],
+            "pathname": item["pathname"],
+            "filename": item["filename"],
+            "funcName": item["funcName"],
+            "lineno": item["lineno"]
+        } for item in rows]
+    }
+
+    # return json data
+    return jsonify(response)
+
+
 @app.route("/version")
 def version():
     return render_template("./version.html")
