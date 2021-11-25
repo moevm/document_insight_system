@@ -15,20 +15,14 @@ from app.servants import data as data
 from app.bd_helper import bd_helper
 from app.servants import pre_luncher
 from app.servants.user import update_criteria
-
+from app.root_logger import get_logging_stdout_handler, get_root_logger
 from app.utils.decorators import decorator_assertion
 from app.lti_session_passback.lti.check_request import check_request
 from lti_session_passback.lti import utils
 
 from flask_recaptcha import ReCaptcha
 
-from logging import getLogger
-logger = getLogger('root')
-logger.setLevel(logging.DEBUG)
-
-DEBUG = True
-
-ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
+logger = get_root_logger(service_name='web')
 UPLOAD_FOLDER = './files'
 columns = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
 
@@ -37,13 +31,11 @@ app.config.from_pyfile('settings.py')
 app.recaptcha = ReCaptcha(app=app)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
+app.logger.addHandler(get_logging_stdout_handler())
+app.logger.propagate = False
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.init_app(app)
-
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.DEBUG)
 
 
 @login_manager.user_loader

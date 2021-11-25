@@ -3,9 +3,6 @@ from flask_login import current_user
 from app.main.checks import SldNumCheck, SearchKeyWord, FindTasks, FindDefSld, \
                             SldEnumCheck, SldSimilarity, TitleFormatCheck, FurtherDev
 
-from logging import getLogger
-logger = getLogger('root')
-
 key_slides = {
               'goals_and_tasks': 'Цель и задачи',
               'approbation': 'Апробация',

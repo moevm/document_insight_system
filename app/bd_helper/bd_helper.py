@@ -4,13 +4,10 @@ from pymongo import MongoClient
 from bson import ObjectId
 import pymongo
 
-from app.bd_helper.bd_types import User, Presentation, Checks, Consumers, CriteriaPack
+from app.bd_helper.bd_types import User, Presentation, Checks, Consumers, CriteriaPack, Logs
 from app.utils.pdf_converter import convert_to_pdf
 
 from datetime import datetime, timezone
-
-from logging import getLogger
-logger = getLogger('root')
 
 client = MongoClient("mongodb://mongodb:27017")
 db = client['pres-parser-db']
@@ -21,6 +18,7 @@ presentations_collection = db['presentations']
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
+logs_collection = db['logs']
 
 def get_client():
     return client
@@ -292,3 +290,10 @@ class ConsumersDBManager:
         upd_consumer = {"$push": {'timestamp_and_nonce': (timestamp, nonce)}}
         consumer = consumers_collection.update_one({'consumer_key': key}, upd_consumer)
         return consumer if consumer else None
+
+def add_log(timestamp, serviceName, levelname, levelno, message,
+            pathname, filename, funcName, lineno):
+    args = locals()
+    new_log = Logs(args)
+    logs_collection.insert_one(new_log.pack())
+    return new_log

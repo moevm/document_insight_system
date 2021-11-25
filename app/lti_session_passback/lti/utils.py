@@ -1,6 +1,5 @@
-from logging import getLogger
-logger = getLogger('root')
-
+from app.root_logger import get_root_logger
+logger = get_root_logger('lti_helper')
 from app.main.checks_config.parser import sld_num
 
 TITLE = 'context_title'

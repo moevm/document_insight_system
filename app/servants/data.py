@@ -10,8 +10,8 @@ from app.server import logger
 from flask import current_app
 
 import os
-from logging import getLogger
-logger = getLogger('root')
+from app.root_logger import get_root_logger
+logger = get_root_logger('data')
 
 
 def get_file_len(file):

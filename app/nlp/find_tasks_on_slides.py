@@ -1,7 +1,7 @@
 from app.nlp.stemming import Stemming
 import re
-from logging import getLogger
-logger = getLogger('root')
+from app.root_logger import get_root_logger
+logger = get_root_logger('find_tasks_on_slides')
 import itertools
 from scipy.spatial import distance
 
@@ -47,7 +47,6 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
                 similarity = compare_task_and_title(task, title) * 100
                 if similarity >= intersection:
                     found_descriptions.append(task)
-                    logger.info('\t\tВ презентации найдено описание задачи: ' + str(task))
                     break
         if task_count == len(found_descriptions):
             return 0

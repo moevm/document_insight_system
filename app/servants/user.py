@@ -24,7 +24,7 @@ def signup(args):
 
 
 def logout():
-    logger.info("Пользователь " + current_user.username + " вышел")
+    logger.info(f"Пользователь {current_user.username} вышел")
     logout_user()
     return 'OK'
 

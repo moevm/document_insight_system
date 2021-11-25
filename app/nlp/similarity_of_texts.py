@@ -3,8 +3,6 @@ import random
 
 from app import server
 from app.nlp.stemming import Stemming
-from logging import getLogger
-logger = getLogger('root')
 
 def check_similarity(string1, string2):
     stemming = Stemming()
