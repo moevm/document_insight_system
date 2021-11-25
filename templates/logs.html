@@ -1,0 +1,59 @@
+{# Accepts: header dependicies #}
+
+{% extends 'root.html' %}
+
+{% block title %}
+    Логи
+{% endblock title %}
+
+{% block main %}
+    <style>
+        .fht-cell { margin: 0 0.2rem 0.2rem; }
+
+        #logs-table {
+            table-layout: fixed;
+            word-wrap:break-word;
+        }
+
+        #logs-table.table-bordered,
+        #logs-table.table-bordered > thead > tr > th,
+        #logs-table.table-bordered > tbody > tr > td {
+            border: 1px solid #a1a1a1;
+        }
+    </style>
+    <div class="header row">{% include 'header.html' %}</div>
+    <div class="holder row">
+        <div class="container-fluid table-responsive-xl">
+            <table id="logs-table" class="table bg-white"
+                data-filter-control="true"
+                data-pagination="true"
+                data-page-list="[5, 10, 25, 50, All]"
+                data-ajax="ajaxRequest"
+                data-query-params="queryParams"
+                data-show-refresh="true"
+                data-auto-refresh="true"
+                data-auto-refresh-interval="10"
+                data-side-pagination="server"
+                data-icon-size="lg"
+                data-show-filter-control-switch="true"
+                data-show-button-icons="false"
+                data-show-button-text="true"
+            >
+                <thead>
+                    <tr>
+                        <th data-field="timestamp" data-filter-control="datepicker" data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}' data-sortable="true">Upload date</th>
+                        <th data-field="service-name" data-filter-control="input" data-sortable="true">Service name</th>
+                        <th data-field="levelname" data-filter-control="input" data-sortable="true">Levelname</th>
+                        <th data-field="levelno" data-filter-control="input" data-sortable="true">Level no.</th>
+                        <th data-field="message" data-sortable="false">Message</th>
+                        <th data-field="pathname" data-filter-control="input" data-sortable="false">Path</th>
+                        <th data-field="filename" data-filter-control="input" data-sortable="true">File</th>
+                        <th data-field="funcName" data-filter-control="input" data-sortable="true">Function</th>
+                        <th data-field="lineno" data-filter-control="input" data-sortable="true">Line no.</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <div class="footer row"></div>
+{% endblock main %}
