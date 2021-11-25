@@ -112,11 +112,6 @@ function initTable() {
 
         queryParams: queryParams,
         ajax: ajaxRequest
-
-        //columns: [{
-          //  field: "_id",
-          //  formatter: idFormatter
-        //}]
     })
 }
 
