@@ -18,7 +18,7 @@ presentations_collection = db['presentations']
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
-logs_collection = db['logs']
+logs_collection = db.create_collection('logs', capped=True, size=5242880)
 
 def get_client():
     return client
@@ -228,7 +228,7 @@ def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
 
 # get logs cursor with specified parameters
 def get_logs_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
-    sort = 'timestamp' if not sort else sort
+    sort = 'serviceName' if sort == 'service-name' else sort
 
     count = logs_collection.count_documents(filter)
     rows = logs_collection.find(filter)

@@ -322,6 +322,28 @@ def logs_data():
 
     # request filter to mongo query filter conversion
     filter_query = {}
+    if f_service_name := filters.get("service-name", None):
+        filter_query["serviceName"] = { "$regex": f_service_name }
+
+    if f_levelname := filters.get("levelname", None):
+        filter_query["levelname"] = { "$regex": f_levelname }
+
+    if f_pathname := filters.get("pathname", None):
+        filter_query["pathname"] = { "$regex": f_pathname }
+
+    f_lineno = filters.get("lineno", "")
+    f_lineno_list = list(filter(lambda val: val, f_lineno.split("-")))
+    try:
+        if len(f_lineno_list) == 1:
+            filter_query["lineno"] = int(f_lineno_list[0])
+        elif len(f_lineno_list) > 1:
+            filter_query["lineno"] = {
+                "$gte": int(f_lineno_list[0]),
+                "$lte": int(f_score_list[1])
+            }
+    except Exception as e:
+        logger.warning("Can't apply lineno filter")
+        logger.warning(repr(e))
 
     f_timestamp = filters.get("timestamp", "")
     f_timestamp_list = list(filter(lambda val: val, f_timestamp.split("-")))
@@ -364,11 +386,8 @@ def logs_data():
             "timestamp": item["timestamp"].strftime("%d.%m.%Y %H:%M:%S"),
             "service-name": item["serviceName"],
             "levelname": item["levelname"],
-            "levelno": item["levelno"],
             "message": item["message"],
             "pathname": item["pathname"],
-            "filename": item["filename"],
-            "funcName": item["funcName"],
             "lineno": item["lineno"]
         } for item in rows]
     }
