@@ -18,7 +18,7 @@ presentations_collection = db['presentations']
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
-logs_collection = db.create_collection('logs', capped=True, size=5242880)
+logs_collection = db.create_collection('logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 
 def get_client():
     return client

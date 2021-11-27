@@ -22,7 +22,7 @@ from lti_session_passback.lti import utils
 
 from flask_recaptcha import ReCaptcha
 
-logger = get_root_logger(service_name='web')
+logger = get_root_logger('web')
 UPLOAD_FOLDER = './files'
 columns = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
 

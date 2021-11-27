@@ -1,7 +1,7 @@
 from app.main.odp.presentation_odp import PresentationODP
 from app.main.pptx.presentation_pptx import PresentationPPTX
-from app.root_logger import get_root_logger
-logger = get_root_logger('parser')
+import logging
+logger = logging.getLogger('root_logger')
 
 def parse(presentation_name):
     if presentation_name.endswith('.ppt') or presentation_name.endswith('.pptx'):

@@ -9,8 +9,8 @@ from app.main.parser import parse
 from flask import current_app
 
 import os
-from app.root_logger import get_root_logger
-logger = get_root_logger('data')
+import logging
+logger = logging.getLogger('root_logger')
 
 
 def get_file_len(file):
