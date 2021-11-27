@@ -11,14 +11,17 @@
         .fht-cell { margin: 0 0.2rem 0.2rem; }
 
         #logs-table {
-            table-layout: auto;
-            word-wrap:break-word;
+            table-layout: fixed;
+            width: 100%;
         }
 
         #logs-table.table-bordered,
         #logs-table.table-bordered > thead > tr > th,
         #logs-table.table-bordered > tbody > tr > td {
             border: 1px solid #a1a1a1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
         }
     </style>
     <div class="header row">{% include 'header.html' %}</div>

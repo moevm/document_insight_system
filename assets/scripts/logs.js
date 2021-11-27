@@ -109,6 +109,10 @@ function initTable() {
         pageSize: parseInt(params.size) || 10,
         sortName: params.sort,
         sortOrder: params.order,
+        detailView:true,
+        detailViewIcon: false,
+        detailViewByClick: true,
+        detailFormatter: detailFormatter,
 
         queryParams: queryParams,
         ajax: ajaxRequest
@@ -162,6 +166,11 @@ function queryParams(params) {
     return query
 }
 
-function idFormatter(value, row, index, field) {
-    return `<a href="/results/${value}">${value.slice(0, 5)}-${value.slice(-5)}</a>`
+function detailFormatter(index, row) {
+  var html = []
+  $.each(row, function (key, value) {
+    if (key === 'message' || key === 'pathname'){
+        html.push('<p><b>' + key + ':</b> ' + row[key] + '</p>')
+    }})
+  return html.join('')
 }
