@@ -2,8 +2,8 @@ from flask_login import logout_user, current_user
 
 from app.bd_helper.bd_helper import *
 
-from logging import getLogger
-logger = getLogger('root')
+import logging
+logger = logging.getLogger('root_logger')
 
 def login(args):
     validation = validate_user(args['username'], args['password_hash'])
@@ -24,7 +24,7 @@ def signup(args):
 
 
 def logout():
-    logger.info("Пользователь " + current_user.username + " вышел")
+    logger.info(f"Пользователь {current_user.username} вышел")
     logout_user()
     return 'OK'
 

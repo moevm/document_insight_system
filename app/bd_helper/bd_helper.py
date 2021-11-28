@@ -4,13 +4,10 @@ from pymongo import MongoClient
 from bson import ObjectId
 import pymongo
 
-from app.bd_helper.bd_types import User, Presentation, Checks, Consumers, CriteriaPack
+from app.bd_helper.bd_types import User, Presentation, Checks, Consumers, CriteriaPack, Logs
 from app.utils.pdf_converter import convert_to_pdf
 
 from datetime import datetime, timezone
-
-from logging import getLogger
-logger = getLogger('root')
 
 client = MongoClient("mongodb://mongodb:27017")
 db = client['pres-parser-db']
@@ -21,6 +18,7 @@ presentations_collection = db['presentations']
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
+logs_collection = db.create_collection('logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 
 def get_client():
     return client
@@ -228,6 +226,20 @@ def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
 
     return rows, count
 
+# get logs cursor with specified parameters
+def get_logs_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
+    sort = 'serviceName' if sort == 'service-name' else sort
+
+    count = logs_collection.count_documents(filter)
+    rows = logs_collection.find(filter)
+
+    if sort and order in ("asc, desc"):
+        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
+
+    rows = rows.skip(offset) if offset else rows
+    rows = rows.limit(limit) if limit else rows
+
+    return rows, count
 
 #Get stats for one user, return a list in the form
 #[check_id, login, time of check_id's creation, result(0/1)]
@@ -292,3 +304,10 @@ class ConsumersDBManager:
         upd_consumer = {"$push": {'timestamp_and_nonce': (timestamp, nonce)}}
         consumer = consumers_collection.update_one({'consumer_key': key}, upd_consumer)
         return consumer if consumer else None
+
+def add_log(timestamp, serviceName, levelname, levelno, message,
+            pathname, filename, funcName, lineno):
+    args = locals()
+    new_log = Logs(args)
+    logs_collection.insert_one(new_log.pack())
+    return new_log

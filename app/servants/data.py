@@ -6,12 +6,11 @@ from flask_login import current_user
 from app.bd_helper.bd_helper import *
 from app.main.checker import check
 from app.main.parser import parse
-from app.server import logger
 from flask import current_app
 
 import os
-from logging import getLogger
-logger = getLogger('root')
+import logging
+logger = logging.getLogger('root_logger')
 
 
 def get_file_len(file):

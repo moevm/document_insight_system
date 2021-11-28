@@ -2,8 +2,8 @@ import hashlib
 from pymongo.errors import ConnectionFailure
 
 from app.bd_helper.bd_helper import add_user, get_user, get_client, edit_user
-from logging import getLogger
-logger = getLogger('root')
+import logging
+logger = logging.getLogger('root_logger')
 
 def get_hash(password): return hashlib.md5(password.encode()).hexdigest()
 
@@ -26,6 +26,6 @@ def init(app, debug):
         user.is_admin = True
         edit_user(user)
 
-    logger.info("Создан администратор по умолчанию: { логин: " + user.username + ", пароль уточняйте у разработчика }")
+    logger.info(f"Создан администратор по умолчанию: логин: {user.username}, пароль уточняйте у разработчика")
 
     return True

@@ -3,12 +3,12 @@ from time import sleep
 from lti.tool_provider import ToolProvider
 from app.bd_helper.bd_helper import ConsumersDBManager, get_unpassed_checks, set_passbacked_flag, get_user
 from app.utils.repeated_timer import RepeatedTimer
-from logging import getLogger
 import configparser
 
 config = configparser.ConfigParser()
 config.read('app/config.ini')
-logger = getLogger('root')
+from app.root_logger import get_root_logger
+logger = get_root_logger('passback_grades')
 
 class ChecksPassBack:
     def __init__(self, timeout_seconds=10):

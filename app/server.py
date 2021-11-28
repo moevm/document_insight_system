@@ -15,20 +15,14 @@ from app.servants import data as data
 from app.bd_helper import bd_helper
 from app.servants import pre_luncher
 from app.servants.user import update_criteria
-
+from app.root_logger import get_logging_stdout_handler, get_root_logger
 from app.utils.decorators import decorator_assertion
 from app.lti_session_passback.lti.check_request import check_request
 from lti_session_passback.lti import utils
 
 from flask_recaptcha import ReCaptcha
 
-from logging import getLogger
-logger = getLogger('root')
-logger.setLevel(logging.DEBUG)
-
-DEBUG = True
-
-ALLOWED_EXTENSIONS = {'pptx', 'odp', 'ppt'}
+logger = get_root_logger('web')
 UPLOAD_FOLDER = './files'
 columns = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
 
@@ -37,13 +31,11 @@ app.config.from_pyfile('settings.py')
 app.recaptcha = ReCaptcha(app=app)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
+app.logger.addHandler(get_logging_stdout_handler())
+app.logger.propagate = False
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.init_app(app)
-
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.DEBUG)
 
 
 @login_manager.user_loader
@@ -303,6 +295,100 @@ def check_list_data():
             "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H:%M:%S"),
             "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get('lms_passback_time') else '-',
             "score": item["score"]
+        } for item in rows]
+    }
+
+    # return json data
+    return jsonify(response)
+
+
+@app.route("/logs")
+@login_required
+def logs():
+    return render_template("./logs.html", name=current_user.name, navi_upload=True)
+
+
+@app.route("/logs/data")
+@login_required
+def logs_data():
+    filters = request.args.get("filter", "{}")
+    try:
+        filters = json.loads(filters)
+        filters = filters if filters else {}
+    except Exception as e:
+        logger.warning("Can't parse filters")
+        logger.warning(repr(e))
+        filters = {}
+
+    # request filter to mongo query filter conversion
+    filter_query = {}
+    if f_service_name := filters.get("service-name", None):
+        filter_query["serviceName"] = { "$regex": f_service_name }
+
+    if f_levelname := filters.get("levelname", None):
+        filter_query["levelname"] = { "$regex": f_levelname }
+
+    if f_pathname := filters.get("pathname", None):
+        filter_query["pathname"] = { "$regex": f_pathname }
+
+    f_lineno = filters.get("lineno", "")
+    f_lineno_list = list(filter(lambda val: val, f_lineno.split("-")))
+    try:
+        if len(f_lineno_list) == 1:
+            filter_query["lineno"] = int(f_lineno_list[0])
+        elif len(f_lineno_list) > 1:
+            filter_query["lineno"] = {
+                "$gte": int(f_lineno_list[0]),
+                "$lte": int(f_score_list[1])
+            }
+    except Exception as e:
+        logger.warning("Can't apply lineno filter")
+        logger.warning(repr(e))
+
+    f_timestamp = filters.get("timestamp", "")
+    f_timestamp_list = list(filter(lambda val: val, f_timestamp.split("-")))
+    try:
+        if len(f_timestamp_list) == 1:
+            date = datetime.strptime(f_timestamp_list[0], "%d.%m.%Y")
+            filter_query['timestamp'] = {
+                "$gte": date,
+                "$lte": date + timedelta(hours=23, minutes=59, seconds=59)
+            }
+        elif len(f_timestamp_list) > 1:
+            filter_query['timestamp'] = {
+                "$gte": datetime.strptime(f_timestamp_list[0], "%d.%m.%Y"),
+                "$lte": datetime.strptime(f_timestamp_list[1], "%d.%m.%Y")
+            }
+    except Exception as e:
+        logger.warning("Can't apply timestamp filter")
+        logger.warning(repr(e))
+
+    # parse and validate rest query
+    limit = request.args.get("limit", "")
+    limit = int(limit) if limit.isnumeric() else 10
+
+    offset = request.args.get("offset", "")
+    offset = int(offset) if offset.isnumeric() else 0
+
+    sort = request.args.get("sort", "")
+    sort = 'timestamp' if not sort else sort
+
+    order = request.args.get("order", "")
+    order = 'desc' if not order else order
+
+    # get data and records count
+    rows, count = bd_helper.get_logs_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+
+    # construct response
+    response = {
+        "total": count,
+        "rows": [{
+            "timestamp": item["timestamp"].strftime("%d.%m.%Y %H:%M:%S"),
+            "service-name": item["serviceName"],
+            "levelname": item["levelname"],
+            "message": item["message"],
+            "pathname": item["pathname"],
+            "lineno": item["lineno"]
         } for item in rows]
     }
 

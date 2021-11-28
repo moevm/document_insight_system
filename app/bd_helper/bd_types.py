@@ -1,7 +1,5 @@
 from flask_login import UserMixin
-from logging import getLogger
 from app.main.checks_config.parser import sld_num
-logger = getLogger('root')
 
 class Packable:
     def __init__(self, dictionary):
@@ -67,6 +65,22 @@ class Presentation(Packable):
         self.name = dictionary.get('name', '')
         self.checks = dictionary.get('checks', [])
 
+
+class Logs(Packable):
+    def __init__(self, dictionary=None):
+        super().__init__(dictionary)
+        dictionary = dictionary or {}
+        if '_id' in dictionary:
+            self._id = dictionary.get('_id', '')
+        self.timestamp = dictionary.get('timestamp', None)
+        self.serviceName = dictionary.get('serviceName', None)
+        self.levelname = dictionary.get('levelname', None)
+        self.levelno = dictionary.get('levelno', None)
+        self.message = dictionary.get('message', None)
+        self.pathname = dictionary.get('pathname', None)
+        self.filename = dictionary.get('filename', None)
+        self.funcName = dictionary.get('funcName', None)
+        self.lineno = dictionary.get('lineno', None)
 
 # You shouldn't create or change this explicitly
 class Checks(Packable):
