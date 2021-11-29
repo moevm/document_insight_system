@@ -1,7 +1,5 @@
 import re
 import random
-
-from app import server
 from app.nlp.stemming import Stemming
 from logging import getLogger
 logger = getLogger('root')

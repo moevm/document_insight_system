@@ -126,15 +126,15 @@ def create_check(user):
 
 
 # Adds checks to given presentation, updates presentation, returns presentation and checks id
-def add_check(presentation, checks, presentation_file):
+def add_check(checks, presentation_file):
     checks_id = checks_collection.insert_one(checks.pack()).inserted_id
-    upd_presentation = presentations_collection.update_one({'_id': presentation._id}, {"$push": {'checks': checks_id}})
+    #upd_presentation = presentations_collection.update_one({'_id': presentation._id}, {"$push": {'checks': checks_id}})
 
     grid_in = fs.open_upload_stream_with_id(checks_id, basename(presentation_file))
     grid_in.write(open(presentation_file, 'rb'))
     grid_in.close()
 
-    return presentation, checks_id
+    return checks_id
 
 def write_pdf(file):
     extension = file.filename.rsplit('.', 1)[-1].lower()

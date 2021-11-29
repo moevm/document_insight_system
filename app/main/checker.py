@@ -1,5 +1,4 @@
 from argparse import Namespace
-from flask_login import current_user
 from app.main.checks import SldNumCheck, SearchKeyWord, FindTasks, FindDefSld, \
                             SldEnumCheck, SldSimilarity, TitleFormatCheck, FurtherDev
 
@@ -36,8 +35,8 @@ def check(presentation, checks, presentation_name):
     checks.enabled_checks = set_enabled
     checks.score = checks.calc_score()
     checks.filename = presentation_name
-    checks.user = current_user.username
-    if current_user.params_for_passback:
-        checks.is_passbacked = False
+    #checks.user = current_user.username
+    #if current_user.params_for_passback:
+    #    checks.is_passbacked = False
 
     return checks
