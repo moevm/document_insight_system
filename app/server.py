@@ -2,6 +2,11 @@ from datetime import datetime, timedelta
 import logging
 from sys import argv
 
+from celery.result import AsyncResult
+from celery import Celery
+from app.tasks import create_task
+
+import os
 import json
 import bson
 import pymongo
@@ -17,6 +22,7 @@ from app.servants import pre_luncher
 from app.servants.user import update_criteria
 from app.root_logger import get_logging_stdout_handler, get_root_logger
 from app.utils.decorators import decorator_assertion
+from app.utils.get_file_len import get_file_len
 from app.lti_session_passback.lti.check_request import check_request
 from lti_session_passback.lti import utils
 
@@ -31,6 +37,9 @@ app.config.from_pyfile('settings.py')
 app.recaptcha = ReCaptcha(app=app)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['CELERY_RESULT_BACKEND'] = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
+app.config['CELERY_BROKER_URL'] = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
+
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
 login_manager = LoginManager()
@@ -118,6 +127,36 @@ def upload():
         return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name)
     elif request.method == "PUT":
         return data.remove_presentation(request.json)
+
+
+@app.route("/tasks", methods=["POST"])
+def run_task():
+    file = request.files["presentation"]
+    if get_file_len(file)*2 + bd_helper.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
+        logger.critical('Storage overload has occured')
+        return 'storage_overload'
+    try:
+        converted_id = bd_helper.write_pdf(file)
+    except TypeError:
+        return 'Not OK, pdf converter refuses connection. Try reloading.'
+
+    filename = os.path.join(UPLOAD_FOLDER, file.filename)
+    file.save(filename)
+
+    from app.tasks import create_task  ###
+    task = create_task.delay(filename, str(converted_id))
+    return jsonify({"task_id": task.id}), 202
+
+
+@app.route("/tasks/<task_id>", methods=["GET"])
+def get_status(task_id):
+    task_result = AsyncResult(task_id)
+    result = {
+        "task_id": task_id,
+        "task_status": task_result.status,
+        "task_result": task_result.result
+    }
+    return jsonify(result), 200
 
 
 @app.route("/results/<string:_id>", methods=["GET"])
