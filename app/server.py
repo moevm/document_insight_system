@@ -301,7 +301,7 @@ def check_list_data():
     # return json data
     return jsonify(response)
 
-@app.route("/get_csv", methods=["GET", "POST"])
+@app.route("/get_csv")
 @login_required
 def get_csv():
     filters = request.args.get("filter", "{}")
@@ -390,7 +390,7 @@ def get_csv():
             "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get('lms_passback_time') else '-',
             "score": item["score"]
         } for item in rows]
-        
+
     df = pd.read_json(json.dumps(response))
     return Response(
         df.to_csv(),
