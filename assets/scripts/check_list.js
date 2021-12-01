@@ -25,7 +25,7 @@ $(()=>{
             else {
                 expectedStr = numbers[1].insert(carret - numbers[0].length - 1, ".")
             }
-            
+
             if (isFloat(expectedStr)) {
                 return
             }
@@ -102,13 +102,14 @@ function initTable() {
             }
         }
     })
-    
+
     // activate bs table
     $table.bootstrapTable({
         pageNumber: parseInt(params.page) || 1,
         pageSize: parseInt(params.size) || 10,
         sortName: params.sort,
         sortOrder: params.order,
+        buttons: buttons,
 
         queryParams: queryParams,
         ajax: ajaxRequest,
@@ -170,3 +171,41 @@ function queryParams(params) {
 function idFormatter(value, row, index, field) {
     return `<a href="/results/${value}">${value.slice(0, 5)}-${value.slice(-5)}</a>`
 }
+
+function timeStamp() {
+  var now = new Date();
+  var date = [ now.getMonth() + 1, now.getDate(), now.getFullYear() ];
+  var time = [ now.getHours(), now.getMinutes(), now.getSeconds() ];
+  var suffix = ( time[0] < 12 ) ? "AM" : "PM";
+
+  time[0] = ( time[0] < 12 ) ? time[0] : time[0] - 12;
+  time[0] = time[0] || 12;
+  for ( var i = 1; i < 3; i++ ) {
+    if ( time[i] < 10 ) {
+      time[i] = "0" + time[i];
+    }
+  }
+  return '[' + date.join(".") + "_" + time.join(".") + suffix + ']';
+}
+
+function buttons () {
+    return {
+      FetchCSV: {
+        text: 'CSV',
+        event: function () {
+          const queryString = window.location.search
+          const params = Object.fromEntries(new URLSearchParams(queryString).entries())
+
+          fetch('get_csv' + '?' + $.param(params))
+          .then(response => response.blob())
+          .then(blob => {
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'slides_checker'+ timeStamp() + '.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        });
+    }}}
+  }
