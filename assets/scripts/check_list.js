@@ -207,5 +207,10 @@ function buttons () {
             a.click();
             a.remove();
         });
-    }}}
-  }
+    }},
+    LatestChecks: {
+      text: 'Latest',
+      event: function () {
+        $("#check-list-table").bootstrapTable('refresh', {query: {sort: 'moodle-date', order: 'desc'}});
+    }}
+}}
