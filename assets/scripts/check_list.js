@@ -136,12 +136,12 @@ function onPopState() {
 
 function pushHistoryState(params) {
     // replace limit and offset to page and page-size
-    const {limit, offset, sort, order, filter} = params.data;
+    const {limit, offset, sort, order, filter, latest} = params.data;
     const page = offset / limit + 1
     const size = limit
 
     // push history state
-    history.pushState(params.data, "", "?" + $.param({page, size, filter, sort, order}))
+    history.pushState(params.data, "", "?" + $.param({page, size, filter, sort, order, latest}))
 }
 
 function queryParams(params) {
@@ -159,6 +159,7 @@ function queryParams(params) {
         offset: params.offset,
         sort: params.sort,
         order: params.order,
+        latest: params.latest
     }
 
     if (!$.isEmptyObject(filters)) {
@@ -211,6 +212,6 @@ function buttons () {
     LatestChecks: {
       text: 'Latest',
       event: function () {
-        $("#check-list-table").bootstrapTable('refresh', {query: {sort: 'moodle-date', order: 'desc'}});
+        $("#check-list-table").bootstrapTable('refresh', {query: {latest: true}});
     }}
 }}

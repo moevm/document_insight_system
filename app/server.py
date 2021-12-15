@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime, timedelta
 from sys import argv
+import urllib.parse
 
 import bson
 import pandas as pd
@@ -249,8 +250,13 @@ def check_list_data():
 
     sort = "_id" if sort == "upload-date" else sort
 
-    # get data and records count
-    rows, count = bd_helper.get_checks_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+    query = dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+
+    if request.args.get("latest"):
+        rows, count = bd_helper.get_latest_check_cursor(**query)
+    else:
+        # get data and records count
+        rows, count = bd_helper.get_checks_cursor(**query)
 
     # construct response
     response = {
