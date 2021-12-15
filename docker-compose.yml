@@ -17,6 +17,8 @@ services:
       - PYTHONIOENCODING=UTF-8
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - presentation_files:/usr/src/project/files/
 
   worker:
     image: slides_checker_base_image
@@ -28,6 +30,8 @@ services:
       - web
       - redis
       - mongodb
+    volumes:
+      - presentation_files:/usr/src/project/files/
 
   redis:
     image: redis:6-alpine
@@ -44,3 +48,6 @@ services:
     restart: always
     depends_on:
       - mongodb
+
+volumes:
+  presentation_files:
