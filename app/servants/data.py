@@ -6,18 +6,12 @@ from flask_login import current_user
 from app.bd_helper.bd_helper import *
 from app.main.checker import check
 from app.main.parser import parse
+from app.utils.get_file_len import get_file_len
 from flask import current_app
 
 import os
 import logging
 logger = logging.getLogger('root_logger')
-
-
-def get_file_len(file):
-    file.seek(0, os.SEEK_END)
-    file_length = file.tell()
-    file.seek(0, 0)
-    return file_length
 
 def upload(request, upload_folder):
     try:
@@ -56,11 +50,3 @@ def upload(request, upload_folder):
     except Exception as e:
         logger.error("\tПри обработке произошла ошибка: " + str(e), exc_info=True)
         return 'Not OK, error: {}'.format(e)
-
-
-def remove_presentation(json):
-    count = len(current_user.presentations)
-    user, presentation = delete_presentation(current_user, ObjectId(json['presentation']))
-    deleted = count == len(user.presentations) - 1
-    logger.info("Презентация " + presentation.name + " пользователя " + user.username + " удалена со всеми проверками")
-    return 'OK' if deleted else 'Not OK'
