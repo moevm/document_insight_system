@@ -14,8 +14,26 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONIOENCODING=UTF-8
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     volumes:
       - ./:/usr/src/project
+
+  worker:
+    image: slides_checker_base_image
+    command: celery worker --app=app.tasks.celery --loglevel=info
+    volumes:
+      - ./:/usr/src/project
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - web
+      - redis
+      - mongodb
+
+  redis:
+    image: redis:6-alpine
 
   mongodb:
     image: mongo:4.0.17-xenial
@@ -29,6 +47,6 @@ services:
     restart: always
     depends_on:
       - mongodb
-      
+
 volumes:
   mongodata:
