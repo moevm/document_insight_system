@@ -1,32 +1,29 @@
+import json
+import os
 from datetime import datetime, timedelta
-import logging
 from sys import argv
 
-from celery.result import AsyncResult
-from celery import Celery
-from app.tasks import create_task
-
-import os
-import json
 import bson
-import pymongo
+import pandas as pd
 from bson import ObjectId
-from flask import Flask, request, redirect, url_for, render_template, Response, abort, jsonify
-from flask_login import LoginManager, login_user, current_user, login_required, logout_user
-
+from celery.result import AsyncResult
+from flask import (Flask, Response, abort, jsonify, redirect, render_template,
+                   request, url_for)
+from flask_login import (LoginManager, current_user, login_required,
+                         login_user, logout_user)
+from flask_recaptcha import ReCaptcha
 
 import app.servants.user as user
-from app.servants import data as data
 from app.bd_helper import bd_helper
+from app.lti_session_passback.lti.check_request import check_request
+from app.root_logger import get_logging_stdout_handler, get_root_logger
+from app.servants import data as data
 from app.servants import pre_luncher
 from app.servants.user import update_criteria
-from app.root_logger import get_logging_stdout_handler, get_root_logger
+from app.utils.checklist_filter import checklist_filter
 from app.utils.decorators import decorator_assertion
 from app.utils.get_file_len import get_file_len
-from app.lti_session_passback.lti.check_request import check_request
 from lti_session_passback.lti import utils
-
-from flask_recaptcha import ReCaptcha
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = './files'
@@ -143,7 +140,7 @@ def run_task():
     filename = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(filename)
 
-    from app.tasks import create_task  ###
+    from app.tasks import create_task  # ##
     task = create_task.delay(filename, str(converted_id))
     return jsonify({"task_id": task.id}), 202
 
@@ -234,78 +231,7 @@ def check_list():
 @app.route("/check_list/data")
 @login_required
 def check_list_data():
-    # transform json filter into dict
-    filters = request.args.get("filter", "{}")
-    try:
-        filters = json.loads(filters)
-        filters = filters if filters else {}
-    except Exception as e:
-        logger.warning("Can't parse filters")
-        logger.warning(repr(e))
-        filters = {}
-
-    # request filter to mongo query filter conversion
-    filter_query = {}
-    if f_filename := filters.get("filename", None):
-        filter_query["filename"] = { "$regex": f_filename }
-
-    if f_user := filters.get("user", None):
-        filter_query["user"] = { "$regex": f_user }
-
-    f_upload_date = filters.get("upload-date", "")
-    f_upload_date_list = list(filter(lambda val: val, f_upload_date.split("-")))
-    try:
-        if len(f_upload_date_list) == 1:
-            date = datetime.strptime(f_upload_date_list[0], "%d.%m.%Y")
-            filter_query["_id"] = {
-                "$gte": ObjectId.from_datetime(date),
-                "$lte": ObjectId.from_datetime(date + timedelta(hours=23, minutes=59, seconds=59))
-            }
-        elif len(f_upload_date_list) > 1:
-            filter_query["_id"] = {
-                "$gte": ObjectId.from_datetime(datetime.strptime(f_upload_date_list[0], "%d.%m.%Y")),
-                "$lte": ObjectId.from_datetime(datetime.strptime(f_upload_date_list[1], "%d.%m.%Y"))
-            }
-    except Exception as e:
-        logger.warning("Can't apply upload-date filter")
-        logger.warning(repr(e))
-
-    f_moodle_date = filters.get("moodle-date", "")
-    f_moodle_date_list = list(filter(lambda val: val, f_moodle_date.split("-")))
-    try:
-        if len(f_moodle_date_list) == 1:
-            date = datetime.strptime(f_moodle_date_list[0], "%d.%m.%Y")
-            filter_query['lms_passback_time'] = {
-                "$gte": date,
-                "$lte": date + timedelta(hours=23, minutes=59, seconds=59)
-            }
-        elif len(f_moodle_date_list) > 1:
-            filter_query['lms_passback_time'] = {
-                "$gte": datetime.strptime(f_moodle_date_list[0], "%d.%m.%Y"),
-                "$lte": datetime.strptime(f_moodle_date_list[1], "%d.%m.%Y")
-            }
-    except Exception as e:
-        logger.warning("Can't apply moodle-date filter")
-        logger.warning(repr(e))
-
-    f_score = filters.get("score", "")
-    f_score_list = list(filter(lambda val: val, f_score.split("-")))
-    try:
-        if len(f_score_list) == 1:
-            filter_query["score"] = float(f_score_list[0])
-        elif len(f_score_list) > 1:
-            filter_query["score"] = {
-                "$gte": float(f_score_list[0]),
-                "$lte": float(f_score_list[1])
-            }
-    except Exception as e:
-        logger.warning("Can't apply score filter")
-        logger.warning(repr(e))
-
-    # set user filter for current non-admin user
-    if not current_user.is_admin:
-        filter_query["user"] = current_user.username
-
+    filter_query = checklist_filter(request)
     # parse and validate rest query
     limit = request.args.get("limit", "")
     limit = int(limit) if limit.isnumeric() else 10
@@ -340,6 +266,34 @@ def check_list_data():
     # return json data
     return jsonify(response)
 
+@app.route("/get_csv")
+@login_required
+def get_csv():
+    filter_query = checklist_filter(request)
+
+    limit = False
+    offset = False
+    sort = request.args.get("sort", "")
+    sort = 'upload-date' if not sort else sort
+    order = request.args.get("order", "")
+    order = 'desc' if not order else order
+    sort = "_id" if sort == "upload-date" else sort
+
+    rows, count = bd_helper.get_checks_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+    response = [{
+            "_id": str(item["_id"]),
+            "filename": item["filename"],
+            "user": item["user"],
+            "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H:%M:%S"),
+            "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get('lms_passback_time') else '-',
+            "score": item["score"]
+        } for item in rows]
+
+    df = pd.read_json(json.dumps(response))
+    return Response(
+        df.to_csv(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment"})
 
 @app.route("/logs")
 @login_required
