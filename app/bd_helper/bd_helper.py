@@ -18,14 +18,16 @@ presentations_collection = db['presentations']
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
-logs_collection = db.create_collection('logs', capped=True, size=5242880) if not db['logs'] else db['logs']
+logs_collection = db.create_collection(
+    'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
+
 
 def get_client():
     return client
 
 
 # Returns user if user was created and None if already exists
-def add_user(username, password_hash = '', is_LTI = False):
+def add_user(username, password_hash='', is_LTI=False):
     user = User()
     user.username = username
     user.is_LTI = is_LTI
@@ -40,7 +42,8 @@ def add_user(username, password_hash = '', is_LTI = False):
 
 # Returns user if there was user with given credentials and None if not
 def validate_user(username, password_hash):
-    user = users_collection.find_one({'username': username, 'password_hash': password_hash})
+    user = users_collection.find_one(
+        {'username': username, 'password_hash': password_hash})
     if user is not None:
         return User(user)
     else:
@@ -77,7 +80,8 @@ def delete_user(username):
 def add_presentation(user, presentation_name):
     presentation = Presentation()
     presentation.name = presentation_name
-    presentation_id = presentations_collection.insert_one(presentation.pack()).inserted_id
+    presentation_id = presentations_collection.insert_one(
+        presentation.pack()).inserted_id
     user.presentations.append(presentation_id)
     edit_user(user)
     return user, presentation_id
@@ -97,7 +101,8 @@ def find_presentation(user, presentation_name):
     presentations = []
     for presentation_id in user.presentations:
         presentations.append(get_presentation(presentation_id))
-    presentation = next((x for x in presentations if x.name == presentation_name), None)
+    presentation = next(
+        (x for x in presentations if x.name == presentation_name), None)
     if presentation is not None:
         return presentation
     else:
@@ -112,7 +117,8 @@ def delete_presentation(user, presentation_id):
         presentation = get_presentation(presentation_id)
         for check_id in presentation.checks:
             presentation, check = delete_check(presentation, check_id)
-        presentation = Presentation(presentations_collection.find_one_and_delete({'_id': presentation_id}))
+        presentation = Presentation(
+            presentations_collection.find_one_and_delete({'_id': presentation_id}))
         return user, presentation
     else:
         return user, get_presentation(presentation_id)
@@ -126,18 +132,22 @@ def create_check(user):
 # Adds checks to given presentation, updates presentation, returns presentation and checks id
 def add_check(presentation, checks, presentation_file):
     checks_id = checks_collection.insert_one(checks.pack()).inserted_id
-    upd_presentation = presentations_collection.update_one({'_id': presentation._id}, {"$push": {'checks': checks_id}})
+    upd_presentation = presentations_collection.update_one(
+        {'_id': presentation._id}, {"$push": {'checks': checks_id}})
 
-    grid_in = fs.open_upload_stream_with_id(checks_id, basename(presentation_file))
+    grid_in = fs.open_upload_stream_with_id(
+        checks_id, basename(presentation_file))
     grid_in.write(open(presentation_file, 'rb'))
     grid_in.close()
 
     return presentation, checks_id
 
+
 def add_api_check(checks, presentation_file):
     checks_id = checks_collection.insert_one(checks.pack()).inserted_id
 
-    grid_in = fs.open_upload_stream_with_id(checks_id, basename(presentation_file))
+    grid_in = fs.open_upload_stream_with_id(
+        checks_id, basename(presentation_file))
     grid_in.write(open(presentation_file, 'rb'))
     grid_in.close()
 
@@ -192,8 +202,10 @@ def find_pdf_by_file_id(file_id):
 # Deletes checks with given id, returns presentation
 def delete_check(presentation, checks_id):
     if checks_id in presentation.checks:
-        upd_presentation = presentations_collection.update_one({'_id': presentation._id}, {"$pull": {'checks': checks_id}})
-        checks = Checks(checks_collection.find_one_and_delete({'_id': checks_id}))
+        upd_presentation = presentations_collection.update_one(
+            {'_id': presentation._id}, {"$pull": {'checks': checks_id}})
+        checks = Checks(
+            checks_collection.find_one_and_delete({'_id': checks_id}))
         fs.delete(checks_id)
         return presentation, checks
     else:
@@ -203,10 +215,25 @@ def delete_check(presentation, checks_id):
 def get_unpassed_checks():
     return checks_collection.find({'is_passbacked': False})
 
+
 def set_passbacked_flag(checks_id, flag):
-    upd_check = {"$set": {'is_passbacked': flag, 'lms_passback_time': datetime.now(timezone.utc)}}
+    upd_check = {"$set": {'is_passbacked': flag,
+                          'lms_passback_time': datetime.now(timezone.utc)}}
     check = checks_collection.update_one({'_id': checks_id}, upd_check)
     return check if check else None
+
+
+def get_latest_users_check():
+    return db.checks.aggregate([
+        {'$sort': {'_id': -1}},
+        {'$group': {'_id': '$user', 'check_id': {'$first': '$_id'}}}
+    ])
+
+def get_latest_check_cursor(filter, *args, **kwargs):
+    checks = [result['check_id'] for result in get_latest_users_check()]
+    filter['_id'] = {'$in': checks}
+    return get_checks_cursor(filter, *args, **kwargs)
+
 
 # Return no of bytes stored in gridfs
 def get_storage():
@@ -222,6 +249,8 @@ def get_all_checks():
     return checks_collection.find()
 
 # get checks cursor with specified parameters
+
+
 def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
     sort = 'lms_passback_time' if sort == 'moodle-date' else sort
 
@@ -229,7 +258,8 @@ def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
     rows = checks_collection.find(filter)
 
     if sort and order in ("asc, desc"):
-        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
+        rows = rows.sort(sort, pymongo.ASCENDING if order ==
+                         "asc" else pymongo.DESCENDING)
 
     rows = rows.skip(offset) if offset else rows
     rows = rows.limit(limit) if limit else rows
@@ -237,6 +267,8 @@ def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
     return rows, count
 
 # get logs cursor with specified parameters
+
+
 def get_logs_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
     sort = 'serviceName' if sort == 'service-name' else sort
 
@@ -244,15 +276,18 @@ def get_logs_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
     rows = logs_collection.find(filter)
 
     if sort and order in ("asc, desc"):
-        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
+        rows = rows.sort(sort, pymongo.ASCENDING if order ==
+                         "asc" else pymongo.DESCENDING)
 
     rows = rows.skip(offset) if offset else rows
     rows = rows.limit(limit) if limit else rows
 
     return rows, count
 
-#Get stats for one user, return a list in the form
-#[check_id, login, time of check_id's creation, result(0/1)]
+# Get stats for one user, return a list in the form
+# [check_id, login, time of check_id's creation, result(0/1)]
+
+
 def get_user_checks(login):
     return checks_collection.find({'user': login})
 
@@ -260,21 +295,24 @@ def get_user_checks(login):
 def get_check_stats(oid):
     return checks_collection.find_one({'_id': oid})
 
+
 def format_check(check):
     grade_passback_time = check['lms_passback_time']
-    grade_passback_ts = grade_passback_time.strftime("%H:%M:%S - %b %d %Y") if grade_passback_time else '-'
+    grade_passback_ts = grade_passback_time.strftime(
+        "%H:%M:%S - %b %d %Y") if grade_passback_time else '-'
     return (str(check['_id']), check['user'], check['filename'], check['_id'].generation_time.strftime("%H:%M:%S - %b %d %Y"),
-                    grade_passback_ts, check['score'])
+            grade_passback_ts, check['score'])
+
 
 def format_stats(stats):
     return (format_check(check) for check in stats)
 
 
-#LTI
+# LTI
 class ConsumersDBManager:
 
     @staticmethod
-    def add_consumer(consumer_key, consumer_secret, timestamp_and_nonce = []):
+    def add_consumer(consumer_key, consumer_secret, timestamp_and_nonce=[]):
         consumer = Consumers()
         consumer.consumer_key = consumer_key
         consumer.consumer_secret = consumer_secret
@@ -312,8 +350,10 @@ class ConsumersDBManager:
     @staticmethod
     def add_timestamp_and_nonce(key, timestamp, nonce):
         upd_consumer = {"$push": {'timestamp_and_nonce': (timestamp, nonce)}}
-        consumer = consumers_collection.update_one({'consumer_key': key}, upd_consumer)
+        consumer = consumers_collection.update_one(
+            {'consumer_key': key}, upd_consumer)
         return consumer if consumer else None
+
 
 def add_log(timestamp, serviceName, levelname, levelno, message,
             pathname, filename, funcName, lineno):
