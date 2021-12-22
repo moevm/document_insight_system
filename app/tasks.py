@@ -18,14 +18,15 @@ celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:
 celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
 
 @celery.task(name="create_task")
-def create_task(filename, converted_id):
+def create_task(filename, converted_id, username=''):
     try:
-        delete = True
         presentation_name = basename(filename)
 
-        checks = Checks({})
+        checks = Checks({
+            'conv_pdf_fs_id': ObjectId(converted_id),
+            'user': username
+        })
 
-        checks.conv_pdf_fs_id = ObjectId(converted_id)
         check(parse(filename), checks, presentation_name)
         checks_id = add_api_check(checks, filename)
 

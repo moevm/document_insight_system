@@ -130,6 +130,7 @@ def upload():
 
 
 @app.route("/tasks", methods=["POST"])
+@login_required
 def run_task():
     file = request.files["presentation"]
     if get_file_len(file)*2 + bd_helper.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
@@ -144,11 +145,12 @@ def run_task():
     file.save(filename)
 
     from app.tasks import create_task  # ##
-    task = create_task.delay(filename, str(converted_id))
+    task = create_task.delay(filename, str(converted_id), username=current_user.username)
     return jsonify({"task_id": task.id}), 202
 
 
 @app.route("/tasks/<task_id>", methods=["GET"])
+@login_required
 def get_status(task_id):
     task_result = AsyncResult(task_id)
     result = {
