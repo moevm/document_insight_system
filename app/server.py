@@ -200,6 +200,18 @@ def checks(_id):
         return render_template("./404.html")
 
 
+@app.route("/get_last_check_results/<string:moodle_id>", methods=["GET"])
+@login_required
+def get_latest_user_check(moodle_id):
+    check = bd_helper.get_latest_user_check_by_moodle(moodle_id)
+    logger.error(str(check))
+    if check:
+        check = check[0]
+        return redirect(url_for('results', _id=str(check['_id'])))
+    else:
+        return render_template("./404.html")
+
+
 @app.route("/get_pdf/<string:_id>", methods=["GET"])
 @login_required
 def get_pdf(_id):
