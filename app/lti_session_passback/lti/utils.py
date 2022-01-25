@@ -78,7 +78,7 @@ def extract_passback_params(data):
 
 def launch_sanity_check(custom, task_info):
     try:
-        order = ('slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
+        order = ('template_name', 'slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
                   'probe_slide', 'actual_slide', 'conclusion_slide', 'slide_every_task',
                   'conclusion_actual', 'conclusion_along')
         detect_additional = custom.get('detect_additional', 'True')
@@ -90,7 +90,7 @@ def launch_sanity_check(custom, task_info):
 
     int_false_checks = ['slide_every_task', 'conclusion_actual']
     check_types = {
-        **dict.fromkeys(['slides_enum', 'slides_headers', 'goals_slide', 'detect_additional', 'probe_slide',
+        **dict.fromkeys(['template_name', 'slides_enum', 'slides_headers', 'goals_slide', 'detect_additional', 'probe_slide',
                          'actual_slide', 'conclusion_slide', 'conclusion_along'], (bool)),
         **dict.fromkeys(int_false_checks, (int, bool))
         }
