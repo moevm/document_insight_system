@@ -229,6 +229,13 @@ def get_latest_users_check():
         {'$group': {'_id': '$user', 'check_id': {'$first': '$_id'}}}
     ])
 
+
+def get_latest_user_check_by_moodle(moodle_id):
+    return list(db.checks.find(
+        {'lms_user_id': moodle_id}
+    ).sort('_id', -1).limit(1))
+
+
 def get_latest_check_cursor(filter, *args, **kwargs):
     checks = [result['check_id'] for result in get_latest_users_check()]
     filter['_id'] = {'$in': checks}
