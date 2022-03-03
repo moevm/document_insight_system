@@ -1,7 +1,7 @@
 from argparse import Namespace
 from flask_login import current_user
 from app.main.checks import SldNumCheck, SearchKeyWord, FindTasks, FindDefSld, \
-                            SldEnumCheck, SldSimilarity, TitleFormatCheck, FurtherDev
+                            SldEnumCheck, SldSimilarity, TitleFormatCheck, FurtherDev, TemplateNameCheck
 
 key_slides = {
               'goals_and_tasks': 'Цель и задачи',
@@ -14,7 +14,8 @@ key_slide = Namespace(**key_slides)
 def check(presentation, checks, presentation_name):
     check_names = checks.enabled_checks.keys()
     set_enabled = dict.fromkeys(check_names, False)
-    check_classes = [SldNumCheck(presentation, checks.enabled_checks['slides_number']),
+    check_classes = [TemplateNameCheck(presentation, presentation_name),
+                     SldNumCheck(presentation, checks.enabled_checks['slides_number']),
                      SldEnumCheck(presentation, checks.conv_pdf_fs_id),
                      TitleFormatCheck(presentation, checks.conv_pdf_fs_id),
                      FindDefSld(presentation, key_slide.goals_and_tasks, checks.conv_pdf_fs_id),

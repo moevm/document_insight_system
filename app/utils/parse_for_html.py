@@ -9,11 +9,11 @@ def format_header(header, close_tag = tag.br):
     return f"{header}{close_tag}"
 
 def find_tasks_on_slides_feedback(slides_with_tasks):
-    return format_header('Всего задач: {}'.format(slides_with_tasks.get('count')), tag.br), \
+    return (format_header('Всего задач: {}'.format(slides_with_tasks.get('count')), tag.br), \
            'Распознанные задачи: ', \
            *format_descriptions(slides_with_tasks.get('recognized'), tag.div_class, tag.br + tag.close_div), \
            'Не найдены: ', \
-           *format_descriptions(slides_with_tasks.get('not_found'), tag.div_class, tag.br + tag.close_div)
+           *format_descriptions(slides_with_tasks.get('not_found'), tag.div_class, tag.br + tag.close_div))
 
 def tasks_conclusions_feedback(results):
     return format_header('Соответствует на {}%'.format(results[0]), tag.br), \

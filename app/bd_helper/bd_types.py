@@ -21,7 +21,7 @@ class User(Packable, UserMixin):
         self.name = dictionary.get('name', '')
         self.password_hash = dictionary.get('password_hash', '')
         self.presentations = dictionary.get('presentations', [])
-        self.criteria = dictionary.get('criteria', {'slides_number': {'sld_num': sld_num['bsc'], 'detect_additional': True},
+        self.criteria = dictionary.get('criteria', {'template_name': True,'slides_number': {'sld_num': sld_num['bsc'], 'detect_additional': True},
                                               'slides_enum': True, 'slides_headers': True, 'goals_slide': True, 'probe_slide': True,
                                               'actual_slide': True, 'conclusion_slide': True, 'slide_every_task': 50,
                                               'conclusion_actual': 50, 'conclusion_along': True})
