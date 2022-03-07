@@ -1,3 +1,6 @@
+import pandas
+
+
 class Paragraph:
 
     def __init__(self, paragraph):
@@ -17,20 +20,16 @@ class Paragraph:
         self.modify()
 
     def print_info(self):
-        print('TEXT: ', self.paragraph_text)
-        print('ALIGNMENT: ', self.paragraph_alignment)
-        print('LEFT_INDENT: ', self.paragraph_left_indent)
-        print('RIGHT_INDENT: ', self.paragraph_right_indent)
-        print('FIRST_LINE_INDENT: ', self.paragraph_first_line_indent)
-        print('SPACE_AFTER: ', self.paragraph_space_after)
-        print('SPACE_BEFORE: ', self.paragraph_space_before)
-        print('LINE_SPACING: ', self.paragraph_line_spacing)
-        print('LINE_SPACING_RULE: ', self.paragraph_line_spacing_rule)
-        print('KEEP_TOGETHER: ', self.paragraph_keep_together)
-        print('KEEP_WITH_NEXT: ', self.paragraph_keep_with_next)
-        print('PAGE_BREAK_BEFORE: ', self.paragraph_page_break_before)
-        print('WIDOW_CONTROL: ', self.paragraph_widow_control)
-        print()
+        df = pandas.DataFrame({'Values': [self.paragraph_text, self.paragraph_alignment, self.paragraph_left_indent,
+                                          self.paragraph_right_indent, self.paragraph_first_line_indent,
+                                          self.paragraph_space_after, self.paragraph_space_before,
+                                          self.paragraph_line_spacing, self.paragraph_line_spacing_rule,
+                                          self.paragraph_keep_together, self.paragraph_keep_with_next,
+                                          self.paragraph_page_break_before, self.paragraph_widow_control]})
+        df.index = ['TEXT', 'ALIGNMENT', 'LEFT_INDENT', 'RIGHT_INDENT', 'FIRST_LINE_INDENT', 'SPACE_AFTER',
+                    'SPACE_BEFORE', 'LINE_SPACING', 'LINE_SPACING_RULE', 'KEEP_TOGETHER', 'KEEP_WITH_NEXT',
+                    'PAGE_BREAK_BEFORE', 'WIDOW_CONTROL']
+        print(df.to_string())
 
     def modify(self):
         if self.paragraph_left_indent is not None:
