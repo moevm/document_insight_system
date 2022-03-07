@@ -9,6 +9,7 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x  | bash -
 RUN apt install -y  nodejs
 RUN add-apt-repository ppa:libreoffice/ppa
 RUN apt install -y unoconv
+RUN apt install -y libreoffice
 
 ADD . /usr/src/project
 WORKDIR /usr/src/project
