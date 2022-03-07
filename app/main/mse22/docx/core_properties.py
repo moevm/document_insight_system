@@ -1,3 +1,6 @@
+import pandas
+
+
 class CoreProperties:
     def __init__(self, doc):
         self.author = doc.core_properties.author
@@ -17,18 +20,10 @@ class CoreProperties:
         self.version = doc.core_properties.version
 
     def print_file_info(self):
-        print('AUTHOR: ', self.author)
-        print('CATEGORY: ', self.category)
-        print('COMMENTS: ', self.comments)
-        print('CONTENT STATUS: ', self.content_status)
-        print('CREATED: ', self.created)
-        print('IDENTIFIED: ', self.identifier)
-        print('KEYWORDS: ', self.keywords)
-        print('LAST MODIFIED BY: ', self.last_modified_by)
-        print('LAST PRINTED: ', self.last_printed)
-        print('MODIFIED: ', self.modified)
-        print('REVISION: ', self.revision)
-        print('SUBJECT: ', self.subject)
-        print('TITLE: ', self.title)
-        print('VERSION: ', self.version)
-        print()
+        df = pandas.DataFrame({'Values': [self.author, self.category, self.comments, self.content_status, self.created,
+                                          self.identifier, self.keywords, self.language, self.last_modified_by,
+                                          self.last_printed, self.modified, self.revision, self.subject, self.title,
+                                          self.version]})
+        df.index = ['AUTHOR', 'CATEGORY', 'COMMENTS', 'CONTENT STATUS', 'CREATED', 'IDENTIFIED', 'KEYWORDS', 'LANGUAGE',
+                    'LAST MODIFIED BY', 'LAST PRINTED', 'MODIFIED', 'REVISION', 'SUBJECT', 'TITLE', 'VERSION']
+        print(df.to_string())
