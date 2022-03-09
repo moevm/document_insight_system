@@ -19,11 +19,11 @@ class CoreProperties:
         self.title = doc.core_properties.title
         self.version = doc.core_properties.version
 
-    def print_file_info(self):
+    def to_string(self):
         df = pandas.DataFrame({'Values': [self.author, self.category, self.comments, self.content_status, self.created,
                                           self.identifier, self.keywords, self.language, self.last_modified_by,
                                           self.last_printed, self.modified, self.revision, self.subject, self.title,
                                           self.version]})
         df.index = ['AUTHOR', 'CATEGORY', 'COMMENTS', 'CONTENT STATUS', 'CREATED', 'IDENTIFIED', 'KEYWORDS', 'LANGUAGE',
                     'LAST MODIFIED BY', 'LAST PRINTED', 'MODIFIED', 'REVISION', 'SUBJECT', 'TITLE', 'VERSION']
-        print(df.to_string())
+        return df.to_string()

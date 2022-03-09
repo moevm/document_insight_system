@@ -46,9 +46,10 @@ class DocxUploader(BaseUploader):
         self._upload(file=file)
 
     def print_info(self):
-        self.__core_properties.print_file_info()
+        print(self.__core_properties.to_string())
         for i in range(len(self.__paragraphs)):
-            self.__paragraphs[i].print_info()
+            print(self.__paragraphs[i].to_string())
+
 
 def main(args):
     file = args.file
