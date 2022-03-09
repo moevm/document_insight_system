@@ -19,7 +19,7 @@ class Paragraph:
         self.paragraph_widow_control = paragraph.paragraph_format.widow_control
         self.modify()
 
-    def print_info(self):
+    def to_string(self):
         df = pandas.DataFrame({'Values': [self.paragraph_text, self.paragraph_alignment, self.paragraph_left_indent,
                                           self.paragraph_right_indent, self.paragraph_first_line_indent,
                                           self.paragraph_space_after, self.paragraph_space_before,
@@ -29,7 +29,7 @@ class Paragraph:
         df.index = ['TEXT', 'ALIGNMENT', 'LEFT_INDENT', 'RIGHT_INDENT', 'FIRST_LINE_INDENT', 'SPACE_AFTER',
                     'SPACE_BEFORE', 'LINE_SPACING', 'LINE_SPACING_RULE', 'KEEP_TOGETHER', 'KEEP_WITH_NEXT',
                     'PAGE_BREAK_BEFORE', 'WIDOW_CONTROL']
-        print(df.to_string())
+        return df.to_string()
 
     def modify(self):
         if self.paragraph_left_indent is not None:
