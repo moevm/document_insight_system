@@ -16,8 +16,9 @@ class Checker:
         self._file = file
         self._document = document
         
-    def check_pages(self, lower_bound, upper_bound):       
-        if self.pages_number < upper_bound and self.pages_number > lower_bound:
+    def check_pages(self, lower_bound, upper_bound):
+        pages_number = self.pages_number    
+        if pages_number < upper_bound and pages_number > lower_bound:
             return True
         return False
         
