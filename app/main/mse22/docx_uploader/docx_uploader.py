@@ -1,10 +1,10 @@
 import docx
 
-from app.main.mse22.docx.base_uploader import BaseUploader
-from app.main.mse22.docx.core_properties import CoreProperties
-from app.main.mse22.docx.inline_shape import InlineShape
-from app.main.mse22.docx.paragraph import Paragraph
-from app.main.mse22.docx.table import Table, Cell
+from app.main.mse22.docx_uploader.base_uploader import BaseUploader
+from app.main.mse22.docx_uploader.core_properties import CoreProperties
+from app.main.mse22.docx_uploader.inline_shape import InlineShape
+from app.main.mse22.docx_uploader.paragraph import Paragraph
+from app.main.mse22.docx_uploader.table import Table, Cell
 
 
 class DocxUploader(BaseUploader):
