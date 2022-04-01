@@ -1,22 +1,14 @@
 import docx
 
 from app.main.mse22.document.style_info import StyleInfo
+from app.main.mse22.document.page_creator import PageCreator
 
 
 class Document:
-    def __init__(self, docx_document):
+    def __init__(self, docx_document, filename):
         core_props = docx_document.core_properties
         self.info = DocumentInfo(core_props.author, core_props.created, core_props.modified)
-        self.pages = []
-        current = []
-        index = 0
-        for par in docx_document.paragraphs:
-            current.append(par)
-            if 'w:br w:type="page"/' in par._element.xml:
-                # create new_page from `current` and `index`
-                # self.pages.append(new_page)
-                current = []
-                index += 1
+        self.pages = PageCreator().createPageObjects(filename)
 
     def __str__(self):
         return "document.Document object:\nPages:\n{0}\nInfo: {1}".format(self.pages, self.info)
@@ -35,9 +27,11 @@ class DocumentInfo:
 
 def main(args):
     docx_document = docx.Document(args.filename)
-    parsed_document = Document(docx_document)
+    parsed_document = Document(docx_document, args.filename)
     print(parsed_document)
     print()
-    for paragraph in docx_document.paragraphs:
-        style = StyleInfo(paragraph.style)
-        print(style, "\n")
+    for page in parsed_document.pages:
+        print(page.header)
+        for object in page.pageObjects:
+            if object.type != 'table':
+                print(object.data.text, StyleInfo(object.data.style), '', sep='\n')
