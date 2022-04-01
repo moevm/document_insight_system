@@ -11,7 +11,7 @@ class PageCreator:
         docx_docx2python = docx2python(path)
         indices = self.makeIndices(docx_docx2python)
         if not indices[0]:
-            return 'Report does not contain a section' + indices[1]
+            return [['Report does not contain a section', indices[1]]]
         image_pattern = r'\-{4}media/image\d+\.\D+\-{4}'
         chapters = ['Титульный лист', 'Цель работы', 'Основные теоретические положения', 'Выполнение работы',
                     'Тестирование', 'Выводы']

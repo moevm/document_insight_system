@@ -30,8 +30,11 @@ def main(args):
     parsed_document = Document(docx_document, args.filename)
     print(parsed_document)
     print()
-    for page in parsed_document.pages:
-        print(page.header)
-        for object in page.pageObjects:
-            if object.type != 'table':
-                print(object.data.text, StyleInfo(object.data.style), '', sep='\n')
+    if len(parsed_document.pages) == 1:
+        print(*parsed_document.pages[0])
+    else:
+        for page in parsed_document.pages:
+            print(page.header)
+            for object in page.pageObjects:
+                if object.type != 'table':
+                    print(object.data.text, StyleInfo(object.data.style), '', sep='\n')
