@@ -1,5 +1,5 @@
 import argparse
-from doc_parser import main as doc
+from app.main.mse22.doc.doc_parser import main as doc
 
 
 def parse_args():
