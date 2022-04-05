@@ -26,6 +26,7 @@ class PageCreator:
                     current_page_object.append(PageObject('table', docx_docx.tables[table_index]))
                     table_index += 1
                 else:
+
                     if indices[1][i][0][0] == indices[1][i][1][0]:
                         for _ in range(indices[1][i][0][1], indices[1][i][1][1] + 1):
                             if re.search(image_pattern, docx_docx2python.body[j][0][0][_ - 1]):
@@ -51,7 +52,7 @@ class PageCreator:
                                                                       docx_docx.paragraphs[paragraph_index]))
                             paragraph_index += 1
                     elif j == indices[1][i][1][0]:
-                        for _ in range(0, indices[1][i][1][0] + 1):
+                        for _ in range(0, indices[1][i][1][1] + 1):
                             if re.search(image_pattern, docx_docx2python.body[j][0][0][_ - 1]):
                                 current_page_object.append(PageObject('image', docx_docx.paragraphs[paragraph_index]))
                             else:
@@ -87,5 +88,5 @@ class PageCreator:
             else:
                 cur_index += 1
         docx_chapters.append([[cur_index, docx_chapters[len(docx_chapters) - 1][1][1] + 1],
-                              [len(doc_result.body) - 1, len(doc_result.body[len(doc_result.body) - 1][0][0])]])
+                              [len(doc_result.body) - 1, len(doc_result.body[len(doc_result.body) - 1][0][0]) - 1]])
         return [True, docx_chapters]
