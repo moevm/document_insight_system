@@ -3,7 +3,7 @@ version: '2'
 services:
   web:
     build: .
-    image: slides_checker_base_image
+    image: slides_checker_base_image:v1.0
     restart: always
     ports:
       - "8080:8080"
@@ -21,7 +21,7 @@ services:
       - presentation_files:/usr/src/project/files/
 
   worker:
-    image: slides_checker_base_image
+    image: slides_checker_base_image:v1.0
     command: celery worker --app=app.tasks.celery --loglevel=info
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
@@ -43,7 +43,7 @@ services:
       - ../slides_checker_mongo_data:/data/db
 
   passback_grades:
-    image: slides_checker_base_image
+    image: slides_checker_base_image:v1.0
     command: python3 ./app/passback_grades.py
     restart: always
     depends_on:

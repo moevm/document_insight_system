@@ -11,6 +11,6 @@ scripts/version.sh > $VERSION_FILE_PATH
 
 # up docker
 mkdir -p ../slides_checker_mongo_data
-docker-compose down --rmi local
+docker-compose down
 docker-compose build --no-cache
 docker-compose up -d --remove-orphans
