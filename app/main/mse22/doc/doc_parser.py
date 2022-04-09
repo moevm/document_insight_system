@@ -1,5 +1,5 @@
-from converter import *
 from app.main.mse22.docx_uploader.docx_uploader import DocxUploader
+from app.main.mse22.doc.converter import Converter
 
 
 class DocParser(DocxUploader):

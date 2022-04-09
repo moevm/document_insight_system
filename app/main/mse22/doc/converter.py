@@ -8,5 +8,5 @@ class Converter:
         self._filename = path_to_file.split('/')[-1].split('.')[0]
 
     def convert(self):
-        subprocess.call(['soffice', '--headless', '--convert-to', 'docx_uploader', '--outdir', self._out_dir, self._file])
-        return self._out_dir + self._filename + '.docx_uploader'
+        subprocess.call(['soffice', '--headless', '--convert-to', 'docx', '--outdir', self._out_dir, self._file])
+        return self._out_dir + self._filename + '.docx'
