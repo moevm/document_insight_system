@@ -307,6 +307,8 @@ def get_csv():
             "_id": str(item["_id"]),
             "filename": item["filename"],
             "user": item["user"],
+            "lms-username": item["user"].rsplit('_', 1)[0],
+            "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
             "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H:%M:%S"),
             "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get('lms_passback_time') else '-',
             "score": item["score"]
