@@ -29,6 +29,7 @@ class User(Packable, UserMixin):
         self.lms_user_id = dictionary.get('lms_user_id', None)
         self.is_admin = dictionary.get('is_admin', False)
         self.params_for_passback = dictionary.get('params_for_passback', None)
+        self.formats = dictionary.get('formats', [])
 
     def pack(self):
         package = super(User, self).pack()

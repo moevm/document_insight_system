@@ -29,6 +29,7 @@ from lti_session_passback.lti import utils
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = './files'
+ALLOWED_EXTENSIONS = set(('ppt', 'pptx', 'odp'))
 columns = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
@@ -62,6 +63,7 @@ def lti():
         lms_user_id = temporary_user_params.get('user_id', '')
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
+        formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS or ALLOWED_EXTENSIONS))
         custom_criteria = utils.get_criteria_from_launch(temporary_user_params)
         role = utils.get_role(temporary_user_params)
 
@@ -73,7 +75,7 @@ def lti():
             user.is_admin = role
         else:
             user = bd_helper.get_user(user_id)
-
+        user.formats = formats
         user.params_for_passback = params_for_passback
         user.lms_user_id = lms_user_id
         bd_helper.edit_user(user)
@@ -125,7 +127,7 @@ def upload():
         else:
             abort(401)
     elif request.method == "GET":
-        return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name)
+        return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name, formats=current_user.formats or ALLOWED_EXTENSIONS)
     elif request.method == "PUT":
         return data.remove_presentation(request.json)
 
