@@ -189,29 +189,52 @@ function timeStamp() {
   return '[' + date.join(".") + "_" + time.join(".") + suffix + ']';
 }
 
-function buttons () {
+function buttons() {
     return {
-      FetchCSV: {
-        text: 'CSV',
-        event: function () {
-          const queryString = window.location.search
-          const params = Object.fromEntries(new URLSearchParams(queryString).entries())
+        FetchCSV: {
+            text: 'CSV',
+            event: function () {
+                const queryString = window.location.search
+                const params = Object.fromEntries(new URLSearchParams(queryString).entries())
 
-          fetch('get_csv' + '?' + $.param(params))
-          .then(response => response.blob())
-          .then(blob => {
-            var url = window.URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = 'slides_checker'+ timeStamp() + '.csv';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        });
-    }},
-    LatestChecks: {
-      text: 'Latest',
-      event: function () {
-        $("#check-list-table").bootstrapTable('refresh', {query: {latest: true}});
-    }}
-}}
+                fetch('get_csv' + '?' + $.param(params))
+                    .then(response => response.blob())
+                    .then(blob => {
+                        downdloadBlob(blob, `slides_checker${timeStamp()}.csv`)
+                    });
+            }
+        },
+        FetchZip: {
+            text: 'ZIP',
+            event: function () {
+                const queryString = window.location.search
+                const params = Object.fromEntries(new URLSearchParams(queryString).entries())
+
+                fetch('get_zip' + '?' + $.param(params))
+                    .then(response => response.ok ? response.blob() : false)
+                    .then(blob => {
+                        if (blob)
+                            downdloadBlob(blob, `slides_checker_presentation${timeStamp()}.zip`)
+                        else
+                            alert("Error during file download")
+                    });
+            }
+        },
+        LatestChecks: {
+            text: 'Latest',
+            event: function () {
+                $("#check-list-table").bootstrapTable('refresh', { query: { latest: true } });
+            }
+        }
+    }
+}
+
+function downdloadBlob(blob, filename){
+    var url = window.URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+}

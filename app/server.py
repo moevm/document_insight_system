@@ -1,8 +1,9 @@
 import json
 import os
+import shutil
+import tempfile
 from datetime import datetime, timedelta
 from sys import argv
-import urllib.parse
 
 import bson
 import pandas as pd
@@ -289,11 +290,10 @@ def check_list_data():
     # return json data
     return jsonify(response)
 
-@app.route("/get_csv")
-@login_required
-def get_csv():
-    filter_query = checklist_filter(request)
 
+def get_query(request):
+    # query for download csv/zip
+    filter_query = checklist_filter(request)
     limit = False
     offset = False
     sort = request.args.get("sort", "")
@@ -301,8 +301,13 @@ def get_csv():
     order = request.args.get("order", "")
     order = 'desc' if not order else order
     sort = "_id" if sort == "upload-date" else sort
+    return dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
 
-    rows, count = bd_helper.get_checks_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+
+@app.route("/get_csv")
+@login_required
+def get_csv():
+    rows, count = bd_helper.get_checks_cursor(**get_query(request))
     response = [{
             "_id": str(item["_id"]),
             "filename": item["filename"],
@@ -319,6 +324,34 @@ def get_csv():
         df.to_csv(),
         mimetype="text/csv",
         headers={"Content-disposition": "attachment"})
+
+
+@app.route("/get_zip")
+@login_required
+def get_zip():
+    # create tmp folder
+    dirpath = tempfile.TemporaryDirectory()
+
+    # write files
+    checks, _ = bd_helper.get_checks_cursor(**get_query(request))
+    for check in checks:
+        db_file = bd_helper.find_pdf_by_file_id(check['_id'])
+        if db_file is not None:
+            with open(f"{dirpath.name}/{db_file.filename}", 'wb') as os_file:
+                os_file.write(db_file.read())
+    
+    # zip
+    archive_path = shutil.make_archive('archive', 'zip', dirpath.name)
+    dirpath.cleanup()
+
+    # send
+    with open(archive_path, 'rb') as zip_file:
+        return Response(
+            zip_file.read(),
+            mimetype="application/zip",
+            headers={"Content-disposition": "attachment"}
+        )
+
 
 @app.route("/logs")
 @login_required
@@ -357,7 +390,7 @@ def logs_data():
         elif len(f_lineno_list) > 1:
             filter_query["lineno"] = {
                 "$gte": int(f_lineno_list[0]),
-                "$lte": int(f_score_list[1])
+                "$lte": int(f_lineno_list[1])
             }
     except Exception as e:
         logger.warning("Can't apply lineno filter")
