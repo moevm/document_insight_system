@@ -72,6 +72,15 @@ if ($("#pdf").length !== 0){
     scale = 1.1;
     canvas = $("#the-canvas")[0];
     ctx = canvas.getContext("2d");
+  var href = $("#pdf").attr('href');
+  pdfDoc = null;
+  pageNum = 1;
+  pageIsRendering = false,
+  pageNumIsPending = null;
+  scale = 1.1;
+
+  canvas = document.getElementById('the-canvas');
+  ctx = canvas.getContext('2d');
 
    pdfjsLib
   .getDocument(href)
