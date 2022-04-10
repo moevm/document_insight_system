@@ -164,6 +164,12 @@ def get_status(task_id):
     return jsonify(result), 200
 
 
+CRITERIA_LABELS = {'template_name': 'Соответствие названия файла шаблону', 'slides_number': 'Количество основных слайдов',
+                    'slides_enum': 'Нумерация слайдов', 'slides_headers': 'Заголовки слайдов присутствуют и занимают не более двух строк', 'goals_slide': 'Слайд "Цель и задачи"', 'probe_slide': 'Слайд "Апробация работы"',
+                    'actual_slide': 'Слайд с описанием актуальности работы', 'conclusion_slide': 'Слайд с заключением', 'slide_every_task': 'Наличие слайдов, посвященных задачам',
+                    'conclusion_actual': 'Соответствие заключения задачам', 'conclusion_along': 'Наличие направлений дальнейшего развития'}
+
+
 @app.route("/results/<string:_id>", methods=["GET"])
 @login_required
 def results(_id):
@@ -175,7 +181,7 @@ def results(_id):
     check = bd_helper.get_check(oid)
     if check is not None:
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id, fi=check.filename,
-                                columns=columns, stats = bd_helper.format_check(check.pack()))
+                                columns=columns, stats = bd_helper.format_check(check.pack()), labels=CRITERIA_LABELS)
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
