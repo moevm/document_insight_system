@@ -255,12 +255,16 @@ def get_storage():
 def get_all_checks():
     return checks_collection.find()
 
+
+def get_checks(filter={}, latest=None, limit=10, offset=0, sort=None, order=None):
+    if latest:
+        return get_latest_check_cursor(filter, limit, offset, sort, order)
+    else:
+        return get_checks_cursor(filter, limit, offset, sort, order)
+
 # get checks cursor with specified parameters
 
-
-def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None, latest=None):
-    if latest:
-        return get_latest_check_cursor(**query)
+def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
 
     sort = 'lms_passback_time' if sort == 'moodle-date' else sort
 

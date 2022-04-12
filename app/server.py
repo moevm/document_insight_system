@@ -316,7 +316,7 @@ def get_query(request):
 @app.route("/get_csv")
 @login_required
 def get_csv():
-    rows, count = bd_helper.get_checks_cursor(**get_query(request))
+    rows, count = bd_helper.get_checks(**get_query(request))
     response = [{
             "_id": str(item["_id"]),
             "filename": item["filename"],
@@ -342,7 +342,7 @@ def get_zip():
     dirpath = tempfile.TemporaryDirectory()
 
     # write files
-    checks, _ = bd_helper.get_checks_cursor(**get_query(request))
+    checks, _ = bd_helper.get_checks(**get_query(request))
     for check in checks:
         db_file = bd_helper.find_pdf_by_file_id(check['_id'])
         if db_file is not None:
