@@ -47,7 +47,7 @@ services:
       - ../slides_checker_mongo_data:/data/db
 
   passback_grades:
-    image: slides_checker_base_image:v1.0
+    image: slides_checker_base_image
     command: python3 ./app/passback_grades.py
     restart: always
     depends_on:
