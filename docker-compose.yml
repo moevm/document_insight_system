@@ -3,7 +3,7 @@ version: '2'
 services:
   web:
     build: .
-    image: slides_checker_base_image:v1.0
+    image: slides_checker_base_image
     restart: always
     ports:
       - "8080:8080"
@@ -23,7 +23,7 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
 
   worker:
-    image: slides_checker_base_image:v1.0
+    image: slides_checker_base_image
     command: celery worker --app=app.tasks.celery --loglevel=info
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
