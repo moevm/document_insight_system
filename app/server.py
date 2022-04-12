@@ -309,7 +309,8 @@ def get_query(request):
     order = request.args.get("order", "")
     order = 'desc' if not order else order
     sort = "_id" if sort == "upload-date" else sort
-    return dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+    latest = True if request.args.get("latest") else False
+    return dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order, latest=latest)
 
 
 @app.route("/get_csv")
