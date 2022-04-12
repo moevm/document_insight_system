@@ -19,3 +19,6 @@ class SlidePPTX(SlideBasic):
                 continue
             if hasattr(shape, "text"):
                 self.text += "\n" + shape.text
+
+    def __str__(self):
+        return super().__str__()

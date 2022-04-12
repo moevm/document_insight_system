@@ -13,3 +13,6 @@ class SlideBasic:
 
     def get_page_number(self):
         return self.page_number
+
+    def __str__(self):
+        return f"\tTitle: {self.title}.\n\tText: {self.text}.\n\tPage_num: {self.page_number}"
