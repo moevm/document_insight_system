@@ -196,11 +196,12 @@ function buttons() {
             event: function () {
                 const queryString = window.location.search
                 const params = Object.fromEntries(new URLSearchParams(queryString).entries())
-
+                $("[name=FetchCSV]").innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Exporting..."
                 fetch('get_csv' + '?' + $.param(params))
                     .then(response => response.blob())
                     .then(blob => {
                         downdloadBlob(blob, `slides_checker${timeStamp()}.csv`)
+                    $("[name=FetchCSV]").innerHtml = "CSV"
                     });
             }
         },
@@ -209,7 +210,7 @@ function buttons() {
             event: function () {
                 const queryString = window.location.search
                 const params = Object.fromEntries(new URLSearchParams(queryString).entries())
-
+                $("[name=FetchZip]").innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Zipping..."
                 fetch('get_zip' + '?' + $.param(params))
                     .then(response => response.ok ? response.blob() : false)
                     .then(blob => {
@@ -217,6 +218,7 @@ function buttons() {
                             downdloadBlob(blob, `slides_checker_presentation${timeStamp()}.zip`)
                         else
                             alert("Error during file download")
+                        $("[name=FetchZip]").innerHtml = "ZIP"
                     });
             }
         },
