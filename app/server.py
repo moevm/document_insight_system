@@ -25,6 +25,7 @@ from app.servants.user import update_criteria
 from app.utils.checklist_filter import checklist_filter
 from app.utils.decorators import decorator_assertion
 from app.utils.get_file_len import get_file_len
+from app.utils.time import timezone_offset
 from lti_session_passback.lti import utils
 
 logger = get_root_logger('web')
@@ -289,7 +290,7 @@ def check_list_data():
             "filename": item["filename"],
             "user": item["user"],
             "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
-            "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H:%M:%S"),
+            "upload-date": (item["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
             "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get('lms_passback_time') else '-',
             "score": item["score"]
         } for item in rows]
@@ -323,7 +324,7 @@ def get_csv():
             "user": item["user"],
             "lms-username": item["user"].rsplit('_', 1)[0],
             "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
-            "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H:%M:%S"),
+            "upload-date": (item["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
             "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get('lms_passback_time') else '-',
             "score": item["score"]
         } for item in rows]
