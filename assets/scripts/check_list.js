@@ -190,35 +190,36 @@ function timeStamp() {
 }
 
 function buttons() {
-    return {
+    if (is_admin)
+        return {
         FetchCSV: {
             text: 'CSV',
             event: function () {
                 const queryString = window.location.search
                 const params = Object.fromEntries(new URLSearchParams(queryString).entries())
-                $("[name=FetchCSV]").innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Exporting..."
+                $("[name=FetchCSV]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Exporting..."
                 fetch('get_csv' + '?' + $.param(params))
                     .then(response => response.blob())
                     .then(blob => {
-                        downdloadBlob(blob, `slides_checker${timeStamp()}.csv`)
-                    $("[name=FetchCSV]").innerHtml = "CSV"
+                        $("[name=FetchCSV]")[0].textContent = "CSV"
+                        downdloadBlob(blob, `Презентации.csv`)
                     });
             }
         },
         FetchZip: {
-            text: 'ZIP',
+            text: 'Скачать архив',
             event: function () {
                 const queryString = window.location.search
                 const params = Object.fromEntries(new URLSearchParams(queryString).entries())
-                $("[name=FetchZip]").innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Zipping..."
+                $("[name=FetchZip]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Архивирование..."
                 fetch('get_zip' + '?' + $.param(params))
                     .then(response => response.ok ? response.blob() : false)
                     .then(blob => {
+                        $("[name=FetchZip]")[0].textContent = "Скачать архив"
                         if (blob)
-                            downdloadBlob(blob, `slides_checker_presentation${timeStamp()}.zip`)
+                            downdloadBlob(blob, `Презентации.zip`)
                         else
                             alert("Error during file download")
-                        $("[name=FetchZip]").innerHtml = "ZIP"
                     });
             }
         },
@@ -229,6 +230,8 @@ function buttons() {
             }
         }
     }
+    else
+        return {}
 }
 
 function downdloadBlob(blob, filename){

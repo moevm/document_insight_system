@@ -313,12 +313,9 @@ def get_query(request):
     latest = True if request.args.get("latest") else False
     return dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order, latest=latest)
 
-
-@app.route("/get_csv")
-@login_required
-def get_csv():
+def get_stats():
     rows, count = bd_helper.get_checks(**get_query(request))
-    response = [{
+    return [{
             "_id": str(item["_id"]),
             "filename": item["filename"],
             "user": item["user"],
@@ -329,6 +326,13 @@ def get_csv():
             "score": item["score"]
         } for item in rows]
 
+
+@app.route("/get_csv")
+@login_required
+def get_csv():
+    if not current_user.is_admin:
+        abort(403)
+    response = get_stats()
     df = pd.read_json(json.dumps(response))
     return Response(
         df.to_csv(),
@@ -339,6 +343,9 @@ def get_csv():
 @app.route("/get_zip")
 @login_required
 def get_zip():
+    if not current_user.is_admin:
+        abort(403)
+
     # create tmp folder
     dirpath = tempfile.TemporaryDirectory()
 
@@ -350,8 +357,14 @@ def get_zip():
             with open(f"{dirpath.name}/{db_file.filename}", 'wb') as os_file:
                 os_file.write(db_file.read())
     
+    # add csv
+    response = get_stats()
+    df = pd.read_json(json.dumps(response))
+    df.to_csv(f"{dirpath.name}/Презентации.csv")
+
     # zip
-    archive_path = shutil.make_archive('archive', 'zip', dirpath.name)
+    tmp = tempfile.TemporaryDirectory()
+    archive_path = shutil.make_archive(f"{tmp}/archive", 'zip', dirpath.name)
     dirpath.cleanup()
 
     # send
