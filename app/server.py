@@ -1,8 +1,9 @@
 import json
 import os
+import shutil
+import tempfile
 from datetime import datetime, timedelta
 from sys import argv
-import urllib.parse
 
 import bson
 import pandas as pd
@@ -24,10 +25,12 @@ from app.servants.user import update_criteria
 from app.utils.checklist_filter import checklist_filter
 from app.utils.decorators import decorator_assertion
 from app.utils.get_file_len import get_file_len
+from app.utils.time import timezone_offset
 from lti_session_passback.lti import utils
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = './files'
+ALLOWED_EXTENSIONS = set(('ppt', 'pptx', 'odp'))
 columns = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
@@ -61,6 +64,7 @@ def lti():
         lms_user_id = temporary_user_params.get('user_id', '')
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
+        formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS or ALLOWED_EXTENSIONS))
         custom_criteria = utils.get_criteria_from_launch(temporary_user_params)
         role = utils.get_role(temporary_user_params)
 
@@ -72,7 +76,7 @@ def lti():
             user.is_admin = role
         else:
             user = bd_helper.get_user(user_id)
-
+        user.formats = formats
         user.params_for_passback = params_for_passback
         user.lms_user_id = lms_user_id
         bd_helper.edit_user(user)
@@ -124,7 +128,7 @@ def upload():
         else:
             abort(401)
     elif request.method == "GET":
-        return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name)
+        return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name, formats=current_user.formats or ALLOWED_EXTENSIONS)
     elif request.method == "PUT":
         return data.remove_presentation(request.json)
 
@@ -161,6 +165,12 @@ def get_status(task_id):
     return jsonify(result), 200
 
 
+CRITERIA_LABELS = {'template_name': 'Соответствие названия файла шаблону', 'slides_number': 'Количество основных слайдов',
+                    'slides_enum': 'Нумерация слайдов', 'slides_headers': 'Заголовки слайдов присутствуют и занимают не более двух строк', 'goals_slide': 'Слайд "Цель и задачи"', 'probe_slide': 'Слайд "Апробация работы"',
+                    'actual_slide': 'Слайд с описанием актуальности работы', 'conclusion_slide': 'Слайд с заключением', 'slide_every_task': 'Наличие слайдов, посвященных задачам',
+                    'conclusion_actual': 'Соответствие заключения задачам', 'conclusion_along': 'Наличие направлений дальнейшего развития'}
+
+
 @app.route("/results/<string:_id>", methods=["GET"])
 @login_required
 def results(_id):
@@ -172,7 +182,7 @@ def results(_id):
     check = bd_helper.get_check(oid)
     if check is not None:
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id, fi=check.filename,
-                                columns=columns, stats = bd_helper.format_check(check.pack()))
+                                columns=columns, stats = bd_helper.format_check(check.pack()), labels=CRITERIA_LABELS)
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
@@ -280,7 +290,7 @@ def check_list_data():
             "filename": item["filename"],
             "user": item["user"],
             "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
-            "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H:%M:%S"),
+            "upload-date": (item["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
             "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get('lms_passback_time') else '-',
             "score": item["score"]
         } for item in rows]
@@ -289,11 +299,10 @@ def check_list_data():
     # return json data
     return jsonify(response)
 
-@app.route("/get_csv")
-@login_required
-def get_csv():
-    filter_query = checklist_filter(request)
 
+def get_query(request):
+    # query for download csv/zip
+    filter_query = checklist_filter(request)
     limit = False
     offset = False
     sort = request.args.get("sort", "")
@@ -301,22 +310,71 @@ def get_csv():
     order = request.args.get("order", "")
     order = 'desc' if not order else order
     sort = "_id" if sort == "upload-date" else sort
+    latest = True if request.args.get("latest") else False
+    return dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order, latest=latest)
 
-    rows, count = bd_helper.get_checks_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
-    response = [{
+def get_stats():
+    rows, count = bd_helper.get_checks(**get_query(request))
+    return [{
             "_id": str(item["_id"]),
             "filename": item["filename"],
             "user": item["user"],
-            "upload-date": item["_id"].generation_time.strftime("%d.%m.%Y %H:%M:%S"),
+            "lms-username": item["user"].rsplit('_', 1)[0],
+            "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
+            "upload-date": (item["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
             "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get('lms_passback_time') else '-',
             "score": item["score"]
         } for item in rows]
 
+
+@app.route("/get_csv")
+@login_required
+def get_csv():
+    if not current_user.is_admin:
+        abort(403)
+    response = get_stats()
     df = pd.read_json(json.dumps(response))
     return Response(
         df.to_csv(),
         mimetype="text/csv",
         headers={"Content-disposition": "attachment"})
+
+
+@app.route("/get_zip")
+@login_required
+def get_zip():
+    if not current_user.is_admin:
+        abort(403)
+
+    # create tmp folder
+    dirpath = tempfile.TemporaryDirectory()
+
+    # write files
+    checks, _ = bd_helper.get_checks(**get_query(request))
+    for check in checks:
+        db_file = bd_helper.find_pdf_by_file_id(check['_id'])
+        if db_file is not None:
+            with open(f"{dirpath.name}/{db_file.filename}", 'wb') as os_file:
+                os_file.write(db_file.read())
+    
+    # add csv
+    response = get_stats()
+    df = pd.read_json(json.dumps(response))
+    df.to_csv(f"{dirpath.name}/Презентации.csv")
+
+    # zip
+    tmp = tempfile.TemporaryDirectory()
+    archive_path = shutil.make_archive(f"{tmp}/archive", 'zip', dirpath.name)
+    dirpath.cleanup()
+
+    # send
+    with open(archive_path, 'rb') as zip_file:
+        return Response(
+            zip_file.read(),
+            mimetype="application/zip",
+            headers={"Content-disposition": "attachment"}
+        )
+
 
 @app.route("/logs")
 @login_required
@@ -355,7 +413,7 @@ def logs_data():
         elif len(f_lineno_list) > 1:
             filter_query["lineno"] = {
                 "$gte": int(f_lineno_list[0]),
-                "$lte": int(f_score_list[1])
+                "$lte": int(f_lineno_list[1])
             }
     except Exception as e:
         logger.warning("Can't apply lineno filter")

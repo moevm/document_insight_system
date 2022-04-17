@@ -23,3 +23,6 @@ class PresentationODP(PresentationBasic):
             for child in style.childNodes:
                 style_params.update(tict.dictify(child.attributes))
             self.auto_styles[style_name] = style_params
+
+    def __str__(self):
+        return super().__str__()

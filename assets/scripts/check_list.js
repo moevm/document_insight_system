@@ -189,29 +189,57 @@ function timeStamp() {
   return '[' + date.join(".") + "_" + time.join(".") + suffix + ']';
 }
 
-function buttons () {
-    return {
-      FetchCSV: {
-        text: 'CSV',
-        event: function () {
-          const queryString = window.location.search
-          const params = Object.fromEntries(new URLSearchParams(queryString).entries())
+function buttons() {
+    if (is_admin)
+        return {
+        FetchCSV: {
+            text: 'CSV',
+            event: function () {
+                const queryString = window.location.search
+                const params = Object.fromEntries(new URLSearchParams(queryString).entries())
+                $("[name=FetchCSV]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Exporting..."
+                fetch('get_csv' + '?' + $.param(params))
+                    .then(response => response.blob())
+                    .then(blob => {
+                        $("[name=FetchCSV]")[0].textContent = "CSV"
+                        downdloadBlob(blob, `Презентации.csv`)
+                    });
+            }
+        },
+        FetchZip: {
+            text: 'Скачать архив',
+            event: function () {
+                const queryString = window.location.search
+                const params = Object.fromEntries(new URLSearchParams(queryString).entries())
+                $("[name=FetchZip]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Архивирование..."
+                fetch('get_zip' + '?' + $.param(params))
+                    .then(response => response.ok ? response.blob() : false)
+                    .then(blob => {
+                        $("[name=FetchZip]")[0].textContent = "Скачать архив"
+                        if (blob)
+                            downdloadBlob(blob, `Презентации.zip`)
+                        else
+                            alert("Error during file download")
+                    });
+            }
+        },
+        LatestChecks: {
+            text: 'Latest',
+            event: function () {
+                $("#check-list-table").bootstrapTable('refresh', { query: { latest: true } });
+            }
+        }
+    }
+    else
+        return {}
+}
 
-          fetch('get_csv' + '?' + $.param(params))
-          .then(response => response.blob())
-          .then(blob => {
-            var url = window.URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = 'slides_checker'+ timeStamp() + '.csv';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        });
-    }},
-    LatestChecks: {
-      text: 'Latest',
-      event: function () {
-        $("#check-list-table").bootstrapTable('refresh', {query: {latest: true}});
-    }}
-}}
+function downdloadBlob(blob, filename){
+    var url = window.URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+}

@@ -21,8 +21,8 @@
                         <h5 class="texteous ins" id="uploading_label">Презентация</h5>
                         <div class="form-group">
                             <div id="uploading_form" class="custom-file">
-                                <input type="file" class="custom-file-input" id="upload_file" accept=".odp, .pptx, .ppt">
-                                <label class="custom-file-label" id="upload_file_label" for="upload_file">Допустимые форматы: odp, pptx, ppt</label>
+                                <input type="file" class="custom-file-input" id="upload_file" accept=".{{', .'.join(formats)}}">
+                                <label class="custom-file-label" id="upload_file_label" for="upload_file">Допустимые форматы: {{ ", ".join(formats) }}</label>
                                 <div class="invalid-feedback ins">Возникла ошибка</div>
                             </div>
                         </div>

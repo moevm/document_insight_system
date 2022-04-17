@@ -6,10 +6,6 @@
 {% block title %}Результаты проверки{% endblock %}
 
 {% block main %}
-{% set hr_checks = ['Соответствие названия файла шаблону', 'Количество основных слайдов', 'Нумерация слайдов', 'Заголовки слайдов присутствуют и занимают не более двух строк',
-                    'Слайд "Цель и задачи"', 'Слайд "Апробация работы"', 'Слайд с описанием актуальности работы',
-                    'Слайд с заключением', 'Наличие слайдов, посвященных задачам', 'Соответствие заключения задачам',
-                    'Наличие направлений дальнейшего развития'] %}
 
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row" id="results_holder">
@@ -24,7 +20,7 @@
           </thead>
           <tbody>
             <tr>
-              <td><a class="id_check" href="{{ "/results/"  ~ stats[0]}}">
+              <td><a class="id_check" href="{{ '/results/'  ~ stats[0]}}">
                 {{ (stats[0] | string)[-5:]}}</a></td>
                 {% for item in stats[1:] %}
                     <td>{{ item }}</td>
@@ -46,8 +42,8 @@
                 <tr data-toggle="collapse" data-target="#verd{{ loop.index }}" class="accordion-toggle">
                     <td><button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></td>
                     <th scope="row" class="ins">{{ loop.index }}</th>
-                    <td class="ins">{{ hr_checks[loop.index0] }}</td>
-                    <td class="{{ "table-secondary ins" if not results.enabled_checks[key] else ("table-success ins" if results.enabled_checks[key].pass else "table-danger ins") }}">
+                    <td class="ins">{{ labels[key] }}</td>
+                    <td class="{{ 'table-secondary ins' if not results.enabled_checks[key] else ('table-success ins' if results.enabled_checks[key].pass else 'table-danger ins') }}">
                        {{ "Не проведена" if not results.enabled_checks[key] else ("Пройдена" if results.enabled_checks[key].pass else "Не пройдена") }}
                     </td>
                 </tr>
@@ -75,9 +71,9 @@
          <canvas id="the-canvas" style="border: 1px solid #000000; direction: ltr;"></canvas>
        </div>
        {% endif %}
-        <a href="{{url_for("checks", _id=id)}}" id="presentation_download" class="col text-center" download="{{ fi }}">Скачать презентацию</a>
+        <a href="{{url_for('checks', _id=id)}}" id="presentation_download" class="col text-center" download="{{ fi }}">Скачать презентацию</a>
         {% if results.conv_pdf_fs_id %}
-            <a href="{{url_for("get_pdf", _id=results.conv_pdf_fs_id)}}" id="pdf" class="col text-center">PDF</a>
+            <a href="{{url_for('get_pdf', _id=results.conv_pdf_fs_id)}}" id="pdf" class="col text-center">PDF</a>
         {% endif %}
     </div>
     <div class="footer row"></div>
