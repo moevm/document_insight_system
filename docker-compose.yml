@@ -19,6 +19,8 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     volumes:
       - presentation_files:/usr/src/project/files/
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
 
   worker:
     image: slides_checker_base_image
@@ -32,6 +34,8 @@ services:
       - mongodb
     volumes:
       - presentation_files:/usr/src/project/files/
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
 
   redis:
     image: redis:6-alpine
@@ -48,6 +52,9 @@ services:
     restart: always
     depends_on:
       - mongodb
+    volumes: 
+    - "/etc/timezone:/etc/timezone:ro"
+    - "/etc/localtime:/etc/localtime:ro"
 
 volumes:
   presentation_files:

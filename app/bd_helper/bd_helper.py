@@ -6,6 +6,7 @@ import pymongo
 
 from app.bd_helper.bd_types import User, Presentation, Checks, Consumers, CriteriaPack, Logs
 from app.utils.pdf_converter import convert_to_pdf
+from app.utils.time import timezone_offset
 
 from datetime import datetime, timezone
 
@@ -218,7 +219,7 @@ def get_unpassed_checks():
 
 def set_passbacked_flag(checks_id, flag):
     upd_check = {"$set": {'is_passbacked': flag,
-                          'lms_passback_time': datetime.now(timezone.utc)}}
+                          'lms_passback_time': datetime.now()}}
     check = checks_collection.update_one({'_id': checks_id}, upd_check)
     return check if check else None
 
@@ -255,10 +256,17 @@ def get_storage():
 def get_all_checks():
     return checks_collection.find()
 
+
+def get_checks(filter={}, latest=None, limit=10, offset=0, sort=None, order=None):
+    if latest:
+        return get_latest_check_cursor(filter, limit, offset, sort, order)
+    else:
+        return get_checks_cursor(filter, limit, offset, sort, order)
+
 # get checks cursor with specified parameters
 
-
 def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
+
     sort = 'lms_passback_time' if sort == 'moodle-date' else sort
 
     count = checks_collection.count_documents(filter)
@@ -307,7 +315,7 @@ def format_check(check):
     grade_passback_time = check['lms_passback_time']
     grade_passback_ts = grade_passback_time.strftime(
         "%H:%M:%S - %b %d %Y") if grade_passback_time else '-'
-    return (str(check['_id']), check['user'], check['filename'], check['_id'].generation_time.strftime("%H:%M:%S - %b %d %Y"),
+    return (str(check['_id']), check['user'], check['filename'], (check['_id'].generation_time + timezone_offset).strftime("%H:%M:%S - %b %d %Y"),
             grade_passback_ts, check['score'])
 
 

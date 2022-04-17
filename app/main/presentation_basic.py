@@ -21,3 +21,10 @@ class PresentationBasic:
         for slide in self.slides:
             titles.append(slide.get_title())
         return titles
+
+    def __str__(self):
+        s = '-------------'
+        for slide in self.slides:
+            s += '\n' + str(slide)
+        s += '-------------'
+        return s

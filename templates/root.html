@@ -17,4 +17,5 @@
 
     <script src={{ url_for("static", filename="vendors.js") }}></script>
     <script src={{ url_for("static", filename="main.js") }}></script>
+    {% block script %}{% endblock %}
 </html>
