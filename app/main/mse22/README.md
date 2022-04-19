@@ -28,11 +28,11 @@ Proof-of-concept парсинг файлов `.docx` с выводом стру�
 
 ## `doc`
 
-Перевод файлов `.doc` в `.docx` с помощью сторонней программы (LibreOffice) с целью дальнейшего парсинга.
+Перевод файлов `.doc`, `.odt` в `.docx` с помощью сторонней программы (LibreOffice) с целью дальнейшего парсинга.
 
-`python3 -m app.main.mse22.doc doc --filename <path_to_doc_file>`
+`python3 -m app.main.mse22.converter_to_docx convert --filename <path_to_file>`
 
-Пример: `python3 -m app.main.mse22.doc doc --filename ~/my/beatiful/file.doc`
+Пример: `python3 -m app.main.mse22.converter_to_docx convert --filename ~/my/beatiful/file.doc`
 
 ## `document`
 Парсинг файлов с созданием вспомогательных структур, которые будут
