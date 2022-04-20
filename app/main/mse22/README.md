@@ -38,17 +38,23 @@ Proof-of-concept парсинг файлов `.docx` с выводом стру�
 Парсинг файлов с созданием вспомогательных структур, которые будут
 использоваться для проверки документов, с печатью результата в stdout.
 
-Запуск: `python3 -m app.main.mse22.document [-h|--help] --filename <path_to_docx_file>`
+Запуск: `python3 -m app.main.mse22.document [-h|--help] --filename <path_to_docx_file> --type <type_of_file>`
+
+Тип файла:
+
+- LR - Лабораторная работа
+- FWQ - Выпускная квалификационная работа
+
 
 Конкретные примеры:
 
 `python3 -m app.main.mse22.document --help`
 – вызов краткой справки;
 
-`python3 -m app.main.mse22.document --filename ~/my/beatiful/file.docx`
+`python3 -m app.main.mse22.document --filename ~/my/beatiful/file.docx --type FWQ`
 – парсинг файла `~/my/beatiful/file.docx`;
 
-`python3 -m app.main.mse22.document --filename ~/my/beatiful/file.docx > /dev/null && echo $?`
+`python3 -m app.main.mse22.document --filename ~/my/beatiful/file.docx --type FWQ > /dev/null && echo $?`
 – проверка безошибочной работы пакета на файле `~/my/beatiful/file.docx` без
 вывода содержимого файла.
 
