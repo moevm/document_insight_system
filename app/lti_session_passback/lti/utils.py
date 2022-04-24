@@ -1,6 +1,5 @@
 import logging
 
-from app.server import criteria
 logger = logging.getLogger('root_logger')
 from app.main.checks_config.parser import sld_num
 
