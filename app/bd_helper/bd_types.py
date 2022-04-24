@@ -1,3 +1,4 @@
+from app.lti_session_passback.lti.utils import DEFAULT_CRITERIA
 from flask_login import UserMixin
 from app.main.checks_config.parser import sld_num
 
@@ -11,11 +12,6 @@ class Packable:
     def __str__(self) -> str:
         return f"{self.__class__.__name__}: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
 
-
-DEFAULT_CRITERIA = {'template_name': True, 'slides_number': {'sld_num': sld_num['bsc'], 'detect_additional': True},
-                    'slides_enum': True, 'slides_headers': True, 'goals_slide': True, 'probe_slide': True,
-                    'actual_slide': True, 'conclusion_slide': True, 'slide_every_task': 50,
-                    'conclusion_actual': 50, 'conclusion_along': True}
 
 # You shouldn't create this or change username and presentations explicitly
 class User(Packable, UserMixin):

@@ -1,4 +1,6 @@
 import logging
+
+from app.server import criteria
 logger = logging.getLogger('root_logger')
 from app.main.checks_config.parser import sld_num
 
@@ -10,6 +12,10 @@ ROLES = 'roles'
 ADMIN_ROLE = 'Instructor'
 CUSTOM_PARAM_PREFIX = 'custom_'
 PASSBACK_PARAMS = ('lis_outcome_service_url', 'lis_result_sourcedid', 'oauth_consumer_key')
+DEFAULT_CRITERIA = {'template_name': True, 'slides_number': {'sld_num': sld_num['bsc'], 'detect_additional': True},
+                    'slides_enum': True, 'slides_headers': True, 'goals_slide': True, 'probe_slide': True,
+                    'actual_slide': True, 'conclusion_slide': True, 'slide_every_task': 50,
+                    'conclusion_actual': 50, 'conclusion_along': True}
 
 from app.bd_helper.bd_helper import ConsumersDBManager
 
@@ -86,7 +92,7 @@ def launch_sanity_check(custom, task_info):
         eval_criteria = dict((k, eval(custom[k])) for k in order if k in custom and k != 'slides_number')
     except NameError:
         logger.warning("Error in declared launch values is present in {0}(id={1}). {2}'s checks will be defaulted".format(*task_info.values()))
-        return dict()
+        return DEFAULT_CRITERIA
 
     int_false_checks = ['slide_every_task', 'conclusion_actual']
     check_types = {
@@ -110,6 +116,6 @@ def launch_sanity_check(custom, task_info):
         logger.warning(f"The following check types don't match their designated types: {', '.join(failed_types)}.")
         logger.warning("They will be disabled for task {0}(id={1}) in {2}'s checks".format(*task_info.values()))
 
-    reordered_dict = {k: eval_criteria.get(k, False) for k in order}
+    reordered_dict = {k: eval_criteria.get(k, DEFAULT_CRITERIA.get(k, False)) for k in order}
 
     return reordered_dict
