@@ -1,5 +1,6 @@
 import os
 import time
+import traceback
 from celery import Celery
 from app.bd_helper.bd_types import Checks
 from os.path import join, exists
@@ -35,4 +36,4 @@ def create_task(filename, converted_id, username=''):
         return {'check_id': str(checks_id), 'score': checks.score}
     except Exception as e:
         logger.error("\tПри обработке произошла ошибка: " + str(e), exc_info=True)
-        return 'Not OK, error: {}'.format(e)
+        return 'Not OK, error: {}'.format(traceback.format_exc())

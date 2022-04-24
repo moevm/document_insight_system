@@ -2,7 +2,7 @@ from os import remove
 from os.path import join, exists
 from bson import ObjectId
 from flask_login import current_user
-
+import traceback
 from app.bd_helper.bd_helper import *
 from app.main.checker import check
 from app.main.parser import parse
@@ -49,4 +49,4 @@ def upload(request, upload_folder):
         return str(checks_id)
     except Exception as e:
         logger.error("\tПри обработке произошла ошибка: " + str(e), exc_info=True)
-        return 'Not OK, error: {}'.format(e)
+        return 'Not OK, error: {}'.format(traceback.format_exc())
