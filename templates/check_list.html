@@ -59,3 +59,9 @@
     </div>
     <div class="footer row"></div>
 {% endblock main %}
+
+{% block script %}
+<script>
+    var is_admin = "{{current_user.is_admin}}" == "True"   
+</script>
+{% endblock %}

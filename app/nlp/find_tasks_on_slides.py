@@ -36,6 +36,11 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
         tasks = stemming.get_sentences(slide_goal_and_tasks, True)
         ignore = re.compile('[0-9][.]?|Задачи:|‹#›')  #[:]?
         cleaned_tasks = [task for task in tasks if not re.fullmatch(ignore, task)]
+        logger=logging.getLogger('root_logger')
+        logger.debug(str(slide_goal_and_tasks))
+        logger.debug(str(tasks))
+        logger.debug(str(ignore))
+        logger.debug(str(cleaned_tasks))
         if len(cleaned_tasks) == 0:
             return 'Задач не существует'
 

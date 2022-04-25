@@ -6,7 +6,7 @@ key_slides = {
               'goals_and_tasks': 'Цель и задачи',
               'approbation': 'Апробация',
               'conclusion': 'Заключение',
-              'relevance': 'Актуальность'
+              'relevance': ['Актуальность', 'Актуальности', 'Актуальностью']
               }
 key_slide = Namespace(**key_slides)
 

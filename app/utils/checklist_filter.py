@@ -1,9 +1,11 @@
 import json
+import logging
 from datetime import datetime, timedelta
+
 from bson import ObjectId
 from flask_login import current_user
+from app.utils.time import timezone_offset
 
-import logging
 logger = logging.getLogger('root_logger')
 
 
@@ -30,15 +32,15 @@ def checklist_filter(request):
     f_upload_date_list = list(filter(lambda val: val, f_upload_date.split("-")))
     try:
         if len(f_upload_date_list) == 1:
-            date = datetime.strptime(f_upload_date_list[0], "%d.%m.%Y")
+            date = datetime.strptime(f_upload_date_list[0], "%d.%m.%Y") - timezone_offset
             filter_query["_id"] = {
                 "$gte": ObjectId.from_datetime(date),
                 "$lte": ObjectId.from_datetime(date + timedelta(hours=23, minutes=59, seconds=59))
             }
         elif len(f_upload_date_list) > 1:
             filter_query["_id"] = {
-                "$gte": ObjectId.from_datetime(datetime.strptime(f_upload_date_list[0], "%d.%m.%Y")),
-                "$lte": ObjectId.from_datetime(datetime.strptime(f_upload_date_list[1], "%d.%m.%Y"))
+                "$gte": ObjectId.from_datetime(datetime.strptime(f_upload_date_list[0], "%d.%m.%Y") - timezone_offset),
+                "$lte": ObjectId.from_datetime(datetime.strptime(f_upload_date_list[1], "%d.%m.%Y") - timezone_offset)
             }
     except Exception as e:
         logger.warning("Can't apply upload-date filter")

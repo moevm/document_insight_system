@@ -52,3 +52,6 @@ class SlideODP(SlideBasic):
         else:
             for in_child in child.childNodes:
                 self.__walk_children(in_child, child_container)
+
+    def __str__(self):
+        return super().__str__()

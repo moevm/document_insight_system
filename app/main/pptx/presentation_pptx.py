@@ -10,5 +10,8 @@ class PresentationPPTX(PresentationBasic):
         self.add_slides()
 
     def add_slides(self):
-        for slide in self.prs.slides:
-            self.slides.append(SlidePPTX(slide, self.prs.slide_width, self.prs.slide_height))
+        for index, slide in enumerate(self.prs.slides, 1):
+            self.slides.append(SlidePPTX(slide, self.prs.slide_width, self.prs.slide_height, index))
+
+    def __str__(self):
+        return super().__str__()
