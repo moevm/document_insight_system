@@ -2,7 +2,7 @@ from docx2python import docx2python
 import docx
 import re
 
-from app.main.mse22.document.page_object import PageObject
+from app.main.mse22.document.page_object import PageObjectImage, PageObjectTable, PageObjectList, PageObjectHeader
 from app.main.mse22.document.page import Page
 
 
@@ -11,9 +11,9 @@ class PageCreator:
     def makePageObject(docx_docx2python, docx_docx, i, j, paragraph_index):
         image_pattern = r'\-{4}media/image\d+\.\D+\-{4}'
         if re.search(image_pattern, docx_docx2python.body[i][0][0][j - 1]):
-            return PageObject('image', docx_docx.paragraphs[paragraph_index])
+            return PageObjectImage('image', docx_docx.paragraphs[paragraph_index])
         else:
-            return PageObject('paragraph', docx_docx.paragraphs[paragraph_index])
+            return PageObjectHeader('paragraph', docx_docx.paragraphs[paragraph_index])
 
     def createPageObjects(self, path, file_type):
         docx_docx2python = docx2python(path)
@@ -33,7 +33,7 @@ class PageCreator:
                     chapter = 'Титульный лист'
 
                 if len(docx_docx2python.body[j]) > 1:
-                    current_page_object.append(PageObject('table', docx_docx.tables[table_index]))
+                    current_page_object.append(PageObjectTable('table', docx_docx.tables[table_index]))
                     table_index += 1
 
                 else:
