@@ -10,3 +10,7 @@ class Converter:
     def convert(self):
         subprocess.call(['soffice', '--headless', '--convert-to', 'docx', '--outdir', self._out_dir, self._file])
         return self._out_dir + self._filename + '.docx'
+
+    def convert_to_pdf(self):
+        subprocess.call(['soffice', '--headless', '--convert-to', 'pdf', '--outdir', self._out_dir, self._file])
+        return self._out_dir + self._filename + '.pdf'
