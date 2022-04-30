@@ -1,5 +1,6 @@
 from .style_info import StyleInfo
 
+
 class PageObject:
     def __init__(self, object_type, data):
         self.type = object_type
@@ -30,4 +31,3 @@ class PageObjectList(PageObject):
     def __init__(self, object_type, data, list_of_paragraphs=None):
         super().__init__(object_type, data)
         self.data_list = list_of_paragraphs
-   

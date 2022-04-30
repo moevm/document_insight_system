@@ -133,6 +133,12 @@ def upload():
         return data.remove_presentation(request.json)
 
 
+@app.route("/textfiles/upload", methods=["GET"])
+@login_required
+def upload_textfile():
+    return render_template("./upload_textfile.html")
+
+
 @app.route("/tasks", methods=["POST"])
 @login_required
 def run_task():
