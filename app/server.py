@@ -136,7 +136,7 @@ def upload():
 @app.route("/textfiles/upload", methods=["GET"])
 @login_required
 def upload_textfile():
-    return render_template("./upload_textfile.html")
+    return render_template("./upload_textfile.html", debug=DEBUG, navi_upload=False, name=current_user.name, formats=["docx", "doc"])
 
 
 @app.route("/tasks", methods=["POST"])
