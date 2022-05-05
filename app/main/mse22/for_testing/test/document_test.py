@@ -6,7 +6,7 @@ import docx
 from app.main.mse22.document.document import Document
 
 
-class TestDocumentBasic:
+class TestDocument:
     sections_lab = ['Цель работы', 'Основные теоретические положения',
                         'Выполнение работы', 'Тестирование', 'Выводы']
     sections_fwq = ['ЗАДАНИЕ НА ВЫПУСКНУЮ КВАЛИФИКАЦИОННУЮ РАБОТУ',
