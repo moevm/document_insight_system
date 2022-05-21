@@ -44,18 +44,24 @@ class TestDocument:
             assert page_object.type == "paragraph"
         assert [page.pageObjects[0].text for page in parsed_document.pages[1:]] == self.sections_lab
 
-    def test_pre_made_passing_lab_docx(self):
-        sections = ["Титульный лист"] + self.sections_lab
-        appendix_regex = re.compile("ПРИЛОЖЕНИЕ [А-ЯЁ]")
-        for i in range(1, 5):
-            filename = "../test_files/docx/passing-{0}.docx".format(str(i))
-            docx_document = docx.Document(filename)
-            parsed_document = Document(docx_document, filename, "LR")
-            assert parsed_document.errors == []
-            assert len(parsed_document.pages) >= len(sections)
-            assert [page.header for page in parsed_document.pages[0:len(sections)]] == sections
-            for j in range(len(parsed_document.pages), len(parsed_document.pages)):
-                assert appendix_regex.match(parsed_document.pages[j].header)
+    @pytest.mark.parametrize("filename, expected_sections", [
+        ("../test_files/docx/passing-1.docx", ["Титульный лист"] + sections_lab),
+        ("../test_files/docx/passing-2.docx", ["Титульный лист"] + sections_lab + ["ПРИЛОЖЕНИЕ А"]),
+        ("../test_files/docx/passing-3.docx", ["Титульный лист"] + sections_lab),
+        ("../test_files/docx/passing-4.docx", ["Титульный лист"] + sections_lab),
+        ("../test_files/docx/passing-5.docx", ["Титульный лист"] + sections_lab + ["приложение А"])
+    ])
+    def test_pre_made_passing_lab_docx(self, filename, expected_sections):
+        appendix_regex = re.compile("(Приложение|ПРИЛОЖЕНИЕ|приложение) [А-ЯЁа-яё]")
+        docx_document = docx.Document(filename)
+        parsed_document = Document(docx_document, filename, "LR")
+        assert parsed_document.errors == []
+        actual_sections = [page.header for page in parsed_document.pages]
+        assert actual_sections == expected_sections
+        for section in actual_sections:
+            if section not in ["Титульный лист"] + self.sections_lab:
+                print(section)
+                assert appendix_regex.match(str(section))
 
     @pytest.mark.parametrize("filename, expected_errors", [
         ("../test_files/docx/failing-1.docx", ["Выполнение работы"]),
@@ -63,7 +69,8 @@ class TestDocument:
         ("../test_files/docx/failing-3.docx", ["Цель работы"]),
         ("../test_files/docx/failing-4.docx", ["Основные теоретические положения"]),
         ("../test_files/docx/failing-5.docx", ['Цель работы', 'Основные теоретические положения',
-                                               'Выполнение работы', 'Тестирование', 'Выводы'])
+                                               'Выполнение работы', 'Тестирование', 'Выводы']),
+        ("../test_files/docx/failing-6.docx", ["Выводы"])
     ])
     def test_pre_made_failing_lab_docx(self, filename, expected_errors):
         parsed_document = Document(docx.Document(filename), filename, "LR")
@@ -73,7 +80,7 @@ class TestDocument:
             sections.remove(section)
         actual_sections = [page.header for page in parsed_document.pages]
         for section in actual_sections:
-            if re.compile("ПРИЛОЖЕНИЕ [А-ЯЁ]").match(section):
+            if re.compile("(ПРИЛОЖЕНИЕ|Приложение|приложение) [А-ЯЁа-яё]").match(section):
                 actual_sections.remove(section)
         assert actual_sections == sections
 
