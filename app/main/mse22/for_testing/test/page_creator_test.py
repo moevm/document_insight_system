@@ -3,7 +3,6 @@ import docx
 from docx2python import docx2python
 
 from app.main.mse22.document.page_creator import PageCreator
-from app.main.mse22.document.page_object import PageObject
 
 
 @pytest.mark.parametrize("entities, body, paragraph_in_body, paragraph, expected_type, expected_content", [
@@ -116,7 +115,7 @@ def test_make_content(filename, body, paragraph, expected_result):
 
 
 class TestMakeIndices:
-    chapters_lab = chapters = ['Цель работы', 'Основные теоретические положения',
+    chapters_lab = ['Цель работы', 'Основные теоретические положения',
                         'Выполнение работы', 'Тестирование', 'Выводы']
     chapters_fwq = ['ЗАДАНИЕ НА ВЫПУСКНУЮ КВАЛИФИКАЦИОННУЮ РАБОТУ',
                         'КАЛЕНДАРНЫЙ ПЛАН ВЫПОЛНЕНИЯ ВЫПУСКНОЙ КВАЛИФИКАЦИОННОЙ РАБОТЫ', 'РЕФЕРАТ', 'ABSTRACT',
@@ -334,6 +333,36 @@ class TestMakeIndices:
                 [[0, 5], [1, 0]]
             ],
             ["Выводы"]
+        ),
+        (
+            ["", "Цель работы", "Основные теоретические положения", "Выполнение работы",
+                 "Тестирование", "Тестирование", "Выводы"],
+            "LR",
+            [
+                [[0, 0], [0, 0]],
+                [[0, 1], [0, 1]],
+                [[0, 2], [0, 2]],
+                [[0, 3], [0, 3]],
+                [[0, 4], [0, 5]],
+                [[0, 6], [0, 6]]
+            ],
+            []
+        ),
+        (
+            ["", "Цель работы", "Основные теоретические положения", "Выполнение работы",
+                 "Тестирование", "Выводы", "ПРИЛОЖЕНИЕ А", "ПРИЛОЖЕНИЕ А"],
+            "LR",
+            [
+                [[0, 0], [0, 0]],
+                [[0, 1], [0, 1]],
+                [[0, 2], [0, 2]],
+                [[0, 3], [0, 3]],
+                [[0, 4], [0, 4]],
+                [[0, 5], [0, 5]],
+                [[0, 6], [0, 6]],
+                [[0, 7], [0, 7]]
+            ],
+            []
         )
     ])
     def test_simple_file(self, tmp_path, paragraphs, file_type, expected_chapters, expected_errors):
@@ -347,6 +376,26 @@ class TestMakeIndices:
         docx_document.save(filename)
         docx2python_document = docx2python(filename)
         assert (expected_chapters, expected_errors) == PageCreator().makeIndices(docx2python_document, file_type)
+
+    def test_one_section_missing(self, tmp_path):
+        filename = tmp_path.as_posix() + "/test_file.docx"
+        for i in range(len(self.chapters_lab)):
+            docx_document = docx.Document()
+            docx_document.add_paragraph("Title page")
+            for j in range(len(self.chapters_lab)):
+                if j != i:
+                    docx_document.add_paragraph(self.chapters_lab[j])
+            docx_document.save(filename)
+            docx2python_document = docx2python(filename)
+            (actual_chapters, actual_errors) = PageCreator().makeIndices(docx2python_document, "LR")
+            assert actual_errors == [self.chapters_lab[i]]
+            assert actual_chapters == [
+                [[0, 0], [0, 0]],
+                [[0, 1], [0, 1]],
+                [[0, 2], [0, 2]],
+                [[0, 3], [0, 3]],
+                [[0, 4], [0, 4]]
+            ]
 
 
 if __name__ == '__main__':

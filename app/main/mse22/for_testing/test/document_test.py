@@ -63,19 +63,6 @@ class TestDocument:
                 print(section)
                 assert appendix_regex.match(str(section))
 
-    '''def test_pre_made_passing_lab_docx_(self):
-        sections = ["Титульный лист"] + self.sections_lab
-        appendix_regex = re.compile("ПРИЛОЖЕНИЕ [А-ЯЁ]")
-        for i in range(1, 6):
-            filename = "../test_files/docx/passing-{0}.docx".format(str(i))
-            docx_document = docx.Document(filename)
-            parsed_document = Document(docx_document, filename, "LR")
-            assert parsed_document.errors == []
-            assert len(parsed_document.pages) >= len(sections)
-            assert [page.header for page in parsed_document.pages[0:len(sections)]] == sections
-            for j in range(len(parsed_document.pages), len(parsed_document.pages)):
-                assert appendix_regex.match(parsed_document.pages[j].header)'''
-
     @pytest.mark.parametrize("filename, expected_errors", [
         ("../test_files/docx/failing-1.docx", ["Выполнение работы"]),
         ("../test_files/docx/failing-2.docx", ["Цель работы"]),
