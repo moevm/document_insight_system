@@ -4,8 +4,11 @@ import '../styles/upload.css';
 let upload_id;
 const file_input = $("#upload_file");
 const upload_button = $("#upload_upload_button");
+const document_type_select = $("#document_type");
+const textfiles_extensions = ['doc', 'docx', "odt"];
 
 upload_button.prop("disabled", true);
+document_type_select.prop("hidden", true);
 
 file_input.change(() => {
     const fileName = file_input.val().split("\\")[2];
@@ -16,6 +19,11 @@ file_input.change(() => {
     }
     $("#upload_file_label").html(fileName);
     upload_button.prop("disabled", false);
+    if (textfiles_extensions.includes(fileName.split('.').pop())){
+        document_type_select.prop("hidden", false);
+    }else{
+        document_type_select.prop("hidden", true);
+    }
 });
 
 async function upload(sample = false) {
@@ -37,6 +45,7 @@ async function upload(sample = false) {
     const response_text = await (await fetch("/upload", post_data)).text();
     console.log("Answer:", response_text);
     bar.css("width", "100%").attr('aria-valuenow', 100);
+    console.log(presentation);
     if (response_text == 'storage_overload') {
         alert('Система перегружена, попробуйте повторить запрос позднее');
         bar.addClass("bg-danger");
@@ -45,6 +54,11 @@ async function upload(sample = false) {
         alert(response_text);
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");
+    } else if (textfiles_extensions.includes(presentation.name.split('.').pop())) {
+        console.log(presentation.name)
+        upload_id = response_text;
+      bar.addClass("bg-success");
+      window.location.replace("/parse_results/" + upload_id);
     } else {
       upload_id = response_text;
       bar.addClass("bg-success");

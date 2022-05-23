@@ -30,7 +30,8 @@ from lti_session_passback.lti import utils
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = './files'
-ALLOWED_EXTENSIONS = set(('ppt', 'pptx', 'odp'))
+ALLOWED_EXTENSIONS = set(('ppt', 'pptx', 'odp', 'doc', 'odt', 'docx'))
+DOCUMENT_TYPES = set(('Лабораторная работа', 'Курсовая работа'))
 columns = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
@@ -128,7 +129,7 @@ def upload():
         else:
             abort(401)
     elif request.method == "GET":
-        return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name, formats=current_user.formats or ALLOWED_EXTENSIONS)
+        return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name, formats=current_user.formats or ALLOWED_EXTENSIONS, doc_types=DOCUMENT_TYPES)
     elif request.method == "PUT":
         return data.remove_presentation(request.json)
 
@@ -193,6 +194,21 @@ def results(_id):
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
 
+
+@app.route("/parse_results/<string:_id>", methods=["GET"])
+@login_required
+def parse_results(_id):
+    try:
+        oid = ObjectId(_id)
+    except bson.errors.InvalidId:
+        logger.error('_id exception:', exc_info=True)
+        return render_template("./404.html")
+    check = bd_helper.get_check(oid)
+    if check is not None:
+        return render_template("./parse_results.html", results=check.enabled_checks, id=_id, fi=check.filename, navi_upload=True)
+    else:
+        logger.info("Запрошенная проверка не найдена: " + _id)
+        return render_template("./404.html")
 
 @app.route("/checks/<string:_id>", methods=["GET"])
 @login_required

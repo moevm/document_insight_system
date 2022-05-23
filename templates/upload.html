@@ -24,6 +24,12 @@
                                 <input type="file" class="custom-file-input" id="upload_file" accept=".{{', .'.join(formats)}}">
                                 <label class="custom-file-label" id="upload_file_label" for="upload_file">Допустимые форматы: {{ ", ".join(formats) }}</label>
                                 <div class="invalid-feedback ins">Возникла ошибка</div>
+                                <select class="form-control" id="document_type">
+                                    <option value="">Выберите тип документа</option>
+                                    {% for type in doc_types %}
+                                        <option value="{{ type }}">{{ type }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
                         <div id="uploading_progress_holder" class="form-group" style="display: none">

@@ -41,3 +41,17 @@ def check(presentation, checks, presentation_name):
         checks.is_passbacked = False
 
     return checks
+
+
+def parse_check(presentation, checks, presentation_name):
+    checks.enabled_checks = {
+        "result": presentation
+    }
+    # checks.score = checks.calc_score()
+    checks.filename = presentation_name
+    checks.user = current_user.username
+    checks.lms_user_id = current_user.lms_user_id
+    if current_user.params_for_passback:
+        checks.is_passbacked = False
+
+    return checks

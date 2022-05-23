@@ -1,0 +1,14 @@
+{% extends "root.html" %}
+
+{% block title %}Результаты проверки{% endblock %}
+
+{% block main %}
+    <div class="header row">{% include "header.html" %}</div>
+    <div class="holder row" id="results_holder" style="display: block">
+        {% for key, v in results.items() %}
+            {% for string in v.splitlines() %}
+                <p style="margin-left: 10px"> {{ string }} </p>
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endblock %}
