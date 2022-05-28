@@ -31,7 +31,7 @@ from lti_session_passback.lti import utils
 logger = get_root_logger('web')
 UPLOAD_FOLDER = './files'
 ALLOWED_EXTENSIONS = set(('ppt', 'pptx', 'odp', 'doc', 'odt', 'docx'))
-DOCUMENT_TYPES = set(('Лабораторная работа', 'Курсовая работа'))
+DOCUMENT_TYPES = set(('Лабораторная работа', 'Курсовая работа', 'ВКР'))
 columns = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
