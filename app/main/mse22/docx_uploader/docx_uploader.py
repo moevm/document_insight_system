@@ -50,6 +50,9 @@ class DocxUploader(BaseUploader):
         for i in range(len(self.__paragraphs)):
             print(self.__paragraphs[i].to_string())
 
+    def __str__(self):
+        return self.__core_properties.to_string() + '\n' + '\n'.join([self.__paragraphs[i].to_string() for i in range(len(self.__paragraphs))])
+
 
 def main(args):
     file = args.file

@@ -4,7 +4,7 @@ from bson import ObjectId
 from flask_login import current_user
 
 from app.bd_helper.bd_helper import *
-from app.main.checker import check
+from app.main.checker import check, parse_check
 from app.main.parser import parse
 from app.utils.get_file_len import get_file_len
 from flask import current_app
@@ -39,7 +39,10 @@ def upload(request, upload_folder):
         checks = create_check(current_user)
 
         checks.conv_pdf_fs_id = converted_id
-        check(parse(filename), checks, presentation_name)
+        if filename.endswith('.docx') or filename.endswith('.doc') or filename.endswith('.odt'):
+            checks = parse_check(parse(filename), checks, presentation_name)
+        else:
+            check(parse(filename), checks, presentation_name)
         presentation, checks_id = add_check(presentation, checks, filename)
 
         if delete and exists(filename):
