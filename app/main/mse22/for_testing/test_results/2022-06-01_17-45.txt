@@ -1,0 +1,24 @@
+============================= test session starts ==============================
+platform linux -- Python 3.8.10, pytest-7.1.2, pluggy-0.13.0
+rootdir: /home/evgeny/mse_auto_checking_slides_vaganov/app/main/mse22/for_testing/test
+plugins: repeat-0.9.1, rerunfailures-10.2, mock-1.10.4, colcon-core-0.8.3, cov-2.8.1
+collected 14 items
+
+document_test.py ..............                                          [100%]
+
+=============================== warnings summary ===============================
+document_test.py::TestDocument::test_pre_made_passing_lab_docx[../test_files/docx/passing-5.docx-expected_sections4]
+  /usr/local/lib/python3.8/dist-packages/docx2python/bullets_and_numbering.py:47: UserWarning: none numbering format not implemented, substituting '--'
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 14 passed, 1 warning in 113.94s (0:01:53) ===================
+============================= test session starts ==============================
+platform linux -- Python 3.8.10, pytest-7.1.2, pluggy-0.13.0
+rootdir: /home/evgeny/mse_auto_checking_slides_vaganov/app/main/mse22/for_testing/test
+plugins: repeat-0.9.1, rerunfailures-10.2, mock-1.10.4, colcon-core-0.8.3, cov-2.8.1
+collected 10 items
+
+page_creator_test.py ..........                                          [100%]
+
+============================== 10 passed in 0.32s ==============================
