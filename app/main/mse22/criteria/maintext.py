@@ -21,6 +21,9 @@ class MainText:
         self._errors = defaultdict(list)
         
     def check_text(self):
+        self._errors.clear()
+        self.msg = ''
+        self.output = True
         for obj in self.text_page_objects:
             for k, v in self.criteria.items():
                 if getattr(obj.style_info, k, None) not in v:
@@ -56,6 +59,9 @@ class MainText:
             if error_name == 'line_spacing':
                 error_info = '\nНеверный межстрочный интервал в строках:\n' + '\n'.join(strings) 
                 self.change_msg(self.msg + error_info)
-
+                
+        if not self.msg:
+            self.msg = 'Текст оформлен правильно'
+            
         return self.output
     
