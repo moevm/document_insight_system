@@ -16,7 +16,7 @@ class PageCreator:
             return PageObjectHeader('paragraph', docx_docx.paragraphs[paragraph_index])
 
     @staticmethod
-    def make_content(doc, body_index, paragraph_index):  # шрифты, автогенерация
+    def make_content(doc, body_index, paragraph_index): 
         new_chapters = []
         index = 0
         paragraph_index += 1
@@ -24,7 +24,6 @@ class PageCreator:
         while len(doc.body[body_index][0][0]) >= paragraph_index + 1 \
                 and doc.body[body_index][0][0][paragraph_index] == ' ':
             paragraph_index += 1
-        #print(len(doc.body), len(doc.body[body_index][0][0]), paragraph_index + 1)
         if len(doc.body[body_index][0][0]) == paragraph_index + 1:
             body_index += 1
             paragraph_index = 0
@@ -43,11 +42,9 @@ class PageCreator:
                     continue
                 else:
                     if s.split('+')[1].strip():
-                        #print(s.split('+')[0] + s.split('+')[1])
                         new_chapters.append(f"{s.split('+')[0]} {s.split('+')[1]}".strip())
         else:
             for elem in doc.body[body_index][0][0]:
-                #print(elem)
                 if re.search(r'(ЗАКЛЮЧЕНИЕ|Заключение|заключение)', elem):
                     flag = True
                     break
@@ -69,7 +66,6 @@ class PageCreator:
                             r'[\w. ]{2,}',
                             doc.body[body_index][0][0][i]).start():re.search(r'[\w. ]{2,}',
                                                                              doc.body[body_index][0][0][i]).end()])
-        #print(new_chapters)
         if flag:
             return True, new_chapters, index
         else:
@@ -205,7 +201,6 @@ class PageCreator:
                     tmp_i_end[1] = doc_result.body[cur_index][0][0].index(find_chapter, find_index) - 1
                     i_start[0], i_start[1] = tmp_i_end[0], tmp_i_end[1] + 1
                 docx_chapters.append([tmp_i_start, tmp_i_end])
-                #i_start[0], i_start[1] = tmp_i_end[0], tmp_i_end[1] + 1
                 cur_chapter += 1
 
             else:
