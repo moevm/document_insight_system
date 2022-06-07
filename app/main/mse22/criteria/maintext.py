@@ -38,8 +38,6 @@ class MainText:
         self.msg = ''
         self.output = True
 
-        print(self.text_page_objects)
-
         for object_dict in self.text_page_objects:
             
             obj = object_dict['object']
