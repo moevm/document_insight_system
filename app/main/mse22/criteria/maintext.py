@@ -36,8 +36,7 @@ class MainText:
         self.output = True
         self.text_page_objects = [{'object': page_object, 'passed': None, 'error_sets': None}
                                          for page_object in text_page_objects
-                                            if not getattr(page_object.style_info, 'bold', None)
-                                               and getattr(page_object.style_info, 'alignment', None) != WD_ALIGN_PARAGRAPH.CENTER]
+                                            if not getattr(page_object.style_info, 'bold', None)]
         self.styles = styles
 
 
