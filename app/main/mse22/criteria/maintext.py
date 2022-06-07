@@ -5,11 +5,11 @@ from app.main.mse22.document.page_object import PageObjectHeader
 
 DEFAULT_STYLE = {
     'fields':{
-        'font_name': ['Times New Roman'],
-        'font_size': [12, 14],
+        'font_name': ['Times New Roman', None],
+        'font_size': [12, 14, None],
         'bold': [False, None],
         'italic': [False, None],
-        'alignment': [WD_ALIGN_PARAGRAPH.JUSTIFY],
+        'alignment': [WD_ALIGN_PARAGRAPH.JUSTIFY, None],
         'first_line_indent': [Cm(1.25), None],
         'line_spacing': [Cm(1.5), None],
     },
@@ -18,11 +18,11 @@ DEFAULT_STYLE = {
 
 LISTING_STYLE = {
     'fields':{
-        'font_name': ['Courier New'],
-        'font_size': [11],
+        'font_name': ['Courier New', None],
+        'font_size': [11, None],
         'bold': [False, None],
         'italic': [False, None],
-        'alignment': [WD_ALIGN_PARAGRAPH.JUSTIFY],
+        'alignment': [WD_ALIGN_PARAGRAPH.JUSTIFY, None],
         'first_line_indent': [Cm(0), None],
         'line_spacing': [Cm(1), None],
     },
