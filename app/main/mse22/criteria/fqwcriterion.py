@@ -1,6 +1,8 @@
 from app.main.mse22.document.page_object import PageObjectTable
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
+from app.main.mse22.document.style_info import StyleInfo
+
 # class FQWCritertion(BaseCriteterion):
 class FQWCriterion():
     def __init__(self, title=None, subtitle=None, *args, **kwargs):
@@ -27,18 +29,22 @@ class FQWCriterion():
                 size = 12
             
             # проверка оформления
+            for row in obj.data_matrix:
+                for cell in row:
+                    for paragraph in cell:
+                        p_style = StyleInfo(paragraph.style)
 
-            if hasattr(obj.style_info, 'alignment') and obj.style_info.alignment != alignment:
-                if obj.style_info.alignment != None:
-                    errors.add('Неверное выравнивание')
-            
-            if hasattr(obj.style_info, 'font_name') and obj.style_info.font_name != font:
-                if obj.style_info.font_name != None:
-                    errors.add('Неверное шрифт')
-            
-            if hasattr(obj.style_info, 'font_size') and obj.style_info.font_size != size:
-                if obj.style_info.font_size != None:
-                    errors.add('Неверное шрифт')
+                        if hasattr(p_style, 'alignment') and p_style.alignment != alignment:
+                            if p_style.alignment != None:
+                                errors.add('Неверное выравнивание')
+                        
+                        if hasattr(p_style, 'font_name') and p_style.font_name != font:
+                            if p_style.font_name != None:
+                                errors.add('Неверный шрифт')
+                        
+                        if hasattr(p_style, 'font_size') and p_style.font_size != size:
+                            if p_style.font_size != None:
+                                errors.add('Неверный размер шрифта')
 
             if errors:
                 passed = False
