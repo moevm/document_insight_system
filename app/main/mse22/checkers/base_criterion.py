@@ -122,7 +122,7 @@ form_data_2 = {
 }
 
 if __name__ == "__main__":
-    filename = "/home/michael/Downloads/PR_Eiswald_MI_lb3.docx"
+    filename = "../for_testing/test_files/docx/passing-1.docx"
     docx_document = docx.Document(filename)
     document = Document(docx_document, filename, "LR")
     criterion = BaseCriterion(document, form_data_1)
