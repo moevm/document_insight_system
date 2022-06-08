@@ -1,3 +1,5 @@
+from docx.shared import Cm
+
 class StyleInfo:
     def __init__(self, docx_paragraph_style):
         if docx_paragraph_style is not None:
@@ -13,11 +15,13 @@ class StyleInfo:
             formatting = docx_paragraph_style.paragraph_format
             self.alignment = formatting.alignment
             if formatting.first_line_indent is not None:
-                self.first_line_indent = formatting.first_line_indent.cm
+                self.first_line_indent = Cm(formatting.first_line_indent.cm)
+                self.first_line_indent = round(self.first_line_indent / 1000) * 1000
             else:
                 self.first_line_indent = None
             if formatting.line_spacing is not None:
-                self.line_spacing = formatting.line_spacing
+                self.line_spacing = Cm(formatting.line_spacing)
+                self.line_spacing = round(self.line_spacing / 1000) * 1000
             else:
                 self.line_spacing = None
 
