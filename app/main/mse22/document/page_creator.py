@@ -10,7 +10,7 @@ class PageCreator:
     @staticmethod
     def makePageObject(docx_docx2python, docx_docx, i, j, paragraph_index):
         image_pattern = r'\-{4}media/image\d+\.\D+\-{4}'
-        if re.search(image_pattern, docx_docx2python.body[i][0][0][j - 1]):
+        if re.search(image_pattern, docx_docx2python.body[i][0][0][j]):
             return PageObjectImage('image', docx_docx.paragraphs[paragraph_index])
         else:
             return PageObjectHeader('paragraph', docx_docx.paragraphs[paragraph_index])
