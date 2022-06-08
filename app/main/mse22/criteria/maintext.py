@@ -36,7 +36,8 @@ class MainText:
         self.output = True
         self.text_page_objects = [{'object': page_object, 'passed': None, 'error_sets': None}
                                          for page_object in text_page_objects
-                                            if not getattr(page_object.style_info, 'bold', None)]
+                                           # if not getattr(page_object.style_info, 'bold', None)
+                                  ]
         self.styles = styles
 
 
@@ -110,7 +111,7 @@ class MainText:
                             self.change_msg(self.msg + error_info)
                 
         if self.output:
-            self.change_msg('Текст оформлен правильно')
+            self.change_msg('')
             
         return self.output
     
