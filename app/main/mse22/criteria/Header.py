@@ -12,8 +12,8 @@ class Header:
             'font_name': ['Times New Roman'],
             'font_size': [14],
             'alignment': [WD_PARAGRAPH_ALIGNMENT.CENTER],
-            'first_line_indent': [Cm(0)],
-            'line_spacing': [Cm(1.5)],
+            'first_line_indent': [0, None],
+            'line_spacing': [1.5],
             'bold': [True],
             'italic': [False, None],
             'underline': [False, None]
@@ -22,8 +22,18 @@ class Header:
             'font_name': ['Times New Roman'],
             'font_size': [14],
             'alignment': [WD_PARAGRAPH_ALIGNMENT.JUSTIFY],
-            'first_line_indent': [Cm(1.25)],
-            'line_spacing': [Cm(1.5)],
+            'first_line_indent': [1.25],
+            'line_spacing': [1.5],
+            'bold': [True],
+            'italic': [False, None],
+            'underline': [False, None]
+        },
+        '3': {
+            'font_name': ['Times New Roman'],
+            'font_size': [14],
+            'alignment': [WD_PARAGRAPH_ALIGNMENT.LEFT],
+            'first_line_indent': [1.25],
+            'line_spacing': [1.5],
             'bold': [True],
             'italic': [False, None],
             'underline': [False, None]
@@ -35,26 +45,46 @@ class Header:
 
     def CheckHeader(self):
         application_pattern = r"(Приложение|ПРИЛОЖЕНИЕ|приложение) [А-ЯЁа-яё]"
+        third_level_pattern = r"([1-9]\.( ){0,1}){2,}"
         for page in self.page_objects:
             if page.header == 'Титульный лист':
                 continue
-            self.__check_results[page.header] = dict.fromkeys(self.default_header_criteria['1'].keys())
+            self.__check_results[page.header] = dict.fromkeys(self.default_header_criteria['1'].keys(), True)
             if re.search(application_pattern, page.pageObjects[0].text):
-                for criteria_name, criteria_value in self.default_header_criteria['1'].items():
-                    self.Check_Criteria(page, criteria_name, criteria_value)
+                self.Check_Criteria(page, '1')
+            elif re.search(third_level_pattern, page.pageObjects[0].text):
+                self.Check_Criteria(page, '3')
             else:
-                for criteria_name, criteria_value in self.default_header_criteria['2'].items():
-                    self.Check_Criteria(page, criteria_name, criteria_value)
+                self.Check_Criteria(page, '2')
 
-    def Check_Criteria(self, page, criteria_name, criteria_value):
-        if not hasattr(page.pageObjects[0].style_info, criteria_name):
-            self.__check_results[page.header][criteria_name] = False
+    def Check_Criteria(self, page, header_type):
+        if page.pageObjects[0].data.alignment not in self.default_header_criteria[header_type]['alignment']:
+            self.__check_results[page.header]['alignment'] = False
             self.output = False
-        elif getattr(page.pageObjects[0].style_info, criteria_name) not in criteria_value:
-            self.__check_results[page.header][criteria_name] = False
+        if page.pageObjects[0].data.paragraph_format.line_spacing \
+                not in self.default_header_criteria[header_type]['line_spacing']:
+            self.__check_results[page.header]['line_spacing'] = False
             self.output = False
-        else:
-            self.__check_results[page.header][criteria_name] = True
+        if page.pageObjects[0].data.style.font.name not in self.default_header_criteria[header_type]['font_name']:
+            self.__check_results[page.header]['font_name'] = False
+            self.output = False
+        if round(page.pageObjects[0].data.paragraph_format.first_line_indent.cm, 2) \
+                not in self.default_header_criteria[header_type]['first_line_indent']:
+            self.__check_results[page.header]['first_line_indent'] = False
+            self.output = False
+        for elem in page.pageObjects[0].data.runs:
+            if elem.bold not in self.default_header_criteria[header_type]['bold']:
+                self.__check_results[page.header]['bold'] = False
+                self.output = False
+            if elem.italic not in self.default_header_criteria[header_type]['italic']:
+                self.__check_results[page.header]['italic'] = False
+                self.output = False
+            if elem.underline not in self.default_header_criteria[header_type]['underline']:
+                self.__check_results[page.header]['underline'] = False
+                self.output = False
+            if int(elem.font.size.pt) not in self.default_header_criteria[header_type]['font_size']:
+                self.__check_results[page.header]['font_size'] = False
+                self.output = False
 
     def ChangeMsg(self, msg):
         self.msg = msg
