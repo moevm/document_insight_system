@@ -1,6 +1,5 @@
 import re
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.shared import Cm
 
 
 class Header:
@@ -65,9 +64,6 @@ class Header:
                 not in self.default_header_criteria[header_type]['line_spacing']:
             self.__check_results[page.header]['line_spacing'] = False
             self.output = False
-        if page.pageObjects[0].data.style.font.name not in self.default_header_criteria[header_type]['font_name']:
-            self.__check_results[page.header]['font_name'] = False
-            self.output = False
         if round(page.pageObjects[0].data.paragraph_format.first_line_indent.cm, 2) \
                 not in self.default_header_criteria[header_type]['first_line_indent']:
             self.__check_results[page.header]['first_line_indent'] = False
@@ -82,8 +78,17 @@ class Header:
             if elem.underline not in self.default_header_criteria[header_type]['underline']:
                 self.__check_results[page.header]['underline'] = False
                 self.output = False
-            if int(elem.font.size.pt) not in self.default_header_criteria[header_type]['font_size']:
+            if elem.font.size is not None \
+                    and int(elem.font.size.pt) not in self.default_header_criteria[header_type]['font_size'] \
+                    or elem.font.size is None and page.pageObjects[0].data.style.font.size.pt \
+                    not in self.default_header_criteria[header_type]['font_size']:
                 self.__check_results[page.header]['font_size'] = False
+                self.output = False
+            if elem.font.name is not None \
+                    and elem.font.name not in self.default_header_criteria[header_type]['font_name'] \
+                    or elem.font.name is None and page.pageObjects[0].data.style.font.name \
+                    not in self.default_header_criteria[header_type]['font_name']:
+                self.__check_results[page.header]['font_name'] = False
                 self.output = False
 
     def ChangeMsg(self, msg):
@@ -122,3 +127,4 @@ class Header:
 
     def Get_msg(self):
         return self.msg
+    
