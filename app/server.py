@@ -515,6 +515,19 @@ def profile(username):
         abort(403)
 
 
+@app.route("/capacity", methods=["GET"])
+def system_capacity():
+    units = {'b': 1, 'mb':1024**2, 'gb': 1024**3}
+    unit = units.get(request.args.get('unit', 'gb').lower(), units['gb']) 
+    current_size = data.get_storage()
+    ratio = current_size / app.config['MAX_SYSTEM_STORAGE']
+    return {
+        'size': current_size / unit,
+        'max_size': app.config['MAX_SYSTEM_STORAGE'] / unit,
+        'ratio': ratio
+    }
+
+
 # Handle exceptions
 
 @app.errorhandler(413)
