@@ -30,8 +30,11 @@ from lti_session_passback.lti import utils
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = './files'
-ALLOWED_EXTENSIONS = set(('ppt', 'pptx', 'odp', 'doc', 'odt', 'docx'))
-DOCUMENT_TYPES = set(('Лабораторная работа', 'Курсовая работа', 'ВКР'))
+ALLOWED_EXTENSIONS = {
+    'pres': {'ppt', 'pptx', 'odp'},
+    'report': {'doc', 'odt', 'docx'}
+}
+DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
 columns = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
@@ -120,7 +123,7 @@ def interact():
 
 # Main pages request handlers:
 
-@app.route("/upload", methods=["GET", "POST", "PUT"])
+@app.route("/upload", methods=["GET", "POST"])
 @login_required
 def upload():
     if request.method == "POST":
@@ -129,16 +132,11 @@ def upload():
         else:
             abort(401)
     elif request.method == "GET":
-        return render_template("./upload.html", debug=DEBUG, navi_upload=False, name=current_user.name, formats=current_user.formats or ALLOWED_EXTENSIONS, doc_types=DOCUMENT_TYPES)
-    elif request.method == "PUT":
-        return data.remove_presentation(request.json)
-
-
-@app.route("/textfiles/upload", methods=["GET"])
-@login_required
-def upload_textfile():
-    return render_template("./upload_textfile.html", debug=DEBUG, navi_upload=False, name=current_user.name, formats=["docx", "doc"])
-
+        formats = set(current_user.formats)
+        # add user info as primary condition (check that user file type == request file type)
+        file_type = 'report' if request.args.get('report') else 'pres'
+        formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
+        return render_template("./upload.html", navi_upload=False, name=current_user.name, file_type=file_type, formats=sorted(formats))
 
 @app.route("/tasks", methods=["POST"])
 @login_required
@@ -583,4 +581,4 @@ if __name__ == '__main__':
         logger.info("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
               ("отладочном" if DEBUG else "рабочем") + " режиме")
         utils.create_consumers(app.config['LTI_CONSUMERS'])
-        app.run(debug=DEBUG, host=ip, port=8080, use_reloader=False)
+        app.run(debug=True, host=ip, port=8080, use_reloader=True)

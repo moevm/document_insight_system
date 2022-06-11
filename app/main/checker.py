@@ -43,12 +43,15 @@ def check(presentation, checks, presentation_name):
     return checks
 
 
-def parse_check(presentation, checks, presentation_name):
+def check_report(file, checks, filename):
     checks.enabled_checks = {
-        "result": presentation
+        'parse_result': {
+            'pass': True,
+            'verdict': file
+        }
     }
     # checks.score = checks.calc_score()
-    checks.filename = presentation_name
+    checks.filename = filename
     checks.user = current_user.username
     checks.lms_user_id = current_user.lms_user_id
     if current_user.params_for_passback:

@@ -78,14 +78,15 @@ def delete_user(username):
 
 
 # Adds presentation with given name to given user presentations, updates user, returns user and presentation id
-def add_presentation(user, presentation_name):
+def add_presentation(user, presentation_name, file_type):
     presentation = Presentation()
     presentation.name = presentation_name
+    presentation.file_type = file_type
     presentation_id = presentations_collection.insert_one(
         presentation.pack()).inserted_id
     user.presentations.append(presentation_id)
     edit_user(user)
-    return user, presentation_id
+    return presentation_id
 
 
 # Returns presentation with given id or None
@@ -126,8 +127,8 @@ def delete_presentation(user, presentation_id):
 
 
 # Creates checks from given user check-list
-def create_check(user):
-    return Checks({'enabled_checks': user.criteria})
+def create_check(user, file_type='pres'):
+    return Checks({'enabled_checks': user.criteria, 'file_type': file_type})
 
 
 # Adds checks to given presentation, updates presentation, returns presentation and checks id
@@ -141,7 +142,7 @@ def add_check(presentation, checks, presentation_file):
     grid_in.write(open(presentation_file, 'rb'))
     grid_in.close()
 
-    return presentation, checks_id
+    return checks_id
 
 
 def add_api_check(checks, presentation_file):

@@ -1,35 +1,29 @@
-{# Accepts: "debug", header dependicies #}
-
-
-
 {% extends "root.html" %}
 
-{% block title %}Загрузка презентаций{% endblock %}
+{% set title = {'report': "Загрузка отчётов", 'pres': "Загрузка презентаций"}[file_type] %}
+{% set upload_title = {'report': "Загрузите отчёт", 'pres': "Загрузите презентацию"}[file_type] %}
+
+{% block title %}{{ title }}{% endblock %}
 
 {% block main %}
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row justify-content-center">
     <script>
-      var file_upload_limit = {{ config.MAX_CONTENT_LENGTH | tojson }};
+      const file_upload_limit = {{ config.MAX_CONTENT_LENGTH | tojson }};
+      const file_type = "{{file_type}}";
     </script>
         <div class="col-11 col-sm-8 col-md-5 col-lg-4 my-auto">
-            <h3 class="text-center ins" id="upload_title">Какую презентацию Вы хотите проверить?</h3>
+            <h3 class="text-center ins" id="upload_title">{{upload_title}}</h3>
 
             <div class="row justify-content-center" id="uploading_body">
                 <div class="col my-auto">
                     <form>
-                        <h5 class="texteous ins" id="uploading_label">Презентация</h5>
+                        <h5 class="texteous ins" id="uploading_label">{{uploading_label}}</h5>
                         <div class="form-group">
                             <div id="uploading_form" class="custom-file">
                                 <input type="file" class="custom-file-input" id="upload_file" accept=".{{', .'.join(formats)}}">
                                 <label class="custom-file-label" id="upload_file_label" for="upload_file">Допустимые форматы: {{ ", ".join(formats) }}</label>
                                 <div class="invalid-feedback ins">Возникла ошибка</div>
-                                <select class="form-control" id="document_type">
-                                    <option value="">Выберите тип документа</option>
-                                    {% for type in doc_types %}
-                                        <option value="{{ type }}">{{ type }}</option>
-                                    {% endfor %}
-                                </select>
                             </div>
                         </div>
                         <div id="uploading_progress_holder" class="form-group" style="display: none">

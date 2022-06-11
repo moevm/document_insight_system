@@ -4,7 +4,7 @@ from bson import ObjectId
 from flask_login import current_user
 
 from app.bd_helper.bd_helper import *
-from app.main.checker import check, parse_check
+from app.main.checker import check, check_report
 from app.main.parser import parse
 from app.utils.get_file_len import get_file_len
 from flask import current_app
@@ -15,7 +15,8 @@ logger = logging.getLogger('root_logger')
 
 def upload(request, upload_folder):
     try:
-        file = request.files["presentation"]
+        file = request.files["file"]
+        file_type = request.form.get('file_type', 'pres')
         if get_file_len(file)*2 + get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
             logger.critical('Storage overload has occured')
             return 'storage_overload'
@@ -24,29 +25,28 @@ def upload(request, upload_folder):
         except TypeError:
             return 'Not OK, pdf converter refuses connection. Try reloading.'
 
-        filename = join(upload_folder, file.filename)
-        file.save(filename)
-        delete = True
+        filename = basename(file.filename)
+        filepath = join(upload_folder, filename)
+        file.save(filepath)
 
-        presentation_name = basename(filename)
-        logger.info("Обработка презентации " + presentation_name + " пользователя " +
+        logger.info("Обработка файла " + filename + " пользователя " +
               current_user.username + " проверками " + str(current_user.criteria))
-        presentation = find_presentation(current_user, presentation_name)
-        if presentation is None:
-            user, presentation_id = add_presentation(current_user, presentation_name)
-            presentation = get_presentation(presentation_id)
 
-        checks = create_check(current_user)
+        file_id = add_presentation(current_user, filename, file_type)
+        checking_file = get_presentation(file_id)
 
+        checks = create_check(current_user, file_type)
         checks.conv_pdf_fs_id = converted_id
-        if filename.endswith('.docx') or filename.endswith('.doc') or filename.endswith('.odt'):
-            checks = parse_check(parse(filename), checks, presentation_name)
-        else:
-            check(parse(filename), checks, presentation_name)
-        presentation, checks_id = add_check(presentation, checks, filename)
 
-        if delete and exists(filename):
-            remove(filename)
+        if file_type == 'report':
+            parsed_file = parse(filepath)
+            checks = check_report(parsed_file, checks, filename)
+        else:
+            checks = check(parse(filepath), checks, filename)
+
+        checks_id = add_check(checking_file, checks, filepath)
+
+        if exists(filepath): remove(filepath)
 
         logger.info("\tОбработка завершена успешно!")
         return str(checks_id)

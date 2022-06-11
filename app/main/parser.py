@@ -48,4 +48,4 @@ def parse(presentation_name):
             logger.error(err, exc_info=True)
             return None
     else:
-        raise ValueError("Презентация с недопустимым именем или недопустимого формата: " + presentation_name)
+        raise ValueError("Файл с недопустимым именем или недопустимого формата: " + presentation_name)
