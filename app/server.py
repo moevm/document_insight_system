@@ -37,7 +37,7 @@ ALLOWED_EXTENSIONS = {
 DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
 columns = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
 
-app = Flask(__name__, static_folder="./../src/", template_folder="./../templates/")
+app = Flask(__name__, static_folder="./../src/", template_folder="./templates/")
 app.config.from_pyfile('settings.py')
 app.recaptcha = ReCaptcha(app=app)
 
