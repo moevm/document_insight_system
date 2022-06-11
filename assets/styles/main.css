@@ -48,9 +48,14 @@ body {
 
 .holder {
     background: var(--background-color);
-    height: 100vh;
+    height: 95vh;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.footer {
+    background: var(--footer-color);
+    height: 5vh;
 }
 
 .blue_button {
