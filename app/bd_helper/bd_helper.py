@@ -1,3 +1,4 @@
+import os
 from os.path import basename
 from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
@@ -5,7 +6,7 @@ from bson import ObjectId
 import pymongo
 
 from app.bd_helper.bd_types import User, Presentation, Checks, Consumers, CriteriaPack, Logs
-from app.utils.pdf_converter import convert_to_pdf
+from app.utils.converter import convert_to
 from app.utils.time import timezone_offset
 
 from datetime import datetime, timezone
@@ -77,7 +78,7 @@ def delete_user(username):
     return user
 
 
-# Adds presentation with given name to given user presentations, updates user, returns user and presentation id
+# Adds presentations with given name to given user presentations, updates user, returns user and presentations id
 def add_presentation(user, presentation_name, file_type):
     presentation = Presentation()
     presentation.name = presentation_name
@@ -89,7 +90,7 @@ def add_presentation(user, presentation_name, file_type):
     return presentation_id
 
 
-# Returns presentation with given id or None
+# Returns presentations with given id or None
 def get_presentation(presentation_id):
     presentation = presentations_collection.find_one({'_id': presentation_id})
     if presentation is not None:
@@ -98,7 +99,7 @@ def get_presentation(presentation_id):
         return None
 
 
-# Returns presentation of given user with given id or None
+# Returns presentations of given user with given id or None
 def find_presentation(user, presentation_name):
     presentations = []
     for presentation_id in user.presentations:
@@ -111,7 +112,7 @@ def find_presentation(user, presentation_name):
         return None
 
 
-# Deletes presentation with given id, deleting also its checks, returns presentation
+# Deletes presentations with given id, deleting also its checks, returns presentations
 def delete_presentation(user, presentation_id):
     if presentation_id in user.presentations:
         user.presentations.remove(presentation_id)
@@ -131,7 +132,7 @@ def create_check(user, file_type='pres'):
     return Checks({'enabled_checks': user.criteria, 'file_type': file_type})
 
 
-# Adds checks to given presentation, updates presentation, returns presentation and checks id
+# Adds checks to given presentations, updates presentations, returns presentations and checks id
 def add_check(presentation, checks, presentation_file):
     checks_id = checks_collection.insert_one(checks.pack()).inserted_id
     upd_presentation = presentations_collection.update_one(
@@ -159,13 +160,15 @@ def add_api_check(checks, presentation_file):
 def write_pdf(file):
     extension = file.filename.rsplit('.', 1)[-1].lower()
     converted = 'pdf'.join(file.filename.rsplit(extension, 1))
-    convert2pdf = convert_to_pdf(file)
+    converted_filename = convert_to(file, target_format='pdf')
+    converted_file = open(converted_filename, 'rb')
+    os.remove(converted_filename)
 
-    id = ObjectId()
-    grid_in = fs.open_upload_stream_with_id(id, converted)
-    grid_in.write(convert2pdf)
+    file_id = ObjectId()
+    grid_in = fs.open_upload_stream_with_id(file_id, converted)
+    grid_in.write(converted_file)
     grid_in.close()
-    return id
+    return file_id
 
 
 # Returns checks with given id or None
@@ -177,7 +180,7 @@ def get_check(checks_id):
         return None
 
 
-# Returns presentation file with given id or None
+# Returns presentations file with given id or None
 def get_presentation_check(checks_id):
     try:
         return fs.open_download_stream(checks_id)
@@ -201,7 +204,7 @@ def find_pdf_by_file_id(file_id):
         return None
 
 
-# Deletes checks with given id, returns presentation
+# Deletes checks with given id, returns presentations
 def delete_check(presentation, checks_id):
     if checks_id in presentation.checks:
         upd_presentation = presentations_collection.update_one(

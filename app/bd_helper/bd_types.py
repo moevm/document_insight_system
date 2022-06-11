@@ -16,7 +16,7 @@ DEFAULT_PRESENTATION_CRITERIA = {'template_name': True, 'slides_number': {'sld_n
                     'slides_enum': True, 'slides_headers': True, 'goals_slide': True, 'probe_slide': True,
                     'actual_slide': True, 'conclusion_slide': True, 'slide_every_task': 50,
                     'conclusion_actual': 50, 'conclusion_along': True}
-DEFAULT_REPORT_CRITERIA = {}
+DEFAULT_REPORT_CRITERIA = { 'simple_check': True }
 
 
 # You shouldn't create this or change username and presentations explicitly

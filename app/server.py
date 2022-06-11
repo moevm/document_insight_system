@@ -57,7 +57,7 @@ def load_user(user_id):
     return bd_helper.get_user(user_id)
 
 
-# User pages request handlers:
+# User chapters request handlers:
 @app.route('/lti', methods=['POST'])
 def lti():
     if check_request(request):
@@ -68,7 +68,8 @@ def lti():
         lms_user_id = temporary_user_params.get('user_id', '')
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
-        formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS or ALLOWED_EXTENSIONS))
+        file_type = custom_params.get('file_type', 'pres')
+        formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[file_type] or ALLOWED_EXTENSIONS[file_type]))
         custom_criteria = utils.get_criteria_from_launch(temporary_user_params)
         role = utils.get_role(temporary_user_params)
 
@@ -121,27 +122,31 @@ def interact():
         return user.signout()
 
 
-# Main pages request handlers:
+# Main chapters request handlers:
 
 @app.route("/upload", methods=["GET", "POST"])
 @login_required
 def upload():
     if request.method == "POST":
-        if current_user.is_LTI or app.recaptcha.verify() :
+        if current_user.is_LTI or True:#app.recaptcha.verify():
             return data.upload(request, UPLOAD_FOLDER)
         else:
             abort(401)
     elif request.method == "GET":
         formats = set(current_user.formats)
         # add user info as primary condition (check that user file type == request file type)
-        file_type = 'report' if request.args.get('report') else 'pres'
+        if request.args.get('report'):
+            file_type = 'report'
+            formats = None
+        else:
+            file_type = 'pres'
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
         return render_template("./upload.html", navi_upload=False, name=current_user.name, file_type=file_type, formats=sorted(formats))
 
 @app.route("/tasks", methods=["POST"])
 @login_required
 def run_task():
-    file = request.files["presentation"]
+    file = request.files["presentations"]
     if get_file_len(file)*2 + bd_helper.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
         return 'storage_overload'
@@ -173,7 +178,8 @@ def get_status(task_id):
 CRITERIA_LABELS = {'template_name': 'Соответствие названия файла шаблону', 'slides_number': 'Количество основных слайдов',
                     'slides_enum': 'Нумерация слайдов', 'slides_headers': 'Заголовки слайдов присутствуют и занимают не более двух строк', 'goals_slide': 'Слайд "Цель и задачи"', 'probe_slide': 'Слайд "Апробация работы"',
                     'actual_slide': 'Слайд с описанием актуальности работы', 'conclusion_slide': 'Слайд с заключением', 'slide_every_task': 'Наличие слайдов, посвященных задачам',
-                    'conclusion_actual': 'Соответствие заключения задачам', 'conclusion_along': 'Наличие направлений дальнейшего развития'}
+                    'conclusion_actual': 'Соответствие заключения задачам', 'conclusion_along': 'Наличие направлений дальнейшего развития',
+                    'simple_check': 'Простейшая проверка отчёта'}
 
 
 @app.route("/results/<string:_id>", methods=["GET"])
@@ -193,21 +199,6 @@ def results(_id):
         return render_template("./404.html")
 
 
-@app.route("/parse_results/<string:_id>", methods=["GET"])
-@login_required
-def parse_results(_id):
-    try:
-        oid = ObjectId(_id)
-    except bson.errors.InvalidId:
-        logger.error('_id exception:', exc_info=True)
-        return render_template("./404.html")
-    check = bd_helper.get_check(oid)
-    if check is not None:
-        return render_template("./parse_results.html", results=check.enabled_checks, id=_id, fi=check.filename, navi_upload=True)
-    else:
-        logger.info("Запрошенная проверка не найдена: " + _id)
-        return render_template("./404.html")
-
 @app.route("/checks/<string:_id>", methods=["GET"])
 @login_required
 def checks(_id):
@@ -221,9 +212,9 @@ def checks(_id):
         if f.name.endswith('.ppt'):
             n = 'application/vnd.ms-powerpoint'
         elif f.name.endswith('.pptx'):
-            n = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+            n = 'application/vnd.openxmlformats-officedocument.presentationml.presentations'
         elif f.name.endswith('.odp'):
-            n = 'application/vnd.oasis.opendocument.presentation'
+            n = 'application/vnd.oasis.opendocument.presentations'
         return Response(f.read(), mimetype=n)
     else:
         logger.info("Запрошенная презентация не найдена: " + _id)

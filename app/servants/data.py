@@ -1,6 +1,5 @@
 from os import remove
 from os.path import join, exists
-from bson import ObjectId
 from flask_login import current_user
 
 from app.bd_helper.bd_helper import *
@@ -9,8 +8,10 @@ from app.main.parser import parse
 from app.utils.get_file_len import get_file_len
 from flask import current_app
 
-import os
 import logging
+
+from main.reports.document import Document
+
 logger = logging.getLogger('root_logger')
 
 def upload(request, upload_folder):
@@ -22,7 +23,8 @@ def upload(request, upload_folder):
             return 'storage_overload'
         try:
             converted_id = write_pdf(file)
-        except TypeError:
+        except TypeError as exc:
+            logger.error(exc, exc_info=True)
             return 'Not OK, pdf converter refuses connection. Try reloading.'
 
         filename = basename(file.filename)
@@ -39,7 +41,7 @@ def upload(request, upload_folder):
         checks.conv_pdf_fs_id = converted_id
 
         if file_type == 'report':
-            parsed_file = parse(filepath)
+            parsed_file = parse(filepath) # DocxUploader
             checks = check_report(parsed_file, checks, filename)
         else:
             checks = check(parse(filepath), checks, filename)
