@@ -1,9 +1,12 @@
-from app.nlp.stemming import Stemming
-import re
-import logging
-logger = logging.getLogger('root_logger')
 import itertools
+import logging
+import re
+
 from scipy.spatial import distance
+
+from nlp.stemming import Stemming
+
+logger = logging.getLogger('root_logger')
 
 def compare_task_and_title(task, title):
     #weak check, def doesn't work: CountVect/Tf-IdfVect
@@ -36,7 +39,6 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
         tasks = stemming.get_sentences(slide_goal_and_tasks, True)
         ignore = re.compile('[0-9][.]?|Задачи:|‹#›')  #[:]?
         cleaned_tasks = [task for task in tasks if not re.fullmatch(ignore, task)]
-        logger=logging.getLogger('root_logger')
         logger.debug(str(slide_goal_and_tasks))
         logger.debug(str(tasks))
         logger.debug(str(ignore))

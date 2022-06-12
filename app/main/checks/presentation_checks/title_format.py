@@ -1,7 +1,7 @@
 import itertools
 import re
 
-from utils.parse_for_html import format_header
+from utils import format_header
 from ..base_check import BaseCheck, answer
 
 
@@ -13,11 +13,13 @@ class TitleFormatCheck(BaseCheck):
         self.pdf_id = pdf_id
 
     def exceeded_verdict(self):
-        return format_header('Превышение длины: {}'.format(', '.join(map(str,  self.format_page_link(self.len_exceeded))))), \
+        return format_header(
+            'Превышение длины: {}'.format(', '.join(map(str, self.format_page_link(self.len_exceeded))))), \
                format_header('Убедитесь в корректности заголовка и текста слайда')
 
     def empty_verdict(self):
-        return format_header('Заголовки не найдены: {}.'.format(', '.join(map(str,  self.format_page_link(self.empty_headers))))), \
+        return format_header(
+            'Заголовки не найдены: {}.'.format(', '.join(map(str, self.format_page_link(self.empty_headers))))), \
                format_header('Убедитесь, что слайд озаглавлен соответстующим элементом')
 
     def get_failing_headers(self):
@@ -45,4 +47,4 @@ class TitleFormatCheck(BaseCheck):
             return answer(False, *self.empty_verdict())
         else:
             return answer(False,
-                   *list(itertools.chain(self.empty_verdict(), self.exceeded_verdict())))
+                          *list(itertools.chain(self.empty_verdict(), self.exceeded_verdict())))

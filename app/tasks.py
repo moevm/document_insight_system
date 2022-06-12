@@ -1,11 +1,11 @@
 import os
 import time
 from celery import Celery
-from app.bd_helper.bd_types import Checks
+from app.db.db_types import Checks
 from os.path import join, exists
 from bson import ObjectId
 
-from app.bd_helper.bd_helper import *
+from app.db.db_methods import *
 from app.main.api_checker import check
 from app.main.parser import parse
 

@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from app.main.checks_config.parser import sld_num
+from main.checks_config.parser import sld_num
 
 class Packable:
     def __init__(self, dictionary):

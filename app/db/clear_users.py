@@ -1,4 +1,4 @@
-from app.bd_helper.bd_helper import *
+from .db_methods import client
 import logging
 logger = logging.getLogger('root_logger')
 

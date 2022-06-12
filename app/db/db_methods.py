@@ -1,15 +1,14 @@
 import os
+from datetime import datetime
 from os.path import basename
+
+import pymongo
+from bson import ObjectId
 from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
-from bson import ObjectId
-import pymongo
 
-from app.bd_helper.bd_types import User, Presentation, Checks, Consumers, CriteriaPack, Logs
-from app.utils.converter import convert_to
-from app.utils.time import timezone_offset
-
-from datetime import datetime, timezone
+from utils import convert_to, timezone_offset
+from .db_types import User, Presentation, Checks, Consumers, Logs
 
 client = MongoClient("mongodb://mongodb:27017")
 db = client['pres-parser-db']
@@ -267,10 +266,10 @@ def get_checks(filter={}, latest=None, limit=10, offset=0, sort=None, order=None
     else:
         return get_checks_cursor(filter, limit, offset, sort, order)
 
+
 # get checks cursor with specified parameters
 
 def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
-
     sort = 'lms_passback_time' if sort == 'moodle-date' else sort
 
     count = checks_collection.count_documents(filter)
@@ -278,12 +277,13 @@ def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
 
     if sort and order in ("asc, desc"):
         rows = rows.sort(sort, pymongo.ASCENDING if order ==
-                         "asc" else pymongo.DESCENDING)
+                                                    "asc" else pymongo.DESCENDING)
 
     rows = rows.skip(offset) if offset else rows
     rows = rows.limit(limit) if limit else rows
 
     return rows, count
+
 
 # get logs cursor with specified parameters
 
@@ -296,12 +296,13 @@ def get_logs_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
 
     if sort and order in ("asc, desc"):
         rows = rows.sort(sort, pymongo.ASCENDING if order ==
-                         "asc" else pymongo.DESCENDING)
+                                                    "asc" else pymongo.DESCENDING)
 
     rows = rows.skip(offset) if offset else rows
     rows = rows.limit(limit) if limit else rows
 
     return rows, count
+
 
 # Get stats for one user, return a list in the form
 # [check_id, login, time of check_id's creation, result(0/1)]
@@ -319,7 +320,8 @@ def format_check(check):
     grade_passback_time = check['lms_passback_time']
     grade_passback_ts = grade_passback_time.strftime(
         "%H:%M:%S - %b %d %Y") if grade_passback_time else '-'
-    return (str(check['_id']), check['user'], check['filename'], (check['_id'].generation_time + timezone_offset).strftime("%H:%M:%S - %b %d %Y"),
+    return (str(check['_id']), check['user'], check['filename'],
+            (check['_id'].generation_time + timezone_offset).strftime("%H:%M:%S - %b %d %Y"),
             grade_passback_ts, check['score'])
 
 

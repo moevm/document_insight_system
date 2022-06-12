@@ -1,8 +1,10 @@
 from argparse import Namespace
+
 from flask_login import current_user
-from .checks import SldNumCheck, SearchKeyWord, FindTasks, FindDefSld, \
-                            SldEnumCheck, SldSimilarity, TitleFormatCheck, FurtherDev, TemplateNameCheck
+
 from .checks import ReportSimpleCheck
+from .checks import SldNumCheck, SearchKeyWord, FindTasks, FindDefSld, \
+    SldEnumCheck, SldSimilarity, TitleFormatCheck, FurtherDev, TemplateNameCheck
 
 key_slides = {
               'goals_and_tasks': 'Цель и задачи',

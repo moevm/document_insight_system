@@ -1,10 +1,11 @@
-from main.reports.docx_uploader.docx_uploader import DocxUploader
-from main.presentations import PresentationODP, PresentationPPTX
 import logging
 
-from utils.converter import convert_to
+from main.presentations import PresentationODP, PresentationPPTX
+from main.reports.docx_uploader import DocxUploader
+from utils import convert_to
 
 logger = logging.getLogger('root_logger')
+
 
 def parse(filename):
     if filename.endswith('.ppt') or filename.endswith('.pptx'):

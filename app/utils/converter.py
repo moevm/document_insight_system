@@ -1,8 +1,10 @@
+import os
 import subprocess
 import tempfile
-import os
+
 
 def run_process(cmd: str): return subprocess.run(cmd.split(' '))
+
 
 def convert_to(file, target_format='pdf'):
     temp_file = tempfile.NamedTemporaryFile(delete=False)

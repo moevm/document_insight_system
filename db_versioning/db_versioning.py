@@ -1,10 +1,13 @@
 import argparse
+
 from pymongo import MongoClient
+
 from versions import LAST_VERSION, VERSIONS
 
 
 class DBCollections:
     MONGO_URL = ''
+
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(DBCollections, cls).__new__(cls)
@@ -21,9 +24,9 @@ class DBCollections:
 
     def get_by_name(self, name):
         return dict(
-            users = self.db['users'],
-            presentations = self.db['presentations'],
-            checks = self.db['checks']
+            users=self.db['users'],
+            presentations=self.db['presentations'],
+            checks=self.db['checks']
         ).get(name)
 
     def to_dict(self):
@@ -34,11 +37,12 @@ def add_version(version):
     version_doc = DBCollections().db_version.insert_one(version.to_dict())
     return version_doc.inserted_id
 
+
 def update_db_version():
     version_doc = DBCollections().db_version.find_one()
 
     if not version_doc:
-        version_doc_id = add_version(VERSIONS['1.0'])    # if no version == 1.0
+        version_doc_id = add_version(VERSIONS['1.0'])  # if no version == 1.0
         version_doc = DBCollections().db_version.find_one({'_id': version_doc_id})
     version_doc_id = version_doc['_id']
 

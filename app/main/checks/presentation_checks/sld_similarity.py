@@ -1,6 +1,5 @@
 from nlp.similarity_of_texts import check_similarity
-from utils.get_text_from_slides import get_text_from_slides
-from utils.parse_for_html import tasks_conclusions_feedback
+from utils import get_text_from_slides, tasks_conclusions_feedback
 from ..base_check import BaseCheck, answer
 
 

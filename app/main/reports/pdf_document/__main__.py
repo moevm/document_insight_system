@@ -1,6 +1,6 @@
 import argparse
 
-from main.reports.pdf_document.pdf_document_manager import main as pdf_document_main
+from .pdf_document_manager import main as pdf_document_main
 
 
 def parse_args():
