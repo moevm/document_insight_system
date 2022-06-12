@@ -1,7 +1,6 @@
 import re
 
-from app.main.checks.base_check import BaseCheck, answer
-from app.utils.parse_for_html import format_header
+from ..base_check import BaseCheck, answer
 
 
 class TemplateNameCheck(BaseCheck):

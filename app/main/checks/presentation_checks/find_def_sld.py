@@ -1,4 +1,4 @@
-from app.main.checks.base_check import BaseCheck, answer
+from ..base_check import BaseCheck, answer
 
 class FindDefSld(BaseCheck):
     def __init__(self, file, type_of_slide, pdf_id):

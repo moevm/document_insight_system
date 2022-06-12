@@ -1,4 +1,4 @@
-from app.main.checks.base_check import BaseCheck, answer
+from ..base_check import BaseCheck, answer
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
 from app.utils.parse_for_html import find_tasks_on_slides_feedback
 from app.utils.get_text_from_slides import get_text_from_slides

@@ -1,7 +1,9 @@
-from app.main.checks.base_check import BaseCheck, answer
-from app.utils.parse_for_html import format_header
-import re
 import itertools
+import re
+
+from utils.parse_for_html import format_header
+from ..base_check import BaseCheck, answer
+
 
 class TitleFormatCheck(BaseCheck):
     def __init__(self, file, pdf_id):

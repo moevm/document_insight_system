@@ -1,6 +1,6 @@
 import re
 
-from app.main.checks.base_check import BaseCheck, answer
+from ..base_check import BaseCheck, answer
 
 
 class SearchKeyWord(BaseCheck):
