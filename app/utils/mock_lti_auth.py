@@ -1,5 +1,6 @@
 from distutils.util import strtobool
-from app.settings import DEBUG_AUTH
+
+from settings import DEBUG_AUTH
 
 
 def safe_strtobool(value, on_error=False):

@@ -1,25 +1,27 @@
 FROM ubuntu:20.04
+
 ENV LANG en_US.UTF-8
+ENV TZ=Europe/Moscow
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN apt update
-RUN apt-get install -y software-properties-common
-RUN apt install -y curl gnupg
-RUN apt install -y python3-pip python3.8-dev
-RUN curl -sL https://deb.nodesource.com/setup_16.x  | bash -
-RUN apt install -y  nodejs
-RUN add-apt-repository ppa:libreoffice/ppa
-RUN apt install -y unoconv
-RUN apt install -y libreoffice
-
-ADD . /usr/src/project
 WORKDIR /usr/src/project
 
-RUN npm install
-RUN npm audit fix
-RUN npm install webpack
+RUN apt update && apt install -y software-properties-common curl gnupg python3-pip python3.8-dev
+RUN curl -sL https://deb.nodesource.com/setup_16.x  | bash -
+RUN apt install -y nodejs libreoffice
 
-RUN  python3.8 -m pip install -r dependencies.txt
-ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project"
+ADD package.json webpack.config.js requirements.txt ./
 
-RUN ./act.sh -b
+RUN npm install && npm audit fix && npm install webpack
+RUN python3.8 -m pip install -r requirements.txt
+
+ADD ./assets ./assets
+RUN npm run build
+
+ADD ./scripts/local_start.sh ./scripts/
+ADD ./app ./app/
+ADD ./db_versioning ./db_versioning/
+
+ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project/app"
+
 CMD ./scripts/local_start.sh

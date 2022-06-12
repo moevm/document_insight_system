@@ -1,7 +1,9 @@
 import logging
 import sys
 from datetime import datetime
-from app.bd_helper.bd_helper import add_log
+
+from db.db_methods import add_log
+
 
 class MongoDBLoggingHandler(logging.StreamHandler):
     def __init__(self, service_name):
@@ -26,9 +28,11 @@ class MongoDBLoggingHandler(logging.StreamHandler):
 def get_logging_stdout_handler():
     logging_stdout_handler = logging.StreamHandler(sys.stdout)
     logging_stdout_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('[%(asctime)s] {%(filename)s:%(funcName)s:%(lineno)d} %(levelname)s - %(message)s','%y-%m-%d %H:%M:%S')
+    formatter = logging.Formatter('[%(asctime)s] {%(filename)s:%(funcName)s:%(lineno)d} %(levelname)s - %(message)s',
+                                  '%y-%m-%d %H:%M:%S')
     logging_stdout_handler.setFormatter(formatter)
     return logging_stdout_handler
+
 
 def get_root_logger(service_name):
     root_logger = logging.getLogger('root_logger')

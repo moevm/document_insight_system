@@ -5,8 +5,8 @@ def answer(mod, *args):
     }
 
 class BaseCheck:
-    def __init__(self, presentation):
-        self.presentation = presentation
+    def __init__(self, file):
+        self.file = file
 
     def check(self):
         raise NotImplementedError()

@@ -43,22 +43,20 @@ body {
     background: var(--main-color);
     padding-left: 2rem;
     padding-right: 2rem;
-    height: 15vh;
+    height: 10vh;
 }
 
 .holder {
     background: var(--background-color);
-    height: 75vh;
+    height: 95vh;
     overflow-y: auto;
     overflow-x: hidden;
 }
 
 .footer {
     background: var(--footer-color);
-    height: 10vh;
+    height: 5vh;
 }
-
-
 
 .blue_button {
     background: var(--main-color) !important;

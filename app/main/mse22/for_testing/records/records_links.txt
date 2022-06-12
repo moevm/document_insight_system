@@ -1,4 +1,0 @@
-Тестирование класса Document 01.05.2022: https://drive.google.com/file/d/1Eb8P13YVnC3exssSlue16b5kOTcN5jMY/view?usp=sharing
-Тестирование эскиза веб-страницы 03.05.2022: https://drive.google.com/file/d/1KEQ-Shv79wXGVmsDfVZDDeHyrRcC_YCN/view?usp=sharing
-Тестирование Page Objects 05.05.2022: https://drive.google.com/file/d/1SnPZk0sHBJxaF9zLQtDPx-d4yZurKzbC/view?usp=sharing
-Тесторование PdfDocumentManager 05.05.2022: https://drive.google.com/file/d/1SawAv_KBRnLutjngm21vbNaL50VSadD7/view?usp=sharing
