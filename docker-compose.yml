@@ -26,6 +26,7 @@ services:
     image: slides_checker_base_image
     command: celery worker --app=app.tasks.celery --loglevel=info
     environment:
+      - PYTHONPATH=/usr/src/project/app
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
