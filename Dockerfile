@@ -22,6 +22,6 @@ ADD ./scripts/local_start.sh ./scripts/
 ADD ./app ./app/
 ADD ./db_versioning ./db_versioning/
 
-ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project"
+ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project/app"
 
 CMD ./scripts/local_start.sh
