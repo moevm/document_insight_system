@@ -1,5 +1,5 @@
-from main.presentations.odp.slide_odp import SlideODP
-from main.presentations.presentation_basic import PresentationBasic
+from .slide_odp import SlideODP
+from ..presentation_basic import PresentationBasic
 from odf import opendocument, draw
 from app.utils import tict
 

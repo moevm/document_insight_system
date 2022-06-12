@@ -1,6 +1,5 @@
 from main.reports.docx_uploader.docx_uploader import DocxUploader
-from main.presentations.odp.presentation_odp import PresentationODP
-from main.presentations.pptx.presentation_pptx import PresentationPPTX
+from main.presentations import PresentationODP, PresentationPPTX
 import logging
 
 from utils.converter import convert_to
