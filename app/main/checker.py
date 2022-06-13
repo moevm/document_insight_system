@@ -1,7 +1,10 @@
 from argparse import Namespace
+
 from flask_login import current_user
-from app.main.checks import SldNumCheck, SearchKeyWord, FindTasks, FindDefSld, \
-                            SldEnumCheck, SldSimilarity, TitleFormatCheck, FurtherDev, TemplateNameCheck
+
+from .checks import ReportSimpleCheck
+from .checks import SldNumCheck, SearchKeyWord, FindTasks, FindDefSld, \
+    SldEnumCheck, SldSimilarity, TitleFormatCheck, FurtherDev, TemplateNameCheck
 
 key_slides = {
               'goals_and_tasks': 'Цель и задачи',
@@ -35,6 +38,29 @@ def check(presentation, checks, presentation_name):
     checks.enabled_checks = set_enabled
     checks.score = checks.calc_score()
     checks.filename = presentation_name
+    checks.user = current_user.username
+    checks.lms_user_id = current_user.lms_user_id
+    if current_user.params_for_passback:
+        checks.is_passbacked = False
+
+    return checks
+
+# TODO: объединить check и check_report, передавая список проверок
+def check_report(file, checks, filename):
+    set_checks = {
+        "simple_check": ReportSimpleCheck(file)
+    }
+    # добавить зависимость от критериев проверки
+    enabled_checks = set_checks
+    check_names = enabled_checks
+    set_enabled = dict.fromkeys(check_names, False)
+
+    for k, v in enabled_checks.items():
+        set_enabled[k] = set_checks[k].check()
+
+    checks.enabled_checks = set_enabled
+    checks.score = checks.calc_score()
+    checks.filename = filename
     checks.user = current_user.username
     checks.lms_user_id = current_user.lms_user_id
     if current_user.params_for_passback:

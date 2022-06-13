@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 
 from bson import ObjectId
 from flask_login import current_user
-from app.utils.time import timezone_offset
 
 logger = logging.getLogger('root_logger')
 
 
 def checklist_filter(request):
+    from utils import timezone_offset
     # transform json filter into dict
     filters = request.args.get("filter", "{}")
     try:
@@ -20,13 +20,13 @@ def checklist_filter(request):
         logger.warning(repr(e))
         filters = {}
 
-    # request filter to mongo query filter conversion
+    # req filter to mongo query filter conversion
     filter_query = {}
     if f_filename := filters.get("filename", None):
-        filter_query["filename"] = { "$regex": f_filename }
+        filter_query["filename"] = {"$regex": f_filename}
 
     if f_user := filters.get("user", None):
-        filter_query["user"] = { "$regex": f_user }
+        filter_query["user"] = {"$regex": f_user}
 
     f_upload_date = filters.get("upload-date", "")
     f_upload_date_list = list(filter(lambda val: val, f_upload_date.split("-")))

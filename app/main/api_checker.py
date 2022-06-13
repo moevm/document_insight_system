@@ -1,5 +1,5 @@
 from argparse import Namespace
-from app.main.checks import SldNumCheck, SearchKeyWord, FindTasks, FindDefSld, \
+from .checks import SldNumCheck, SearchKeyWord, FindTasks, FindDefSld, \
                             SldEnumCheck, SldSimilarity, TitleFormatCheck, FurtherDev
 
 key_slides = {

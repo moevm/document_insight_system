@@ -1,14 +1,12 @@
 import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize, sent_tokenize
+from pymorphy2 import MorphAnalyzer
 
 nltk.download('stopwords')
 nltk.download('punkt')
 
-from pymorphy2 import MorphAnalyzer
-from nltk.tokenize import word_tokenize, sent_tokenize
-from nltk.corpus import stopwords
-
 TASKS = 'задачи:'
-
 
 class Stemming:
     def __init__(self):

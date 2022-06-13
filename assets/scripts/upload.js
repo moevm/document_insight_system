@@ -18,10 +18,11 @@ file_input.change(() => {
     upload_button.prop("disabled", false);
 });
 
-async function upload(sample = false) {
-    let presentation = file_input.prop("files")[0];
+async function upload() {
+    let file = file_input.prop("files")[0];
     let formData = new FormData();
-    formData.append("presentation", presentation);
+    formData.append("file", file);
+    formData.append("file_type", file_type);    
     if ($('div.g-recaptcha').length){
         let response = grecaptcha.getResponse();
         formData.append("g-recaptcha-response", response);};
@@ -32,11 +33,14 @@ async function upload(sample = false) {
     if (bar.hasClass("bg-danger")) bar.removeClass("bg-danger");
     if (bar.hasClass("bg-success")) bar.removeClass("bg-success");
 
-    const post_data = { method: "POST" };
-    if (!sample) post_data.body = formData;
+    const post_data = {
+      method: "POST",
+      body: formData
+    };
     const response_text = await (await fetch("/upload", post_data)).text();
     console.log("Answer:", response_text);
     bar.css("width", "100%").attr('aria-valuenow', 100);
+    console.log(file);
     if (response_text == 'storage_overload') {
         alert('Система перегружена, попробуйте повторить запрос позднее');
         bar.addClass("bg-danger");
@@ -58,5 +62,5 @@ $("#upload_upload_button").click(async () =>{
         }
         else{
           upload_button.prop("disabled", true);
-          await upload(false);
+          await upload();
     }});

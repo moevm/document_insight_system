@@ -1,5 +1,7 @@
 from oauthlib.oauth1 import RequestValidator
-from app.bd_helper.bd_helper import ConsumersDBManager
+
+from db.db_methods import ConsumersDBManager
+
 
 class LTIRequestValidator(RequestValidator):
     """
@@ -12,7 +14,7 @@ class LTIRequestValidator(RequestValidator):
 
     @property
     def nonce_length(self):
-        return 20, 40   # len(nonce_from_moodle) = 32. default_return = (20, 30)
+        return 20, 40  # len(nonce_from_moodle) = 32. default_return = (20, 30)
 
     @property
     def enforce_ssl(self):
@@ -28,7 +30,8 @@ class LTIRequestValidator(RequestValidator):
     def validate_client_key(self, client_key, request):
         return ConsumersDBManager.is_key_valid(client_key)
 
-    def validate_timestamp_and_nonce(self, client_key, timestamp, nonce, request, request_token=None, access_token=None):
+    def validate_timestamp_and_nonce(self, client_key, timestamp, nonce, request, request_token=None,
+                                     access_token=None):
         if not ConsumersDBManager.has_timestamp_and_nonce(client_key, timestamp, nonce):
             ConsumersDBManager.add_timestamp_and_nonce(client_key, timestamp, nonce)
             return True

@@ -1,7 +1,7 @@
 import re
 import random
 
-from app.nlp.stemming import Stemming
+from nlp.stemming import Stemming
 
 def check_similarity(string1, string2):
     stemming = Stemming()
