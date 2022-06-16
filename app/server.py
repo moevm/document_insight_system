@@ -17,10 +17,12 @@ from flask_recaptcha import ReCaptcha
 
 import servants.user as user
 from db import db_methods
+from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
 from root_logger import get_logging_stdout_handler, get_root_logger
-from servants import data as data, pre_luncher
+from servants import pre_luncher
+from tasks import create_task
 from utils import checklist_filter, decorator_assertion, get_file_len, timezone_offset
 
 logger = get_root_logger('web')
@@ -125,7 +127,7 @@ def interact():
 def upload():
     if request.method == "POST":
         if current_user.is_LTI or True:  # app.recaptcha.verify():
-            return data.upload(request, UPLOAD_FOLDER)
+            return run_task()
         else:
             abort(401)
     elif request.method == "GET":
@@ -144,7 +146,10 @@ def upload():
 @app.route("/tasks", methods=["POST"])
 @login_required
 def run_task():
-    file = request.files["presentations"]
+    file = request.files.get("file")
+    if not file:
+        logger.critical("request doesn't include file")
+        return "request doesn't include file"
     file_type = request.form.get('file_type', 'pres')
     if get_file_len(file) * 2 + db_methods.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
@@ -154,14 +159,14 @@ def run_task():
     converted_id = db_methods.write_pdf(file)  # convert to pdf for preview
     # TODO: validate that checks match file_type
     check = Check({
-        '_id': file_id,
-        'conv_pdf_fs_id': ObjectId(converted_id),
+        '_id': str(file_id),
+        'conv_pdf_fs_id': str(converted_id),
         'user': current_user.username,
         'enabled_checks': current_user.criteria,
         'file_type': file_type  # current_user.file_type
     })
     db_methods.add_check(file_id, check)  # add check for parsed_file to db
-    task = create_task.delay(check)  # add check to queue
+    task = create_task.delay(check.pack(to_str=True))  # add check to queue
     return jsonify({"task_id": task.id}), 202
 
 
@@ -211,7 +216,7 @@ def results(_id):
 @login_required
 def checks(_id):
     try:
-        f = db_methods.get_presentation_check(ObjectId(_id))
+        f = db_methods.get_file_by_check(ObjectId(_id))
     except bson.errors.InvalidId:
         logger.error('_id exception in checks occured:', exc_info=True)
         return render_template("./404.html")
@@ -520,7 +525,7 @@ def profile(username):
 def system_capacity():
     units = {'b': 1, 'mb': 1024 ** 2, 'gb': 1024 ** 3}
     unit = units.get(request.args.get('unit', 'gb').lower(), units['gb'])
-    current_size = data.get_storage()
+    current_size = db_methods.get_storage()
     ratio = current_size / app.config['MAX_SYSTEM_STORAGE']
     return {
         'size': current_size / unit,

@@ -1,3 +1,4 @@
+from bson import ObjectId
 from flask_login import UserMixin
 
 from main.checks_config.parser import sld_num
@@ -41,7 +42,7 @@ class User(Packable, UserMixin):
         self.formats = dictionary.get('formats', [])
 
     def pack(self):
-        package = super(User, self).pack()
+        package = super().pack()
         package['criteria'] = self.criteria
         return package
 
@@ -66,24 +67,33 @@ class CriteriaPack(Packable):
         self.enabled_checks = dictionary.get('enabled_checks', '')
 
 
-# You shouldn't create or change this explicitly
-class Presentation(Packable):
+class PackableWithId(Packable):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
         dictionary = dictionary or {}
         if '_id' in dictionary:
-            self._id = dictionary.get('_id')
+            self._id = ObjectId(dictionary.get('_id'))
+
+    def pack(self, to_str=False):
+        package = super().pack()
+        if to_str and '_id' in package: package['_id'] = str(self._id)
+        return package
+
+
+# You shouldn't create or change this explicitly
+class Presentation(PackableWithId):
+    def __init__(self, dictionary=None):
+        super().__init__(dictionary)
+        dictionary = dictionary or {}
         self.name = dictionary.get('name', '')
         self.checks = dictionary.get('checks', [])
         self.file_type = dictionary.get('file_type', 'pres')
 
 
-class Logs(Packable):
+class Logs(PackableWithId):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
         dictionary = dictionary or {}
-        if '_id' in dictionary:
-            self._id = dictionary.get('_id', '')
         self.timestamp = dictionary.get('timestamp', None)
         self.serviceName = dictionary.get('serviceName', None)
         self.levelname = dictionary.get('levelname', None)
@@ -95,12 +105,10 @@ class Logs(Packable):
         self.lineno = dictionary.get('lineno', None)
 
 
-class Check(Packable):
+class Check(PackableWithId):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
         dictionary = dictionary or {}
-        if '_id' in dictionary:
-            self._id = dictionary.get('_id', '')
         self.filename = dictionary.get('filename', '')
         self.conv_pdf_fs_id = dictionary.get('conv_pdf_fs_id', '')
         self.user = dictionary.get('user', '')
@@ -127,3 +135,11 @@ class Check(Packable):
 
     def correct(self):
         return all([check == False or check['pass'] for check in self.enabled_checks.values()])
+
+    def pack(self, to_str=False):
+        package = super().pack(to_str)
+        if to_str:
+            for key in ('conv_pdf_fs_id',):
+                if key in package: package[key] = str(self._id)
+        package['enabled_checks'] = self.enabled_checks
+        return package

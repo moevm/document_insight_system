@@ -10,7 +10,7 @@ logger = logging.getLogger('root_logger')
 
 def parse(file):
     filename = file.filename
-    filepath = save_to_temp_file(filename)
+    filepath = save_to_temp_file(file)
     if filename.endswith('.ppt') or filename.endswith('.pptx'):
         try:
             return PresentationPPTX(filepath)

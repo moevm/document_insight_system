@@ -1,4 +1,4 @@
-from app.db.db_types import Checks
+from app.db.db_types import Check
 
 
 class Version:
@@ -89,7 +89,7 @@ class Version20(Version):
 
             # calc score for all checks w/score=-1
             for check in collections['checks'].find({'score': -1}):
-                score = Checks(check).calc_score()
+                score = Check(check).calc_score()
                 collections['checks'].update(
                     {'_id': check['_id']},
                     {'$set': {'score': score}}
@@ -131,7 +131,7 @@ class Version21(Version):
 
             # mv from 0/-1 -> T/F
             for check in collections['checks'].find({}):
-                check_dt = Checks(check).enabled_checks.items()
+                check_dt = Check(check).enabled_checks.items()
                 upd_check = {k: False if v == -1 else v for k, v in check_dt}
                 collections['checks'].update(
                     {'_id': check['_id']},
@@ -139,7 +139,7 @@ class Version21(Version):
                 )
 
             for user in collections['users'].find():
-                criteria_dt = Checks(user['criteria']).enabled_checks
+                criteria_dt = Check(user['criteria']).enabled_checks
                 upd_criteria = {k: False if v == -1 else True for k, v in criteria_dt.items()}
                 upd_criteria['slides_number'] = {"sld_num": criteria_dt['slides_number'], "detect_additional": True} if \
                     upd_criteria['slides_number'] else False

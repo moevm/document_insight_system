@@ -142,7 +142,7 @@ def add_check(file_id, check):
 
 
 def update_check(check):
-    return checks_collection.update_one({'_id': check['_id']}, check.pack()).inserted_id
+    return bool(checks_collection.find_one_and_replace({'_id': check._id}, check.pack()))
 
 
 def write_pdf(file):
@@ -154,7 +154,7 @@ def write_pdf(file):
 
 def add_file_to_db(filename, file, file_id=None):
     if not file_id: file_id = ObjectId()
-    fs.upload_from_stream(file_id, filename, file)
+    fs.upload_from_stream_with_id(file_id, filename, file)
     return file_id
 
 

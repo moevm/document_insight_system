@@ -14,7 +14,7 @@ key_slides = {
 key_slide = Namespace(**key_slides)
 
 
-def check(parsed_file, checks, filename):
+def check(parsed_file, checks, filename, user):
     check_names = checks.enabled_checks.keys()
     set_enabled = dict.fromkeys(check_names, False)
     # TODO: create only enabled checks (because checks may not contain some info?)
@@ -42,9 +42,9 @@ def check(parsed_file, checks, filename):
     checks.enabled_checks = set_enabled
     checks.score = checks.calc_score()
     checks.filename = filename
-    checks.user = current_user.username
-    checks.lms_user_id = current_user.lms_user_id
-    if current_user.params_for_passback:
+    checks.user = user.username
+    checks.lms_user_id = user.lms_user_id
+    if user.params_for_passback:
         checks.is_passbacked = False
 
     return checks
