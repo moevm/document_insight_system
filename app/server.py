@@ -145,19 +145,23 @@ def upload():
 @login_required
 def run_task():
     file = request.files["presentations"]
+    file_type = request.form.get('file_type', 'pres')
     if get_file_len(file) * 2 + db_methods.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
         return 'storage_overload'
-    try:
-        converted_id = db_methods.write_pdf(file)
-    except TypeError:
-        return 'Not OK, pdf converter refuses connection. Try reloading.'
-
-    filename = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(filename)
-
-    from app.tasks import create_task  # ##
-    task = create_task.delay(filename, str(converted_id), username=current_user.username)
+    # add file and file's info to db
+    file_id = db_methods.add_file_info_and_content(current_user.username, file, file_type)
+    converted_id = db_methods.write_pdf(file)  # convert to pdf for preview
+    # TODO: validate that checks match file_type
+    check = Check({
+        '_id': file_id,
+        'conv_pdf_fs_id': ObjectId(converted_id),
+        'user': current_user.username,
+        'enabled_checks': current_user.criteria,
+        'file_type': file_type  # current_user.file_type
+    })
+    db_methods.add_check(file_id, check)  # add check for parsed_file to db
+    task = create_task.delay(check)  # add check to queue
     return jsonify({"task_id": task.id}), 202
 
 

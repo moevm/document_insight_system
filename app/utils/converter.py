@@ -24,3 +24,9 @@ def convert_to(file, target_format='pdf'):
     os.remove(temp_file.name)
 
     return new_filename
+
+
+def open_file(filepath, remove=True):
+    file = open(filepath, 'rb')
+    if remove: os.remove(filepath)
+    return file

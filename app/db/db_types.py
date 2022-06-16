@@ -1,5 +1,7 @@
 from flask_login import UserMixin
+
 from main.checks_config.parser import sld_num
+
 
 class Packable:
     def __init__(self, dictionary):
@@ -12,11 +14,12 @@ class Packable:
         return f"{self.__class__.__name__}: {', '.join([f'{key}: {value}' for key, value in vars(self).items()])}"
 
 
-DEFAULT_PRESENTATION_CRITERIA = {'template_name': True, 'slides_number': {'sld_num': sld_num['bsc'], 'detect_additional': True},
-                    'slides_enum': True, 'slides_headers': True, 'goals_slide': True, 'probe_slide': True,
-                    'actual_slide': True, 'conclusion_slide': True, 'slide_every_task': 50,
-                    'conclusion_actual': 50, 'conclusion_along': True}
-DEFAULT_REPORT_CRITERIA = { 'simple_check': True }
+DEFAULT_PRESENTATION_CRITERIA = {'template_name': True,
+                                 'slides_number': {'sld_num': sld_num['bsc'], 'detect_additional': True},
+                                 'slides_enum': True, 'slides_headers': True, 'goals_slide': True, 'probe_slide': True,
+                                 'actual_slide': True, 'conclusion_slide': True, 'slide_every_task': 50,
+                                 'conclusion_actual': 50, 'conclusion_along': True}
+DEFAULT_REPORT_CRITERIA = {'simple_check': True}
 
 
 # You shouldn't create this or change username and presentations explicitly
@@ -29,7 +32,8 @@ class User(Packable, UserMixin):
         self.password_hash = dictionary.get('password_hash', '')
         self.presentations = dictionary.get('presentations', [])
         self.file_type = dictionary.get('file_type', 'pres')
-        self.criteria = dictionary.get('enabled_checks', DEFAULT_REPORT_CRITERIA if self.file_type == 'report' else DEFAULT_PRESENTATION_CRITERIA)
+        self.criteria = dictionary.get('enabled_checks',
+                                       DEFAULT_REPORT_CRITERIA if self.file_type == 'report' else DEFAULT_PRESENTATION_CRITERIA)
         self.is_LTI = dictionary.get('is_LTI', False)
         self.lms_user_id = dictionary.get('lms_user_id', None)
         self.is_admin = dictionary.get('is_admin', False)
@@ -91,7 +95,7 @@ class Logs(Packable):
         self.lineno = dictionary.get('lineno', None)
 
 
-class Checks(Packable):
+class Check(Packable):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
         dictionary = dictionary or {}
@@ -105,7 +109,8 @@ class Checks(Packable):
         self.lms_passback_time = dictionary.get('lms_passback_time', None)
         self.score = dictionary.get('score', -1)
         self.file_type = dictionary.get('file_type', 'pres')
-        self.enabled_checks = dictionary.get('enabled_checks', DEFAULT_REPORT_CRITERIA if self.file_type == 'report' else DEFAULT_PRESENTATION_CRITERIA)
+        self.enabled_checks = dictionary.get('enabled_checks',
+                                             DEFAULT_REPORT_CRITERIA if self.file_type == 'report' else DEFAULT_PRESENTATION_CRITERIA)
 
     def calc_score(self):
         enabled_checks = dict((k, v) for k, v in self.enabled_checks.items() if v)
