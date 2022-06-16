@@ -8,7 +8,8 @@ WORKDIR /usr/src/project
 
 RUN apt update && apt install -y software-properties-common curl gnupg python3-pip python3.8-dev
 RUN curl -sL https://deb.nodesource.com/setup_16.x  | bash -
-RUN apt install -y nodejs libreoffice
+RUN apt-add-repository ppa:libreoffice/ppa
+RUN apt install -y nodejs libreoffice-writer-nogui libreoffice-impress-nogui
 
 ADD package.json webpack.config.js requirements.txt ./
 
