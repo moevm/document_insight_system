@@ -20,6 +20,7 @@ consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
 logs_collection = db.create_collection(
     'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
+celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
 
 
 def get_client():
@@ -370,3 +371,21 @@ def add_log(timestamp, serviceName, levelname, levelno, message,
     new_log = Logs(args)
     logs_collection.insert_one(new_log.pack())
     return new_log
+
+
+# mapping celery_task to check
+
+def add_celery_task(celery_task_id, check_id):
+    return celery_check_collection.insert_one({'celery_task_id': celery_task_id, 'check_id': check_id}).inserted_id
+
+
+def get_celery_task(celery_task_id):
+    return celery_check_collection.find_one({'celery_task_id': celery_task_id})
+
+
+def get_celery_task_by_check(check_id):
+    return celery_check_collection.find_one({'check_id': check_id})
+
+
+def delete_celery_task(celery_task_id):
+    return celery_check_collection.delete_one({'celery_task_id': celery_task_id})
