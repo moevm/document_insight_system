@@ -9,7 +9,7 @@ WORKDIR /usr/src/project
 RUN apt update && apt install -y software-properties-common curl gnupg python3-pip python3.8-dev
 RUN curl -sL https://deb.nodesource.com/setup_16.x  | bash -
 RUN apt-add-repository ppa:libreoffice/ppa
-RUN apt install -y nodejs libreoffice-writer-nogui libreoffice-impress-nogui
+RUN apt install -y nodejs libreoffice
 
 ADD package.json webpack.config.js requirements.txt ./
 
@@ -20,8 +20,8 @@ ADD ./assets ./assets
 RUN npm run build
 
 ADD ./scripts/local_start.sh ./scripts/
-ADD ./app ./app/
 ADD ./db_versioning ./db_versioning/
+ADD ./app ./app/
 
 ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project/app"
 
