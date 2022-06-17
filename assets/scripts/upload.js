@@ -52,10 +52,9 @@ async function upload() {
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");
     } else {
-        upload_id = response_text;
+        upload_id = JSON.parse(response_text)['check_id'];
         bar.addClass("bg-success");
-        console.log(upload_id)
-        //window.location.replace("/results/" + upload_id);
+        window.location.replace("/results/" + upload_id);
     }
 }
 

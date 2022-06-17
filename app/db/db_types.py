@@ -76,7 +76,7 @@ class PackableWithId(Packable):
 
     def pack(self, to_str=False):
         package = super().pack()
-        if to_str and '_id' in package: package['_id'] = str(self._id)
+        if '_id' in package: package['_id'] = self._id if not to_str else str(self._id)
         return package
 
 
@@ -90,7 +90,7 @@ class Presentation(PackableWithId):
         self.file_type = dictionary.get('file_type', 'pres')
 
 
-class Logs(PackableWithId):
+class Logs(Packable):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
         dictionary = dictionary or {}
@@ -138,8 +138,6 @@ class Check(PackableWithId):
 
     def pack(self, to_str=False):
         package = super().pack(to_str)
-        if to_str:
-            for key in ('conv_pdf_fs_id',):
-                if key in package: package[key] = str(self._id)
+        package['conv_pdf_fs_id'] = self.conv_pdf_fs_id if not to_str else str(self.conv_pdf_fs_id)
         package['enabled_checks'] = self.enabled_checks
         return package

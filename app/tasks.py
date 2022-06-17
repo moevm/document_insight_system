@@ -16,14 +16,16 @@ celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:
 celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
 
 
-@celery.task(name="create_task")
-def create_task(check_info):
+@celery.task(name="create_task", bind=True)
+def create_task(self, check_info):
     try:
         check_obj = Check(check_info)
         file = db_methods.get_file_by_check(check_obj._id)
         updated_check = check(parse(file), check_obj, file.name, get_user(check_obj.user))
         db_methods.update_check(updated_check)  # save to db
-        return updated_check.pack(to_str=True)
+        db_methods.delete_celery_task(self.request.id)
+        return str(updated_check._id)
     except Exception as e:
         logger.error("\tПри обработке произошла ошибка: " + str(e), exc_info=True)
         return 'Not OK, error: {}'.format(e)
+    #   self.retry(countdown=60 * 5) # Retry the task, adding it to the back of the queue.

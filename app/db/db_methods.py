@@ -156,6 +156,7 @@ def write_pdf(file):
 def add_file_to_db(filename, file, file_id=None):
     if not file_id: file_id = ObjectId()
     fs.upload_from_stream_with_id(file_id, filename, file)
+    file.seek(0)
     return file_id
 
 
