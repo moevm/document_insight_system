@@ -377,7 +377,14 @@ def add_log(timestamp, serviceName, levelname, levelno, message,
 # mapping celery_task to check
 
 def add_celery_task(celery_task_id, check_id):
-    return celery_check_collection.insert_one({'celery_task_id': celery_task_id, 'check_id': check_id}).inserted_id
+    return celery_check_collection.insert_one(
+        {'celery_task_id': celery_task_id, 'check_id': check_id, 'started_at': datetime.now()}).inserted_id
+
+
+def update_celery_task(celery_task_id, finished_time=None):
+    if finished_time is None: finished_time = datetime.now()
+    return celery_check_collection.update_one({'celery_task_id': celery_task_id},
+                                              {'$set': {'finished_at': finished_time}})
 
 
 def get_celery_task(celery_task_id):
@@ -386,7 +393,3 @@ def get_celery_task(celery_task_id):
 
 def get_celery_task_by_check(check_id):
     return celery_check_collection.find_one({'check_id': check_id})
-
-
-def delete_celery_task(celery_task_id):
-    return celery_check_collection.delete_one({'celery_task_id': celery_task_id})

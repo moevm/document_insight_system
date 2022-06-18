@@ -147,13 +147,15 @@ def upload():
 @login_required
 def run_task():
     file = request.files.get("file")
+    file_type = request.form.get('file_type', 'pres')
     if not file:
         logger.critical("request doesn't include file")
         return "request doesn't include file"
-    file_type = request.form.get('file_type', 'pres')
     if get_file_len(file) * 2 + db_methods.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
         return 'storage_overload'
+    logger.info(
+        f"Запуск обработки файла {file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
     # add file and file's info to db
     file_id = db_methods.add_file_info_and_content(current_user.username, file, file_type)
     converted_id = db_methods.write_pdf(file)  # convert to pdf for preview
@@ -166,7 +168,9 @@ def run_task():
         'enabled_checks': current_user.criteria,
         'file_type': file_type,  # current_user.file_type
         'filename': file.filename,
-        'score': -1  # score=-1 -> checking in progress
+        'score': -1,  # score=-1 -> checking in progress
+        'is_ended': False,
+        'is_failed': False
     })
     db_methods.add_check(file_id, check)  # add check for parsed_file to db
     task = create_task.delay(check.pack(to_str=True))  # add check to queue
@@ -208,11 +212,12 @@ def results(_id):
         return render_template("./404.html")
     check = db_methods.get_check(oid)
     if check is not None:
-        celery_task_done = db_methods.get_celery_task_by_check(oid) is None  # check real task status like get_status?
+        check_flags = check.get_flags()  # process check flags: is_ended, is_failed
+        logger.error(str(check_flags))
+        # TODO: if task crashed, check may contain data not for page rendering (we can fix Check.correct())
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id,
-                               fi=check.filename,
-                               columns=TABLE_COLUMNS, processing_ended=celery_task_done,
-                               stats=db_methods.format_check(check.pack()),
+                               fi=check.filename, columns=TABLE_COLUMNS, is_ended=check_flags['is_ended'],
+                               is_failed=check_flags['is_failed'], stats=db_methods.format_check(check.pack()),
                                labels=CRITERIA_LABELS)
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)

@@ -119,6 +119,8 @@ class Check(PackableWithId):
         self.file_type = dictionary.get('file_type', 'pres')
         self.enabled_checks = dictionary.get('enabled_checks',
                                              DEFAULT_REPORT_CRITERIA if self.file_type == 'report' else DEFAULT_PRESENTATION_CRITERIA)
+        self.is_failed = dictionary.get('is_failed', None)
+        self.is_ended = dictionary.get('is_ended', None)
 
     def calc_score(self):
         enabled_checks = dict((k, v) for k, v in self.enabled_checks.items() if v)
@@ -141,3 +143,14 @@ class Check(PackableWithId):
         package['conv_pdf_fs_id'] = self.conv_pdf_fs_id if not to_str else str(self.conv_pdf_fs_id)
         package['enabled_checks'] = self.enabled_checks
         return package
+
+    def get_flags(self):
+        def none_to_true(x):
+            return x is None or bool(x)
+
+        def none_to_false(x):
+            return x is not None and bool(x)
+
+        is_ended = none_to_true(self.is_ended)  # None for old checks => True, True->True, False->False
+        is_failed = none_to_false(self.is_failed)  # None for old checks => False, True->True, False->False
+        return {'is_ended': is_ended, 'is_failed': is_failed}

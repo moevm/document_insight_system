@@ -10,10 +10,16 @@
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row" id="results_holder">
         <h4 id="results_title" class="texteous ins">
-            {% if processing_ended %}
-                <h3 id="results_title" class="texteous ins">
-                    Результат проверки: {{ "" if results.correct() else "не" }} пройдена! <!-- threshold? -->
-                </h3>
+            {% if is_ended %}
+                {% if is_failed %}
+                    <h3 id="results_title" class="texteous ins">
+                        Проверка завершилась с ошибкой, попробуйте загрузить файл заново
+                    </h3>
+                {% else %}
+                    <h3 id="results_title" class="texteous ins">
+                        Результат проверки: {{ "" if results.correct() else "не" }} пройдена! <!-- threshold? -->
+                    </h3>
+                {% endif %}
             {% else %}
                 <i>Производится проверка файла (перезагрузите страницу)</i>
             {% endif %}
@@ -37,7 +43,7 @@
             </tr>
             </tbody>
         </table>
-        {% if processing_ended %}
+        {% if is_ended and not is_failed %}
             <table class="table table-striped table-hover" id="results_table">
                 <thead>
                 <tr>
