@@ -20,7 +20,7 @@ def convert_to(file, target_format='pdf'):
 
     if run_process(convert_cmd).returncode == 0:
         # success conversion
-        new_filename = "{}.pdf".format(temp_file.name)
+        new_filename = "{}.{}".format(temp_file.name, target_format)
     os.remove(temp_file.name)
 
     return new_filename
