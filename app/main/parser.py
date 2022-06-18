@@ -25,7 +25,7 @@ def parse(file):
             return None
     elif filename.endswith('.doc') or filename.endswith('.odt'):
         try:
-            converted_file_path = convert_to(filepath, target_format='docx')
+            converted_file_path = convert_to(file, target_format='docx')
             docx = DocxUploader()
             docx.upload(converted_file_path)
             docx.parse()
