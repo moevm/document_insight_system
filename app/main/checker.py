@@ -1,7 +1,5 @@
 from argparse import Namespace
 
-from flask_login import current_user
-
 from .checks import ReportSimpleCheck, SldNumCheck, SearchKeyWord, FindTasks, FindDefSld, SldEnumCheck, SldSimilarity, \
     TitleFormatCheck, FurtherDev, TemplateNameCheck
 
@@ -51,7 +49,7 @@ def check(parsed_file, checks, filename, user):
 
 
 # TODO: объединить check и check_report, передавая список проверок
-def check_report(parsed_file, checks, filename):
+def check_report(parsed_file, checks, filename, user):
     set_checks = {
         "simple_check": ReportSimpleCheck(parsed_file)
     }
@@ -66,9 +64,9 @@ def check_report(parsed_file, checks, filename):
     checks.enabled_checks = set_enabled
     checks.score = checks.calc_score()
     checks.filename = filename
-    checks.user = current_user.username
-    checks.lms_user_id = current_user.lms_user_id
-    if current_user.params_for_passback:
+    checks.user = user.username
+    checks.lms_user_id = user.lms_user_id
+    if user.params_for_passback:
         checks.is_passbacked = False
 
     return checks
