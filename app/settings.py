@@ -1,7 +1,7 @@
 import configparser
-from json.decoder import JSONDecodeError
-import os
 import json
+import os
+
 from lti_session_passback.lti.utils import parse_consumer_info
 
 # read ini file
@@ -17,7 +17,7 @@ try:
     with open(version_file) as vfp:
         json_string = vfp.read()
         VERSION_DATA = json.loads(json_string)
-except JSONDecodeError as error:
+except json.decoder.JSONDecodeError as error:
     VERSION_DATA = {
         "error": str(error),
         "data": error.doc
@@ -25,7 +25,7 @@ except JSONDecodeError as error:
 except IOError as error:
     VERSION_DATA = {"error": f"{error.strerror}: {error.filename}"}
 except Exception as error:
-    VERSION_DATA = { "error": repr(error) }
+    VERSION_DATA = {"error": repr(error)}
 
 # setup variables
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '')
@@ -37,8 +37,8 @@ RECAPTCHA_SECRET_KEY = os.environ.get('RECAPTCHA_SECRET_KEY', '')
 SECRET_KEY = os.environ.get('SECRET_KEY', '')
 SIGNUP_PAGE_ENABLED = os.environ.get('SIGNUP_PAGE_ENABLED', 'True') == 'True'
 
-MAX_CONTENT_LENGTH = config.getint('consts', 'MAX_CONTENT_LENGTH')*1024*1024
-MAX_SYSTEM_STORAGE = config.getint('consts', 'MAX_SYSTEM_STORAGE')*1024*1024
+MAX_CONTENT_LENGTH = config.getint('consts', 'MAX_CONTENT_LENGTH') * 1024 * 1024
+MAX_SYSTEM_STORAGE = config.getint('consts', 'MAX_SYSTEM_STORAGE') * 1024 * 1024
 
 DEBUG_AUTH = False
 consumer_keys = os.environ.get('CONSUMER_KEY', '')

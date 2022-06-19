@@ -1,8 +1,10 @@
 import hashlib
+import logging
+
 from pymongo.errors import ConnectionFailure
 
-from app.bd_helper.bd_helper import add_user, get_user, get_client, edit_user
-import logging
+from db.db_methods import add_user, get_user, get_client, edit_user
+
 logger = logging.getLogger('root_logger')
 
 def get_hash(password): return hashlib.md5(password.encode()).hexdigest()

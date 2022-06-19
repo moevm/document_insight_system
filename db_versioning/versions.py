@@ -1,5 +1,5 @@
-from app.bd_helper.bd_types import Checks
-from collections import OrderedDict
+from app.db.db_types import Check
+
 
 class Version:
     VERSION_NAME = '0.1'
@@ -18,16 +18,9 @@ class Version:
     @classmethod
     def to_dict(cls):
         return dict(
-            version = cls.VERSION_NAME,
-            changes = cls.CHANGES
+            version=cls.VERSION_NAME,
+            changes=cls.CHANGES
         )
-
-    @staticmethod
-    def get_version(version_name):
-        for version in VERSIONS:
-            if version.version == version_name:
-                return version
-        return None
 
 
 class Version10(Version):
@@ -57,6 +50,7 @@ class Version11(Version):
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
+
 class Version20(Version):
     VERSION_NAME = '2.0'
     CHANGES = "Изменен подход к версионированию БД: исправляются минусы предыдущих версий " \
@@ -72,30 +66,30 @@ class Version20(Version):
             # process all checks of pres and set filename + user
             for presentation in collections['presentations'].find({}):
                 filename = presentation['name']
-                user_doc = collections['users'].find_one({'presentations': presentation['_id'] })
+                user_doc = collections['users'].find_one({'presentations': presentation['_id']})
                 user = user_doc.get('username', 'moevm') if user_doc else 'moevm'
                 for check_id in presentation["checks"]:
                     collections['checks'].update(
                         {"_id": check_id},
-                        { '$set': { 'filename': filename, 'user': user } }
+                        {'$set': {'filename': filename, 'user': user}}
                     )
 
             # if we have checks without presentation == after prev loop it doesn't include filename/user field
             # set default user='moevm', filename='_.pptx'
             collections['checks'].update(
-                {'filename': { "$exists": 0}},
+                {'filename': {"$exists": 0}},
                 {'$set': {'filename': '_.pptx'}},
                 multi=True
             )
             collections['checks'].update(
-                {'user': { "$exists": 0}},
+                {'user': {"$exists": 0}},
                 {'$set': {'user': 'moevm'}},
                 multi=True
             )
 
             # calc score for all checks w/score=-1
             for check in collections['checks'].find({'score': -1}):
-                score = Checks(check).calc_score()
+                score = Check(check).calc_score()
                 collections['checks'].update(
                     {'_id': check['_id']},
                     {'$set': {'score': score}}
@@ -126,6 +120,7 @@ class Version20(Version):
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
+
 class Version21(Version):
     VERSION_NAME = '2.1'
     CHANGES = '0/1 -> T/F; criteria.slides_number: [] -> {}'
@@ -134,9 +129,9 @@ class Version21(Version):
     def update_database(cls, collections, prev_version):
         if prev_version in (Version10.VERSION_NAME, Version11.VERSION_NAME, Version20.VERSION_NAME):
 
-            #mv from 0/-1 -> T/F
+            # mv from 0/-1 -> T/F
             for check in collections['checks'].find({}):
-                check_dt = Checks(check).get_checks().items()
+                check_dt = Check(check).enabled_checks.items()
                 upd_check = {k: False if v == -1 else v for k, v in check_dt}
                 collections['checks'].update(
                     {'_id': check['_id']},
@@ -144,16 +139,18 @@ class Version21(Version):
                 )
 
             for user in collections['users'].find():
-                criteria_dt = Checks(user['criteria']).get_checks()
+                criteria_dt = Check(user['criteria']).enabled_checks
                 upd_criteria = {k: False if v == -1 else True for k, v in criteria_dt.items()}
-                upd_criteria['slides_number'] = {"sld_num": criteria_dt['slides_number'], "detect_additional": True} if upd_criteria['slides_number'] else False
+                upd_criteria['slides_number'] = {"sld_num": criteria_dt['slides_number'], "detect_additional": True} if \
+                    upd_criteria['slides_number'] else False
                 collections['users'].update(
-                                   {'_id': user['_id']},
-                                   {'$set': {'criteria': upd_criteria}}
-                               )
+                    {'_id': user['_id']},
+                    {'$set': {'criteria': upd_criteria}}
+                )
 
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
+
 
 class Version22(Version):
     VERSION_NAME = '2.2'
@@ -163,7 +160,8 @@ class Version22(Version):
 
     @classmethod
     def update_database(cls, collections, prev_version):
-        if prev_version in (Version10.VERSION_NAME, Version11.VERSION_NAME, Version20.VERSION_NAME, Version21.VERSION_NAME):
+        if prev_version in (
+                Version10.VERSION_NAME, Version11.VERSION_NAME, Version20.VERSION_NAME, Version21.VERSION_NAME):
             criteria_keys = ('slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
                              'probe_slide', 'actual_slide', 'conclusion_slide', 'slide_every_task',
                              'conclusion_actual', 'conclusion_along')
@@ -176,15 +174,15 @@ class Version22(Version):
                 criteria = user['criteria']
                 reorder_criteria = {k: criteria.get(k, False) for k in criteria_keys}
                 collections['users'].update_one(
-                        {'_id': user['_id']},
-                        {'$set': {'criteria': reorder_criteria}}
-                        )
+                    {'_id': user['_id']},
+                    {'$set': {'criteria': reorder_criteria}}
+                )
             collections['users'].update_many({}, {"$unset": unset_fields})
 
             pipeline = [{'$project': {'enabled_checks': dict((f'{k}', f'${k}') for k in criteria_keys),
-                                                        **dict.fromkeys(check_info, 1)}},
+                                      **dict.fromkeys(check_info, 1)}},
                         {'$out': 'checks'}]
-            collections['checks'].aggregate(pipeline = pipeline)
+            collections['checks'].aggregate(pipeline=pipeline)
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
@@ -197,7 +195,6 @@ VERSIONS = {
     '2.2': Version22,
 }
 LAST_VERSION = '2.2'
-
 
 for _, ver in VERSIONS.items():
     print(ver.to_dict())

@@ -2,7 +2,7 @@
     --main-color: #01549B;
     --accent-color: #0275D8;
     --text-color: #373A3C;
-    --footer-color:#80878D;
+    --footer-color: #80878D;
     --background-color: #E5E5E5;
     --bright-color: #FFFFFF;
     --border-color: #CCCCCC;
@@ -16,7 +16,6 @@ body {
 
     overflow: hidden;
 }
-
 
 
 .h-box {
@@ -38,27 +37,24 @@ body {
 }
 
 
-
 .header {
     background: var(--main-color);
     padding-left: 2rem;
     padding-right: 2rem;
-    height: 15vh;
+    height: 5vh;
 }
 
 .holder {
     background: var(--background-color);
-    height: 75vh;
+    height: 95vh;
     overflow-y: auto;
     overflow-x: hidden;
 }
 
 .footer {
     background: var(--footer-color);
-    height: 10vh;
+    height: 5vh;
 }
-
-
 
 .blue_button {
     background: var(--main-color) !important;
@@ -71,7 +67,6 @@ body {
     box-sizing: border-box;
     border-radius: 4px;
 }
-
 
 
 .texteous {
@@ -105,9 +100,8 @@ body {
 }
 
 .dropdown-item:active {
-  background-color: var(--footer-color) !important;
+    background-color: var(--footer-color) !important;
 }
-
 
 
 #user_info {
