@@ -216,7 +216,7 @@ def results(_id):
         avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
         # TODO: if task crashed, check may contain data not for page rendering (we can fix Check.correct())
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id,
-                               fi=check.filename, columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
+                               filename=check.filename, columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
                                stats=db_methods.format_check(check.pack()), labels=CRITERIA_LABELS)
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
