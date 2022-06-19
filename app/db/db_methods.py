@@ -6,7 +6,7 @@ from bson import ObjectId
 from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 
-from utils import convert_to, timezone_offset, open_file
+from utils import convert_to, timezone_offset
 from .db_types import User, Presentation, Check, Consumers, Logs
 
 client = MongoClient("mongodb://mongodb:27017")
@@ -78,16 +78,19 @@ def delete_user(username):
 
 
 # Adds presentations with given name to given user presentations, updates user, returns user and presentations id
-def add_file_info_and_content(username, file, file_type):
+def add_file_info_and_content(username, filepath, file_type, file_id=None):
+    if not file_id: file_id = ObjectId()
     # parsed_file's info
-    filename = basename(file.filename)
+    filename = basename(filepath)
     file_info = Presentation({
-        'name': basename(file.filename),
+        '_id': file_id,
+        'name': filename,
         'file_type': file_type
     })
     file_info_id = files_info_collection.insert_one(file_info.pack()).inserted_id
+    assert file_id == file_info_id, f"{file_id} -- {file_info_id}"
     # parsed_file's content in GridFS (file_id = file_info_id)
-    add_file_to_db(filename, file, file_info_id)
+    add_file_to_db(filename, filepath, file_info_id)
     # add parsed_file to user info
     users_collection.update_one({'username': username}, {"$push": {'presentations': file_info_id}})
     return file_info_id
@@ -146,17 +149,14 @@ def update_check(check):
     return bool(checks_collection.find_one_and_replace({'_id': check._id}, check.pack()))
 
 
-def write_pdf(file):
-    extension = file.filename.rsplit('.', 1)[-1].lower()
-    converted_filename = 'pdf'.join(file.filename.rsplit(extension, 1))
-    converted_filepath = convert_to(file, target_format='pdf')
-    return add_file_to_db(filename=converted_filename, file=open_file(converted_filepath))
+def write_pdf(filename, filepath):
+    converted_filepath = convert_to(filepath, target_format='pdf')
+    return add_file_to_db(filename, converted_filepath)
 
 
-def add_file_to_db(filename, file, file_id=None):
+def add_file_to_db(filename, filepath, file_id=None):
     if not file_id: file_id = ObjectId()
-    fs.upload_from_stream_with_id(file_id, filename, file)
-    file.seek(0)
+    fs.upload_from_stream_with_id(file_id, filename, open(filepath, 'rb'))
     return file_id
 
 

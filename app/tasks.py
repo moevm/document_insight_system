@@ -1,5 +1,6 @@
 import os
 from logging import getLogger
+from os.path import join, exists
 
 from celery import Celery
 
@@ -16,18 +17,28 @@ celery = Celery(__name__)
 celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
 celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
 
+FILES_FOLDER = '/usr/src/project/files'
+
 
 @celery.task(name="create_task", bind=True)
 def create_task(self, check_info):
+    check_obj = Check(check_info)
+    check_id = str(check_obj._id)
+    # get check files filepath
+    original_filepath = join(FILES_FOLDER, f"{check_id}.{check_obj.filename.rsplit('.', 1)[-1]}")
+    pdf_filepath = join(FILES_FOLDER, f"{check_id}.pdf")
     try:
-        check_obj = Check(check_info)
-        file = db_methods.get_file_by_check(check_obj._id)
         user = get_user(check_obj.user)
         check_function = check_report if check_obj.file_type == 'report' else check
-        updated_check = check_function(parse(file), check_obj, file.name, user)
+
+        updated_check = check_function(parse(original_filepath), check_obj, check_obj.filename, user)
         updated_check.is_ended = True
         db_methods.update_check(updated_check)  # save to db
         db_methods.mark_celery_task_as_finished(self.request.id)
+
+        # remove files from FILES_FOLDER after checking
+        remove_files((original_filepath, pdf_filepath))
+
         return str(updated_check._id)
     except Exception as e:
         if self.request.retries == self.max_retries:
@@ -38,6 +49,13 @@ def create_task(self, check_info):
             updated_check.is_failed = True
             updated_check.is_ended = True
             db_methods.update_check(updated_check)  # save to db
+            # remove files from FILES_FOLDER after checking
+            remove_files((original_filepath, pdf_filepath))
             return 'Not OK, error: {}'.format(e)
         logger.error(f"\tПри обработке произошла ошибка: {e}. Попытка повторного запуска", exc_info=True)
         self.retry(countdown=TASK_RETRY_COUNTDOWN)  # Retry the task, adding it to the back of the queue.
+
+
+def remove_files(filepaths):
+    for filepath in filepaths:
+        if exists(filepath): os.remove(filepath)

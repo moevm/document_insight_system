@@ -8,24 +8,22 @@ from utils import convert_to
 logger = logging.getLogger('root_logger')
 
 
-def parse(file):
-    filename = file.filename
-    filepath = save_to_temp_file(file)
-    if filename.endswith('.ppt') or filename.endswith('.pptx'):
+def parse(filepath):
+    if filepath.endswith('.ppt') or filepath.endswith('.pptx'):
         try:
             return PresentationPPTX(filepath)
         except Exception as err:
             logger.error(err, exc_info=True)
             return None
-    elif filename.endswith('.odp'):
+    elif filepath.endswith('.odp'):
         try:
             return PresentationODP(filepath)
         except Exception as err:
             logger.error(err, exc_info=True)
             return None
-    elif filename.endswith('.doc') or filename.endswith('.odt'):
+    elif filepath.endswith('.doc') or filepath.endswith('.odt'):
         try:
-            converted_file_path = convert_to(file, target_format='docx')
+            converted_file_path = convert_to(filepath, target_format='docx')
             docx = DocxUploader()
             docx.upload(converted_file_path)
             docx.parse()
@@ -34,7 +32,7 @@ def parse(file):
             logger.error(err, exc_info=True)
             return None
 
-    elif filename.endswith('.docx'):
+    elif filepath.endswith('.docx'):
         try:
             docx = DocxUploader()
             docx.upload(filepath)

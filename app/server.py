@@ -3,6 +3,7 @@ import os
 import shutil
 import tempfile
 from datetime import datetime, timedelta
+from os.path import join
 from sys import argv
 
 import bson
@@ -26,7 +27,7 @@ from tasks import create_task
 from utils import checklist_filter, decorator_assertion, get_file_len, timezone_offset
 
 logger = get_root_logger('web')
-UPLOAD_FOLDER = './files'
+UPLOAD_FOLDER = '/usr/src/project/files'
 ALLOWED_EXTENSIONS = {
     'pres': {'ppt', 'pptx', 'odp'},
     'report': {'doc', 'odt', 'docx'}
@@ -156,9 +157,16 @@ def run_task():
         return 'storage_overload'
     logger.info(
         f"Запуск обработки файла {file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
+
+    file_id = ObjectId()
+    # save to file on disk for future checking
+    filename, extension = file.filename.rsplit('.', 1)
+    filepath = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
+    file.save(filepath)
     # add file and file's info to db
-    file_id = db_methods.add_file_info_and_content(current_user.username, file, file_type)
-    converted_id = db_methods.write_pdf(file)  # convert to pdf for preview
+    file_id = db_methods.add_file_info_and_content(current_user.username, filepath, file_type, file_id)
+    # convert to pdf and save on disk and db
+    converted_id = db_methods.write_pdf(filename, filepath)  # convert to pdf for preview
     # TODO: validate that enabled_checks match file_type
     check = Check({
         '_id': file_id,
