@@ -3,6 +3,7 @@ import os
 import shutil
 import tempfile
 from datetime import datetime, timedelta
+from os.path import join
 from sys import argv
 
 import bson
@@ -17,20 +18,22 @@ from flask_recaptcha import ReCaptcha
 
 import servants.user as user
 from db import db_methods
+from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
 from root_logger import get_logging_stdout_handler, get_root_logger
-from servants import data as data, pre_luncher
+from servants import pre_luncher
+from tasks import create_task
 from utils import checklist_filter, decorator_assertion, get_file_len, timezone_offset
 
 logger = get_root_logger('web')
-UPLOAD_FOLDER = './files'
+UPLOAD_FOLDER = '/usr/src/project/files'
 ALLOWED_EXTENSIONS = {
     'pres': {'ppt', 'pptx', 'odp'},
     'report': {'doc', 'odt', 'docx'}
 }
 DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
-columns = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
+TABLE_COLUMNS = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./templates/")
 app.config.from_pyfile('settings.py')
@@ -125,7 +128,7 @@ def interact():
 def upload():
     if request.method == "POST":
         if current_user.is_LTI or True:  # app.recaptcha.verify():
-            return data.upload(request, UPLOAD_FOLDER)
+            return run_task()
         else:
             abort(401)
     elif request.method == "GET":
@@ -144,21 +147,43 @@ def upload():
 @app.route("/tasks", methods=["POST"])
 @login_required
 def run_task():
-    file = request.files["presentations"]
+    file = request.files.get("file")
+    file_type = request.form.get('file_type', 'pres')
+    if not file:
+        logger.critical("request doesn't include file")
+        return "request doesn't include file"
     if get_file_len(file) * 2 + db_methods.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
         return 'storage_overload'
-    try:
-        converted_id = db_methods.write_pdf(file)
-    except TypeError:
-        return 'Not OK, pdf converter refuses connection. Try reloading.'
+    logger.info(
+        f"Запуск обработки файла {file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
 
-    filename = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(filename)
-
-    from app.tasks import create_task  # ##
-    task = create_task.delay(filename, str(converted_id), username=current_user.username)
-    return jsonify({"task_id": task.id}), 202
+    file_id = ObjectId()
+    # save to file on disk for future checking
+    filename, extension = file.filename.rsplit('.', 1)
+    filepath = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
+    file.save(filepath)
+    # add file and file's info to db
+    file_id = db_methods.add_file_info_and_content(current_user.username, filepath, file_type, file_id)
+    # convert to pdf and save on disk and db
+    converted_id = db_methods.write_pdf(filename, filepath)  # convert to pdf for preview
+    # TODO: validate that enabled_checks match file_type
+    check = Check({
+        '_id': file_id,
+        'conv_pdf_fs_id': converted_id,
+        'user': current_user.username,
+        'lms_user_id': current_user.lms_user_id,
+        'enabled_checks': current_user.criteria,
+        'file_type': file_type,  # current_user.file_type
+        'filename': file.filename,
+        'score': -1,  # score=-1 -> checking in progress
+        'is_ended': False,
+        'is_failed': False
+    })
+    db_methods.add_check(file_id, check)  # add check for parsed_file to db
+    task = create_task.delay(check.pack(to_str=True))  # add check to queue
+    db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
+    return {'task_id': task.id, 'check_id': str(file_id)}
 
 
 @app.route("/tasks/<task_id>", methods=["GET"])
@@ -195,9 +220,12 @@ def results(_id):
         return render_template("./404.html")
     check = db_methods.get_check(oid)
     if check is not None:
+        # show processing time for user
+        avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
+        # TODO: if task crashed, check may contain data not for page rendering (we can fix Check.correct())
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id,
-                               fi=check.filename,
-                               columns=columns, stats=db_methods.format_check(check.pack()), labels=CRITERIA_LABELS)
+                               filename=check.filename, columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
+                               stats=db_methods.format_check(check.pack()), labels=CRITERIA_LABELS)
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
@@ -207,7 +235,7 @@ def results(_id):
 @login_required
 def checks(_id):
     try:
-        f = db_methods.get_presentation_check(ObjectId(_id))
+        f = db_methods.get_file_by_check(ObjectId(_id))
     except bson.errors.InvalidId:
         logger.error('_id exception in checks occured:', exc_info=True)
         return render_template("./404.html")
@@ -516,7 +544,7 @@ def profile(username):
 def system_capacity():
     units = {'b': 1, 'mb': 1024 ** 2, 'gb': 1024 ** 3}
     unit = units.get(request.args.get('unit', 'gb').lower(), units['gb'])
-    current_size = data.get_storage()
+    current_size = db_methods.get_storage()
     ratio = current_size / app.config['MAX_SYSTEM_STORAGE']
     return {
         'size': current_size / unit,

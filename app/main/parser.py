@@ -1,4 +1,5 @@
 import logging
+import tempfile
 
 from main.presentations import PresentationODP, PresentationPPTX
 from main.reports.docx_uploader import DocxUploader
@@ -7,22 +8,22 @@ from utils import convert_to
 logger = logging.getLogger('root_logger')
 
 
-def parse(filename):
-    if filename.endswith('.ppt') or filename.endswith('.pptx'):
+def parse(filepath):
+    if filepath.endswith('.ppt') or filepath.endswith('.pptx'):
         try:
-            return PresentationPPTX(filename)
+            return PresentationPPTX(filepath)
         except Exception as err:
             logger.error(err, exc_info=True)
             return None
-    elif filename.endswith('.odp'):
+    elif filepath.endswith('.odp'):
         try:
-            return PresentationODP(filename)
+            return PresentationODP(filepath)
         except Exception as err:
             logger.error(err, exc_info=True)
             return None
-    elif filename.endswith('.doc') or filename.endswith('.odt'):
+    elif filepath.endswith('.doc') or filepath.endswith('.odt'):
         try:
-            converted_file_path = convert_to(filename, target_format='docx')
+            converted_file_path = convert_to(filepath, target_format='docx')
             docx = DocxUploader()
             docx.upload(converted_file_path)
             docx.parse()
@@ -31,10 +32,10 @@ def parse(filename):
             logger.error(err, exc_info=True)
             return None
 
-    elif filename.endswith('.docx'):
+    elif filepath.endswith('.docx'):
         try:
             docx = DocxUploader()
-            docx.upload(filename)
+            docx.upload(filepath)
             docx.parse()
             return docx
         except Exception as err:
@@ -42,3 +43,11 @@ def parse(filename):
             return None
     else:
         raise ValueError("Файл с недопустимым именем или недопустимого формата: " + filename)
+
+
+def save_to_temp_file(file):
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_file.write(file.read())
+    temp_file.close()
+    file.seek(0)
+    return temp_file.name

@@ -9,7 +9,7 @@ services:
       - "8080:8080"
     depends_on:
       - mongodb
-      - redis
+      - worker
     env_file:
       - .env
     environment:
@@ -31,7 +31,6 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      - web
       - redis
       - mongodb
     volumes:
@@ -46,6 +45,8 @@ services:
   mongodb:
     image: mongo:4.0.17-xenial
     restart: always
+    command:
+      - '--wiredTigerCacheSizeGB=1'
     ports:
       - 27017:27017
     volumes:
@@ -58,8 +59,8 @@ services:
     depends_on:
       - mongodb
     volumes:
-    - "/etc/timezone:/etc/timezone:ro"
-    - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
 
 volumes:
   presentation_files:

@@ -1,9 +1,10 @@
-from docx2python import docx2python
-import docx
 import re
 
-from .chapter_object import ChapterObjectImage, ChapterObjectTable, ChapterObjectHeader
+import docx
+from docx2python import docx2python
+
 from .chapter import Chapter
+from .chapter_object import ChapterObjectImage, ChapterObjectTable, ChapterObjectHeader
 
 
 class ChapterCreator:
@@ -16,7 +17,7 @@ class ChapterCreator:
             return ChapterObjectHeader('paragraph', docx_docx.paragraphs[paragraph_index])
 
     @staticmethod
-    def make_content(doc, body_index, paragraph_index): 
+    def make_content(doc, body_index, paragraph_index):
         new_chapters = []
         index = 0
         paragraph_index += 1
@@ -37,7 +38,7 @@ class ChapterCreator:
                     break
                 elif re.search(r'(ВВЕДЕНИЕ|Введение|введение)', s) \
                         or re.search(r'(ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ|Определения, обозначения и сокращения|'
-                                     r'определения, обозначения и сокращения)', s)\
+                                     r'определения, обозначения и сокращения)', s) \
                         or len(s) == len(elem):
                     continue
                 else:
@@ -81,7 +82,7 @@ class ChapterCreator:
         page_objects = []
         current_page_object = []
         for i in range(0, len(indices)):
-            chapter = docx_docx.paragraphs[paragraph_index].text if i!=0 else 'Титульный лист'
+            chapter = docx_docx.paragraphs[paragraph_index].text if i != 0 else 'Титульный лист'
             for j in range(indices[i][0][0], indices[i][1][0] + 1):
                 if len(docx_docx2python.body[j]) > 1:
                     current_page_object.append(ChapterObjectTable('table', docx_docx.tables[table_index]))
@@ -117,7 +118,7 @@ class ChapterCreator:
 
         return page_objects, errors
 
-    def make_indices(self, parsed_doc, chapter_names=None):
+    def make_indices(self, parsed_doc, file_type, chapter_names=None):
         # 'LR':
         #     chapters = ['Цель работы', 'Основные теоретические положения',
         #                 'Выполнение работы', 'Тестирование', 'Выводы']
@@ -127,7 +128,7 @@ class ChapterCreator:
         #                 'СОДЕРЖАНИЕ', 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ', 'ВВЕДЕНИЕ', 'ЗАКЛЮЧЕНИЕ',
         #                 'СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ']
         i_start = [0, 0]
-        doc_chapters = []   #
+        doc_chapters = []  #
         errors = []
         cur_index = 0
         cur_chapter = 0
@@ -154,7 +155,7 @@ class ChapterCreator:
                 cur_index += 1
             elif chapter_names[cur_chapter] in parsed_doc.body[cur_index][0][0][find_index:] \
                     or chapter_names[cur_chapter].lower() in parsed_doc.body[cur_index][0][0][find_index:] \
-                    and file_type != 'LR'\
+                    and file_type != 'LR' \
                     or chapter_names[cur_chapter].capitalize() in parsed_doc.body[cur_index][0][0][find_index:]:
                 if chapter_names[cur_chapter] in parsed_doc.body[cur_index][0][0][find_index:]:
                     find_chapter = chapter_names[cur_chapter]
@@ -191,7 +192,8 @@ class ChapterCreator:
                     tmp_i_end[0], tmp_i_end[1] = cur_index - 1, len(parsed_doc.body[cur_index - 1][0][0]) - 1
                     i_start[0], i_start[1] = tmp_i_end[0] + 1, 0
                 else:
-                    tmp_i_end[0], tmp_i_end[1] = cur_index, parsed_doc.body[cur_index][0][0].index(find_chapter, find_index) - 1
+                    tmp_i_end[0], tmp_i_end[1] = cur_index, parsed_doc.body[cur_index][0][0].index(find_chapter,
+                                                                                                   find_index) - 1
                     i_start[0], i_start[1] = tmp_i_end[0], tmp_i_end[1] + 1
                 doc_chapters.append([tmp_i_start, tmp_i_end])
                 cur_chapter += 1

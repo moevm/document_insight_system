@@ -9,7 +9,7 @@ services:
       - "8080:8080"
     depends_on:
       - mongodb
-      - redis
+      - worker
     env_file:
       - .env
     environment:
@@ -24,12 +24,12 @@ services:
 
   worker:
     image: slides_checker_base_image
+    restart: always
     command: celery worker --app=app.tasks.celery --loglevel=info
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      - web
       - redis
       - mongodb
     volumes:
@@ -39,6 +39,7 @@ services:
 
   redis:
     image: redis:6-alpine
+    restart: always
 
   mongodb:
     image: mongo:4.0.17-xenial
@@ -50,8 +51,8 @@ services:
 
   passback_grades:
     image: slides_checker_base_image
-    command: python3 ./app/passback_grades.py
     restart: always
+    command: python3 ./app/passback_grades.py
     depends_on:
       - mongodb
     volumes:

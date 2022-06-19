@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 from os.path import basename
 
@@ -8,19 +7,20 @@ from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 
 from utils import convert_to, timezone_offset
-from .db_types import User, Presentation, Checks, Consumers, Logs
+from .db_types import User, Presentation, Check, Consumers, Logs
 
 client = MongoClient("mongodb://mongodb:27017")
 db = client['pres-parser-db']
 fs = GridFSBucket(db)
 
 users_collection = db['users']
-presentations_collection = db['presentations']
+files_info_collection = db['presentations']  # actually, collection for all files (pres and reports)
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
 logs_collection = db.create_collection(
     'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
+celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
 
 
 def get_client():
@@ -78,22 +78,29 @@ def delete_user(username):
 
 
 # Adds presentations with given name to given user presentations, updates user, returns user and presentations id
-def add_presentation(user, presentation_name, file_type):
-    presentation = Presentation()
-    presentation.name = presentation_name
-    presentation.file_type = file_type
-    presentation_id = presentations_collection.insert_one(
-        presentation.pack()).inserted_id
-    user.presentations.append(presentation_id)
-    edit_user(user)
-    return presentation_id
+def add_file_info_and_content(username, filepath, file_type, file_id=None):
+    if not file_id: file_id = ObjectId()
+    # parsed_file's info
+    filename = basename(filepath)
+    file_info = Presentation({
+        '_id': file_id,
+        'name': filename,
+        'file_type': file_type
+    })
+    file_info_id = files_info_collection.insert_one(file_info.pack()).inserted_id
+    assert file_id == file_info_id, f"{file_id} -- {file_info_id}"
+    # parsed_file's content in GridFS (file_id = file_info_id)
+    add_file_to_db(filename, filepath, file_info_id)
+    # add parsed_file to user info
+    users_collection.update_one({'username': username}, {"$push": {'presentations': file_info_id}})
+    return file_info_id
 
 
 # Returns presentations with given id or None
 def get_presentation(presentation_id):
-    presentation = presentations_collection.find_one({'_id': presentation_id})
-    if presentation is not None:
-        return Presentation(presentation)
+    file = files_info_collection.find_one({'_id': presentation_id})
+    if file is not None:
+        return Presentation(file)
     else:
         return None
 
@@ -120,53 +127,36 @@ def delete_presentation(user, presentation_id):
         for check_id in presentation.checks:
             presentation, check = delete_check(presentation, check_id)
         presentation = Presentation(
-            presentations_collection.find_one_and_delete({'_id': presentation_id}))
+            files_info_collection.find_one_and_delete({'_id': presentation_id}))
         return user, presentation
     else:
         return user, get_presentation(presentation_id)
 
 
-# Creates checks from given user check-list
+# Creates checks from given user check-list (not created in DB)
 def create_check(user, file_type='pres'):
-    return Checks({'enabled_checks': user.criteria, 'file_type': file_type})
+    return Check({'enabled_checks': user.criteria, 'file_type': file_type})
 
 
 # Adds checks to given presentations, updates presentations, returns presentations and checks id
-def add_check(presentation, checks, presentation_file):
-    checks_id = checks_collection.insert_one(checks.pack()).inserted_id
-    upd_presentation = presentations_collection.update_one(
-        {'_id': presentation._id}, {"$push": {'checks': checks_id}})
-
-    grid_in = fs.open_upload_stream_with_id(
-        checks_id, basename(presentation_file))
-    grid_in.write(open(presentation_file, 'rb'))
-    grid_in.close()
-
+def add_check(file_id, check):
+    checks_id = checks_collection.insert_one(check.pack()).inserted_id
+    files_info_collection.update_one({'_id': file_id}, {"$push": {'checks': checks_id}})
     return checks_id
 
 
-def add_api_check(checks, presentation_file):
-    checks_id = checks_collection.insert_one(checks.pack()).inserted_id
-
-    grid_in = fs.open_upload_stream_with_id(
-        checks_id, basename(presentation_file))
-    grid_in.write(open(presentation_file, 'rb'))
-    grid_in.close()
-
-    return checks_id
+def update_check(check):
+    return bool(checks_collection.find_one_and_replace({'_id': check._id}, check.pack()))
 
 
-def write_pdf(file):
-    extension = file.filename.rsplit('.', 1)[-1].lower()
-    converted = 'pdf'.join(file.filename.rsplit(extension, 1))
-    converted_filename = convert_to(file, target_format='pdf')
-    converted_file = open(converted_filename, 'rb')
-    os.remove(converted_filename)
+def write_pdf(filename, filepath):
+    converted_filepath = convert_to(filepath, target_format='pdf')
+    return add_file_to_db(filename, converted_filepath)
 
-    file_id = ObjectId()
-    grid_in = fs.open_upload_stream_with_id(file_id, converted)
-    grid_in.write(converted_file)
-    grid_in.close()
+
+def add_file_to_db(filename, filepath, file_id=None):
+    if not file_id: file_id = ObjectId()
+    fs.upload_from_stream_with_id(file_id, filename, open(filepath, 'rb'))
     return file_id
 
 
@@ -174,13 +164,13 @@ def write_pdf(file):
 def get_check(checks_id):
     checks = checks_collection.find_one({'_id': checks_id})
     if checks is not None:
-        return Checks(checks)
+        return Check(checks)
     else:
         return None
 
 
-# Returns presentations file with given id or None
-def get_presentation_check(checks_id):
+# Returns presentations parsed_file with given id or None
+def get_file_by_check(checks_id):
     try:
         return fs.open_download_stream(checks_id)
     except NoFile:
@@ -206,9 +196,9 @@ def find_pdf_by_file_id(file_id):
 # Deletes checks with given id, returns presentations
 def delete_check(presentation, checks_id):
     if checks_id in presentation.checks:
-        upd_presentation = presentations_collection.update_one(
+        upd_presentation = files_info_collection.update_one(
             {'_id': presentation._id}, {"$pull": {'checks': checks_id}})
-        checks = Checks(
+        checks = Check(
             checks_collection.find_one_and_delete({'_id': checks_id}))
         fs.delete(checks_id)
         return presentation, checks
@@ -382,3 +372,38 @@ def add_log(timestamp, serviceName, levelname, levelno, message,
     new_log = Logs(args)
     logs_collection.insert_one(new_log.pack())
     return new_log
+
+
+# mapping celery_task to check
+
+def add_celery_task(celery_task_id, check_id):
+    return celery_check_collection.insert_one(
+        {'celery_task_id': celery_task_id, 'check_id': check_id, 'started_at': datetime.now()}).inserted_id
+
+
+def mark_celery_task_as_finished(celery_task_id, finished_time=None):
+    celery_task = get_celery_task(celery_task_id)
+    if not celery_task: return
+    if finished_time is None: finished_time = datetime.now()
+    return celery_check_collection.update_one({'celery_task_id': celery_task_id}, {
+        '$set': {'finished_at': finished_time,
+                 'processing_time': (finished_time - celery_task['started_at']).total_seconds()}})
+
+
+def get_average_processing_time(min_time=5.0, limit=10):
+    # TODO: use only success check (failed checks processing time is more bigger than normal)
+    result = list(celery_check_collection.aggregate(
+        [{'$limit': limit}, {'$group': {'_id': None, 'avg_processing_time': {'$avg': "$processing_time"}}}]))
+    if result:
+        result = result[0]
+        if result['avg_processing_time'] > min_time:
+            return round(result['avg_processing_time'], 1)
+    return min_time
+
+
+def get_celery_task(celery_task_id):
+    return celery_check_collection.find_one({'celery_task_id': celery_task_id})
+
+
+def get_celery_task_by_check(check_id):
+    return celery_check_collection.find_one({'check_id': check_id})
