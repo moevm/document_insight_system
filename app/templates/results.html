@@ -47,7 +47,7 @@
         </table>
         <!-- Download links -->
         <a href="{{ url_for('checks', _id=id) }}" id="file_download" class="col text-center" download="{{ filename }}">
-            Скачать файл в исходном расширении ({{ filename.upper().rsplit('.', 1)[-1] }})
+            Скачать файл в исходном формате ({{ filename.upper().rsplit('.', 1)[-1] }})
         </a>
         {% if results.conv_pdf_fs_id %}
             <a href="{{ url_for('get_pdf', _id=results.conv_pdf_fs_id) }}" id="pdf_download"
