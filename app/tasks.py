@@ -27,13 +27,13 @@ def create_task(self, check_info):
         updated_check = check_function(parse(file), check_obj, file.name, user)
         updated_check.is_ended = True
         db_methods.update_check(updated_check)  # save to db
-        db_methods.update_celery_task(self.request.id)
+        db_methods.mark_celery_task_as_finished(self.request.id)
         return str(updated_check._id)
     except Exception as e:
         if self.request.retries == self.max_retries:
             logger.error(f"\tДостигнуто максимальное количество попыток перезапуска. Удаление задачи из очереди",
                          exc_info=True)
-            db_methods.update_celery_task(self.request.id)
+            db_methods.mark_celery_task_as_finished(self.request.id)
             updated_check = Check(check_info)
             updated_check.is_failed = True
             updated_check.is_ended = True

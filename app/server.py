@@ -159,7 +159,7 @@ def run_task():
     # add file and file's info to db
     file_id = db_methods.add_file_info_and_content(current_user.username, file, file_type)
     converted_id = db_methods.write_pdf(file)  # convert to pdf for preview
-    # TODO: validate that checks match file_type
+    # TODO: validate that enabled_checks match file_type
     check = Check({
         '_id': file_id,
         'conv_pdf_fs_id': converted_id,
@@ -212,13 +212,12 @@ def results(_id):
         return render_template("./404.html")
     check = db_methods.get_check(oid)
     if check is not None:
-        check_flags = check.get_flags()  # process check flags: is_ended, is_failed
-        logger.error(str(check_flags))
+        # show processing time for user
+        avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
         # TODO: if task crashed, check may contain data not for page rendering (we can fix Check.correct())
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id,
-                               fi=check.filename, columns=TABLE_COLUMNS, is_ended=check_flags['is_ended'],
-                               is_failed=check_flags['is_failed'], stats=db_methods.format_check(check.pack()),
-                               labels=CRITERIA_LABELS)
+                               fi=check.filename, columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
+                               stats=db_methods.format_check(check.pack()), labels=CRITERIA_LABELS)
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
