@@ -1,7 +1,7 @@
 from argparse import Namespace
 
 from .checks import ReportSimpleCheck, SldNumCheck, SearchKeyWord, FindTasks, FindDefSld, SldEnumCheck, SldSimilarity, \
-    TitleFormatCheck, FurtherDev, TemplateNameCheck
+    TitleFormatCheck, FurtherDev, TemplateNameCheck, ReportBannedWordsCheck
 
 key_slides = {
     'goals_and_tasks': 'Цель и задачи',
@@ -51,7 +51,8 @@ def check(parsed_file, checks, filename, user):
 # TODO: объединить check и check_report, передавая список проверок
 def check_report(parsed_file, checks, filename, user):
     set_checks = {
-        "simple_check": ReportSimpleCheck(parsed_file)
+        "simple_check": ReportSimpleCheck(parsed_file),
+        "banned_words_check": ReportBannedWordsCheck(parsed_file, ['квадрат', 'бэктрекинг'], 3, 6)
     }
     # добавить зависимость от критериев проверки
     enabled_checks = set_checks
