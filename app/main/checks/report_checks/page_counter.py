@@ -1,3 +1,5 @@
+import re
+
 from ..base_check import BaseCheck, answer
 
 class ReportNumberOfPages(BaseCheck):
@@ -11,7 +13,7 @@ class ReportNumberOfPages(BaseCheck):
         count = 0
         for k, v in self.file.pdf_file.text_on_page.items():
             print(f"Страница №{k}", end='\n\n')
-            if "приложение" in v.lower():
+            if re.search('приложение [а-я][\n .]', v.lower()):
                 break
             count += 1
 
