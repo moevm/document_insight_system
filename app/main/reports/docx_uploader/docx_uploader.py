@@ -4,7 +4,7 @@ from .core_properties import CoreProperties
 from .inline_shape import InlineShape
 from .paragraph import Paragraph
 from .table import Table, Cell
-
+from ..pdf_document.pdf_document_manager import PdfDocumentManager
 
 class DocxUploader:
     def __init__(self):
@@ -13,9 +13,11 @@ class DocxUploader:
         self.paragraphs= []
         self.tables = []
         self.file = None
+        self.pdf_file = None
 
     def upload(self, file):
         self.file = docx.Document(file)
+        self.pdf_file = PdfDocumentManager(file)
 
     def parse(self):
         self.core_properties = CoreProperties(self.file)
