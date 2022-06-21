@@ -1,11 +1,12 @@
 import re
+import pymorphy2
 from ..base_check import BaseCheck, answer
 
 
 class ReportBannedWordsCheck(BaseCheck):
     def __init__(self, file, words, min_count, max_count):
         super().__init__(file)
-        self.words = [word.lower() for word in words]
+        self.words = words
         self.min_count = min_count
         self.max_count = max_count
 
@@ -14,6 +15,7 @@ class ReportBannedWordsCheck(BaseCheck):
         text = parsed_pdf.get_text_on_page().items()
         result_str = ''
         count = 0
+        morph = pymorphy2.MorphAnalyzer()
         for k, v in text:
             lines_on_page = re.split(r'\n', v)
             # words_on_page = re.split(r'[^\w-]+', v)
@@ -24,11 +26,13 @@ class ReportBannedWordsCheck(BaseCheck):
             #         result_str += f'Страница №{k}: слово - {word}. \n'
             for line in lines_on_page:
                 words_on_line = re.split(r'[^\w-]+', line)
-                words_on_line = list(map(str.lower, words_on_line))
+                # words_on_line = list(map(str.lower, words_on_line))
+                # words_on_line = list(map(morph.normal_forms, words_on_line))
+                words_on_line = [morph.normal_forms(word)[0] for word in words_on_line]
                 for word in self.words:
-                    if word in words_on_line:
+                    if morph.normal_forms(word)[0] in words_on_line:
                         count += 1
-                        result_str += f'Страница №{k}: {line}. \n'
+                        result_str += f'Страница №{k}: {line} <br>'
 
         result_score = 1
         if count > self.min_count:
