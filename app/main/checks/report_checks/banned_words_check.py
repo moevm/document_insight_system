@@ -18,22 +18,17 @@ class ReportBannedWordsCheck(BaseCheck):
         morph = pymorphy2.MorphAnalyzer()
         for k, v in text:
             lines_on_page = re.split(r'\n', v)
-            # words_on_page = re.split(r'[^\w-]+', v)
-            # words_on_page = list(map(str.lower, words_on_page))
-            # for word in self.words:
-            #     if word in words_on_page:
-            #         count += 1
-            #         result_str += f'Страница №{k}: слово - {word}. \n'
             for line in lines_on_page:
                 words_on_line = re.split(r'[^\w-]+', line)
-                # words_on_line = list(map(str.lower, words_on_line))
-                # words_on_line = list(map(morph.normal_forms, words_on_line))
                 words_on_line = [morph.normal_forms(word)[0] for word in words_on_line]
                 for word in self.words:
                     if morph.normal_forms(word)[0] in words_on_line:
                         count += 1
                         result_str += f'Страница №{k}: {line} <br>'
-
+        if result_str == '':
+            result_str = 'Запретные слова не обнаружены!'
+        else:
+            result_str = 'Обнаружены запретные слова! <br>' + result_str
         result_score = 1
         if count > self.min_count:
             if count <= self.max_count:

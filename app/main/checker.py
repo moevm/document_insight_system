@@ -52,7 +52,7 @@ def check(parsed_file, checks, filename, user):
 def check_report(parsed_file, checks, filename, user):
     set_checks = {
         "simple_check": ReportSimpleCheck(parsed_file),
-        "banned_words_check": ReportBannedWordsCheck(parsed_file, ['квадрат', 'бэктрекинг'], 3, 6)
+        "banned_words_check": ReportBannedWordsCheck(parsed_file, ['я'], 5, 10)
     }
     # добавить зависимость от критериев проверки
     enabled_checks = set_checks
