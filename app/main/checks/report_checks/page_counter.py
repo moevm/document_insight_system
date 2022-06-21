@@ -19,6 +19,6 @@ class ReportNumberOfPages(BaseCheck):
 
         if count >= self.minNumber and (self.maxNumber is None or count <= self.maxNumber):
             return answer(True, f"Пройдена! {count} страниц")
-        return answer(False, f'Неверное кол-во страниц в файле. ({count} страниц)')
+        return answer(False, f'Неверное количество страниц в файле. ({count} страниц)')
 
 
