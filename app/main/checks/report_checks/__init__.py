@@ -1,1 +1,2 @@
 from .simple_check import ReportSimpleCheck
+from .right_words_check import ReportRightWordsCheck
