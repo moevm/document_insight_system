@@ -3,10 +3,13 @@ import pymorphy2
 from ..base_check import BaseCheck, answer
 
 
+morph = pymorphy2.MorphAnalyzer()
+
+
 class ReportBannedWordsCheck(BaseCheck):
-    def __init__(self, file, words, min_count, max_count):
+    def __init__(self, file, words = [], min_count = 3, max_count = 6):
         super().__init__(file)
-        self.words = words
+        self.words = [morph.normal_forms(word)[0] for word in words]
         self.min_count = min_count
         self.max_count = max_count
 
@@ -15,16 +18,14 @@ class ReportBannedWordsCheck(BaseCheck):
         text = parsed_pdf.get_text_on_page().items()
         result_str = ''
         count = 0
-        morph = pymorphy2.MorphAnalyzer()
         for k, v in text:
             lines_on_page = re.split(r'\n', v)
             for line in lines_on_page:
                 words_on_line = re.split(r'[^\w-]+', line)
                 words_on_line = [morph.normal_forms(word)[0] for word in words_on_line]
-                for word in self.words:
-                    if morph.normal_forms(word)[0] in words_on_line:
-                        count += 1
-                        result_str += f'Страница №{k}: {line} <br>'
+                if set(words_on_line).intersection(self.words):
+                    count += 1
+                    result_str += f'Страница №{k}: {line} <br>'
         if result_str == '':
             result_str = 'Запретные слова не обнаружены!'
         else:
@@ -35,4 +36,4 @@ class ReportBannedWordsCheck(BaseCheck):
                 result_score = 0.5
             else:
                 result_score = 0
-        return answer(True, result_str)
+        return answer(result_score, result_str)
