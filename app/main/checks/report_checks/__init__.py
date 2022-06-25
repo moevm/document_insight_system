@@ -1,1 +1,2 @@
 from .simple_check import ReportSimpleCheck
+from .banned_words_in_literature import BannedWordsInLiteratureCheck
