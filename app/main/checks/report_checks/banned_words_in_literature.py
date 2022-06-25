@@ -1,5 +1,4 @@
 from ..base_check import BaseCheck, answer
-from pathlib import Path
 import re
 import pymorphy2
 
@@ -31,7 +30,10 @@ class BannedWordsInLiteratureCheck(BaseCheck):
                 end = len(one_page)
 
                 for j in range(len(one_page)):
-                    if 'список использованных источников' in one_page[j].lower():
+                    page_lower = one_page[j].lower()
+                    if 'список использованных источников' in page_lower\
+                            or 'список использованной литературы' in page_lower\
+                            or 'список литературы' in page_lower:
                         start = j
                         break
                 for j in range(start, len(one_page)):
@@ -42,10 +44,10 @@ class BannedWordsInLiteratureCheck(BaseCheck):
                 for ind in range(start+1, end):
                     if re.match(f"{index+1}.", one_page[ind]):
                         index += 1
-                    words_from_lst = re.split(r'[^\w]+', one_page[ind])
-                    words_from_lst = [morph.normal_forms(word_from_lst)[0] for word_from_lst in words_from_lst]
+                    words_from_str = re.split(r'[^\w]+', one_page[ind])
+                    words_from_str = [morph.normal_forms(word_from_str)[0] for word_from_str in words_from_str]
                     for word in self.banned_words:
-                        if word in words_from_lst:
+                        if word in words_from_str:
                             if index in result_dict.keys():
                                 result_dict[index] += ", " + word
                             else:
