@@ -37,7 +37,7 @@ class BannedWordsInLiteratureCheck(BaseCheck):
                         start = j
                         break
                 for j in range(start, len(one_page)):
-                    if re.search('приложение [а-я][\n .]', one_page[j].lower()):
+                    if re.search('приложение а[\n .]', one_page[j].lower()):
                         end = j
                         break
 
