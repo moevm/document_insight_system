@@ -3,9 +3,8 @@ from ..base_check import BaseCheck, answer
 
 
 class SldEnumCheck(BaseCheck):
-    def __init__(self, file, pdf_id):
-        super().__init__(file)
-        self.pdf_id = pdf_id
+    def __init__(self, file_info):
+        super().__init__(file_info)
 
     def check(self):
         error = []

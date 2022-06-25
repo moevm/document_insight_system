@@ -1,11 +1,12 @@
-from ..base_check import BaseCheck, answer
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
-from app.utils.parse_for_html import find_tasks_on_slides_feedback
 from app.utils.get_text_from_slides import get_text_from_slides
+from app.utils.parse_for_html import find_tasks_on_slides_feedback
+from ..base_check import BaseCheck, answer
+
 
 class FindTasks(BaseCheck):
-    def __init__(self, file, keyword, intersection_number):
-        super().__init__(file)
+    def __init__(self, file_info, keyword, intersection_number):
+        super().__init__(file_info)
         self.keyword = keyword
         self.intersection_number = intersection_number
 
@@ -19,7 +20,7 @@ class FindTasks(BaseCheck):
 
         if slides_with_tasks == 0:
             return answer(True, "Все задачи найдены на слайдах")
-        elif len(slides_with_tasks) == 3 :
+        elif len(slides_with_tasks) == 3:
             return answer(False, *find_tasks_on_slides_feedback(slides_with_tasks))
         else:
             return answer(False, slides_with_tasks)

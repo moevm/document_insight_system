@@ -1,13 +1,13 @@
 from ..base_check import BaseCheck, answer
 
+
 class FindDefSld(BaseCheck):
-    def __init__(self, file, type_of_slide, pdf_id):
-        super().__init__(file)
+    def __init__(self, file_info, type_of_slide):
+        super().__init__(file_info)
         self.type_of_slide = type_of_slide
-        self.pdf_id = pdf_id
 
     def check(self):
-        found_slides, found_idxs  = [], []
+        found_slides, found_idxs = [], []
         for i, title in enumerate(self.file.get_titles(), 1):
             if str(title).lower().find(str(self.type_of_slide).lower()) != -1:
                 found_slides.append(self.file.get_text_from_slides()[i - 1])

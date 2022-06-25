@@ -4,10 +4,9 @@ from ..base_check import BaseCheck, answer
 
 
 class SearchKeyWord(BaseCheck):
-    def __init__(self, file, key_slide, pdf_id):
-        super().__init__(file)
+    def __init__(self, file_info, key_slide):
+        super().__init__(file_info)
         self.key_slide = f"({'|'.join((key.lower() for key in key_slide))})"
-        self.pdf_id = pdf_id
 
     def check(self):
         for i, text in enumerate(self.file.get_text_from_slides(), 1):

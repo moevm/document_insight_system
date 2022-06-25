@@ -1,12 +1,15 @@
 def answer(mod, *args):
     return {
-        'pass': bool(mod),
-        'verdict': (args)
+        'pass': float(mod),
+        'verdict': args
     }
 
+
 class BaseCheck:
-    def __init__(self, file):
-        self.file = file
+    def __init__(self, file_info):
+        self.file = file_info.get('file')
+        self.filename = file_info.get('filename')
+        self.pdf_id = file_info.get('pdf_id')
 
     def check(self):
         raise NotImplementedError()

@@ -4,8 +4,8 @@ from ..base_check import BaseCheck, answer
 
 
 class SldSimilarity(BaseCheck):
-    def __init__(self, file, goals, conclusion, actual_number):
-        super().__init__(file)
+    def __init__(self, file_info, goals, conclusion, actual_number):
+        super().__init__(file_info)
         self.goals = goals
         self.conclusion = conclusion
         self.actual_number = actual_number
