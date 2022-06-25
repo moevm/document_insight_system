@@ -18,7 +18,7 @@ class BannedWordsInLiteratureCheck(BaseCheck):
                     or 'список использованной литературы' in lowcase_str\
                     or 'список литературы' in lowcase_str:
                 start_page = i
-            if re.search('приложение [а-я][\n .]', lowcase_str):
+            if re.search('приложение а[\n .]', lowcase_str):
                 end_page = i
 
         if start_page:
