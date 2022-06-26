@@ -2,7 +2,6 @@ import pdfplumber
 
 from app.utils import convert_to
 
-
 class PdfDocumentManager:
     def __init__(self, path_to_file):
         self.pdf_file = pdfplumber.open(convert_to(path_to_file, target_format='pdf'))

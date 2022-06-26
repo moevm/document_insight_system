@@ -1,3 +1,7 @@
+import pymorphy2
+
+morph = pymorphy2.MorphAnalyzer()
+
 def answer(mod, *args):
     return {
         'pass': bool(mod),

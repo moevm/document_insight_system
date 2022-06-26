@@ -1,9 +1,5 @@
 import re
-import pymorphy2
-from ..base_check import BaseCheck, answer
-
-
-morph = pymorphy2.MorphAnalyzer()
+from ..base_check import BaseCheck, answer, morph
 
 
 class ReportBannedWordsCheck(BaseCheck):
@@ -14,11 +10,9 @@ class ReportBannedWordsCheck(BaseCheck):
         self.max_count = max_count
 
     def check(self):
-        parsed_pdf = self.file.get_parsed_pdf()
-        text = parsed_pdf.get_text_on_page().items()
         result_str = ''
         count = 0
-        for k, v in text:
+        for k, v in self.file.pdf_file.get_text_on_page().items():
             lines_on_page = re.split(r'\n', v)
             for line in lines_on_page:
                 words_on_line = re.split(r'[^\w-]+', line)

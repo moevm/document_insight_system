@@ -1,12 +1,10 @@
 import docx
 
-from app.main.reports.pdf_document import PdfDocumentManager
-
 from .core_properties import CoreProperties
 from .inline_shape import InlineShape
 from .paragraph import Paragraph
 from .table import Table, Cell
-
+from ..pdf_document.pdf_document_manager import PdfDocumentManager
 
 class DocxUploader:
     def __init__(self):
@@ -14,12 +12,12 @@ class DocxUploader:
         self.core_properties = None
         self.paragraphs= []
         self.tables = []
-        self.filepath = ''
         self.file = None
+        self.pdf_file = None
 
     def upload(self, file):
-        self.filepath = file
         self.file = docx.Document(file)
+        self.pdf_file = PdfDocumentManager(file)
 
     def parse(self):
         self.core_properties = CoreProperties(self.file)
@@ -27,10 +25,6 @@ class DocxUploader:
             self.inline_shapes.append(InlineShape(self.file.inline_shapes[i]))
         self.paragraphs = self.__make_paragraphs(self.file.paragraphs)
         self.tables = self.__make_table(self.file.tables)
-
-    def get_parsed_pdf(self):
-        parsed_pdf = PdfDocumentManager(self.filepath)
-        return parsed_pdf
 
     def __make_paragraphs(self, paragraphs):
         tmp_paragraphs = []
