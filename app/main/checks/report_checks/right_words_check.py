@@ -3,7 +3,7 @@ from ..base_check import BaseCheck, answer
 
 
 class ReportRightWordsCheck(BaseCheck):
-    def __init__(self, file, patterns = ['квадр\w*', '[Мм]одификации', 'описание', 'github']):
+    def __init__(self, file, patterns = []):
         super().__init__(file)
         self.patterns = dict.fromkeys(patterns, False)
 
