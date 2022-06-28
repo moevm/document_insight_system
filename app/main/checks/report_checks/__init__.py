@@ -1,1 +1,2 @@
 from .simple_check import ReportSimpleCheck
+from .image_share_check import ReportImageShareCheck
