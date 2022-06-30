@@ -306,19 +306,6 @@ def get_check_stats(oid):
     return checks_collection.find_one({'_id': oid})
 
 
-def format_check(check):
-    grade_passback_time = check['lms_passback_time']
-    grade_passback_ts = grade_passback_time.strftime(
-        "%H:%M:%S - %b %d %Y") if grade_passback_time else '-'
-    return (str(check['_id']), check['user'], check['filename'],
-            (check['_id'].generation_time + timezone_offset).strftime("%H:%M:%S - %b %d %Y"),
-            grade_passback_ts, check['score'])
-
-
-def format_stats(stats):
-    return (format_check(check) for check in stats)
-
-
 # LTI
 class ConsumersDBManager:
 

@@ -21,10 +21,11 @@ from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
+from main.check_packs import init_criterions
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
-from utils import checklist_filter, decorator_assertion, get_file_len, timezone_offset
+from utils import checklist_filter, decorator_assertion, get_file_len, timezone_offset, format_check
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
@@ -222,10 +223,9 @@ def results(_id):
     if check is not None:
         # show processing time for user
         avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
-        # TODO: if task crashed, check may contain data not for page rendering (we can fix Check.correct())
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id,
-                               filename=check.filename, columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
-                               stats=db_methods.format_check(check.pack()), labels=CRITERIA_LABELS)
+                               columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
+                               stats=format_check(check.pack()))
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
