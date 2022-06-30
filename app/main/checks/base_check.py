@@ -25,7 +25,7 @@ class BaseCheck:
 
     @property
     def name(self):
-        return description
+        return self.description
 
 
 class BasePresCriterion(BaseCheck):

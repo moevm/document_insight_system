@@ -134,12 +134,7 @@ def upload():
             abort(401)
     elif request.method == "GET":
         formats = set(current_user.formats)
-        # add user info as primary condition (check that user file type == req file type)
-        if request.args.get('report'):
-            file_type = 'report'
-            formats = None
-        else:
-            file_type = 'pres'
+        file_type = current_user.file_type
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
         return render_template("./upload.html", navi_upload=False, name=current_user.name, file_type=file_type,
                                formats=sorted(formats))
@@ -175,7 +170,7 @@ def run_task():
         'user': current_user.username,
         'lms_user_id': current_user.lms_user_id,
         'enabled_checks': current_user.criteria,
-        'file_type': file_type,  # current_user.file_type
+        'file_type': current_user.file_type,
         'filename': file.filename,
         'score': -1,  # score=-1 -> checking in progress
         'is_ended': False,

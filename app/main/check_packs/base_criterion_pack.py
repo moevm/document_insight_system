@@ -3,15 +3,16 @@ from .utils import init_criterions
 
 class BaseCriterionPack:
 
-    def __init__(self, criterions, file_type, min_score=1.0, name=None):
+    def __init__(self, raw_criterions, file_type, min_score=1.0, name=None, **kwargs):
         self.file_type = file_type
         self.name = name if name else self.__class__.__name__
-        self.criterions = criterions
+        self.raw_criterions = raw_criterions
+        self.criterions = []
         self.min_score = min_score  # min score to pass
 
     def init(self, file_info):
         # create criterion objects, ignore errors - validation was performed earlier
-        self.criterions, _ = init_criterions(self.criterions, file_type=self.file_type, file_info=file_info)
+        self.criterions, errors = init_criterions(self.raw_criterions, file_type=self.file_type, file_info=file_info)
 
     def check(self):
         result = []
@@ -26,6 +27,15 @@ class BaseCriterionPack:
 
     def is_correct(self, score):
         return self.correct(score, self.min_score)
+
+    def to_json(self):
+        # BASE_PRES_CRITERION, 'pres', min_score=1.0, name="BasePresentationCriterionPack"
+        return {
+            'name': self.name,
+            'raw_criterions': self.raw_criterions,
+            'file_type': self.file_type,
+            'min_score': self.min_score
+        }
 
     @staticmethod
     def correct(score, min_score=1.0):

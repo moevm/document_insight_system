@@ -8,7 +8,7 @@ def check(parsed_file, check_obj, filename, user):
         'filename': filename,
         'pdf_id': check_obj.conv_pdf_fs_id
     }
-    pack = BaseCriterionPack(**get_criteria_pack(user.enabled_checks))
+    pack = BaseCriterionPack(**get_criteria_pack(user.criteria))
     pack.init(file_info)
     result, score, is_passed = pack.check()
 

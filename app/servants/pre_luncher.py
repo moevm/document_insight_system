@@ -3,13 +3,19 @@ import logging
 
 from pymongo.errors import ConnectionFailure
 
-from db.db_methods import add_user, get_user, get_client, edit_user
+from db.db_methods import add_user, get_user, get_client, edit_user, save_criteria_pack
 from main.check_packs.pack_config import BASE_PACKS
+from server import ALLOWED_EXTENSIONS
 
 logger = logging.getLogger('root_logger')
 
 
 def get_hash(password): return hashlib.md5(password.encode()).hexdigest()
+
+
+def update_base_check_pack():
+    for pack in BASE_PACKS.values():
+        save_criteria_pack(pack.to_json())
 
 
 def init(app, debug):
@@ -31,9 +37,12 @@ def init(app, debug):
         edit_user(user)
 
     user.file_type = 'report'
-    user.enabled_checks = BASE_PACKS[user.file_type].name
+    user.criteria = BASE_PACKS[user.file_type].name
+    user.formats = list(ALLOWED_EXTENSIONS.get(user.file_type))
     edit_user(user)
 
     logger.info(f"Создан администратор по умолчанию: логин: {user.username}, пароль уточняйте у разработчика")
+
+    update_base_check_pack()
 
     return True

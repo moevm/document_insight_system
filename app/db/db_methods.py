@@ -6,7 +6,7 @@ from bson import ObjectId
 from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 
-from utils import convert_to, timezone_offset
+from utils import convert_to
 from .db_types import User, Presentation, Check, Consumers, Logs
 
 client = MongoClient("mongodb://mongodb:27017")
@@ -369,7 +369,7 @@ def get_criteria_pack(name):
 
 def save_criteria_pack(pack_info):
     # pack_info - dict, that includes name, criterions, check_file_type, min_score}
-    return criteria_pack_collection.update_one({'name': pack_info.get('name')}, pack_info, upsert=True)
+    return criteria_pack_collection.update_one({'name': pack_info.get('name')}, {'$set': pack_info}, upsert=True)
 
 
 # criterions, check_file_type, min_score=1.0, name

@@ -1,5 +1,4 @@
 import os
-from logging import getLogger
 from os.path import join, exists
 
 from celery import Celery
@@ -9,9 +8,10 @@ from db.db_methods import get_user
 from db.db_types import Check
 from main.checker import check
 from main.parser import parse
+from root_logger import get_root_logger
 
-TASK_RETRY_COUNTDOWN = 10  # default = 3 * 60
-logger = getLogger('root_logger')
+TASK_RETRY_COUNTDOWN = 60  # default = 3 * 60
+logger = get_root_logger('tasks')
 
 celery = Celery(__name__)
 celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")

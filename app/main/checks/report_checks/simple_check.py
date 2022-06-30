@@ -13,7 +13,3 @@ class ReportSimpleCheck(BaseReportCriterion):
             return answer(True, "Пройдена!")
         else:
             return answer(False, f'Количество paragraphs в файле = 0')
-
-    @property
-    def name(self):
-        return description

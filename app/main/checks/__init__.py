@@ -1,7 +1,7 @@
 from .presentation_checks import *
 from .report_checks import *
 
-CHECKS = {
+AVAILABLE_CHECKS = {
     'pres': {
         TemplateNameCheck.id: TemplateNameCheck,
         SldNumCheck.id: SldNumCheck,
@@ -17,5 +17,3 @@ CHECKS = {
         ReportSimpleCheck.id: ReportSimpleCheck
     }
 }
-
-AVAILABLE_CHECKS = {file_type: list(checks.keys()) for file_type, checks in CHECKS.items()}

@@ -47,8 +47,8 @@
         </table>
         <!-- Download links -->
         <a href="{{ url_for('checks', _id=id) }}" id="file_download" class="col text-center"
-           download="{{ check.filename }}">
-            Скачать файл в исходном формате ({{ check.filename.upper().rsplit('.', 1)[-1] }})
+           download="{{ results.filename }}">
+            Скачать файл в исходном формате ({{ results.filename.upper().rsplit('.', 1)[-1] }})
         </a>
         {% if results.conv_pdf_fs_id %}
             <a href="{{ url_for('get_pdf', _id=results.conv_pdf_fs_id) }}" id="pdf_download"
@@ -72,7 +72,7 @@
                             <button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button>
                         </td>
                         <th scope="row" class="ins">{{ loop.index }}</th>
-                        <td class="ins">{{ labels[key] }}</td>
+                        <td class="ins">{{ criterion_info['name'] }}</td>
                         {% set colors = {0.0: 'table-danger', 1.0: 'table-success'} %}
                         {% set result_labels = {0.0: 'Не пройдена', 1.0: 'Пройдена'} %}
                         <td class="{{ colors.get(criterion_info['score'], 'table-warning') }} ins">
