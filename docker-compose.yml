@@ -25,7 +25,7 @@ services:
   worker:
     image: slides_checker_base_image
     restart: always
-    command: celery worker --app=app.tasks.celery --loglevel=info
+    command: celery --app=app.tasks.celery worker --loglevel=info
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
