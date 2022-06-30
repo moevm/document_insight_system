@@ -1,17 +1,17 @@
 import re
 
 from utils import format_header
-from ..base_check import BaseCheck, answer
+from ..base_check import BasePresCriterion, answer
 
 
-class SldNumCheck(BaseCheck):
-    def __init__(self, file_info, slides_number):
+class SldNumCheck(BasePresCriterion):
+    description = "Количество основных слайдов"
+    id = 'slides_number'
+
+    def __init__(self, file_info, slides_number, detect_additional=True):
         super().__init__(file_info)
-        if not isinstance(slides_number, (dict,)):
-            self.slides_number = slides_number
-        else:
-            self.slides_number = slides_number.get('sld_num')
-            self.detect_additional = slides_number.get('detect_additional', True)
+        self.slides_number = slides_number
+        self.detect_additional = detect_additional
 
     RANGE_VERDICTS = {
         'in_range': 'Количество слайдов в допустимых границах',

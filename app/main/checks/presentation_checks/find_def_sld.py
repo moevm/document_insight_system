@@ -1,10 +1,13 @@
-from ..base_check import BaseCheck, answer
+from ..base_check import answer, BasePresCriterion
 
 
-class FindDefSld(BaseCheck):
-    def __init__(self, file_info, type_of_slide):
+class FindDefSld(BasePresCriterion):
+    description = "Поиск ключевого слова в заголовках"
+    id = 'find_slides'
+
+    def __init__(self, file_info, key_slide):
         super().__init__(file_info)
-        self.type_of_slide = type_of_slide
+        self.type_of_slide = key_slide
 
     def check(self):
         found_slides, found_idxs = [], []
@@ -17,3 +20,7 @@ class FindDefSld(BaseCheck):
         else:
             found_idxs = self.format_page_link(found_idxs)
             return answer(True, 'Найден под номером: {}'.format(', '.join(map(str, found_idxs))))
+
+    @property
+    def name(self):
+        return f"Слайд: '{key_slide}'"

@@ -1,14 +1,17 @@
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
 from app.utils.get_text_from_slides import get_text_from_slides
 from app.utils.parse_for_html import find_tasks_on_slides_feedback
-from ..base_check import BaseCheck, answer
+from ..base_check import BasePresCriterion, answer
 
 
-class FindTasks(BaseCheck):
-    def __init__(self, file_info, keyword, intersection_number):
+class FindTasks(BasePresCriterion):
+    description = "Наличие слайдов, посвященных задачам"
+    id = 'slide_every_task'
+
+    def __init__(self, file_info, min_percent=50, keyword='Цель и задачи'):
         super().__init__(file_info)
         self.keyword = keyword
-        self.intersection_number = intersection_number
+        self.intersection_number = min_percent
 
     def check(self):
         get_goals = get_text_from_slides(self.file, self.keyword)

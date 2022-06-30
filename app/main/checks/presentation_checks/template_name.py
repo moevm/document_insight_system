@@ -1,13 +1,16 @@
 import re
 
-from ..base_check import BaseCheck, answer
+from ..base_check import BasePresCriterion, answer
 
 
-class TemplateNameCheck(BaseCheck):
-    def __init__(self, file_info):
+class TemplateNameCheck(BasePresCriterion):
+    description = "Проверка соответствия названия файла шаблону"
+    id = 'template_name'
+
+    def __init__(self, file_info, regex="(\bПрезентация|\bПРЕЗЕНТАЦИЯ)_(ВКР|НИР)_(([А-ЯЁ][а-яё]+)|([А-ЯЁ]*))"):
         super().__init__(file_info)
         self.filename = self.filename.split('.', 1)[0]
-        self.reg = r"(\bПрезентация|\bПРЕЗЕНТАЦИЯ)_(ВКР|НИР)_(([А-ЯЁ][а-яё]+)|([А-ЯЁ]*))"
+        self.reg = regex
 
     def check(self):
         if re.fullmatch(self.reg, self.filename):

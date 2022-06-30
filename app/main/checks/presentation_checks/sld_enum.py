@@ -1,8 +1,11 @@
 from utils import format_header
-from ..base_check import BaseCheck, answer
+from ..base_check import BasePresCriterion, answer
 
 
-class SldEnumCheck(BaseCheck):
+class SldEnumCheck(BasePresCriterion):
+    description = "Нумерация слайдов"
+    id = 'slides_enum'
+
     def __init__(self, file_info):
         super().__init__(file_info)
 

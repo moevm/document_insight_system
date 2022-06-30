@@ -1,14 +1,17 @@
 from nlp.similarity_of_texts import check_similarity
 from utils import get_text_from_slides, tasks_conclusions_feedback
-from ..base_check import BaseCheck, answer
+from ..base_check import BasePresCriterion, answer
 
 
-class SldSimilarity(BaseCheck):
-    def __init__(self, file_info, goals, conclusion, actual_number):
+class SldSimilarity(BasePresCriterion):
+    description = "Соответствие заключения задачам"
+    id = 'conclusion_actual'
+
+    def __init__(self, file_info, goals='Цель и задачи', conclusion='Заключение', min_percent=50):
         super().__init__(file_info)
         self.goals = goals
         self.conclusion = conclusion
-        self.actual_number = actual_number
+        self.actual_number = min_percent
 
     def check(self):
         goals = get_text_from_slides(self.file, self.goals)

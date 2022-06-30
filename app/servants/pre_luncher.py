@@ -4,8 +4,10 @@ import logging
 from pymongo.errors import ConnectionFailure
 
 from db.db_methods import add_user, get_user, get_client, edit_user
+from main.check_packs.pack_config import BASE_PACKS
 
 logger = logging.getLogger('root_logger')
+
 
 def get_hash(password): return hashlib.md5(password.encode()).hexdigest()
 
@@ -27,6 +29,10 @@ def init(app, debug):
         user.name = cred_id
         user.is_admin = True
         edit_user(user)
+
+    user.file_type = 'report'
+    user.enabled_checks = BASE_PACKS[user.file_type].name
+    edit_user(user)
 
     logger.info(f"Создан администратор по умолчанию: логин: {user.username}, пароль уточняйте у разработчика")
 
