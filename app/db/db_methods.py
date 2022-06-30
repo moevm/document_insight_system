@@ -374,6 +374,19 @@ def add_log(timestamp, serviceName, levelname, levelno, message,
     return new_log
 
 
+# criteria pack methods
+
+def get_criteria_pack(name):
+    return criteria_pack_collection.find_one({'name': name})
+
+
+def save_criteria_pack(pack_info):
+    # pack_info - dict, that includes name, criterions, check_file_type, min_score}
+    return criteria_pack_collection.update_one({'name': pack_info.get('name')}, pack_info, upsert=True)
+
+
+# criterions, check_file_type, min_score=1.0, name
+
 # mapping celery_task to check
 
 def add_celery_task(celery_task_id, check_id):
