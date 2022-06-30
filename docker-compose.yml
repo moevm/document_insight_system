@@ -40,6 +40,8 @@ services:
   redis:
     image: redis:6-alpine
     restart: always
+    volumes:
+      - ../slides_checker_redis_data:/data
 
   mongodb:
     image: mongo:4.0.17-xenial

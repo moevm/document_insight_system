@@ -26,6 +26,7 @@ services:
 
   worker:
     image: slides_checker_base_image
+    restart: always
     command: celery --app=app.tasks.celery worker --loglevel=info
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
@@ -41,6 +42,9 @@ services:
 
   redis:
     image: redis:6-alpine
+    restart: always
+    volumes:
+      - ../slides_checker_redis_data:/data
 
   mongodb:
     image: mongo:4.0.17-xenial
