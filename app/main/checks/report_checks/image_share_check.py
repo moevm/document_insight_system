@@ -1,7 +1,7 @@
-from ..base_check import BaseCheck, answer
+from ..base_check import BaseReportCriterion, answer
 
 
-class ReportImageShareCheck(BaseCheck):
+class ReportImageShareCheck(BaseReportCriterion):
     description = "Проверка доли объема отчёта, приходящейся на изображения"
     id = 'image_share_check'
 
