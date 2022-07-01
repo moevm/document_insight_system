@@ -2,8 +2,11 @@ from ..base_check import BaseCheck, answer
 
 
 class ReportImageShareCheck(BaseCheck):
-    def __init__(self, file, limit = 0.3):
-        super().__init__(file)
+    description = "Проверка доли объема отчёта, приходящейся на изображения"
+    id = 'image_share_check'
+
+    def __init__(self, file_info, limit = 0.3):
+        super().__init__(file_info)
         self.limit = limit
 
     def check(self):

@@ -1,5 +1,4 @@
 import os
-from logging import getLogger
 from os.path import join, exists
 
 from celery import Celery
@@ -7,11 +6,12 @@ from celery import Celery
 from db import db_methods
 from db.db_methods import get_user
 from db.db_types import Check
-from main.checker import check, check_report
+from main.checker import check
 from main.parser import parse
+from root_logger import get_root_logger
 
-TASK_RETRY_COUNTDOWN = 10  # default = 3 * 60
-logger = getLogger('root_logger')
+TASK_RETRY_COUNTDOWN = 60  # default = 3 * 60
+logger = get_root_logger('tasks')
 
 celery = Celery(__name__)
 celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
@@ -29,9 +29,7 @@ def create_task(self, check_info):
     pdf_filepath = join(FILES_FOLDER, f"{check_id}.pdf")
     try:
         user = get_user(check_obj.user)
-        check_function = check_report if check_obj.file_type == 'report' else check
-
-        updated_check = check_function(parse(original_filepath), check_obj, check_obj.filename, user)
+        updated_check = check(parse(original_filepath), check_obj, check_obj.filename, user)
         updated_check.is_ended = True
         db_methods.update_check(updated_check)  # save to db
         db_methods.mark_celery_task_as_finished(self.request.id)
@@ -39,7 +37,7 @@ def create_task(self, check_info):
         # remove files from FILES_FOLDER after checking
         remove_files((original_filepath, pdf_filepath))
 
-        return str(updated_check._id)
+        return updated_check.pack(to_str=True)
     except Exception as e:
         if self.request.retries == self.max_retries:
             logger.error(f"\tДостигнуто максимальное количество попыток перезапуска. Удаление задачи из очереди",
