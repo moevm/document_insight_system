@@ -2,15 +2,17 @@ import itertools
 import re
 
 from utils import format_header
-from ..base_check import BaseCheck, answer
+from ..base_check import BasePresCriterion, answer
 
 
-class TitleFormatCheck(BaseCheck):
-    def __init__(self, file, pdf_id):
-        super().__init__(file)
+class TitleFormatCheck(BasePresCriterion):
+    description = "Заголовки слайдов присутствуют и занимают не более двух строк"
+    id = 'slides_headers'
+
+    def __init__(self, file_info):
+        super().__init__(file_info)
         self.empty_headers = []
         self.len_exceeded = []
-        self.pdf_id = pdf_id
 
     def exceeded_verdict(self):
         return format_header(

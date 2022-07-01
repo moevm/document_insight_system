@@ -46,8 +46,9 @@
             </tbody>
         </table>
         <!-- Download links -->
-        <a href="{{ url_for('checks', _id=id) }}" id="file_download" class="col text-center" download="{{ filename }}">
-            Скачать файл в исходном формате ({{ filename.upper().rsplit('.', 1)[-1] }})
+        <a href="{{ url_for('checks', _id=id) }}" id="file_download" class="col text-center"
+           download="{{ results.filename }}">
+            Скачать файл в исходном формате ({{ results.filename.upper().rsplit('.', 1)[-1] }})
         </a>
         {% if results.conv_pdf_fs_id %}
             <a href="{{ url_for('get_pdf', _id=results.conv_pdf_fs_id) }}" id="pdf_download"
@@ -65,27 +66,25 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for key in results.enabled_checks.keys() %}
+                {% for criterion_info in results.enabled_checks %}
                     <tr data-toggle="collapse" data-target="#verd{{ loop.index }}" class="accordion-toggle">
                         <td>
                             <button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button>
                         </td>
                         <th scope="row" class="ins">{{ loop.index }}</th>
-                        <td class="ins">{{ labels[key] }}</td>
-                        <td class="{{ 'table-secondary ins' if not results.enabled_checks[key] else ('table-success ins' if results.enabled_checks[key].pass else 'table-danger ins') }}">
-                            {{ "Не проведена" if not results.enabled_checks[key] else ("Пройдена" if results.enabled_checks[key].pass else "Не пройдена") }}
+                        <td class="ins">{{ criterion_info['name'] }}</td>
+                        {% set colors = {0.0: 'table-danger', 1.0: 'table-success'} %}
+                        {% set result_labels = {0.0: 'Не пройдена', 1.0: 'Пройдена'} %}
+                        <td class="{{ colors.get(criterion_info['score'], 'table-warning') }} ins">
+                            {{ result_labels.get(criterion_info['score'], 'Частично пройдена') }}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4" class="hiddenRow">
                             <div id="verd{{ loop.index }}" class="accordian-body collapse" style="margin-left: 2em;">
-                                {% if not results.enabled_checks[key] %}
-                                    {{ 'Не проведена' }}
-                                {% else %}
-                                    {% for item in results.enabled_checks[key].get('verdict', ["Пройдена!"] if results.enabled_checks[key].pass else ["Не пройдена"]) %}
-                                        {{ item|safe }}
-                                    {% endfor %}
-                                {% endif %}
+                                {% for item in criterion_info.get('verdict', ["Пройдена!"] if criterion_info.get('score')==1.0 else ["Не пройдена"]) %}
+                                    {{ item|safe }}
+                                {% endfor %}
                             </div>
                         </td>
                     </tr>
