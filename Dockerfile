@@ -13,7 +13,7 @@ RUN apt install -y nodejs libreoffice
 
 ADD package.json webpack.config.js requirements.txt ./
 
-RUN npm install && npm audit fix && npm install webpack
+RUN npm install && npm install webpack
 RUN python3.8 -m pip install -r requirements.txt
 
 ADD ./assets ./assets

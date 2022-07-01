@@ -1,13 +1,16 @@
-from ..base_check import BaseCheck, answer
+from ..base_check import BaseReportCriterion, answer
 import re
 import pymorphy2
 
 morph = pymorphy2.MorphAnalyzer()
 
 
-class BannedWordsInLiteratureCheck(BaseCheck):
-    def __init__(self, file, banned_words=[]):
-        super().__init__(file)
+class BannedWordsInLiteratureCheck(BaseReportCriterion):
+    description = "Проверка на наличие запрещенных слов в списке литературы"
+    id = 'banned_words_in_literature'
+
+    def __init__(self, file_info, banned_words=[]):
+        super().__init__(file_info)
         self.banned_words = [morph.normal_forms(word)[0] for word in banned_words]
 
     def check(self):

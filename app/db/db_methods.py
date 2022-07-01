@@ -6,7 +6,7 @@ from bson import ObjectId
 from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 
-from utils import convert_to, timezone_offset
+from utils import convert_to
 from .db_types import User, Presentation, Check, Consumers, Logs
 
 client = MongoClient("mongodb://mongodb:27017")
@@ -306,19 +306,6 @@ def get_check_stats(oid):
     return checks_collection.find_one({'_id': oid})
 
 
-def format_check(check):
-    grade_passback_time = check['lms_passback_time']
-    grade_passback_ts = grade_passback_time.strftime(
-        "%H:%M:%S - %b %d %Y") if grade_passback_time else '-'
-    return (str(check['_id']), check['user'], check['filename'],
-            (check['_id'].generation_time + timezone_offset).strftime("%H:%M:%S - %b %d %Y"),
-            grade_passback_ts, check['score'])
-
-
-def format_stats(stats):
-    return (format_check(check) for check in stats)
-
-
 # LTI
 class ConsumersDBManager:
 
@@ -373,6 +360,19 @@ def add_log(timestamp, serviceName, levelname, levelno, message,
     logs_collection.insert_one(new_log.pack())
     return new_log
 
+
+# criteria pack methods
+
+def get_criteria_pack(name):
+    return criteria_pack_collection.find_one({'name': name})
+
+
+def save_criteria_pack(pack_info):
+    # pack_info - dict, that includes name, criterions, check_file_type, min_score}
+    return criteria_pack_collection.update_one({'name': pack_info.get('name')}, {'$set': pack_info}, upsert=True)
+
+
+# criterions, check_file_type, min_score=1.0, name
 
 # mapping celery_task to check
 
