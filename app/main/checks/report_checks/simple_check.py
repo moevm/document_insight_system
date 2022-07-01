@@ -1,9 +1,12 @@
-from ..base_check import BaseCheck, answer
+from ..base_check import BaseReportCriterion, answer
 
 
-class ReportSimpleCheck(BaseCheck):
-    def __init__(self, file):
-        super().__init__(file)
+class ReportSimpleCheck(BaseReportCriterion):
+    description = "Простая проверка на пустоту файла"
+    id = 'simple_check'
+
+    def __init__(self, file_info):
+        super().__init__(file_info)
 
     def check(self):
         if self.file.paragraphs:
