@@ -6,7 +6,9 @@ from pymorphy2 import MorphAnalyzer
 nltk.download('stopwords')
 nltk.download('punkt')
 
+MORPH_ANALYZER = MorphAnalyzer()
 TASKS = 'задачи:'
+
 
 class Stemming:
     def __init__(self):
@@ -27,9 +29,9 @@ class Stemming:
         return self.sentences
 
     def parse_text(self, string, flag):
-        morph = MorphAnalyzer()
-        FURTHER_DEVELOPMENT = morph.parse('дальнейшие'.lower())[0].normal_form
-        FURTHER_IMPROVEMENTS = morph.parse('улучшения'.lower())[0].normal_form
+        # morph = MorphAnalyzer()
+        FURTHER_DEVELOPMENT = MORPH_ANALYZER.parse('дальнейшие'.lower())[0].normal_form
+        FURTHER_IMPROVEMENTS = MORPH_ANALYZER.parse('улучшения'.lower())[0].normal_form
         self.sentences = []
         self.find_further_development = False
         self.filtered_docs = []
@@ -40,7 +42,7 @@ class Stemming:
         for sent in self.sentences:
             token_sent = [w.lower() for w in word_tokenize(sent) if w.lower() not in stop_words]
             for word in token_sent:
-                w = morph.parse(word)[0].normal_form
+                w = MORPH_ANALYZER.parse(word)[0].normal_form
                 filtered_doc.append(w)
                 if w in [FURTHER_DEVELOPMENT, FURTHER_IMPROVEMENTS] and not flag:
                     self.find_further_development = True
