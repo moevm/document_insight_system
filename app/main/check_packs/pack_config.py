@@ -14,7 +14,8 @@ BASE_PRES_CRITERION = [
     ['future_dev']
 ]
 BASE_REPORT_CRITERION = [
-    ["simple_check"]
+    ["simple_check"],
+    ["literature_references"]
 ]
 
 BASE_PACKS = {

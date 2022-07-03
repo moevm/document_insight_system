@@ -14,6 +14,7 @@ AVAILABLE_CHECKS = {
         FurtherDev.id: FurtherDev
     },
     'report': {
-        ReportSimpleCheck.id: ReportSimpleCheck
+        ReportSimpleCheck.id: ReportSimpleCheck,
+        ReferencesToLiteratureCheck.id: ReferencesToLiteratureCheck
     }
 }

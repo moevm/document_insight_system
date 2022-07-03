@@ -1,1 +1,2 @@
 from .simple_check import ReportSimpleCheck
+from .literature_references import ReferencesToLiteratureCheck
