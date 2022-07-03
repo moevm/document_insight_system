@@ -8,7 +8,7 @@ from .inline_shape import InlineShape
 from .paragraph import Paragraph
 from .table import Table, Cell
 from .style import Style
-
+from ..pdf_document.pdf_document_manager import PdfDocumentManager
 
 class DocxUploader:
     def __init__(self):
@@ -19,9 +19,11 @@ class DocxUploader:
         self.file = None
         self.styled_paragraphs = None
         self.special_paragraph_indices = {}
+        self.pdf_file = None
 
     def upload(self, file):
         self.file = docx.Document(file)
+        self.pdf_file = PdfDocumentManager(file)
 
     def parse(self):
         self.core_properties = CoreProperties(self.file)
@@ -121,6 +123,6 @@ def main(args):
     uploader = DocxUploader()
     uploader.upload_from_cli(file=file)
     uploader.parse()
-    # uploader.print_info()
+    uploader.print_info()
     uploader.parse_effective_styles()
     uploader.current_test()

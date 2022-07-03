@@ -17,6 +17,7 @@ BASE_PRES_CRITERION = [
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
+    ["banned_words_check"],
     ["sections_check", {"header_style_dicts": (
         {
             "bold": True,
