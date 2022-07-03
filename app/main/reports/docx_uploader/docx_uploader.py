@@ -14,10 +14,11 @@ class DocxUploader:
     def __init__(self):
         self.inline_shapes = []
         self.core_properties = None
-        self.paragraphs= []
+        self.paragraphs = []
         self.tables = []
         self.file = None
-        self.styled_paragraphs = []
+        self.styled_paragraphs = None
+        self.special_paragraph_indices = {}
 
     def upload(self, file):
         self.file = docx.Document(file)
@@ -47,7 +48,11 @@ class DocxUploader:
             self.tables.append(Table(tables[i], table))
         return tables
 
+    # Parses styles once; subsequent calls have no effect, since the file itself shouldn't change
     def parse_effective_styles(self):
+        if self.styled_paragraphs is not None:
+            return
+        self.styled_paragraphs = []
         for par in filter(lambda p: len(p.text.strip()) > 0, self.file.paragraphs):
             paragraph = {"text": par.text, "runs": []}
             for run in filter(lambda r: len(r.text.strip()) > 0, par.runs):
@@ -67,11 +72,6 @@ class DocxUploader:
 
     # Demo; this will be moved later on
     def current_test(self):
-        for paragraph in self.styled_paragraphs:
-            print('"{0}":'.format(paragraph["text"]))
-            for run in paragraph["runs"]:
-                print("\t\"{0}\": style={1}"
-                      .format(run["text"], run["style"].__dict__))
         header1_style = Style()
         header1_style.bold = True
         header1_style.all_caps = True
@@ -87,7 +87,16 @@ class DocxUploader:
         header2_style.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         header2_style.first_line_indent_cm = 1.25
         header2_style.italic = False
-        header_indices = self.get_paragraph_indices_by_style([header1_style, header2_style])
+        for paragraph in self.styled_paragraphs:
+            print('"{0}":'.format(paragraph["text"]))
+            for run in paragraph["runs"]:
+                print("\t\"{0}\": style={1}"
+                      .format(run["text"], run["style"].__dict__))
+                lst = []
+                run["style"].matches(header2_style, lst)
+                print("Diff with header 2:", lst)
+        self.special_paragraph_indices["header"] = self.get_paragraph_indices_by_style([header1_style, header2_style])
+        header_indices = self.special_paragraph_indices["header"]
         print(header_indices, "\n")
         for i in range(len(header_indices)):
             print("Header {0}:".format(i + 1))
@@ -112,6 +121,6 @@ def main(args):
     uploader = DocxUploader()
     uploader.upload_from_cli(file=file)
     uploader.parse()
-    uploader.print_info()
+    # uploader.print_info()
     uploader.parse_effective_styles()
     uploader.current_test()

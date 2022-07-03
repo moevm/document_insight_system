@@ -2,6 +2,19 @@ from docx.enum.text import WD_LINE_SPACING
 
 
 class Style:
+    _friendly_property_names = {
+        "font_name": "Имя шрифта",
+        "font_size_pt": "Размер шрифта, пт",
+        "bold": "Полужирное начертание",
+        "italic": "Курсивное начертание",
+        "all_caps": "Все заглавные",
+        "alignment": "Выравнивание",
+        "line_spacing": "Межстрочный интервал",
+        "first_line_indent_cm": "Красная строка, см",
+        "space_after_pt": "Отступ перед абзацем, пт",
+        "space_before_pt": "Отступ после абзаца, пт"
+    }
+
     def __init__(self, run=None, par=None):
         self.font_name = None
         self.font_size_pt = None
@@ -10,7 +23,7 @@ class Style:
         self.all_caps = None
         self.alignment = None
         self.line_spacing = None
-        self.line_spacing_rule = None
+        # self.line_spacing_rule = None
         self.first_line_indent_cm = None
         self.space_after_pt = None
         self.space_before_pt = None
@@ -81,10 +94,10 @@ class Style:
         if self.alignment is None:
             self.alignment = Style.resolve_style_hierarchy(None, par, ["paragraph_format", "alignment"])
 
-    def set_line_spacing_rule(self, run, par):
+    '''def set_line_spacing_rule(self, run, par):
         self.line_spacing_rule = Style.resolve_style_hierarchy(None, par, ["paragraph_format", "line_spacing_rule"])
         if self.line_spacing_rule is None:
-            self.line_spacing_rule = WD_LINE_SPACING.SINGLE
+            self.line_spacing_rule = WD_LINE_SPACING.SINGLE'''
 
     def set_line_spacing(self, run, par):
         self.line_spacing = Style.resolve_style_hierarchy(None, par, ["paragraph_format", "line_spacing"])
@@ -113,7 +126,8 @@ class Style:
 
     # a.matches(b) != b.matches(a)
     # None in template_style == "any"; None in self == "not found"
-    def matches(self, template_style):
+    def matches(self, template_style, error_list=None):
+        flag = True
         for property_name in dir(self):
             if callable(getattr(self, property_name)):
                 continue
@@ -122,5 +136,12 @@ class Style:
             if getattr(template_style, property_name) is None:
                 continue
             if getattr(self, property_name) != getattr(template_style, property_name):
-                return False
-        return True
+                if error_list is None:
+                    return False
+                else:
+                    flag = False
+                    error_list.append("{0}: ожидалось \"{1}\", фактически \"{2}\"".format(
+                        Style._friendly_property_names[property_name], getattr(template_style, property_name),
+                        "по умолчанию" if getattr(self, property_name) is None else getattr(self, property_name)
+                    ))
+        return flag

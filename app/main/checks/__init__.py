@@ -1,5 +1,6 @@
 from .presentation_checks import *
 from .report_checks import *
+from .report_checks.sections_check import ReportSectionCheck
 
 AVAILABLE_CHECKS = {
     'pres': {
@@ -14,6 +15,7 @@ AVAILABLE_CHECKS = {
         FurtherDev.id: FurtherDev
     },
     'report': {
-        ReportSimpleCheck.id: ReportSimpleCheck
+        ReportSimpleCheck.id: ReportSimpleCheck,
+        ReportSectionCheck.id: ReportSectionCheck
     }
 }
