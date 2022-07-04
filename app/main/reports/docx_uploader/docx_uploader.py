@@ -1,7 +1,6 @@
 from functools import reduce
 
 import docx
-from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 from .core_properties import CoreProperties
 from .inline_shape import InlineShape
@@ -9,6 +8,7 @@ from .paragraph import Paragraph
 from .table import Table, Cell
 from .style import Style
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
+
 
 class DocxUploader:
     def __init__(self):
@@ -72,40 +72,6 @@ class DocxUploader:
             result.append(matched_pars)
         return result
 
-    # Demo; this will be moved later on
-    def current_test(self):
-        header1_style = Style()
-        header1_style.bold = True
-        header1_style.all_caps = True
-        header1_style.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        header1_style.font_name = "Times New Roman"
-        header1_style.font_size_pt = 14.0
-        header1_style.first_line_indent_cm = 0.0
-        header1_style.italic = False
-        header2_style = Style()
-        header2_style.font_name = "Times New Roman"
-        header2_style.font_size_pt = 14.0
-        header2_style.bold = True
-        header2_style.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-        header2_style.first_line_indent_cm = 1.25
-        header2_style.italic = False
-        for paragraph in self.styled_paragraphs:
-            print('"{0}":'.format(paragraph["text"]))
-            for run in paragraph["runs"]:
-                print("\t\"{0}\": style={1}"
-                      .format(run["text"], run["style"].__dict__))
-                lst = []
-                run["style"].matches(header2_style, lst)
-                print("Diff with header 2:", lst)
-        self.special_paragraph_indices["header"] = self.get_paragraph_indices_by_style([header1_style, header2_style])
-        header_indices = self.special_paragraph_indices["header"]
-        print(header_indices, "\n")
-        for i in range(len(header_indices)):
-            print("Header {0}:".format(i + 1))
-            for index in header_indices[i]:
-                print(self.styled_paragraphs[index]["text"])
-            print("")
-
     def upload_from_cli(self, file):
         self.upload(file=file)
 
@@ -125,4 +91,3 @@ def main(args):
     uploader.parse()
     uploader.print_info()
     uploader.parse_effective_styles()
-    uploader.current_test()

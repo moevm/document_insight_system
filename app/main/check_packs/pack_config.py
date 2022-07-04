@@ -18,6 +18,7 @@ BASE_PRES_CRITERION = [
 BASE_REPORT_CRITERION = [
     ["simple_check"],
     ["banned_words_check"],
+    ["headers_at_page_top_check", {"headers": ["Введение", "4. Характеристика используемых в научной статье материалов"]}],
     ["sections_check", {"header_style_dicts": (
         {
             "bold": True,

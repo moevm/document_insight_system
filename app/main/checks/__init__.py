@@ -1,6 +1,7 @@
 from .presentation_checks import *
 from .report_checks import *
 from .report_checks.sections_check import ReportSectionCheck
+from .report_checks.headers_at_page_top_check import ReportHeadersAtPageTopCheck
 
 AVAILABLE_CHECKS = {
     'pres': {
@@ -17,6 +18,7 @@ AVAILABLE_CHECKS = {
     'report': {
         ReportSimpleCheck.id: ReportSimpleCheck,
         ReportSectionCheck.id: ReportSectionCheck,
-        ReportBannedWordsCheck.id: ReportBannedWordsCheck
+        ReportBannedWordsCheck.id: ReportBannedWordsCheck,
+        ReportHeadersAtPageTopCheck.id: ReportHeadersAtPageTopCheck
     }
 }

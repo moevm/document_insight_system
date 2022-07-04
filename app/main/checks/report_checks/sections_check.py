@@ -2,6 +2,7 @@ from app.main.reports.docx_uploader.style import Style
 from ..base_check import BaseReportCriterion, answer
 
 
+# Do not use it to detect appendices: "ПРИЛОЖЕНИЕ Х\nНАЗВАНИЕ ПРИЛОЖЕНИЯ". Use ReportAppendixCheck for that.
 class ReportSectionCheck(BaseReportCriterion):
     description = "Проверка соответствия заголовков разделов требуемым стилям"
     id = "sections_check"
@@ -82,7 +83,7 @@ class ReportSectionCheck(BaseReportCriterion):
                     diff_lst = []
                     run["style"].matches(template_style, diff_lst)
                     diff_lst = list(map(
-                        lambda diff: f"Абзац \"{trim(par_text, 20)}\", фрагмент \"{trim(run['text'], 20)}\": {diff}",
+                        lambda diff: f"Абзац \"{trim(par_text, 20)}\", фрагмент \"{trim(run['text'], 20)}\": {diff}.",
                         diff_lst
                     ))
                     errors.extend(diff_lst)
@@ -91,7 +92,7 @@ class ReportSectionCheck(BaseReportCriterion):
             else:
                 indices_idx += 1
         for header_text in not_found_texts:
-            errors.append(f"Обязательный заголовок \"{header_text}\" не найден")
+            errors.append(f"Обязательный заголовок \"{header_text}\" не найден.")
         return errors
 
 
