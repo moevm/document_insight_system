@@ -20,10 +20,10 @@ class ReportNumberOfPages(BaseReportCriterion):
             count += 1
 
         if count >= self.minNumber and (self.maxNumber is None or count <= self.maxNumber):
-            return answer(True, f"Пройдена! {count} страниц")
+            return answer(True, f"Пройдена! {count} стр.")
         if self.maxNumber:
             return answer(False,
-                          f'Неверное количество страниц в файле: должно быть [{self.minNumber}, {self.maxNumber}] страниц, в отчете {count} страниц')
+                          f'Неверное количество страниц в файле: должно быть [{self.minNumber}, {self.maxNumber}] стр., в отчете {count} стр.')
         else:
             return answer(False,
-                          f'Неверное количество страниц в файле: должно быть не менее {self.minNumber} страниц, в отчете {count} страниц')
+                          f'Неверное количество страниц в файле: должно быть не менее {self.minNumber} стр., в отчете {count} стр.')
