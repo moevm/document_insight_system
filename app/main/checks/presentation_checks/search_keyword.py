@@ -1,13 +1,15 @@
 import re
 
-from ..base_check import BaseCheck, answer
+from ..base_check import BasePresCriterion, answer
 
 
-class SearchKeyWord(BaseCheck):
-    def __init__(self, file, key_slide, pdf_id):
-        super().__init__(file)
+class SearchKeyWord(BasePresCriterion):
+    description = "Поиск ключевого слова в тексте слайда"
+    id = 'find_on_slide'
+
+    def __init__(self, file_info, key_slide):
+        super().__init__(file_info)
         self.key_slide = f"({'|'.join((key.lower() for key in key_slide))})"
-        self.pdf_id = pdf_id
 
     def check(self):
         for i, text in enumerate(self.file.get_text_from_slides(), 1):
@@ -15,3 +17,7 @@ class SearchKeyWord(BaseCheck):
                 found = self.format_page_link([i])
                 return answer(True, 'Найден под номером: {}'.format(', '.join(map(str, found))))
         return answer(False, 'Слайд не найден')
+
+    @property
+    def name(self):
+        return f"Слайд с упоминанием: {key_slide}"
