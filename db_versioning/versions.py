@@ -187,14 +187,94 @@ class Version22(Version):
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
 
+class Version30(Version):
+    VERSION_NAME = '3.0'
+    CHANGES = 'Implementation of criterion packs and cancellation of criteria field in user as dict with enabled values'
+
+    @staticmethod
+    def map(key, value):
+        if key == 'slides_number':
+            result =  {
+                'id': key,
+                'name': "Количество основных слайдов"
+            }
+        if key == 'slides_enum':
+            result =  {
+                'id': key,
+                'name': "Нумерация слайдов"
+            }
+        if key == 'slides_headers':
+            result =  {
+                'id': key,
+                'name': "Заголовки слайдов присутствуют и занимают не более двух строк"
+            }
+        if key == 'goals_slide':
+            result =  {
+                'id': 'find_slides',
+                'name': "Слайд 'Цель и задачи'"
+            }
+        if key == 'probe_slide':
+            result =  {
+                'id': 'find_slides',
+                'name': "Слайд 'Апробация работы'"
+            }
+        if key == 'actual_slide':
+            result =  {
+                'id': 'find_on_slide',
+                'name': "Слайд с описанием актуальности работы"
+            }
+        if key == 'conclusion_slide':
+            result =  {
+                'id': 'find_slides',
+                'name': "Слайд с заключением"
+            }
+        if key == 'slide_every_task':
+            result =  {
+                'id': key,
+                'name': "Наличие слайдов, посвященных задачам"
+            }
+        if key == 'conclusion_actual':
+            result =  {
+                'id': key,
+                'name': "Соответствие заключения задачам",
+            }
+        if key == 'conclusion_along':
+            result =  {
+                'id': 'future_dev',
+                'name': "Наличие направлений дальнейшего развития"
+            }
+        if key == 'template_name':
+            result =  {
+                'id': key,
+                'name': 'Соответствие названия файла шаблону'
+            }
+        result['score'] = float(value.get('pass', 0))
+        result['verdict'] = value.get('verdict', '')
+        return result
+
+    @classmethod
+    def update_database(cls, collections, prev_version):
+        if prev_version in (Version22.VERSION_NAME, ):
+            base_pres_pack = 'BasePresentationCriterionPack'
+            # set criteria for all user as base pres pack id
+            collections['users'].update_many({}, {'$set': {'criteria': base_pres_pack}})
+            # update criteria results
+            for check in collections['checks'].find():
+                new_list = [cls.map(k,v) for k, v in check['enabled_checks'].items() if v]
+                collections['checks'].update_one({'_id': check['_id']}, {'$set': {'enabled_checks': new_list}})
+        else:
+            raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
+
+
 VERSIONS = {
     '1.0': Version10,
     '1.1': Version11,
     '2.0': Version20,
     '2.1': Version21,
     '2.2': Version22,
+    '3.0': Version30,
 }
-LAST_VERSION = '2.2'
+LAST_VERSION = '3.0'
 
 for _, ver in VERSIONS.items():
     print(ver.to_dict())

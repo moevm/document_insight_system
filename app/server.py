@@ -21,10 +21,11 @@ from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
+from main.check_packs import init_criterions
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
-from utils import checklist_filter, decorator_assertion, get_file_len, timezone_offset
+from utils import checklist_filter, decorator_assertion, get_file_len, timezone_offset, format_check
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
@@ -133,12 +134,7 @@ def upload():
             abort(401)
     elif request.method == "GET":
         formats = set(current_user.formats)
-        # add user info as primary condition (check that user file type == req file type)
-        if request.args.get('report'):
-            file_type = 'report'
-            formats = None
-        else:
-            file_type = 'pres'
+        file_type = current_user.file_type
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
         return render_template("./upload.html", navi_upload=False, name=current_user.name, file_type=file_type,
                                formats=sorted(formats))
@@ -174,7 +170,7 @@ def run_task():
         'user': current_user.username,
         'lms_user_id': current_user.lms_user_id,
         'enabled_checks': current_user.criteria,
-        'file_type': file_type,  # current_user.file_type
+        'file_type': current_user.file_type,
         'filename': file.filename,
         'score': -1,  # score=-1 -> checking in progress
         'is_ended': False,
@@ -222,10 +218,9 @@ def results(_id):
     if check is not None:
         # show processing time for user
         avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
-        # TODO: if task crashed, check may contain data not for page rendering (we can fix Check.correct())
         return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id,
-                               filename=check.filename, columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
-                               stats=db_methods.format_check(check.pack()), labels=CRITERIA_LABELS)
+                               columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
+                               stats=format_check(check.pack()))
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
