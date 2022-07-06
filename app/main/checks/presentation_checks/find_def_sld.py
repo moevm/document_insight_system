@@ -23,4 +23,4 @@ class FindDefSld(BasePresCriterion):
 
     @property
     def name(self):
-        return f"Слайд: '{self.key_slide}'"
+        return f"Слайд: '{self.type_of_slide}'"
