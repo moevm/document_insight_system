@@ -1,8 +1,5 @@
-from ..base_check import BaseReportCriterion, answer
+from ..base_check import BaseReportCriterion, answer, morph
 import re
-import pymorphy2
-
-morph = pymorphy2.MorphAnalyzer()
 
 
 class BannedWordsInLiteratureCheck(BaseReportCriterion):
