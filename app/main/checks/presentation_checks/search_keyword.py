@@ -20,4 +20,4 @@ class SearchKeyWord(BasePresCriterion):
 
     @property
     def name(self):
-        return f"Слайд с упоминанием: {key_slide}"
+        return f"Слайд с упоминанием: {self.key_slide}"
