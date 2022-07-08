@@ -1,2 +1,4 @@
 from .simple_check import ReportSimpleCheck
 from .literature_references import ReferencesToLiteratureCheck
+from .banned_words_check import ReportBannedWordsCheck
+from .page_counter import ReportNumberOfPages
