@@ -6,7 +6,6 @@ from .paragraph import Paragraph
 from .table import Table, Cell
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
 
-
 class DocxUploader:
     def __init__(self):
         self.inline_shapes = []
@@ -63,3 +62,4 @@ def main(args):
     uploader.upload_from_cli(file=file)
     uploader.parse()
     uploader.print_info()
+    

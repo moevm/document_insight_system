@@ -105,7 +105,7 @@ class Check(PackableWithId):
         self.file_type = dictionary.get('file_type', 'pres')
         self.enabled_checks = dictionary.get('enabled_checks', BASE_PACKS.get(self.file_type).name)
         self.is_failed = dictionary.get('is_failed', None)
-        self.is_ended = dictionary.get('is_ended', None)
+        self.is_ended = dictionary.get('is_ended', True)
         self.is_passed = dictionary.get('is_passed', int(self.score) == 1)
 
     def calc_score(self):
