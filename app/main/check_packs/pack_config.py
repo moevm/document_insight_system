@@ -1,5 +1,5 @@
 from .base_criterion_pack import BaseCriterionPack
-from ..checks.report_checks.sections_check import StyleCheckSettings
+from ..checks.report_checks.style_check_settings import StyleCheckSettings
 
 BASE_PRES_CRITERION = [
     ['template_name'],
