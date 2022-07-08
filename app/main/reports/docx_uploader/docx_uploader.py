@@ -62,3 +62,4 @@ def main(args):
     uploader.upload_from_cli(file=file)
     uploader.parse()
     uploader.print_info()
+    

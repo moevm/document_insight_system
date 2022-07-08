@@ -17,3 +17,4 @@ def main(args):
     pdf_document_manager = PdfDocumentManager(args.filename)
     for k, v in pdf_document_manager.text_on_page.items():
         print(f"Страница №{k}" + '\n' + f"Текст: {v}", end='\n\n')
+    

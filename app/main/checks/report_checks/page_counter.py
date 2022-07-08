@@ -9,6 +9,7 @@ class ReportNumberOfPages(BaseReportCriterion):
 
     def __init__(self, file_info, minNumber=0, maxNumber=None):
         super().__init__(file_info)
+
         self.minNumber = minNumber
         self.maxNumber = maxNumber
 
