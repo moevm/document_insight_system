@@ -53,8 +53,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
             text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
-            if re.fullmatch(r'text\s+список использованных источников[\s.]+', text_string) or \
-                    re.fullmatch(r'text\s+список использованной литературы[\s.]+', text_string) or \
-                    re.fullmatch(r'text\s+список литературы[\s.]+', text_string):
+            if re.fullmatch(r'text\s+список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы).?\s*',
+                            text_string):
                 start_index = i
         return start_index
