@@ -1,26 +1,23 @@
+import re
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from typing import List, Union
+
 from app.main.reports.docx_uploader.style import Style
 from ..base_check import BaseReportCriterion, answer
 
 
-# Do not use it to detect appendices: "ПРИЛОЖЕНИЕ Х\nНАЗВАНИЕ ПРИЛОЖЕНИЯ". Use ReportAppendixCheck for that.
 class ReportSectionCheck(BaseReportCriterion):
     description = "Проверка соответствия заголовков разделов требуемым стилям"
     id = "sections_check"
 
-    def __init__(self, file_info, header_style_dicts, header_texts, prechecked_style_props):
+    def __init__(self, file_info, presets: List[dict], prechecked_props: Union[List[str], None]):
         super().__init__(file_info)
         self.file.parse_effective_styles()
-        prechecked_style_dicts = []
-        for style in header_style_dicts:
-            prechecked_style = {}
-            for property_name in prechecked_style_props:
-                prechecked_style[property_name] = style.get(property_name, None)
-            prechecked_style_dicts.append(prechecked_style)
-        self.header_indices = self.file.get_paragraph_indices_by_style(list(map(
-            self.construct_style_from_description, prechecked_style_dicts
-        )))
-        self.header_styles = list(map(self.construct_style_from_description, header_style_dicts))
-        self.header_texts = header_texts
+        if prechecked_props is None:
+            self.prechecked_props = StyleCheckSettings.PRECHECKED_PROPS
+        else:
+            self.prechecked_props = prechecked_props
+        self.presets = presets
 
     @staticmethod
     def construct_style_from_description(dct):
@@ -31,18 +28,25 @@ class ReportSectionCheck(BaseReportCriterion):
     def check(self):
         result = True
         result_str = ""
-        for header_level in range(len(self.header_styles)):
-            indices = self.header_indices[header_level]
-            template_style = self.header_styles[header_level]
-            texts = self.header_texts[header_level]
-            err = self.find_and_check(indices, template_style, texts)
+        for preset in self.presets:
+            full_style = self.construct_style_from_description(preset["style"])
+            precheck_dict = {key: preset["style"].get(key) for key in self.prechecked_props}
+            precheck_style = self.construct_style_from_description(precheck_dict)
+            err = self.check_marked_headers(preset["unify_regex"], preset["regex"], preset["markers"],
+                                            precheck_style, full_style, preset["headers"])
             result = result and (len(err) == 0)
-            result_str += ("<br>".join(err) + "<br>")
-        if not result:
-            result_str += """Если не найден существующий раздел, попробуйте сделать следующее:
+            result_str += ("<br>".join(err) + "<br>" if len(err) else "")
+        if len(result_str) == 0:
+            result_str = "Пройдена!"
+        else:
+            result_str += '''
+            Если не найден существующий раздел, попробуйте сделать следующее:
             <ul>
-                <li>Убедитесь в отсутствии опечаток в названии раздела;</li>
+                <li>Убедитесь, что разделы расположены в правильном порядке;</li>
+                <li>Убедитесь в отсутствии опечаток и лишних пробельных символов в названии раздела;</li>
                 <li>Убедитесь в соответствии стиля заголовка требованиям вашего преподавателя;</li>
+                <li>Если в требованиях к оформлению не указано, что заголовок должен занимать несколько строк,
+                    убедитесь, что заголовок состоит из одного абзаца;</li>
                 <li>Убедитесь, что красная строка не сделана с помощью пробелов или табуляции.</li>
             </ul>
             Чтобы исправить ошибку &laquo;ожидалось "...", фактически "по умолчанию"&raquo;, попробуйте следующее:
@@ -53,47 +57,120 @@ class ReportSectionCheck(BaseReportCriterion):
                     (<a href="http://se.moevm.info/doku.php/courses:informatics:reportrules">инструкция</a>)
                     и примените его к проблемному заголовку.
                 </li>
-            </ul>"""
-        if result:
-            result_str = "Пройдена!"
+            </ul>
+            Ошибки вида &laquo;ошибочная маркировка разделов&raquo; часто вызваны другими ошибками; 
+            их исправлять рекомендуется в последнюю очередь.
+            '''
         return answer(result, result_str)
 
-    def find_and_check(self, indices, template_style, texts):
-        # result = True
+    @staticmethod
+    def style_diff(par, template_style):
+        err = []
+        for run in par["runs"]:
+            diff_lst = []
+            run["style"].matches(template_style, diff_lst)
+            diff_lst = list(map(
+                lambda diff: f"Абзац \"{trim(par['text'], 20)}\", фрагмент \"{trim(run['text'], 20)}\": {diff}.",
+                diff_lst
+            ))
+            err.extend(diff_lst)
+        return err
+
+    # unify_regex is used in self.file.unify_multiline_entities()
+    # header_regex has two capture groups: first is marker and second is header itself (no decorations)
+    def check_marked_headers(self, unify_regex, header_regex, markers, precheck_style, template_style, headers):
+        if unify_regex is not None:
+            self.file.unify_multiline_entities(unify_regex)
+        indices = self.file.get_paragraph_indices_by_style([precheck_style])[0]
+        found_texts = list(map(lambda i: self.file.styled_paragraphs[i]["text"], indices))
+        pars = list(map(lambda i: self.file.styled_paragraphs[i], indices))
+        pattern = re.compile(header_regex)
         errors = []
-        not_found_texts = []
+        marker_idx = 0
+        header_idx = 0
+        found_idx = 0
         last_found = -1
-        texts_idx = 0
-        indices_idx = 0
+        last_punished = -1
         while True:
-            if texts_idx >= len(texts):
+            if header_idx >= len(headers):
                 break
-            if indices_idx >= len(indices):
-                not_found_texts.append(texts[texts_idx])
-                indices_idx = last_found + 1
-                texts_idx += 1
+            if marker_idx >= len(markers):
+                errors.append("""Работа содержит больше нумерованных разделов, чем предусматривают критерии проверки.
+                Дальнейшие разделы не будут проверены.""")
+                break
+            if found_idx >= len(found_texts):
+                errors.append(f'Обязательный раздел "{headers[header_idx]}" не найден.')
+                found_idx = last_found + 1
+                marker_idx = last_found + 1
+                header_idx += 1
                 continue
-            if (self.file.styled_paragraphs[indices[indices_idx]]["text"].lower().rstrip()
-                == texts[texts_idx].lower().rstrip() and hasattr(template_style,
-                                                                 "all_caps") and template_style.all_caps) \
-                    or self.file.styled_paragraphs[indices[indices_idx]]["text"].rstrip() == texts[texts_idx].rstrip():
-                last_found = indices_idx
-                par_text = self.file.styled_paragraphs[indices[indices_idx]]["text"]
-                for run in self.file.styled_paragraphs[indices[indices_idx]]["runs"]:
-                    diff_lst = []
-                    run["style"].matches(template_style, diff_lst)
-                    diff_lst = list(map(
-                        lambda diff: f"Абзац \"{trim(par_text, 20)}\", фрагмент \"{trim(run['text'], 20)}\": {diff}.",
-                        diff_lst
-                    ))
-                    errors.extend(diff_lst)
-                texts_idx += 1
-                indices_idx += 1
+            match = pattern.match(found_texts[found_idx])
+            if match:
+                if markers[marker_idx].lower() != match.group(1).lower() and found_idx > last_punished:
+                    last_punished = found_idx
+                    errors.append(f'Ошибочная маркировка разделов ("{found_texts[found_idx]}"):'
+                                  f' должен следовать раздел &laquo;{markers[marker_idx]}&raquo;, '
+                                  f'фактически встречен раздел &laquo;{match.group(1)}&raquo;.')
+                if headers[header_idx].lower() == match.group(2).lower():
+                    errors.extend(self.style_diff(pars[found_idx], template_style))
+                    last_found = found_idx
+                    marker_idx += 1
+                    header_idx += 1
+                    found_idx += 1
+                else:
+                    found_idx += 1
+                    marker_idx += 1
             else:
-                indices_idx += 1
-        for header_text in not_found_texts:
-            errors.append(f"Обязательный заголовок \"{header_text}\" не найден.")
+                found_idx += 1
         return errors
+
+
+class StyleCheckSettings:
+    EMPTY_MARKERS = ["" for _ in range(5000)]
+    APPENDIX_MARKERS = \
+        [chr(n) for n in range(ord("А"), ord("Я") + 1) if chr(n) not in ["З", "Й", "О", "Ч", "Ъ", "Ы", "Ь"]]
+    NUM_MARKERS = ["{0}. ".format(i) for i in range(1, 100)]
+    APPENDIX_UNIFY_REGEX = "(?i)^приложение \\w$"
+    APPENDIX_REGEX = "(?i)^ПРИЛОЖЕНИЕ (\\w)\\n(.+)"
+    HEADER_1_NUM_REGEX = "^([1-9][0-9]*\\. )([\\w\\s])+$"
+    HEADER_2_NUM_REGEX = "^[1-9][0-9]*\\.([1-9][0-9]*\\. )([\\w\\s]+)$"
+    HEADER_1_REGEX = "^()([\\w\\s]+)$"
+    HEADER_2_REGEX = "^()([\\w\\s]+)\\.$"
+    HEADER_1_STYLE = {
+            "bold": True,
+            "italic": False,
+            "all_caps": True,
+            "alignment": WD_ALIGN_PARAGRAPH.CENTER,
+            "font_name": "Times New Roman",
+            "font_size_pt": 14.0,
+            "first_line_indent_cm": 0.0
+    }
+    HEADER_2_STYLE = {
+            "bold": True,
+            "italic": False,
+            "alignment": WD_ALIGN_PARAGRAPH.JUSTIFY,
+            "font_name": "Times New Roman",
+            "font_size_pt": 14.0,
+            "first_line_indent_cm": 1.25
+    }
+    PRECHECKED_PROPS = ["bold", "italic", "all_caps", "alignment"]
+
+    LR_CONFIG = [
+        {
+            "style": HEADER_2_STYLE,
+            "headers": ["Цель работы", "Основные теоретические положения", "Выполнение работы", "Выводы"],
+            "unify_regex": None,
+            "regex": HEADER_2_REGEX,
+            "markers": EMPTY_MARKERS
+        },
+        {
+            "style": HEADER_1_STYLE,
+            "headers": ["Исходный код программы"],
+            "unify_regex": APPENDIX_UNIFY_REGEX,
+            "regex": APPENDIX_REGEX,
+            "markers": APPENDIX_MARKERS
+        }
+    ]
 
 
 def trim(string, length):

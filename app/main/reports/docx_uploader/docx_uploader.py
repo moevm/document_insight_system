@@ -1,3 +1,4 @@
+import re
 from functools import reduce
 
 import docx
@@ -60,6 +61,25 @@ class DocxUploader:
             for run in filter(lambda r: len(r.text.strip()) > 0, par.runs):
                 paragraph["runs"].append({"text": run.text, "style": Style(run, par)})
             self.styled_paragraphs.append(paragraph)
+
+    def unify_multiline_entities(self, first_line_regex_str):
+        pattern = re.compile(first_line_regex_str)
+        pars_to_delete = []
+        skip_flag = False
+        for i in range(len(self.styled_paragraphs)-1):
+            if skip_flag:
+                skip_flag = False
+                continue
+            par = self.styled_paragraphs[i]
+            next_par = self.styled_paragraphs[i+1]
+            if pattern.match(par["text"]):
+                skip_flag = True
+                par["text"] += ("\n" + next_par["text"])
+                par["runs"].extend(next_par["runs"])
+                pars_to_delete.append(next_par)
+                continue
+        for par in pars_to_delete:
+            self.styled_paragraphs.remove(par)
 
     def get_paragraph_indices_by_style(self, style_list):
         result = []
