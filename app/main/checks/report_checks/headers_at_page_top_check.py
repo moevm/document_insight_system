@@ -26,7 +26,8 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                     if collected_text.lower() == header.lower():
                         found = True
                         break
-                    if header.lower().startswith(collected_text.lower()):
+                    # first condition is needed for cases like that: collected_text == [""]
+                    if len(collected_text) > 0 and header.lower().startswith(collected_text.lower()):
                         last_header_line += 1
                     else:
                         break
