@@ -46,4 +46,4 @@ class BaseCriterionPack:
         score = 0.
         for check in result:
             score += float(check['score'])
-        return round(score, 3)
+        return round(score/len(result), 3)
