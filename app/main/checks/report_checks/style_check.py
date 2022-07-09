@@ -1,0 +1,105 @@
+from .style_check_settings import StyleCheckSettings
+from ..base_check import BaseReportCriterion, answer
+from ...reports.docx_uploader.style import Style
+
+
+class ReportStyleCheck(BaseReportCriterion):
+    description = "Проверка корректности форматирования текста"
+    id = "style_check"
+
+    default_key_property = "font_name"
+
+    def __init__(self, file_info, header_styles=None, target_styles=None, key_property=None):
+        super().__init__(file_info)
+        self.file.parse_effective_styles()
+        if target_styles is None:
+            self.target_styles = StyleCheckSettings.LR_MAIN_TEXT_CONFIG
+        else:
+            self.target_styles = target_styles
+        self.target_styles = list(map(lambda elem: {
+                                                    "name": elem["name"],
+                                                    "style": self.construct_style_from_description(elem["style"])
+                                                    },
+                                      self.target_styles))
+        if header_styles is None:
+            self.header_styles = []
+            for style_dict in StyleCheckSettings.LR_CONFIG:
+                header_style = {key: style_dict["style"].get(key) for key in StyleCheckSettings.PRECHECKED_PROPS}
+                style = Style()
+                style.__dict__.update(header_style)
+                self.header_styles.append(style)
+        else:
+            self.header_styles = []
+            for style_dict in header_styles:
+                style = Style()
+                style.__dict__.update(style_dict)
+                self.header_styles.append(style)
+        if key_property is None:
+            self.key_property = ReportStyleCheck.default_key_property
+        else:
+            self.key_property = key_property
+        indices = self.file.get_paragraph_indices_by_style(self.header_styles)
+        self.header_indices = set()
+        for sublist in indices:
+            self.header_indices.update(sublist)
+
+    @staticmethod
+    def construct_style_from_description(style_dict):
+        style = Style()
+        style.__dict__.update(style_dict)
+        return style
+
+    def get_style_by_key_property(self, value):
+        for style in self.target_styles:
+            if getattr(style["style"], self.key_property) == value:
+                return style
+
+    @staticmethod
+    def style_diff(par, template_style):
+        err = []
+        for run in par["runs"]:
+            diff_lst = []
+            run["style"].matches(template_style, diff_lst)
+            diff_lst = list(map(
+                lambda diff: f"Абзац \"{par['text'][:17] + '...' if len(par['text']) > 20 else par['text']}\""
+                             f", фрагмент "
+                             f"\"{run['text'][:17] + '...' if len(run['text']) > 20 else run['text']}\": {diff}.",
+                diff_lst
+            ))
+            err.extend(diff_lst)
+        return err
+
+    def check(self):
+        result = True
+        result_str = ""
+        valid_key_properties = set(map(lambda s: getattr(s["style"], self.key_property), self.target_styles))
+        if len(self.header_indices):
+            body_start_index = min(self.header_indices)
+        else:
+            body_start_index = -1
+        for i in range(len(self.file.styled_paragraphs)):
+            if i in self.header_indices:
+                continue
+            if i <= body_start_index:
+                continue
+            par = self.file.styled_paragraphs[i]
+            cur_key_property = None
+            for run in par["runs"]:
+                cur_key_property = getattr(run["style"], self.key_property)
+                if cur_key_property in valid_key_properties:
+                    break
+            if cur_key_property not in valid_key_properties:
+                result = False
+                result_str += "<br>" if len(result_str) else ""
+                result_str += f'{Style._friendly_property_names[self.key_property]} в абзаце' \
+                              f' "{par["text"][:17] + "..." if len(par["text"]) > 20 else par["text"]}" ' \
+                              f'не соответствует ни одному из допустимых стилей текста.'
+            else:
+                checked_style = self.get_style_by_key_property(cur_key_property)
+                err = self.style_diff(par, checked_style["style"])
+                result = result and len(err) == 0
+                err = list(map(lambda msg: f'Стиль "{checked_style["name"]}": ' + msg, err))
+                result_str += ("<br>".join(err) + "<br>" if len(err) else "")
+        if len(result_str) == 0:
+            result_str = "Форматирование текста соответствует требованиям."
+        return answer(result, result_str)

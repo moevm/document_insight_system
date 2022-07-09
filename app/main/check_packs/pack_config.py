@@ -18,7 +18,8 @@ BASE_REPORT_CRITERION = [
     ["simple_check"],
     ["banned_words_check"],
     ["headers_at_page_top_check", {"headers": ["Приложение А Исходный код программы"]}],
-    ["sections_check", {"presets": StyleCheckSettings.LR_CONFIG, "prechecked_props": None}]
+    ["sections_check", {"presets": StyleCheckSettings.LR_CONFIG, "prechecked_props": None}],
+    ["style_check"]
 ]
 
 BASE_PACKS = {
