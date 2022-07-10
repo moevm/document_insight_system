@@ -15,7 +15,10 @@ AVAILABLE_CHECKS = {
     },
     'report': {
         ReportSimpleCheck.id: ReportSimpleCheck,
+        ReportNumberOfPages.id: ReportNumberOfPages,
+        ReportImageShareCheck.id: ReportImageShareCheck,
         ReportBannedWordsCheck.id: ReportBannedWordsCheck,
-        ReportImageShareCheck.id: ReportImageShareCheck
+        ReportRightWordsCheck.id: ReportRightWordsCheck,
+        BannedWordsInLiteratureCheck.id: BannedWordsInLiteratureCheck
     }
 }
