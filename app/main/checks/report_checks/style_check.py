@@ -9,9 +9,10 @@ class ReportStyleCheck(BaseReportCriterion):
 
     default_key_property = "font_name"
 
-    def __init__(self, file_info, header_styles=None, target_styles=None, key_property=None):
+    def __init__(self, file_info, header_styles=None, target_styles=None, key_property=None, skip_first_page=True):
         super().__init__(file_info)
         self.file.parse_effective_styles()
+        self.skip_first_page = skip_first_page
         if target_styles is None:
             self.target_styles = StyleCheckSettings.LR_MAIN_TEXT_CONFIG
         else:
@@ -69,18 +70,39 @@ class ReportStyleCheck(BaseReportCriterion):
             err.extend(diff_lst)
         return err
 
+    def get_line_after_skip(self):
+        text_dict = self.file.pdf_file.text_on_page
+        if len(text_dict) < 2:
+            return None
+        for i in range(2, len(text_dict)+1):
+            lines = text_dict[i].split("\n")
+            lines = list(filter(lambda line: not (line.isspace() or len(line) == 0), lines))
+            if len(lines) > 0:
+                return lines[0]
+        return None
+
+    def get_index_after_skip(self):
+        line = self.get_line_after_skip()
+        if line is None:
+            return None
+        for i in range(len(self.file.styled_paragraphs)):
+            par = self.file.styled_paragraphs[i]
+            if par["text"].startswith(line):
+                return i
+        return None
+
     def check(self):
+        if not self.skip_first_page:
+            base_index = 0
+        else:
+            base_index = self.get_index_after_skip()
+        if base_index is None:
+            return answer(True, "Нечего проверять: отчёт содержит не более одной непустой страницы.")
         result = True
         result_str = ""
         valid_key_properties = set(map(lambda s: getattr(s["style"], self.key_property), self.target_styles))
-        if len(self.header_indices):
-            body_start_index = min(self.header_indices)
-        else:
-            body_start_index = -1
-        for i in range(len(self.file.styled_paragraphs)):
+        for i in range(base_index, len(self.file.styled_paragraphs)):
             if i in self.header_indices:
-                continue
-            if i <= body_start_index:
                 continue
             par = self.file.styled_paragraphs[i]
             cur_key_property = None
