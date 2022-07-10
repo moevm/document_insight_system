@@ -16,9 +16,13 @@ BASE_PRES_CRITERION = [
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
-    ["banned_words_check"],
+    ["page_counter"],
+    ["image_share_check"],
     ["headers_at_page_top_check", {"headers": ["Приложение А Исходный код программы"]}],
-    ["sections_check", {"presets": StyleCheckSettings.LR_CONFIG, "prechecked_props": None}]
+    ["sections_check", {"presets": StyleCheckSettings.LR_CONFIG, "prechecked_props": None}],
+    ["banned_words_check"],
+    ["right_words_check"],
+    ["banned_words_in_literature"]
 ]
 
 BASE_PACKS = {
