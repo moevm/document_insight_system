@@ -20,6 +20,7 @@ AVAILABLE_CHECKS = {
         ReportImageShareCheck.id: ReportImageShareCheck,
         ReportSectionCheck.id: ReportSectionCheck,
         ReportHeadersAtPageTopCheck.id: ReportHeadersAtPageTopCheck,
+        ReportShortSectionsCheck.id: ReportShortSectionsCheck,
         ReportBannedWordsCheck.id: ReportBannedWordsCheck,
         ReportRightWordsCheck.id: ReportRightWordsCheck,
         BannedWordsInLiteratureCheck.id: BannedWordsInLiteratureCheck,
