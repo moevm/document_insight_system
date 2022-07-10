@@ -47,20 +47,22 @@ class StyleCheckSettings:
         "line_spacing": 1.0
     }
 
+    # Order of styles may be significant! First level 1, then level 2, if config is used with short_sections_check.
+    # Otherwise, order doesn't matter.
     LR_CONFIG = [
-        {
-            "style": HEADER_2_STYLE,
-            "headers": ["Цель работы", "Основные теоретические положения", "Выполнение работы", "Выводы"],
-            "unify_regex": None,
-            "regex": HEADER_2_REGEX,
-            "markers": EMPTY_MARKERS
-        },
         {
             "style": HEADER_1_STYLE,
             "headers": ["Исходный код программы"],
             "unify_regex": APPENDIX_UNIFY_REGEX,
             "regex": APPENDIX_REGEX,
             "markers": APPENDIX_MARKERS
+        },
+        {
+            "style": HEADER_2_STYLE,
+            "headers": ["Цель работы", "Основные теоретические положения", "Выполнение работы", "Выводы"],
+            "unify_regex": None,
+            "regex": HEADER_2_REGEX,
+            "markers": EMPTY_MARKERS
         }
     ]
 

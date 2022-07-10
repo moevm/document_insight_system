@@ -394,10 +394,10 @@ def get_average_processing_time(min_time=5.0, limit=10):
     # TODO: use only success check (failed checks processing time is more bigger than normal)
     result = list(celery_check_collection.aggregate(
         [{'$limit': limit}, {'$group': {'_id': None, 'avg_processing_time': {'$avg': "$processing_time"}}}]))
-    if result:
-        result = result[0]
-        if result['avg_processing_time'] > min_time:
-            return round(result['avg_processing_time'], 1)
+    if result and result[0]['avg_processing_time']:
+        result = result[0]['avg_processing_time']
+        if result > min_time:
+            return round(result, 1)
     return min_time
 
 

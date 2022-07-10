@@ -4,6 +4,7 @@ from .report_checks.sections_check import ReportSectionCheck
 from .report_checks.headers_at_page_top_check import ReportHeadersAtPageTopCheck
 from .report_checks.style_check import ReportStyleCheck
 
+
 AVAILABLE_CHECKS = {
     'pres': {
         TemplateNameCheck.id: TemplateNameCheck,
@@ -18,9 +19,15 @@ AVAILABLE_CHECKS = {
     },
     'report': {
         ReportSimpleCheck.id: ReportSimpleCheck,
+        ReportNumberOfPages.id: ReportNumberOfPages,
+        ReportImageShareCheck.id: ReportImageShareCheck,
         ReportSectionCheck.id: ReportSectionCheck,
-        ReportBannedWordsCheck.id: ReportBannedWordsCheck,
         ReportHeadersAtPageTopCheck.id: ReportHeadersAtPageTopCheck,
-        ReportStyleCheck.id: ReportStyleCheck
+        ReportShortSectionsCheck.id: ReportShortSectionsCheck,
+        ReportStyleCheck.id: ReportStyleCheck,
+        ReportBannedWordsCheck.id: ReportBannedWordsCheck,
+        ReportRightWordsCheck.id: ReportRightWordsCheck,
+        BannedWordsInLiteratureCheck.id: BannedWordsInLiteratureCheck,
+        ReferencesToLiteratureCheck.id: ReferencesToLiteratureCheck
     }
 }
