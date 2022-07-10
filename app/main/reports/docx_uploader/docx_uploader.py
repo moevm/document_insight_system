@@ -1,5 +1,7 @@
 import docx
 
+from app.main.reports.pdf_document.pdf_document_manager import PdfDocumentManager
+
 from .core_properties import CoreProperties
 from .inline_shape import InlineShape
 from .paragraph import Paragraph
