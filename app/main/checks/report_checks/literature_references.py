@@ -14,15 +14,25 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         if start_literature_par:
             number_of_sources = self.count_sources()
             references = self.search_references(start_literature_par)
-            if len(references) == number_of_sources:
+            all_numbers = set()
+            for i in range(1, number_of_sources + 1):
+                all_numbers.add(i)
+            if len(references.symmetric_difference(all_numbers)) == 0:
                 return answer(True, f"Пройдена!")
+            elif len(references.difference(all_numbers)):
+                if len(all_numbers.difference(references)) == 0:
+                    references -= all_numbers
+                    return answer(False,
+                                  f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(references))}')
+                else:
+                    extras = references - all_numbers
+                    unnamed = all_numbers - references
+                    return answer(False,
+                                  f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(extras))} <br> А также упомянуты не все источники: {", ".join(str(num) for num in sorted(unnamed))}')
             else:
-                all_numbers = set()
-                for i in range(1, number_of_sources + 1):
-                    all_numbers.add(i)
                 all_numbers -= references
                 return answer(False,
-                              f'Упомянуты не все источники из списка <br> Список источников без упоминания: {", ".join(str(q) for q in sorted(all_numbers))}')
+                              f'Упомянуты не все источники из списка <br> Список источников без упоминания: {", ".join(str(num) for num in sorted(all_numbers))}')
         else:
             return answer(False, f'Нет списка литературы')
 
