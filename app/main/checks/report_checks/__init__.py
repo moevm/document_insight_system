@@ -5,3 +5,5 @@ from .banned_words_check import ReportBannedWordsCheck
 from .page_counter import ReportNumberOfPages
 from .image_share_check import ReportImageShareCheck
 from .right_words_check import ReportRightWordsCheck
+from .headers_at_page_top_check import ReportHeadersAtPageTopCheck
+from .sections_check import ReportSectionCheck

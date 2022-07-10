@@ -1,4 +1,5 @@
 from .base_criterion_pack import BaseCriterionPack
+from ..checks.report_checks.style_check_settings import StyleCheckSettings
 
 BASE_PRES_CRITERION = [
     ['template_name'],
@@ -18,6 +19,8 @@ BASE_REPORT_CRITERION = [
     ["banned_words_in_literature"],
     ["page_counter"],
     ["image_share_check"],
+    ["headers_at_page_top_check", {"headers": ["Приложение А Исходный код программы"]}],
+    ["sections_check", {"presets": StyleCheckSettings.LR_CONFIG, "prechecked_props": None}],
     ["banned_words_check"],
     ["right_words_check"],
     ["banned_words_in_literature"],
