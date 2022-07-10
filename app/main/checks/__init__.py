@@ -1,12 +1,6 @@
 from .presentation_checks import *
 from .report_checks import *
-<<<<<<< HEAD
-from .report_checks.sections_check import ReportSectionCheck
-from .report_checks.headers_at_page_top_check import ReportHeadersAtPageTopCheck
-from .report_checks.short_sections_check import ReportShortSectionsCheck
-=======
 
->>>>>>> 302_check_sections
 
 AVAILABLE_CHECKS = {
     'pres': {
@@ -26,13 +20,9 @@ AVAILABLE_CHECKS = {
         ReportImageShareCheck.id: ReportImageShareCheck,
         ReportSectionCheck.id: ReportSectionCheck,
         ReportHeadersAtPageTopCheck.id: ReportHeadersAtPageTopCheck,
+        ReportShortSectionsCheck.id: ReportShortSectionsCheck,
         ReportBannedWordsCheck.id: ReportBannedWordsCheck,
-<<<<<<< HEAD
-        ReportHeadersAtPageTopCheck.id: ReportHeadersAtPageTopCheck,
-        ReportShortSectionsCheck.id: ReportShortSectionsCheck
-=======
         ReportRightWordsCheck.id: ReportRightWordsCheck,
         BannedWordsInLiteratureCheck.id: BannedWordsInLiteratureCheck
->>>>>>> 302_check_sections
     }
 }

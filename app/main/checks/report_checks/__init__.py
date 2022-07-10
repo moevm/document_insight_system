@@ -7,3 +7,4 @@ from .right_words_check import ReportRightWordsCheck
 from .headers_at_page_top_check import ReportHeadersAtPageTopCheck
 from .sections_check import ReportSectionCheck
 from .style_check_settings import StyleCheckSettings
+from .short_sections_check import ReportShortSectionsCheck
