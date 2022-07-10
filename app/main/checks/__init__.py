@@ -19,6 +19,7 @@ AVAILABLE_CHECKS = {
         ReportImageShareCheck.id: ReportImageShareCheck,
         ReportBannedWordsCheck.id: ReportBannedWordsCheck,
         ReportRightWordsCheck.id: ReportRightWordsCheck,
-        BannedWordsInLiteratureCheck.id: BannedWordsInLiteratureCheck
+        BannedWordsInLiteratureCheck.id: BannedWordsInLiteratureCheck,
+        ReferencesToLiteratureCheck.id: ReferencesToLiteratureCheck
     }
 }
