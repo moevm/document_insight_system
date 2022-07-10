@@ -15,10 +15,10 @@ BASE_PRES_CRITERION = [
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
-    ["banned_words_in_literature"],
     ["page_counter"],
-    ["banned_words_check"]
-
+    ["banned_words_check"],
+    ["right_words_check"],
+    ["banned_words_in_literature"]
 ]
 
 BASE_PACKS = {

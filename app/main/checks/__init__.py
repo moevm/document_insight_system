@@ -15,8 +15,9 @@ AVAILABLE_CHECKS = {
     },
     'report': {
         ReportSimpleCheck.id: ReportSimpleCheck,
-        BannedWordsInLiteratureCheck.id: BannedWordsInLiteratureCheck,
         ReportNumberOfPages.id: ReportNumberOfPages,
-        ReportBannedWordsCheck.id: ReportBannedWordsCheck
+        ReportBannedWordsCheck.id: ReportBannedWordsCheck,
+        ReportRightWordsCheck.id: ReportRightWordsCheck,
+        BannedWordsInLiteratureCheck.id: BannedWordsInLiteratureCheck
     }
 }
