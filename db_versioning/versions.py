@@ -257,7 +257,7 @@ class Version30(Version):
         if prev_version in (Version22.VERSION_NAME, ):
             base_pres_pack = 'BasePresentationCriterionPack'
             # set criteria for all user as base pres pack id
-            collections['users'].update_many({}, {'$set': {'criteria': base_pres_pack}})
+            collections['users'].update_many({}, {'$set': {'criteria': base_pres_pack, 'file_type': 'pres'}})
             # update criteria results
             for check in collections['checks'].find():
                 new_list = [cls.map(k,v) for k, v in check['enabled_checks'].items() if v]
