@@ -70,8 +70,10 @@ def lti():
 
         # task settings
         # - file type (pres or report)
-        file_type = custom_params.get('file_type') & set(BASE_PACKS.keys())  # check that file_type is allowed
-        file_type = file_type if file_type else 'pres'  # 'pres' file_type as default
+        file_type = custom_params.get('file_type')
+        is_allowed_file_type = custom_params.get('file_type') in set(
+            BASE_PACKS.keys())  # check that file_type is allowed
+        file_type = file_type if is_allowed_file_type else 'pres'  # 'pres' file_type as default
         # - file formats
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
