@@ -77,7 +77,7 @@ def lti():
         # - file formats
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
-        custom_criterion_pack = custom_params.get('pack', BASE_PACKS.get(file_type))
+        custom_criterion_pack = custom_params.get('pack', BASE_PACKS.get(file_type).name)
 
         role = utils.get_role(temporary_user_params)
 
