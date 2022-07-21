@@ -21,7 +21,7 @@ from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
-from main.check_packs import init_criterions
+from main.check_packs import BASE_PACKS
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
@@ -67,10 +67,16 @@ def lti():
         lms_user_id = temporary_user_params.get('user_id', '')
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
-        file_type = custom_params.get('file_type', 'pres')
+
+        # task settings
+        # - file type (pres or report)
+        file_type = custom_params.get('file_type') & set(BASE_PACKS.keys())  # check that file_type is allowed
+        file_type = file_type if file_type else 'pres'  # 'pres' file_type as default
+        # - file formats
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
-        custom_criteria = utils.get_criteria_from_launch(temporary_user_params)
+        custom_criterion_pack = custom_params.get('pack', BASE_PACKS.get(file_type))
+
         role = utils.get_role(temporary_user_params)
 
         logout_user()
@@ -87,7 +93,7 @@ def lti():
         db_methods.edit_user(lti_user)
 
         login_user(lti_user)
-        lti_user.update_criteria(custom_criteria)
+        lti_user.update_criteria(custom_criterion_pack)
         return redirect(url_for('upload'))
     else:
         abort(403)
