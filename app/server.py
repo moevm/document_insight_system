@@ -89,10 +89,15 @@ def lti():
             lti_user.is_admin = role
         else:
             lti_user = db_methods.get_user(user_id)
+        
+        # task settings
+        lti_user.file_type = file_type
         lti_user.formats = formats
         lti_user.criteria = custom_criterion_pack
+        # passback settings
         lti_user.params_for_passback = params_for_passback
         lti_user.lms_user_id = lms_user_id
+
         db_methods.edit_user(lti_user)
 
         login_user(lti_user)
