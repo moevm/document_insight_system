@@ -30,6 +30,22 @@ class StyleCheckSettings:
             "first_line_indent_cm": 1.25
     }
     PRECHECKED_PROPS = ["bold", "italic", "all_caps", "alignment"]
+    MAIN_TEXT_STYLE = {
+        "bold": False,
+        "alignment": WD_ALIGN_PARAGRAPH.JUSTIFY,
+        "font_name": "Times New Roman",
+        "font_size_pt": 14.0,
+        "first_line_indent_cm": 1.25,
+        "line_spacing": 1.5
+    }
+    LISTING_STYLE = {
+        "bold": False,
+        "alignment": WD_ALIGN_PARAGRAPH.JUSTIFY,
+        "font_name": "Courier New",
+        "font_size_pt": 11.0,
+        "first_line_indent_cm": 0.0,
+        "line_spacing": 1.0
+    }
 
     # Order of styles may be significant! First level 1, then level 2, if config is used with short_sections_check.
     # Otherwise, order doesn't matter.
@@ -47,5 +63,16 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_2_REGEX,
             "markers": EMPTY_MARKERS
+        }
+    ]
+
+    LR_MAIN_TEXT_CONFIG = [
+        {
+            "name": "Основной текст",
+            "style": MAIN_TEXT_STYLE
+        },
+        {
+            "name": "Листинг",
+            "style": LISTING_STYLE
         }
     ]

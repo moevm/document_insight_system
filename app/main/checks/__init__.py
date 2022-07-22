@@ -1,5 +1,8 @@
 from .presentation_checks import *
 from .report_checks import *
+from .report_checks.sections_check import ReportSectionCheck
+from .report_checks.headers_at_page_top_check import ReportHeadersAtPageTopCheck
+from .report_checks.style_check import ReportStyleCheck
 
 
 AVAILABLE_CHECKS = {
@@ -21,6 +24,7 @@ AVAILABLE_CHECKS = {
         ReportSectionCheck.id: ReportSectionCheck,
         ReportHeadersAtPageTopCheck.id: ReportHeadersAtPageTopCheck,
         ReportShortSectionsCheck.id: ReportShortSectionsCheck,
+        ReportStyleCheck.id: ReportStyleCheck,
         ReportBannedWordsCheck.id: ReportBannedWordsCheck,
         ReportRightWordsCheck.id: ReportRightWordsCheck,
         BannedWordsInLiteratureCheck.id: BannedWordsInLiteratureCheck,

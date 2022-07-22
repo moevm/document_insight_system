@@ -21,6 +21,7 @@ BASE_REPORT_CRITERION = [
     ["image_share_check"],
     ["headers_at_page_top_check", {"headers": ["Приложение А Исходный код программы"]}],
     ["sections_check", {"presets": StyleCheckSettings.LR_CONFIG, "prechecked_props": None}],
+    ["style_check"],
     ["short_sections_check", {"presets": StyleCheckSettings.LR_CONFIG}],
     ["banned_words_check"],
     ["right_words_check"],
