@@ -21,8 +21,8 @@ class TitleFormatCheck(BasePresCriterion):
 
     def empty_verdict(self):
         return format_header(
-            'Заголовки не найдены: {}.'.format(', '.join(map(str, self.format_page_link(self.empty_headers))))), \
-               format_header('Убедитесь, что слайд озаглавлен соответстующим элементом')
+            'Заголовки не найдены: {}'.format(', '.join(map(str, self.format_page_link(self.empty_headers))))), \
+               format_header('Убедитесь, что слайд при наведении на него курсора имеет название, соответствующее заголовку на самом слайде.\nДля добавления заглавия в PowerPoint на вкладке Вид нажмите кнопку Режим структуры и щелкните справа от нужного слайда. Затем введите название')
 
     def get_failing_headers(self):
         for i, title in enumerate(self.file.get_titles(), 1):
