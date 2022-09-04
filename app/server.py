@@ -131,8 +131,6 @@ def interact():
         return user.logout()
     elif request.method == "PUT":
         return user.edit(request.json)
-    elif request.method == "DELETE":
-        return user.signout()
 
 
 # Main chapters req handlers:
@@ -292,19 +290,6 @@ def get_pdf(_id):
     else:
         logger.info(f'pdf файл для проверки {id} не найден')
         return render_template("./404.html")
-
-
-@app.route("/criteria", methods=["GET", "POST"])
-@login_required
-def criteria():
-    if current_user.is_admin:
-        if request.method == "GET":
-            return render_template("./criteria.html", navi_upload=True, name=current_user.name,
-                                   crit=current_user.criteria)
-        elif request.method == "POST":
-            return user.update_criteria(request.json)
-    else:
-        abort(403)
 
 
 @app.route("/check_list")

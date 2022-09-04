@@ -45,14 +45,6 @@ class Consumers(Packable):
         self.timestamp_and_nonce = dictionary.get('timestamp_and_nonce', [])
 
 
-class CriteriaPack(Packable):
-    def __init__(self, dictionary=None):
-        super().__init__(dictionary)
-        dictionary = dictionary or {}
-        self.pack_name = dictionary.get('pack_name', '')
-        self.enabled_checks = dictionary.get('enabled_checks', '')
-
-
 class PackableWithId(Packable):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
