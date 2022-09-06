@@ -10,8 +10,10 @@ class ReportSectionCheck(BaseReportCriterion):
     description = "Проверка соответствия заголовков разделов требуемым стилям"
     id = "sections_check"
 
-    def __init__(self, file_info, presets: List[dict], prechecked_props: Union[List[str], None]):
+    def __init__(self, file_info, presets: str = 'LR_HEADERS',
+                 prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS):
         super().__init__(file_info)
+        presets = StyleCheckSettings.CONFIGS.get(presets)
         self.file.parse_effective_styles()
         if prechecked_props is None:
             self.prechecked_props = StyleCheckSettings.PRECHECKED_PROPS
@@ -126,4 +128,4 @@ class ReportSectionCheck(BaseReportCriterion):
 
 
 def trim(string, length):
-    return string[:length-3] + "..." if len(string) > length else string
+    return string[:length - 3] + "..." if len(string) > length else string

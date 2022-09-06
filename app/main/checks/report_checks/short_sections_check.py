@@ -12,9 +12,10 @@ class ReportShortSectionsCheck(BaseReportCriterion):
 
     default_min_len = 20
 
-    def __init__(self, file_info, presets: List[dict], prechecked_props: Union[List[str], None] = None,
-                 min_section_len=None):
+    def __init__(self, file_info, presets: str = 'LR_HEADERS',
+                 prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS, min_section_len=None):
         super().__init__(file_info)
+        presets = StyleCheckSettings.CONFIGS.get(presets)
         self.min_section_len = min_section_len if min_section_len is not None else self.default_min_len
         self.file.parse_effective_styles()
         prechecked_props_lst = prechecked_props
@@ -43,7 +44,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
         if len(tagged_indices) == 0:
             return answer(False, "Заголовки не найдены.")
         self.calc_length(tagged_indices)
-        tagged_indices = tagged_indices[1:len(tagged_indices)-1]
+        tagged_indices = tagged_indices[1:len(tagged_indices) - 1]
         for elem in tagged_indices:
             texts = []
             for i in range(elem["index"] + 1, elem["index"] + elem["length"]):
@@ -76,7 +77,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
         indices = list(map(lambda lst: list(filter(lambda i: i >= cutoff_index, lst)), indices))
         tagged_indices = [{"index": 0, "level": 0}, {"index": len(self.file.styled_paragraphs), "level": 0}]
         for j in range(len(indices)):
-            tagged_indices.extend(list(map(lambda index: {"index": index, "level": j+1}, indices[j])))
+            tagged_indices.extend(list(map(lambda index: {"index": index, "level": j + 1}, indices[j])))
         tagged_indices.sort(key=lambda dct: dct["index"])
         return tagged_indices
 
