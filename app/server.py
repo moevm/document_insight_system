@@ -21,7 +21,7 @@ from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
-from main.check_packs import BASE_PACKS
+from main.check_packs import BASE_PACKS, init_criterions
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
@@ -264,6 +264,82 @@ def checks(_id):
         logger.info("Запрошенная презентация не найдена: " + _id)
         return render_template("./404.html")
 
+
+################### Criterion packs ###################
+
+@app.route("/criterion_pack", methods=["GET"])
+@login_required
+def criteria_pack_new():
+    if not current_user.is_admin:
+        abort(403)
+    return render_template('./criteria_pack.html', name=current_user.name, navi_upload=True)
+
+
+@app.route("/criterion_packs", methods=["GET"])
+@login_required
+def criteria_packs():
+    if not current_user.is_admin:
+        abort(403)
+    packs = db_methods.get_criterion_pack_list()
+    return render_template('./pack_list.html', packs=packs, name=current_user.name, navi_upload=True)
+
+
+@app.route("/criterion_pack/<string:name>", methods=["GET"])
+@login_required
+def criteria_pack(name):
+    if not current_user.is_admin:
+        abort(403)
+
+    pack = db_methods.get_criteria_pack(name)
+    if not pack:
+        abort(404)
+    pack['raw_criterions'] = json.dumps(pack['raw_criterions'], indent=4, ensure_ascii=False)
+    return render_template('./criteria_pack.html', pack=pack, name=current_user.name, navi_upload=True)
+
+
+@app.route("/api/criterion_pack", methods=["POST"])
+@login_required
+def api_criteria_pack():
+    if not current_user.is_admin:
+        abort(403)
+    form_data = dict(request.form)
+    pack_name = form_data.get('pack_name')
+    # get pack configuration info
+    raw_criterions = form_data.get('raw_criterions')
+    file_type = form_data.get('file_type')
+    min_score = float(form_data.get('min_score', '1'))
+    # weak validation
+    try:
+        raw_criterions = json.loads(raw_criterions)
+    except:
+        msg = f"Ошибка при парсинге критериев {raw_criterions} для набора {pack_name} от пользователя {current_user.name}"
+        logger.info(msg)
+        return msg, 400
+    raw_criterions = raw_criterions if type(raw_criterions) is list else None
+    file_type = file_type if file_type in BASE_PACKS.keys() else None
+    min_score = min_score if min_score and (0 <= min_score <= 1) else None
+    if not (raw_criterions and file_type and min_score):
+        msg = f"Конфигурация набора критериев должна содержать список критериев (непустой список в формате JSON)," \
+              f"тип файла (один из {list(BASE_PACKS.keys())})," \
+              f"пороговый балл (0<=x<=1). Получено: {form_data}, после обработки: file_type - {file_type}," \
+              f"min_score - {min_score}, raw_criterions - {raw_criterions}"
+        return {'data': msg, 'time': datetime.now()}, 400
+    #  testing pack initialization
+    inited, err = init_criterions(raw_criterions, file_type=file_type)
+    if len(raw_criterions) != len(inited) or err:
+        msg = f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. Успешно инициализированные: {inited}. Возникшие ошибки: {err}."
+        return {'data': msg, 'time': datetime.now()}, 400
+    # if ok - save to DB
+    db_methods.save_criteria_pack({
+        'name': pack_name,
+        'raw_criterions': raw_criterions,
+        'file_type': file_type,
+        'min_score': min_score
+    })
+    return {'data': f'{pack_name} saved', 'time': datetime.now()}, 200
+
+
+################### ###################
 
 @app.route("/get_last_check_results/<string:moodle_id>", methods=["GET"])
 @login_required
