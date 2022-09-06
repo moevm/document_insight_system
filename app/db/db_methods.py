@@ -375,7 +375,9 @@ def save_criteria_pack(pack_info):
     return criteria_pack_collection.update_one({'name': pack_info.get('name')}, {'$set': pack_info}, upsert=True)
 
 
-# criterions, check_file_type, min_score=1.0, name
+def get_criterion_pack_list():
+    return criteria_pack_collection.find()
+
 
 # mapping celery_task to check
 
