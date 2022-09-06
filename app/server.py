@@ -78,7 +78,12 @@ def lti():
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
         custom_criterion_pack = custom_params.get('pack', BASE_PACKS.get(file_type).name)
-
+        if not db_methods.get_criteria_pack(custom_criterion_pack):
+            default_criterion_pack = BASE_PACKS.get(file_type).name
+            logger.error(
+                f"Ошибка при lti-авторизации. Несуществующий набор {custom_criterion_pack}. Установлен набор по умолчанию: {default_criterion_pack}")
+            logger.debug(f"lti-параметры: {temporary_user_params}")
+            custom_criterion_pack = default_criterion_pack
         role = utils.get_role(temporary_user_params)
 
         logout_user()
@@ -89,7 +94,7 @@ def lti():
             lti_user.is_admin = role
         else:
             lti_user = db_methods.get_user(user_id)
-        
+
         # task settings
         lti_user.file_type = file_type
         lti_user.formats = formats
@@ -220,7 +225,7 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
                    'page_counter': 'Проверка количества страниц',
                    'image_share_check': 'Проверка доли объема отчёта, приходящейся на изображения',
                    'right_words_check': 'Проверка наличия определенных (правильных) слов в тексте отчёта'
-}
+                   }
 
 
 @app.route("/results/<string:_id>", methods=["GET"])
