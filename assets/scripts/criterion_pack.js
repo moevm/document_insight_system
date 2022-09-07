@@ -31,12 +31,12 @@ pack_form.submit((e) => {
             if (response.status === 200) {
                 response.json().then(responseJson => {
                     $("#alert-success").show()
-                    $("#success-text").text(`${responseJson['data']}\n${new Date(responseJson['time']).toLocaleString()}`)
+                    $("#success-text").text(`${responseJson['data']}\n${new Date(responseJson['time']).toString()}`)
                 })
             } else {
                 response.json().then(responseJson => {
                     $("#alert").show();
-                    $("#error-text").text(`${responseJson['data']}\n${new Date(responseJson['time']).toLocaleString()}}`)
+                    $("#error-text").text(`${responseJson['data']}\n${new Date(responseJson['time']).toString()}}`)
                 })
             }
         })
