@@ -26,22 +26,22 @@ pack_form.submit((e) => {
     fd.append('file_type', $("#file_type").val());
     fd.append('min_score', $("#min_score").val());
     fd.append('raw_criterions', raw_criterions_str);
-    fetch(`/api${window.location.pathname}`, {method: "POST", body: fd})
+    fetch(`/api/criterion_pack`, {method: "POST", body: fd})
         .then(response => {
             if (response.status === 200) {
                 response.json().then(responseJson => {
                     $("#alert-success").show()
-                    $("#success-text").text(`${responseJson['data']}<br>${responseJson['time']}`)
+                    $("#success-text").text(`${responseJson['data']}\n${new Date(responseJson['time']).toLocaleString()}`)
                 })
             } else {
                 response.json().then(responseJson => {
                     $("#alert").show();
-                    $("#error-text").text(`${responseJson['data']}<br>${responseJson['time']}`)
+                    $("#error-text").text(`${responseJson['data']}\n${new Date(responseJson['time']).toLocaleString()}}`)
                 })
             }
         })
         .catch((err) => {
-            console.log(`Fetch /api${window.location.pathname} error:`, err);
+            console.log(`Fetch /api/criterion_pack error:`, err);
             $("#alert").show();
             $("#error-text").text(err)
         });

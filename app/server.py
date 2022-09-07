@@ -341,7 +341,7 @@ def api_criteria_pack():
         'file_type': file_type,
         'min_score': min_score
     })
-    return {'data': f'{pack_name} saved', 'time': datetime.now()}, 200
+    return {'data': f"Набор '{pack_name}' сохранен", 'time': datetime.now()}, 200
 
 
 ################### ###################
