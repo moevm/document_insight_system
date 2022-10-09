@@ -6,51 +6,63 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block main %}
-    <div class="header row">{% include "header.html" %}</div>
-    <div class="holder row justify-content-center">
+<div class="header row">{% include "header.html" %}</div>
+<div class="holder row justify-content-center">
     <script>
       const file_upload_limit = {{ config.MAX_CONTENT_LENGTH | tojson }};
       const file_type = "{{file_type}}";
     </script>
-        <div class="col-11 col-sm-8 col-md-5 col-lg-4 my-auto">
-            <h3 class="text-center ins" id="upload_title">{{upload_title}}</h3>
+    <div class="col-11 col-sm-8 col-md-5 col-lg-4 my-auto">
+        <h3 class="text-center ins" id="upload_title">{{upload_title}}</h3>
 
-            <div class="row justify-content-center" id="uploading_body">
-                <div class="col my-auto">
-                    <form>
-                        <h5 class="texteous ins" id="uploading_label">{{uploading_label}}</h5>
+        <div class="row justify-content-center" id="uploading_body">
+            <div class="col my-auto">
+                <form>
+                    <h5 class="texteous ins" id="uploading_label">{{uploading_label}}</h5>
+                    <div class="form-group">
+                        <div id="uploading_form" class="custom-file">
+                            <input type="file" class="custom-file-input" id="upload_file" accept=".{{', .'.join(formats)}}">
+                            <label class="custom-file-label" id="upload_file_label" for="upload_file">Допустимые форматы: {{ ", ".join(formats) }}</label>
+                            <div class="invalid-feedback ins">Возникла ошибка</div>
+                        </div>
+                    </div>
+                    {% if two_files %}
+                    <div>
+                        <h5 class="texteous ins" id="uploading_label_pdf">{{uploading_label}}</h5>
                         <div class="form-group">
-                            <div id="uploading_form" class="custom-file">
-                                <input type="file" class="custom-file-input" id="upload_file" accept=".{{', .'.join(formats)}}">
-                                <label class="custom-file-label" id="upload_file_label" for="upload_file">Допустимые форматы: {{ ", ".join(formats) }}</label>
+                            <div id="uploading_form_pdf" class="custom-file">
+                                <input type="file" class="custom-file-input" id="upload_file_pdf" accept=".pdf">
+                                <label class="custom-file-label" id="upload_file_label_pdf" for="upload_file">Допустимые форматы: pdf</label>
                                 <div class="invalid-feedback ins">Возникла ошибка</div>
                             </div>
                         </div>
-                        <div id="uploading_progress_holder" class="form-group" style="display: none">
-                            <div class="progress">
-                                <div id="uploading_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%"></div>
-                            </div>
+                    </div>
+                    {% endif %}
+                    <div id="uploading_progress_holder" class="form-group" style="display: none">
+                        <div class="progress">
+                            <div id="uploading_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%"></div>
                         </div>
-                        {% if not current_user.is_LTI %}
-                            {{ recaptcha }}
-                        {% endif %}
-                    </form>
-                        <button type="button" class="pale_button" id="upload_upload_button">Загрузить</button>
-                </div>
+                    </div>
+                    {% if not current_user.is_LTI %}
+                    {{ recaptcha }}
+                    {% endif %}
+                </form>
+                <button type="button" class="pale_button" id="upload_upload_button">Загрузить</button>
             </div>
-
-            <div class="row justify-content-center" id="uploading_body">
-                <div class="col my-auto">
-                    <form>
-                        <div class="form-group" style="display: none">
-                            <div id="uploading_progress" class="progress">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%"></div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
         </div>
+
+        <div class="row justify-content-center" id="uploading_body">
+            <div class="col my-auto">
+                <form>
+                    <div class="form-group" style="display: none">
+                        <div id="uploading_progress" class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
+</div>
 {% endblock %}

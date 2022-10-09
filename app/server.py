@@ -68,6 +68,7 @@ def lti():
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
         file_type = custom_params.get('file_type', 'pres')
+        two_files = custom_params.get('two_files', 'EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
         custom_criteria = utils.get_criteria_from_launch(temporary_user_params)
@@ -82,6 +83,7 @@ def lti():
         else:
             lti_user = db_methods.get_user(user_id)
         lti_user.formats = formats
+        lti_user.two_files = two_files
         lti_user.params_for_passback = params_for_passback
         lti_user.lms_user_id = lms_user_id
         db_methods.edit_user(lti_user)
@@ -135,15 +137,17 @@ def upload():
     elif request.method == "GET":
         formats = set(current_user.formats)
         file_type = current_user.file_type
+        two_files = current_user.two_files
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
         return render_template("./upload.html", navi_upload=False, name=current_user.name, file_type=file_type,
-                               formats=sorted(formats))
+                               two_files=two_files, formats=sorted(formats))
 
 
 @app.route("/tasks", methods=["POST"])
 @login_required
 def run_task():
     file = request.files.get("file")
+    pdf_file = request.files.get("pdf_file")
     file_type = request.form.get('file_type', 'pres')
     if not file:
         logger.critical("request doesn't include file")
@@ -153,6 +157,18 @@ def run_task():
         return 'storage_overload'
     logger.info(
         f"Запуск обработки файла {file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
+    if pdf_file:
+        if get_file_len(pdf_file) * 2 + db_methods.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
+            logger.critical('Storage overload has occured')
+            return 'storage_overload'
+        logger.info(
+            f"Запуск обработки файла {pdf_file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
+        pdf_file_id = ObjectId()
+        filenamepdf, extension = pdf_file.filename.rsplit('.', 1)
+        filepathpdf = join(UPLOAD_FOLDER, f"{pdf_file_id}.{extension}")
+        pdf_file.save(filepathpdf)
+        pdf_file_id = db_methods.add_file_info_and_content(current_user.username, filepathpdf, file_type, pdf_file_id)
+        converted_id = db_methods.write_pdf(filenamepdf, filepathpdf)
 
     file_id = ObjectId()
     # save to file on disk for future checking
@@ -162,7 +178,8 @@ def run_task():
     # add file and file's info to db
     file_id = db_methods.add_file_info_and_content(current_user.username, filepath, file_type, file_id)
     # convert to pdf and save on disk and db
-    converted_id = db_methods.write_pdf(filename, filepath)  # convert to pdf for preview
+    if not pdf_file:
+        converted_id = db_methods.write_pdf(filename, filepath)  # convert to pdf for preview
     # TODO: validate that enabled_checks match file_type
     check = Check({
         '_id': file_id,

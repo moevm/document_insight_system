@@ -3,9 +3,21 @@ import '../styles/upload.css';
 
 let upload_id;
 const file_input = $("#upload_file");
+const pdf_file_input = $("#upload_file_pdf");
 const upload_button = $("#upload_upload_button");
 
 upload_button.prop("disabled", true);
+
+pdf_file_input.change(() => {
+    const fileName = pdf_file_input.val().split("\\")[2];
+    let file = pdf_file_input.prop("files")[0];
+    let label = $("#upload_file_label_pdf")
+    if (file.size > file_upload_limit) {
+        label.html(`Exceeded the ${file_upload_limit / 1024 / 1024} MB file limit.`);
+        return;
+    }
+    label.html(fileName);
+});
 
 file_input.change(() => {
     const fileName = file_input.val().split("\\")[2];
@@ -21,9 +33,13 @@ file_input.change(() => {
 
 async function upload() {
     let file = file_input.prop("files")[0];
+    let pdf_file = pdf_file_input.prop("files")[0];
     let formData = new FormData();
     formData.append("file", file);
     formData.append("file_type", file_type);
+    if (pdf_file) {
+        formData.append("pdf_file", file);
+    }
     if ($('div.g-recaptcha').length) {
         let response = grecaptcha.getResponse();
         formData.append("g-recaptcha-response", response);
@@ -32,6 +48,7 @@ async function upload() {
     const bar = $("#uploading_progress");
     $("#uploading_progress_holder").css("display", "block");
     if (file_input.hasClass("is-invalid")) file_input.removeClass("is-invalid");
+    if (pdf_file_input.hasClass("is-invalid")) pdf_file_input.removeClass("is-invalid");
     if (bar.hasClass("bg-danger")) bar.removeClass("bg-danger");
     if (bar.hasClass("bg-success")) bar.removeClass("bg-success");
 
@@ -47,10 +64,12 @@ async function upload() {
         alert('Система перегружена, попробуйте повторить запрос позднее');
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");
+        pdf_file_input.addClass("is-invalid");
     } else if (response_text.includes('Not OK') || response_text === 'File exceeded the upload limit') {
         alert(response_text);
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");
+        pdf_file_input.addClass("is-invalid");
     } else {
         upload_id = JSON.parse(response_text)['check_id'];
         bar.addClass("bg-success");
@@ -66,3 +85,4 @@ upload_button.click(async () => {
         await upload();
     }
 });
+
