@@ -10,3 +10,7 @@ h5 {
 #upload_title {
     margin-bottom: 1rem !important;
 }
+
+.custom-text-input {
+    width: 100%
+}

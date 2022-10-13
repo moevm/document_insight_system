@@ -18,6 +18,7 @@
             <div class="row justify-content-center" id="uploading_body">
                 <div class="col my-auto">
                     <form>
+                        <h6 class="text-center ins" id="upload_title">Прикрепите файл презентации в формате {{', '.join(formats)}}</h6>
                         <h5 class="texteous ins" id="uploading_label">{{uploading_label}}</h5>
                         <div class="form-group">
                             <div id="uploading_form" class="custom-file">
@@ -26,6 +27,26 @@
                                 <div class="invalid-feedback ins">Возникла ошибка</div>
                             </div>
                         </div>
+                        {% if file_type == 'pres' %}
+                            <div>
+                                <h6 class="text-center ins" id="upload_title">Введите своё ФИО</h6>
+                                <div class="form-group">
+                                    <div id="uploading_form_fullname" class="custom-text">
+                                        <input type="text" class="custom-text-input" id="upload_fullname" placeholder="Юрьев Юрий Юрьевич">
+                                        <div class="invalid-feedback ins">Возникла ошибка</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="text-center ins" id="upload_title">Введите номер своей группы</h6>
+                                <div class="form-group">
+                                    <div id="uploading_form_group" class="custom-text">
+                                        <input type="text" class="custom-text-input" id="upload_group" placeholder="9301">
+                                        <div class="invalid-feedback ins">Возникла ошибка</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
                         <div id="uploading_progress_holder" class="form-group" style="display: none">
                             <div class="progress">
                                 <div id="uploading_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%"></div>
