@@ -153,10 +153,6 @@ def write_pdf(filename, filepath):
     converted_filepath = convert_to(filepath, target_format='pdf')
     return add_file_to_db(filename, converted_filepath)
 
-def add_pdf(filename, filepath):
-    converted_filepath = filename + ".pdf"
-    return add_file_to_db(filename, converted_filepath)
-
 
 def add_file_to_db(filename, filepath, file_id=None):
     if not file_id: file_id = ObjectId()

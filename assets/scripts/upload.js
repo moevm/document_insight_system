@@ -38,7 +38,7 @@ async function upload() {
     formData.append("file", file);
     formData.append("file_type", file_type);
     if (pdf_file) {
-        formData.append("pdf_file", file);
+        formData.append("pdf_file", pdf_file);
     }
     if ($('div.g-recaptcha').length) {
         let response = grecaptcha.getResponse();
@@ -85,4 +85,3 @@ upload_button.click(async () => {
         await upload();
     }
 });
-
