@@ -18,6 +18,7 @@
         <div class="row justify-content-center" id="uploading_body">
             <div class="col my-auto">
                 <form>
+                    <h6 class="text-center ins" id="upload_title">Прикрепите файл отчета в формате {{', '.join(formats)}}</h6>
                     <h5 class="texteous ins" id="uploading_label">{{uploading_label}}</h5>
                     <div class="form-group">
                         <div id="uploading_form" class="custom-file">
@@ -28,6 +29,7 @@
                     </div>
                     {% if two_files %}
                     <div>
+                        <h6 class="text-center ins" id="upload_title">Прикрепите файл в формате pdf</h6>
                         <h5 class="texteous ins" id="uploading_label_pdf">{{uploading_label}}</h5>
                         <div class="form-group">
                             <div id="uploading_form_pdf" class="custom-file">
