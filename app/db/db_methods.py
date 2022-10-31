@@ -368,11 +368,16 @@ def get_criteria_pack(name):
 
 
 def save_criteria_pack(pack_info):
-    # pack_info - dict, that includes name, criterions, check_file_type, min_score}
+    """
+    pack_info - dict, that includes name, raw_criterions, file_type, min_score
+    """
+    pack_info['updated'] = datetime.now()
     return criteria_pack_collection.update_one({'name': pack_info.get('name')}, {'$set': pack_info}, upsert=True)
 
 
-# criterions, check_file_type, min_score=1.0, name
+def get_criterion_pack_list():
+    return criteria_pack_collection.find()
+
 
 # mapping celery_task to check
 

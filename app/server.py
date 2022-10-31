@@ -21,7 +21,7 @@ from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
-from main.check_packs import init_criterions
+from main.check_packs import BASE_PACKS, init_criterions
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
@@ -67,10 +67,23 @@ def lti():
         lms_user_id = temporary_user_params.get('user_id', '')
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
-        file_type = custom_params.get('file_type', 'pres')
+
+        # task settings
+        # - file type (pres or report)
+        file_type = custom_params.get('file_type')
+        is_allowed_file_type = custom_params.get('file_type') in set(
+            BASE_PACKS.keys())  # check that file_type is allowed
+        file_type = file_type if is_allowed_file_type else 'pres'  # 'pres' file_type as default
+        # - file formats
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
-        custom_criteria = utils.get_criteria_from_launch(temporary_user_params)
+        custom_criterion_pack = custom_params.get('pack', BASE_PACKS.get(file_type).name)
+        if not db_methods.get_criteria_pack(custom_criterion_pack):
+            default_criterion_pack = BASE_PACKS.get(file_type).name
+            logger.error(
+                f"Ошибка при lti-авторизации. Несуществующий набор {custom_criterion_pack}. Установлен набор по умолчанию: {default_criterion_pack}")
+            logger.debug(f"lti-параметры: {temporary_user_params}")
+            custom_criterion_pack = default_criterion_pack
         role = utils.get_role(temporary_user_params)
 
         logout_user()
@@ -81,13 +94,18 @@ def lti():
             lti_user.is_admin = role
         else:
             lti_user = db_methods.get_user(user_id)
+
+        # task settings
+        lti_user.file_type = file_type
         lti_user.formats = formats
+        lti_user.criteria = custom_criterion_pack
+        # passback settings
         lti_user.params_for_passback = params_for_passback
         lti_user.lms_user_id = lms_user_id
+
         db_methods.edit_user(lti_user)
 
         login_user(lti_user)
-        lti_user.update_criteria(custom_criteria)
         return redirect(url_for('upload'))
     else:
         abort(403)
@@ -118,8 +136,6 @@ def interact():
         return user.logout()
     elif request.method == "PUT":
         return user.edit(request.json)
-    elif request.method == "DELETE":
-        return user.signout()
 
 
 # Main chapters req handlers:
@@ -203,7 +219,13 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
                    'slide_every_task': 'Наличие слайдов, посвященных задачам',
                    'conclusion_actual': 'Соответствие заключения задачам',
                    'conclusion_along': 'Наличие направлений дальнейшего развития',
-                   'simple_check': 'Простейшая проверка отчёта'}
+                   'simple_check': 'Простейшая проверка отчёта',
+                   'banned_words_in_literature': 'Наличие запрещенных слов в списке литературы',
+                   'banned_words_check': 'Проверка наличия запретных слов в тексте отчёта',
+                   'page_counter': 'Проверка количества страниц',
+                   'image_share_check': 'Проверка доли объема отчёта, приходящейся на изображения',
+                   'right_words_check': 'Проверка наличия определенных (правильных) слов в тексте отчёта'
+                   }
 
 
 @app.route("/results/<string:_id>", methods=["GET"])
@@ -248,6 +270,82 @@ def checks(_id):
         return render_template("./404.html")
 
 
+################### Criterion packs ###################
+
+@app.route("/criterion_pack", methods=["GET"])
+@login_required
+def criteria_pack_new():
+    if not current_user.is_admin:
+        abort(403)
+    return render_template('./criteria_pack.html', name=current_user.name, navi_upload=True)
+
+
+@app.route("/criterion_packs", methods=["GET"])
+@login_required
+def criteria_packs():
+    if not current_user.is_admin:
+        abort(403)
+    packs = db_methods.get_criterion_pack_list()
+    return render_template('./pack_list.html', packs=packs, name=current_user.name, navi_upload=True)
+
+
+@app.route("/criterion_pack/<string:name>", methods=["GET"])
+@login_required
+def criteria_pack(name):
+    if not current_user.is_admin:
+        abort(403)
+
+    pack = db_methods.get_criteria_pack(name)
+    if not pack:
+        abort(404)
+    pack['raw_criterions'] = json.dumps(pack['raw_criterions'], indent=4, ensure_ascii=False)
+    return render_template('./criteria_pack.html', pack=pack, name=current_user.name, navi_upload=True)
+
+
+@app.route("/api/criterion_pack", methods=["POST"])
+@login_required
+def api_criteria_pack():
+    if not current_user.is_admin:
+        abort(403)
+    form_data = dict(request.form)
+    pack_name = form_data.get('pack_name')
+    # get pack configuration info
+    raw_criterions = form_data.get('raw_criterions')
+    file_type = form_data.get('file_type')
+    min_score = float(form_data.get('min_score', '1'))
+    # weak validation
+    try:
+        raw_criterions = json.loads(raw_criterions)
+    except:
+        msg = f"Ошибка при парсинге критериев {raw_criterions} для набора {pack_name} от пользователя {current_user.name}"
+        logger.info(msg)
+        return msg, 400
+    raw_criterions = raw_criterions if type(raw_criterions) is list else None
+    file_type = file_type if file_type in BASE_PACKS.keys() else None
+    min_score = min_score if min_score and (0 <= min_score <= 1) else None
+    if not (raw_criterions and file_type and min_score):
+        msg = f"Конфигурация набора критериев должна содержать список критериев (непустой список в формате JSON)," \
+              f"тип файла (один из {list(BASE_PACKS.keys())})," \
+              f"пороговый балл (0<=x<=1). Получено: {form_data}, после обработки: file_type - {file_type}," \
+              f"min_score - {min_score}, raw_criterions - {raw_criterions}"
+        return {'data': msg, 'time': datetime.now()}, 400
+    #  testing pack initialization
+    inited, err = init_criterions(raw_criterions, file_type=file_type)
+    if len(raw_criterions) != len(inited) or err:
+        msg = f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. Успешно инициализированные: {inited}. Возникшие ошибки: {err}."
+        return {'data': msg, 'time': datetime.now()}, 400
+    # if ok - save to DB
+    db_methods.save_criteria_pack({
+        'name': pack_name,
+        'raw_criterions': raw_criterions,
+        'file_type': file_type,
+        'min_score': min_score
+    })
+    return {'data': f"Набор '{pack_name}' сохранен", 'time': datetime.now()}, 200
+
+
+################### ###################
+
 @app.route("/get_last_check_results/<string:moodle_id>", methods=["GET"])
 @login_required
 def get_latest_user_check(moodle_id):
@@ -273,19 +371,6 @@ def get_pdf(_id):
     else:
         logger.info(f'pdf файл для проверки {id} не найден')
         return render_template("./404.html")
-
-
-@app.route("/criteria", methods=["GET", "POST"])
-@login_required
-def criteria():
-    if current_user.is_admin:
-        if request.method == "GET":
-            return render_template("./criteria.html", navi_upload=True, name=current_user.name,
-                                   crit=current_user.criteria)
-        elif request.method == "POST":
-            return user.update_criteria(request.json)
-    else:
-        abort(403)
 
 
 @app.route("/check_list")
