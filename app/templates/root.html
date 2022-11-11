@@ -5,17 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <title>{% block title %}{% endblock %}</title>
-
+    {% block head %}{% endblock %}
     <link rel="icon" href="{{ url_for("static", filename="favicon.ico") }}" type="image/x-icon"/>
 </head>
 <body>
-
+<div class="container-fluid">
+    {% block main %}{% endblock %}
+</div>
 </body>
-    <div class="container-fluid">
-        {% block main %}{% endblock %}
-    </div>
-
-    <script src={{ url_for("static", filename="vendors.js") }}></script>
-    <script src={{ url_for("static", filename="main.js") }}></script>
-    {% block script %}{% endblock %}
+<script src={{ url_for("static", filename="vendors.js") }}></script>
+<script src={{ url_for("static", filename="main.js") }}></script>
+{% block script %}{% endblock %}
 </html>

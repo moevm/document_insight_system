@@ -14,7 +14,18 @@ BASE_PRES_CRITERION = [
     ['future_dev']
 ]
 BASE_REPORT_CRITERION = [
-    ["simple_check"]
+    ["simple_check"],
+    ["banned_words_in_literature"],
+    ["page_counter"],
+    ["image_share_check"],
+    ["headers_at_page_top_check", {"headers": ["Приложение А Исходный код программы"]}],
+    ["sections_check"],
+    ["style_check"],
+    ["short_sections_check"],
+    ["banned_words_check"],
+    ["right_words_check"],
+    ["banned_words_in_literature"],
+    ["literature_references"]
 ]
 
 BASE_PACKS = {

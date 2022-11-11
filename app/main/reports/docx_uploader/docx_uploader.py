@@ -1,21 +1,32 @@
+import re
+from functools import reduce
+
 import docx
+
+from app.main.reports.pdf_document.pdf_document_manager import PdfDocumentManager
 
 from .core_properties import CoreProperties
 from .inline_shape import InlineShape
 from .paragraph import Paragraph
 from .table import Table, Cell
+from .style import Style
+from ..pdf_document.pdf_document_manager import PdfDocumentManager
 
 
 class DocxUploader:
     def __init__(self):
         self.inline_shapes = []
         self.core_properties = None
-        self.paragraphs= []
+        self.paragraphs = []
         self.tables = []
         self.file = None
+        self.styled_paragraphs = None
+        self.special_paragraph_indices = {}
+        self.pdf_file = None
 
     def upload(self, file):
         self.file = docx.Document(file)
+        self.pdf_file = PdfDocumentManager(file)
 
     def parse(self):
         self.core_properties = CoreProperties(self.file)
@@ -42,6 +53,47 @@ class DocxUploader:
             self.tables.append(Table(tables[i], table))
         return tables
 
+    # Parses styles once; subsequent calls have no effect, since the file itself shouldn't change
+    def parse_effective_styles(self):
+        if self.styled_paragraphs is not None:
+            return
+        self.styled_paragraphs = []
+        for par in filter(lambda p: len(p.text.strip()) > 0, self.file.paragraphs):
+            paragraph = {"text": par.text, "runs": []}
+            for run in filter(lambda r: len(r.text.strip()) > 0, par.runs):
+                paragraph["runs"].append({"text": run.text, "style": Style(run, par)})
+            self.styled_paragraphs.append(paragraph)
+
+    def unify_multiline_entities(self, first_line_regex_str):
+        pattern = re.compile(first_line_regex_str)
+        pars_to_delete = []
+        skip_flag = False
+        for i in range(len(self.styled_paragraphs)-1):
+            if skip_flag:
+                skip_flag = False
+                continue
+            par = self.styled_paragraphs[i]
+            next_par = self.styled_paragraphs[i+1]
+            if pattern.match(par["text"]):
+                skip_flag = True
+                par["text"] += ("\n" + next_par["text"])
+                par["runs"].extend(next_par["runs"])
+                pars_to_delete.append(next_par)
+                continue
+        for par in pars_to_delete:
+            self.styled_paragraphs.remove(par)
+
+    def get_paragraph_indices_by_style(self, style_list):
+        result = []
+        for template_style in style_list:
+            matched_pars = []
+            for i in range(len(self.styled_paragraphs)):
+                par = self.styled_paragraphs[i]
+                if reduce(lambda prev, run: prev and run["style"].matches(template_style), par["runs"], True):
+                    matched_pars.append(i)
+            result.append(matched_pars)
+        return result
+
     def upload_from_cli(self, file):
         self.upload(file=file)
 
@@ -60,3 +112,4 @@ def main(args):
     uploader.upload_from_cli(file=file)
     uploader.parse()
     uploader.print_info()
+    uploader.parse_effective_styles()
