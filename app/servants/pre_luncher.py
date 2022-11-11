@@ -36,7 +36,8 @@ def init(app, debug):
         user.is_admin = True
         edit_user(user)
 
-    user.file_type = 'report'
+    user.file_type = 'pres'
+    user.optional = '{fullname: 1, group: 1, comments: 1}'
     user.criteria = BASE_PACKS[user.file_type].name
     user.formats = list(ALLOWED_EXTENSIONS.get(user.file_type))
     edit_user(user)

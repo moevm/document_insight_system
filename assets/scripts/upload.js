@@ -1,13 +1,29 @@
 import '../styles/upload.css';
 
-
 let upload_id;
 const file_input = $("#upload_file");
+const fullname_input = $("#upload_fullname");
+const group_input = $("#upload_group");
+const comments_input = $("#upload_comments");
+var need_data = new Object();
+var got_data = new Object();
 const upload_button = $("#upload_upload_button");
 
 upload_button.prop("disabled", true);
 
+function all_uploaded() {
+    for (let key in need_data) {
+        if ((need_data[key] === 1) && (key in got_data)) {continue}
+        else {return false}
+    }
+    return true
+}
+
 file_input.change(() => {
+    var need_data = optional
+    alert(need_data)
+    need_data["file"] = 1;
+
     const fileName = file_input.val().split("\\")[2];
     let file = file_input.prop("files")[0];
     let label = $("#upload_file_label")
@@ -15,8 +31,32 @@ file_input.change(() => {
         label.html(`Exceeded the ${file_upload_limit / 1024 / 1024} MB file limit.`);
         return;
     }
+    got_data["file"] = 1;
     label.html(fileName);
-    upload_button.prop("disabled", false);
+    if (all_uploaded() === true) {
+        upload_button.prop("disabled", false);
+    }
+});
+
+fullname_input.change(() => {
+    got_data["fullname"] = 1;
+    if (all_uploaded() === true) {
+        upload_button.prop("disabled", false);
+    }
+});
+
+group_input.change(() => {
+    got_data["group"] = 1;
+    if (all_uploaded() === true) {
+        upload_button.prop("disabled", false);
+    }
+});
+
+comments_input.change(() => {
+    got_data["comments"] = 1;
+    if (all_uploaded() === true) {
+        upload_button.prop("disabled", false);
+    }
 });
 
 async function upload() {
@@ -24,6 +64,9 @@ async function upload() {
     let formData = new FormData();
     formData.append("file", file);
     formData.append("file_type", file_type);
+    formData.append("fullname", document.getElementById("upload_fullname").value);
+    formData.append("group", document.getElementById("upload_group").value);
+    formData.append("comments", document.getElementById("upload_comments").value);
     if ($('div.g-recaptcha').length) {
         let response = grecaptcha.getResponse();
         formData.append("g-recaptcha-response", response);

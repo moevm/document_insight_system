@@ -68,6 +68,7 @@ def lti():
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
         file_type = custom_params.get('file_type', 'pres')
+        optional = custom_params.get('optional', {})
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
         custom_criteria = utils.get_criteria_from_launch(temporary_user_params)
@@ -82,6 +83,7 @@ def lti():
         else:
             lti_user = db_methods.get_user(user_id)
         lti_user.formats = formats
+        lti_user.optional = optional
         lti_user.params_for_passback = params_for_passback
         lti_user.lms_user_id = lms_user_id
         db_methods.edit_user(lti_user)
@@ -134,10 +136,11 @@ def upload():
             abort(401)
     elif request.method == "GET":
         formats = set(current_user.formats)
+        optional = current_user.optional
         file_type = current_user.file_type
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
-        return render_template("./upload.html", navi_upload=False, name=current_user.name, file_type=file_type,
-                               formats=sorted(formats))
+        return render_template("./upload.html", navi_upload=False, name=current_user.name, optional=optional,
+                               file_type=file_type, formats=sorted(formats))
 
 
 @app.route("/tasks", methods=["POST"])
@@ -145,6 +148,7 @@ def upload():
 def run_task():
     file = request.files.get("file")
     file_type = request.form.get('file_type', 'pres')
+    optional = request.form.get('fullname', 'No name given') + ', ' + request.form.get('group', 'No group given') + ': ' + request.form.get('comments', 'No comments given')
     if not file:
         logger.critical("request doesn't include file")
         return "request doesn't include file"
@@ -169,6 +173,7 @@ def run_task():
         'conv_pdf_fs_id': converted_id,
         'user': current_user.username,
         'lms_user_id': current_user.lms_user_id,
+        'optional': optional,
         'enabled_checks': current_user.criteria,
         'file_type': current_user.file_type,
         'filename': file.filename,
@@ -329,6 +334,7 @@ def check_list_data():
             "filename": item["filename"],
             "user": item["user"],
             "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
+            "optional": item["optional"] if item.get("optional") else 'No additional info given',
             "upload-date": (item["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
             "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get(
                 'lms_passback_time') else '-',
