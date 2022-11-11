@@ -5,24 +5,35 @@ const file_input = $("#upload_file");
 const fullname_input = $("#upload_fullname");
 const group_input = $("#upload_group");
 const comments_input = $("#upload_comments");
-var need_data = new Object();
-var got_data = new Object();
+var need_data = {};
+var got_data = {};
 const upload_button = $("#upload_upload_button");
 
 upload_button.prop("disabled", true);
 
 function all_uploaded() {
-    for (let key in need_data) {
-        if ((need_data[key] === 1) && (key in got_data)) {continue}
-        else {return false}
+    console.log("all?")
+    if ("file" in need_data) {
+        for (let i in need_data) {
+            if ((need_data[i] === 1) && (i in got_data)){
+                console.log(i, i)
+            }
+            else if (need_data[i] === 0) {console.log(i)}
+            else {
+                console.log(i, i, i)
+                return false
+            }
+        }
+        return true
     }
-    return true
+    return false
 }
 
 file_input.change(() => {
-    var need_data = optional
-    alert(need_data)
+    need_data = optional
+    console.log(need_data["comments"])
     need_data["file"] = 1;
+    console.log(need_data["file"])
 
     const fileName = file_input.val().split("\\")[2];
     let file = file_input.prop("files")[0];
@@ -64,9 +75,12 @@ async function upload() {
     let formData = new FormData();
     formData.append("file", file);
     formData.append("file_type", file_type);
-    formData.append("fullname", document.getElementById("upload_fullname").value);
-    formData.append("group", document.getElementById("upload_group").value);
-    formData.append("comments", document.getElementById("upload_comments").value);
+    for (let i in got_data) {
+        if (i !== "file") {
+        console.log(typeof(i))
+            formData.append(i, document.getElementById("upload_" + i).value);
+        }
+    }
     if ($('div.g-recaptcha').length) {
         let response = grecaptcha.getResponse();
         formData.append("g-recaptcha-response", response);

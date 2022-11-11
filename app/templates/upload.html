@@ -31,7 +31,11 @@
                         </div>
                         {% if "fullname" in optional %}
                             <div>
-                                <h6 class="text-center ins" id="upload_title">Введите своё ФИО</h6>
+                                {% if optional.split('fullname:')[1][0] == '1' %}
+                                    <h6 class="text-center ins" id="upload_title">Введите своё ФИО</h6>
+                                {% else %}
+                                    <h6 class="text-center ins" id="upload_title">Введите своё ФИО (Не обязательно)</h6>
+                                {% endif %}
                                 <div class="form-group">
                                     <div id="uploading_form_fullname" class="custom-text">
                                         <input type="text" class="custom-text-input" id="upload_fullname" placeholder="Юрьев Юрий Юрьевич">
@@ -42,7 +46,11 @@
                         {% endif %}
                         {% if "group" in optional %}
                             <div>
-                                <h6 class="text-center ins" id="upload_title">Введите номер своей группы</h6>
+                                {% if optional.split('group:')[1][0] == '1' %}
+                                    <h6 class="text-center ins" id="upload_title">Введите номер своей группы</h6>
+                                {% else %}
+                                    <h6 class="text-center ins" id="upload_title">Введите номер своей группы (Не обязательно)</h6>
+                                {% endif %}
                                 <div class="form-group">
                                     <div id="uploading_form_group" class="custom-text">
                                         <input type="text" class="custom-text-input" id="upload_group" placeholder="9301">
@@ -53,7 +61,11 @@
                         {% endif %}
                         {% if "comments" in optional %}
                             <div>
-                                <h6 class="text-center ins" id="upload_title">Оставьте комментарий</h6>
+                                {% if optional.split('comments:')[1][0] == '1' %}
+                                    <h6 class="text-center ins" id="upload_title">Оставьте комментарий</h6>
+                                {% else %}
+                                    <h6 class="text-center ins" id="upload_title">Оставьте комментарий (Не обязательно)</h6>
+                                {% endif %}
                                 <div class="form-group">
                                     <div id="uploading_form_comments" class="custom-text">
                                         <input type="text" class="custom-text-input" id="upload_comments" placeholder="Ваши комментарии к работе">

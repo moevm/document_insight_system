@@ -25,7 +25,7 @@ class User(Packable, UserMixin):
         self.password_hash = dictionary.get('password_hash', '')
         self.presentations = dictionary.get('presentations', [])
         self.file_type = dictionary.get('file_type', 'pres')
-        self.optional = dictionary.get('optional', {})
+        self.optional = dictionary.get('optional', '{}')
         self.criteria = dictionary.get('criteria', BASE_PACKS.get(self.file_type).name)
         self.is_LTI = dictionary.get('is_LTI', False)
         self.lms_user_id = dictionary.get('lms_user_id', None)
@@ -44,6 +44,14 @@ class Consumers(Packable):
         self.consumer_key = dictionary.get('consumer_key', '')
         self.consumer_secret = dictionary.get('consumer_secret', '')
         self.timestamp_and_nonce = dictionary.get('timestamp_and_nonce', [])
+
+
+class CriteriaPack(Packable):
+    def __init__(self, dictionary=None):
+        super().__init__(dictionary)
+        dictionary = dictionary or {}
+        self.pack_name = dictionary.get('pack_name', '')
+        self.enabled_checks = dictionary.get('enabled_checks', '')
 
 
 class PackableWithId(Packable):
