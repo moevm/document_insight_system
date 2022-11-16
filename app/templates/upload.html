@@ -11,6 +11,7 @@
     <script>
       const file_upload_limit = {{ config.MAX_CONTENT_LENGTH | tojson }};
       const file_type = "{{file_type}}";
+      const two_files = "{{two_files}}";
     </script>
     <div class="col-11 col-sm-8 col-md-5 col-lg-4 my-auto">
         <h3 class="text-center ins" id="upload_title">{{upload_title}}</h3>
@@ -27,10 +28,9 @@
                             <div class="invalid-feedback ins">Возникла ошибка</div>
                         </div>
                     </div>
-                    {% if two_files %}
+                    {% if two_files and file_type == 'report' %}
                     <div>
-                        <h6 class="text-center ins" id="upload_title">Прикрепите файл в формате pdf</h6>
-                        <h5 class="texteous ins" id="uploading_label_pdf">{{uploading_label}}</h5>
+                        <h6 class="text-center ins" id="upload_titlee">Прикрепите файл в формате pdf</h6>
                         <div class="form-group">
                             <div id="uploading_form_pdf" class="custom-file">
                                 <input type="file" class="custom-file-input" id="upload_file_pdf" accept=".pdf">

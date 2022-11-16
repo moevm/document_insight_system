@@ -2,6 +2,8 @@ import '../styles/upload.css';
 
 
 let upload_id;
+var pdf_uploaded = false;
+var file_uploaded = false;
 const file_input = $("#upload_file");
 const pdf_file_input = $("#upload_file_pdf");
 const upload_button = $("#upload_upload_button");
@@ -16,7 +18,11 @@ pdf_file_input.change(() => {
         label.html(`Exceeded the ${file_upload_limit / 1024 / 1024} MB file limit.`);
         return;
     }
+    pdf_uploaded = true;
     label.html(fileName);
+    if (file_uploaded === true) {
+        upload_button.prop("disabled", false);
+    }
 });
 
 file_input.change(() => {
@@ -27,19 +33,22 @@ file_input.change(() => {
         label.html(`Exceeded the ${file_upload_limit / 1024 / 1024} MB file limit.`);
         return;
     }
+    file_uploaded = true;
     label.html(fileName);
-    upload_button.prop("disabled", false);
+    if ((two_files == 'False') || (pdf_uploaded === true) || (file_type === 'pres')) {
+        upload_button.prop("disabled", false);
+    }
 });
 
 async function upload() {
     let file = file_input.prop("files")[0];
-    let pdf_file = pdf_file_input.prop("files")[0];
     let formData = new FormData();
-    formData.append("file", file);
-    formData.append("file_type", file_type);
-    if (pdf_file) {
+    if (pdf_uploaded === true) {
+        let pdf_file = pdf_file_input.prop("files")[0];
         formData.append("pdf_file", pdf_file);
     }
+    formData.append("file", file);
+    formData.append("file_type", file_type);
     if ($('div.g-recaptcha').length) {
         let response = grecaptcha.getResponse();
         formData.append("g-recaptcha-response", response);
@@ -71,6 +80,8 @@ async function upload() {
         file_input.addClass("is-invalid");
         pdf_file_input.addClass("is-invalid");
     } else {
+        file_uploaded = false;
+        pdf_uploaded = false;
         upload_id = JSON.parse(response_text)['check_id'];
         bar.addClass("bg-success");
         window.location.replace("/results/" + upload_id);

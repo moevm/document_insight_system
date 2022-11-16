@@ -68,7 +68,7 @@ def lti():
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
         file_type = custom_params.get('file_type', 'pres')
-        two_files = custom_params.get('two_files', '')
+        two_files = custom_params.get('two_files', False)
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
         custom_criteria = utils.get_criteria_from_launch(temporary_user_params)
@@ -83,13 +83,14 @@ def lti():
         else:
             lti_user = db_methods.get_user(user_id)
         lti_user.formats = formats
+        lti_user.file_type = file_type
         lti_user.two_files = two_files
         lti_user.params_for_passback = params_for_passback
         lti_user.lms_user_id = lms_user_id
         db_methods.edit_user(lti_user)
 
         login_user(lti_user)
-        lti_user.update_criteria(custom_criteria)
+        user.update_criteria(custom_criteria)
         return redirect(url_for('upload'))
     else:
         abort(403)
