@@ -31,6 +31,7 @@ class User(Packable, UserMixin):
         self.is_admin = dictionary.get('is_admin', False)
         self.params_for_passback = dictionary.get('params_for_passback', None)
         self.formats = dictionary.get('formats', [])
+        self.task_text = dictionary.get('task_text', '')
 
     def get_id(self):
         return self.username

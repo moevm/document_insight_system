@@ -70,6 +70,7 @@ def lti():
         file_type = custom_params.get('file_type', 'pres')
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
+        task_text = custom_params.get('task_text', '')
         custom_criteria = utils.get_criteria_from_launch(temporary_user_params)
         role = utils.get_role(temporary_user_params)
 
@@ -82,12 +83,14 @@ def lti():
         else:
             lti_user = db_methods.get_user(user_id)
         lti_user.formats = formats
+        lti_user.file_type = file_type
+        lti_user.task_text = task_text
         lti_user.params_for_passback = params_for_passback
         lti_user.lms_user_id = lms_user_id
         db_methods.edit_user(lti_user)
 
         login_user(lti_user)
-        lti_user.update_criteria(custom_criteria)
+        user.update_criteria(custom_criteria)
         return redirect(url_for('upload'))
     else:
         abort(403)
@@ -135,9 +138,9 @@ def upload():
     elif request.method == "GET":
         formats = set(current_user.formats)
         file_type = current_user.file_type
-        formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
+        task_text = current_user.task_text
         return render_template("./upload.html", navi_upload=False, name=current_user.name, file_type=file_type,
-                               formats=sorted(formats))
+                               formats=sorted(formats), task_text=task_text)
 
 
 @app.route("/tasks", methods=["POST"])
