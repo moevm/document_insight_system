@@ -8,6 +8,7 @@ from db.db_methods import get_user
 from db.db_types import Check
 from main.checker import check
 from main.parser import parse
+from main.check_packs import BASE_PACKS
 from root_logger import get_root_logger
 
 TASK_RETRY_COUNTDOWN = 60  # default = 3 * 60
@@ -29,6 +30,8 @@ def create_task(self, check_info):
     pdf_filepath = join(FILES_FOLDER, f"{check_id}.pdf")
     try:
         user = get_user(check_obj.user)
+        user.file_type = check_obj.file_type
+        user.criteria = BASE_PACKS.get(user.file_type).name
         updated_check = check(parse(original_filepath), check_obj, check_obj.filename, user, check_obj.optional)
         updated_check.is_ended = True
         db_methods.update_check(updated_check)  # save to db

@@ -83,13 +83,14 @@ def lti():
         else:
             lti_user = db_methods.get_user(user_id)
         lti_user.formats = formats
+        lti_user.file_type = file_type
         lti_user.optional = optional
         lti_user.params_for_passback = params_for_passback
         lti_user.lms_user_id = lms_user_id
         db_methods.edit_user(lti_user)
 
         login_user(lti_user)
-        lti_user.update_criteria(custom_criteria)
+        user.update_criteria(custom_criteria)
         return redirect(url_for('upload'))
     else:
         abort(403)
