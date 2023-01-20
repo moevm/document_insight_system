@@ -8,7 +8,7 @@ old_image="slides_checker_base_image:old"
 
 apache_config_filename=${1}
 apache_ssl_mod=${2:-''}
-scripts/setup_apache_config.sh $apache_config_filename $apache_ssl_mod
+#sudo scripts/setup_apache_config.sh $apache_config_filename $apache_ssl_mod
 
 # generate version file
 VERSION_FILE_PATH="$(dirname $(dirname $(readlink -f $0)))/$VERSION_FILE_NAME"
