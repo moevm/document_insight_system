@@ -1,6 +1,6 @@
 #! /bin/bash
 
-#set -e
+set -e
 
 VERSION_FILE_NAME="VERSION.json" # project directory
 new_image="slides_checker_base_image"
