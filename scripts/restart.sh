@@ -16,8 +16,14 @@ scripts/version.sh > $VERSION_FILE_PATH
 
 # up docker
 mkdir -p ../slides_checker_mongo_data
-docker-compose down
-docker tag $new_image $old_image
+
+result=$( docker images --filter=reference="$new_image" )
+
+# if docker images exits
+if [[ -n "$result" ]]; then
+    docker-compose down
+    docker tag $new_image $old_image
+fi
 docker-compose build --no-cache 
 docker rmi $old_image
 docker-compose up -d --remove-orphans
