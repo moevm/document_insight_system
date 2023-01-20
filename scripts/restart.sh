@@ -1,6 +1,6 @@
 #! /bin/bash
 
-set -e
+#set -e
 
 VERSION_FILE_NAME="VERSION.json" # project directory
 new_image="slides_checker_base_image"
@@ -17,7 +17,7 @@ scripts/version.sh > $VERSION_FILE_PATH
 # up docker
 mkdir -p ../slides_checker_mongo_data
 
-result=$( docker images --filter=reference="$new_image" )
+result=$( docker images --filter=reference="$new_image" -q )
 
 # if docker images exits
 if [[ -n "$result" ]]; then
