@@ -25,5 +25,5 @@ if [[ -n "$result" ]]; then
     docker tag $new_image $old_image
 fi
 docker-compose build --no-cache 
-docker rmi $old_image
+docker rmi -f $old_image
 docker-compose up -d --remove-orphans
