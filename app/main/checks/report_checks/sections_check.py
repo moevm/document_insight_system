@@ -14,7 +14,6 @@ class ReportSectionCheck(BaseReportCriterion):
                  prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS):
         super().__init__(file_info)
         presets = StyleCheckSettings.CONFIGS.get(presets)
-        self.file.parse_effective_styles()
         if prechecked_props is None:
             self.prechecked_props = StyleCheckSettings.PRECHECKED_PROPS
         else:
@@ -28,6 +27,7 @@ class ReportSectionCheck(BaseReportCriterion):
         return style
 
     def check(self):
+        self.file.parse_effective_styles()
         result = True
         result_str = ""
         for preset in self.presets:

@@ -16,7 +16,7 @@ class BaseCheck:
 
     def __init__(self, file_info):
         self.file = file_info.get('file')
-        self.filename = file_info.get('filename')
+        self.filename = file_info.get('filename', '')
         self.pdf_id = file_info.get('pdf_id')
 
     def check(self):

@@ -17,7 +17,6 @@ class ReportShortSectionsCheck(BaseReportCriterion):
         super().__init__(file_info)
         presets = StyleCheckSettings.CONFIGS.get(presets)
         self.min_section_len = min_section_len if min_section_len is not None else self.default_min_len
-        self.file.parse_effective_styles()
         prechecked_props_lst = prechecked_props
         if prechecked_props_lst is None:
             prechecked_props_lst = StyleCheckSettings.PRECHECKED_PROPS
@@ -27,6 +26,9 @@ class ReportShortSectionsCheck(BaseReportCriterion):
             style = Style()
             style.__dict__.update(prechecked_dict)
             self.styles.append(style)
+
+    def late_init(self):
+        self.file.parse_effective_styles()
         try:
             self.cutoff_line = self.file.pdf_file.get_text_on_page()[2].split("\n")[0]
         except:
@@ -36,6 +38,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
                 self.file.unify_multiline_entities(preset["unify_regex"])
 
     def check(self):
+        self.late_init()
         if self.cutoff_line is None:
             return answer(False, "Отчёт содержит единственную страницу или вторая страница отчёта пуста.")
         result = True

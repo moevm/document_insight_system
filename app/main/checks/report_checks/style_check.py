@@ -11,7 +11,6 @@ class ReportStyleCheck(BaseReportCriterion):
 
     def __init__(self, file_info, header_styles=None, target_styles=None, key_property=None, skip_first_page=True):
         super().__init__(file_info)
-        self.file.parse_effective_styles()
         self.skip_first_page = skip_first_page
         if target_styles is None:
             self.target_styles = StyleCheckSettings.LR_MAIN_TEXT_CONFIG
@@ -39,6 +38,9 @@ class ReportStyleCheck(BaseReportCriterion):
             self.key_property = ReportStyleCheck.default_key_property
         else:
             self.key_property = key_property
+        
+    def late_init(self):
+        self.file.parse_effective_styles()
         indices = self.file.get_paragraph_indices_by_style(self.header_styles)
         self.header_indices = set()
         for sublist in indices:
@@ -92,6 +94,7 @@ class ReportStyleCheck(BaseReportCriterion):
         return None
 
     def check(self):
+        self.late_init()
         if not self.skip_first_page:
             base_index = 0
         else:

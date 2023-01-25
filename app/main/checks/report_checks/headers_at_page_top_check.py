@@ -8,7 +8,7 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
     def __init__(self, file_info, headers):
         super().__init__(file_info)
         self.headers = headers
-        self.pdf = self.file.pdf_file
+        self.pdf = self.file.pdf_file if self.file else None
 
     def check(self):
         result = True
