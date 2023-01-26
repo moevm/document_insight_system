@@ -37,7 +37,10 @@ class ChecksPassBack:
     def _run(self):
         logger.info('Start passback')
         for check in get_unpassed_checks():
-            self.grade_passback(check)
+            try:
+                self.grade_passback(check)
+            except Exception as exc:
+                logger.error(str(exc))
 
     def run(self):
         RepeatedTimer(self._timeout_seconds, self._run)
