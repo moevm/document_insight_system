@@ -1,5 +1,6 @@
 import re
 from functools import reduce
+from typing import List
 
 import docx
 
@@ -11,18 +12,22 @@ from .paragraph import Paragraph
 from .table import Table, Cell
 from .style import Style
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
+from ...checks.report_checks.style_check_settings import StyleCheckSettings
+
 
 
 class DocxUploader:
     def __init__(self):
         self.inline_shapes = []
         self.core_properties = None
+        self.chapters = []
         self.paragraphs = []
         self.tables = []
         self.file = None
         self.styled_paragraphs = None
         self.special_paragraph_indices = {}
         self.pdf_file = None
+        self.styles: List[Style] = []
 
     def upload(self, file):
         self.file = docx.Document(file)
@@ -33,6 +38,8 @@ class DocxUploader:
         for i in range(len(self.file.inline_shapes)):
             self.inline_shapes.append(InlineShape(self.file.inline_shapes[i]))
         self.paragraphs = self.__make_paragraphs(self.file.paragraphs)
+        self.parse_effective_styles()
+        self.chapters = self.__make_chapters()
         self.tables = self.__make_table(self.file.tables)
 
     def __make_paragraphs(self, paragraphs):
@@ -40,6 +47,94 @@ class DocxUploader:
         for i in range(len(paragraphs)):
             tmp_paragraphs.append(Paragraph(paragraphs[i]))
         return tmp_paragraphs
+
+    def __make_chapters(self):
+        tmp_chapters = []
+        cutoff_index = 0
+        # Define work type
+        try:
+            cutoff_line = self.pdf_file.get_text_on_page()[2].split("\n")[0]
+        except:
+            return []
+        if cutoff_line.startswith('ЗАДАНИЕ'):
+            config = 'VKR_HEADERS'
+            cutoff_line = self.pdf_file.get_text_on_page()[4].split("\n")[0]
+        elif cutoff_line.startswith('Цель'):
+            config = 'LR_HEADERS'
+            return []
+        else:
+            return []
+        presets = StyleCheckSettings.CONFIGS.get(config)
+        prechecked_props_lst = StyleCheckSettings.PRECHECKED_PROPS
+        for format_description in presets:
+            prechecked_dict = {key: format_description["style"].get(key) for key in prechecked_props_lst}
+            style = Style()
+            style.__dict__.update(prechecked_dict)
+            self.styles.append(style)
+        while True:
+            if cutoff_index >= len(self.styled_paragraphs):
+                return []
+            par_text = self.styled_paragraphs[cutoff_index]["runs"][0]["text"]
+            if par_text.startswith(cutoff_line):
+                break
+            cutoff_index += 1
+        indexes = self.build_hierarchy()
+        i = cutoff_index
+        header_num = -1
+        p = []
+        for j in range(len(indexes)):
+            if indexes[j]["index"] < cutoff_index:
+                continue
+            if indexes[j]["level"] == 3 or indexes[j]["level"] == 4:
+                continue
+            if indexes[j]["level"] == 0:
+                continue
+            if indexes[j]["level"] == 1 or indexes[j]["level"] == 2:
+                tmp_chapters.append({"level": indexes[j]["level"], "text": self.styled_paragraphs[i]["text"], "child": []})
+                header_num += 1
+                header_three_num = -1
+                header_on_num = -1
+                header_no_num = -1
+                i += 1
+                k = j + 1
+                while i < indexes[k]["index"]:
+                    header_on_num += 1
+                    tmp_chapters[header_num]["child"].append({"level": 5, "text": self.styled_paragraphs[i]["text"], "number": header_on_num + 1})
+                    i += 1
+                while indexes[k]["level"] == 3 or indexes[k]["level"] == 4:
+                    while indexes[k]["level"] == 3:
+                        header_on_num += 1
+                        tmp_chapters[header_num]["child"].append({"level": 3, "text": self.styled_paragraphs[i]["text"], "child": []})
+                        header_three_num = header_on_num
+                        header_no_num = -1
+                        i += 1
+                        k += 1
+                        while i < indexes[k]["index"]:
+                            header_no_num += 1
+                            tmp_chapters[header_num]["child"][header_three_num]["child"].append({"level": 5, "text": self.styled_paragraphs[i]["text"], "number": header_no_num + 1})
+                            i += 1
+                    while indexes[k]["level"] == 4:
+                        if header_three_num >= 0:
+                            header_no_num += 1
+                            tmp_chapters[header_num]["child"][header_three_num]["child"].append({"level": 4, "text": self.styled_paragraphs[i]["text"], "child": []})
+                            header_ono_num = -1
+                            i += 1
+                            k += 1
+                            while i < indexes[k]["index"]:
+                                header_ono_num += 1
+                                tmp_chapters[header_num]["child"][header_three_num]["child"][header_no_num]["child"].append({"level": 5, "text": self.styled_paragraphs[i]["text"], "number": header_ono_num + 1})
+                                i += 1
+                        else:
+                            header_on_num += 1
+                            tmp_chapters[header_num]["child"].append({"level": 4, "text": self.styled_paragraphs[i]["text"], "child": []})
+                            header_no_num = -1
+                            i += 1
+                            k += 1
+                            while i < indexes[k]["index"]:
+                                header_no_num += 1
+                                tmp_chapters[header_num]["child"][header_on_num]["child"].append({"level": 5, "text": self.styled_paragraphs[i]["text"], "number": header_no_num + 1})
+                                i += 1
+        return tmp_chapters
 
     def __make_table(self, tables):
         for i in range(len(tables)):
@@ -52,6 +147,15 @@ class DocxUploader:
                 table.append(row)
             self.tables.append(Table(tables[i], table))
         return tables
+
+    def build_hierarchy(self):
+        indices = self.get_paragraph_indices_by_style(self.styles)
+        tagged_indices = [{"index": 0, "level": 0}, {"index": len(self.styled_paragraphs), "level": 0}]
+        for j in range(len(indices)):
+            tagged_indices.extend(list(map(lambda index: {"index": index, "level": j + 1,
+                                                          "text": self.styled_paragraphs[index]["text"]}, indices[j])))
+        tagged_indices.sort(key=lambda dct: dct["index"])
+        return tagged_indices
 
     # Parses styles once; subsequent calls have no effect, since the file itself shouldn't change
     def parse_effective_styles(self):
