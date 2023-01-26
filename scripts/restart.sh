@@ -11,7 +11,6 @@ apache_ssl_mod=${2:-''}
 #sudo scripts/setup_apache_config.sh $apache_config_filename $apache_ssl_mod
 
 # generate version file
-VERSION_FILE_PATH="$(dirname $(dirname $(readlink -f $0)))/$VERSION_FILE_NAME"
 scripts/version.sh > $VERSION_FILE_PATH
 
 # up docker
