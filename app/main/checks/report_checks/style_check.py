@@ -7,9 +7,9 @@ class ReportStyleCheck(BaseReportCriterion):
     description = "Проверка корректности форматирования текста"
     id = "style_check"
 
-    default_key_property = "font_name"
+    default_key_properties = ("font_name", "alignment")
 
-    def __init__(self, file_info, header_styles=None, target_styles=None, key_property=None, skip_first_page=True):
+    def __init__(self, file_info, header_styles=None, target_styles=None, key_properties=None, skip_first_page=True):
         super().__init__(file_info)
         self.skip_first_page = skip_first_page
         if target_styles is None:
@@ -17,9 +17,9 @@ class ReportStyleCheck(BaseReportCriterion):
         else:
             self.target_styles = target_styles
         self.target_styles = list(map(lambda elem: {
-                                                    "name": elem["name"],
-                                                    "style": self.construct_style_from_description(elem["style"])
-                                                    },
+            "name": elem["name"],
+            "style": self.construct_style_from_description(elem["style"])
+        },
                                       self.target_styles))
         if header_styles is None:
             self.header_styles = []
@@ -34,15 +34,15 @@ class ReportStyleCheck(BaseReportCriterion):
                 style = Style()
                 style.__dict__.update(style_dict)
                 self.header_styles.append(style)
-        if key_property is None:
-            self.key_property = ReportStyleCheck.default_key_property
+        if key_properties is None:
+            self.key_properties = self.default_key_properties
         else:
-            self.key_property = key_property
-        
+            self.key_properties = key_properties
+        self.header_indices = set()
+
     def late_init(self):
         self.file.parse_effective_styles()
         indices = self.file.get_paragraph_indices_by_style(self.header_styles)
-        self.header_indices = set()
         for sublist in indices:
             self.header_indices.update(sublist)
 
@@ -54,8 +54,11 @@ class ReportStyleCheck(BaseReportCriterion):
 
     def get_style_by_key_property(self, value):
         for style in self.target_styles:
-            if getattr(style["style"], self.key_property) == value:
+            if value.items() == self.get_style_properties(style['style']).items():
                 return style
+
+    def get_style_properties(self, style):
+        return {key_property: getattr(style, key_property) for key_property in self.key_properties}
 
     @staticmethod
     def style_diff(par, template_style):
@@ -76,7 +79,7 @@ class ReportStyleCheck(BaseReportCriterion):
         text_dict = self.file.pdf_file.text_on_page
         if len(text_dict) < 2:
             return None
-        for i in range(2, len(text_dict)+1):
+        for i in range(2, len(text_dict) + 1):
             lines = text_dict[i].split("\n")
             lines = list(filter(lambda line: not (line.isspace() or len(line) == 0), lines))
             if len(lines) > 0:
@@ -103,20 +106,21 @@ class ReportStyleCheck(BaseReportCriterion):
             return answer(True, "Нечего проверять: отчёт содержит не более одной непустой страницы.")
         result = True
         result_str = ""
-        valid_key_properties = set(map(lambda s: getattr(s["style"], self.key_property), self.target_styles))
+        valid_key_properties = tuple(
+            map(lambda s: self.get_style_properties(s["style"]), self.target_styles))
         for i in range(base_index, len(self.file.styled_paragraphs)):
             if i in self.header_indices:
                 continue
             par = self.file.styled_paragraphs[i]
             cur_key_property = None
             for run in par["runs"]:
-                cur_key_property = getattr(run["style"], self.key_property)
+                cur_key_property = self.get_style_properties(run["style"])
                 if cur_key_property in valid_key_properties:
                     break
             if cur_key_property not in valid_key_properties:
                 result = False
                 result_str += "<br>" if len(result_str) else ""
-                result_str += f'{Style._friendly_property_names[self.key_property]} в абзаце' \
+                result_str += f'{",".join([Style._friendly_property_names[key] for key in self.key_properties])} в абзаце' \
                               f' "{par["text"][:17] + "..." if len(par["text"]) > 20 else par["text"]}" ' \
                               f'не соответствует ни одному из допустимых стилей текста.'
             else:
