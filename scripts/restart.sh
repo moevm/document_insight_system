@@ -11,7 +11,7 @@ apache_ssl_mod=${2:-''}
 #sudo scripts/setup_apache_config.sh $apache_config_filename $apache_ssl_mod
 
 # generate version file
-scripts/version.sh > $VERSION_FILE_NAME
+scripts/version.sh > app/$VERSION_FILE_NAME
 
 # up docker
 mkdir -p ../slides_checker_mongo_data
