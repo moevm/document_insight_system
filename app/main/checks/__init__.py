@@ -28,6 +28,7 @@ AVAILABLE_CHECKS = {
         ReportBannedWordsCheck.id: ReportBannedWordsCheck,
         ReportRightWordsCheck.id: ReportRightWordsCheck,
         BannedWordsInLiteratureCheck.id: BannedWordsInLiteratureCheck,
-        ReferencesToLiteratureCheck.id: ReferencesToLiteratureCheck
+        ReferencesToLiteratureCheck.id: ReferencesToLiteratureCheck,
+        ReportIntroduction.id: ReportIntroduction
     }
 }

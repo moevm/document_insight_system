@@ -25,7 +25,8 @@ BASE_REPORT_CRITERION = [
     ["banned_words_check"],
     ["right_words_check"],
     ["banned_words_in_literature"],
-    ["literature_references"]
+    ["literature_references"],
+    ["intro"]
 ]
 
 BASE_PACKS = {
