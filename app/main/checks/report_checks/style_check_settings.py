@@ -31,7 +31,6 @@ class StyleCheckSettings:
     }
     PRECHECKED_PROPS = ["bold", "italic", "all_caps", "alignment"]
     MAIN_TEXT_STYLE = {
-        "bold": False,
         "alignment": WD_ALIGN_PARAGRAPH.JUSTIFY,
         "font_name": "Times New Roman",
         "font_size_pt": 14.0,
@@ -39,10 +38,23 @@ class StyleCheckSettings:
         "line_spacing": 1.5
     }
     LISTING_STYLE = {
-        "bold": False,
         "alignment": WD_ALIGN_PARAGRAPH.JUSTIFY,
         "font_name": "Courier New",
         "font_size_pt": 11.0,
+        "first_line_indent_cm": 1.25,  # ????
+        "line_spacing": 1.0
+    }
+    IMAGE_CAPTION_STYLE = {
+        "alignment": WD_ALIGN_PARAGRAPH.CENTER,
+        "font_name": "Times New Roman",
+        "font_size_pt": 14.0,
+        "first_line_indent_cm": 1.25,  # ????
+        "line_spacing": 1.5
+    }
+    TABLE_CAPTION_STYLE = {
+        "alignment": WD_ALIGN_PARAGRAPH.LEFT,
+        "font_name": "Times New Roman",
+        "font_size_pt": 14.0,
         "first_line_indent_cm": 0.0,
         "line_spacing": 1.0
     }
@@ -74,6 +86,14 @@ class StyleCheckSettings:
         {
             "name": "Листинг",
             "style": LISTING_STYLE
+        },
+        {
+            "name": "Подпись рисунка",
+            "style": IMAGE_CAPTION_STYLE
+        },
+        {
+            "name": "Подпись таблицы",
+            "style": TABLE_CAPTION_STYLE
         }
     ]
 

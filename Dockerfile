@@ -9,12 +9,12 @@ WORKDIR /usr/src/project
 RUN apt update && apt install -y software-properties-common curl gnupg python3-pip python3.8-dev
 RUN curl -sL https://deb.nodesource.com/setup_16.x  | bash -
 RUN apt-add-repository ppa:libreoffice/ppa
-RUN apt install -y nodejs libreoffice
+RUN apt install -y nodejs libreoffice-writer libreoffice-impress
 
 ADD package.json webpack.config.js requirements.txt ./
 
-RUN npm install && npm install webpack
 RUN python3.8 -m pip install -r requirements.txt
+RUN npm install && npm install webpack
 
 ADD ./assets ./assets
 RUN npm run build

@@ -15,13 +15,13 @@ class ReportShortSectionsCheck(BaseReportCriterion):
     def __init__(self, file_info, presets: str = 'LR_HEADERS',
                  prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS, min_section_len=None):
         super().__init__(file_info)
-        presets = StyleCheckSettings.CONFIGS.get(presets)
+        self.presets = StyleCheckSettings.CONFIGS.get(presets)
         self.min_section_len = min_section_len if min_section_len is not None else self.default_min_len
         prechecked_props_lst = prechecked_props
         if prechecked_props_lst is None:
             prechecked_props_lst = StyleCheckSettings.PRECHECKED_PROPS
         self.styles: List[Style] = []
-        for format_description in presets:
+        for format_description in self.presets:
             prechecked_dict = {key: format_description["style"].get(key) for key in prechecked_props_lst}
             style = Style()
             style.__dict__.update(prechecked_dict)
@@ -33,7 +33,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
             self.cutoff_line = self.file.pdf_file.get_text_on_page()[2].split("\n")[0]
         except:
             self.cutoff_line = None
-        for preset in presets:
+        for preset in self.presets:
             if preset["unify_regex"] is not None:
                 self.file.unify_multiline_entities(preset["unify_regex"])
 
