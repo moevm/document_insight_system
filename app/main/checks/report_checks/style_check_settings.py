@@ -66,7 +66,7 @@ class StyleCheckSettings:
         },
         {
             "style": HEADER_2_STYLE,
-            "headers": ["Цель работы", "Основные теоретические положения", "Выполнение работы", "Выводы"],
+            "headers": ["Цель работы", "Выполнение работы", "Выводы"],
             "unify_regex": None,
             "regex": HEADER_2_REGEX,
         }

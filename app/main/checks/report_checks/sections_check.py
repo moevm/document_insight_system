@@ -104,7 +104,7 @@ class ReportSectionCheck(BaseReportCriterion):
                 continue
             match = pattern.match(found_texts[found_idx])
             if match:
-                if headers[header_idx].lower() == match.group(2).lower():
+                if headers[header_idx].lower() in match.group(2).lower():
                     errors.extend(self.style_diff(pars[found_idx], template_style))
                     last_found = found_idx
                     marker_idx += 1
