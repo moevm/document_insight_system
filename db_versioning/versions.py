@@ -12,6 +12,7 @@ class Version:
         - users
         - presentations
         - checks
+        - criteria_pack
         """
         raise NotImplementedError()
 
@@ -266,6 +267,25 @@ class Version30(Version):
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
 
+class Version31(Version):
+    VERSION_NAME = '3.1'
+    CHANGES = 'Изменена структура наборов критериев - file_type: "pres" => {"type": "pres"}. Обновлены наборы и пользователи'
+
+    @classmethod
+    def update_database(cls, collections, prev_version):
+        if prev_version in (Version30.VERSION_NAME, ):
+            packs = {
+                'pres': {'type': 'pres'},
+                'report': {'type': 'pres', 'report_type': 'LR'}
+            }
+            # set new file_type for pack depends on old type
+            for pack_name in packs:
+                collections['criteria_pack'].update_many({'file_type': pack_name}, {'$set': {'file_type': packs[pack_name]}})
+                collections['users'].update_many({'file_type': pack_name}, {'$set': {'file_type': packs[pack_name]}})
+                collections['checks'].update_many({'file_type': pack_name}, {'$set': {'file_type': packs[pack_name]}})
+        else:
+            raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
+
 VERSIONS = {
     '1.0': Version10,
     '1.1': Version11,
@@ -273,8 +293,9 @@ VERSIONS = {
     '2.1': Version21,
     '2.2': Version22,
     '3.0': Version30,
+    '3.1': Version31,
 }
-LAST_VERSION = '3.0'
+LAST_VERSION = '3.1'
 
 for _, ver in VERSIONS.items():
     print(ver.to_dict())
