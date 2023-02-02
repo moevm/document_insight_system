@@ -276,7 +276,7 @@ class Version31(Version):
         if prev_version in (Version30.VERSION_NAME, ):
             packs = {
                 'pres': {'type': 'pres'},
-                'report': {'type': 'pres', 'report_type': 'LR'}
+                'report': {'type': 'report', 'report_type': 'LR'}
             }
             # set new file_type for pack depends on old type
             for pack_name in packs:
