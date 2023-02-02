@@ -5,6 +5,7 @@ import tempfile
 from datetime import datetime, timedelta
 from os.path import join
 from sys import argv
+from app.main.check_packs.pack_config import DEFAULT_REPORT_TYPE_INFO
 
 import bson
 import pandas as pd
@@ -21,7 +22,7 @@ from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
-from main.check_packs import BASE_PACKS, init_criterions
+from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, init_criterions
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
@@ -69,21 +70,23 @@ def lti():
         custom_params = utils.get_custom_params(temporary_user_params)
 
         # task settings
-        # - file type (pres or report)
-        file_type = custom_params.get('file_type')
-        is_allowed_file_type = custom_params.get('file_type') in set(
-            BASE_PACKS.keys())  # check that file_type is allowed
-        file_type = file_type if is_allowed_file_type else 'pres'  # 'pres' file_type as default
-        # - file formats
-        formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
-            file_type] or ALLOWED_EXTENSIONS[file_type]))
-        custom_criterion_pack = custom_params.get('pack', BASE_PACKS.get(file_type).name)
-        if not db_methods.get_criteria_pack(custom_criterion_pack):
-            default_criterion_pack = BASE_PACKS.get(file_type).name
+        # pack name
+        custom_criterion_pack = custom_params.get('pack', BASE_PACKS.get(DEFAULT_TYPE).name)
+        criterion_pack_info = db_methods.get_criteria_pack(custom_criterion_pack)
+        if not criterion_pack_info:
+            default_criterion_pack = BASE_PACKS.get(DEFAULT_TYPE).name
             logger.error(
-                f"Ошибка при lti-авторизации. Несуществующий набор {custom_criterion_pack}. Установлен набор по умолчанию: {default_criterion_pack}")
+                f"Ошибка при lti-авторизации. Несуществующий набор {custom_criterion_pack} пользователя {username}. Установлен набор по умолчанию: {default_criterion_pack}")
             logger.debug(f"lti-параметры: {temporary_user_params}")
             custom_criterion_pack = default_criterion_pack
+            criterion_pack_info = db_methods.get_criteria_pack(custom_criterion_pack)
+        custom_criterion_pack_obj = BaseCriterionPack(**criterion_pack_info)
+        # get file type and formats from pack
+        file_type_info = custom_criterion_pack_obj.file_type
+        file_type = file_type_info['type']
+        formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
+            file_type] or ALLOWED_EXTENSIONS[file_type]))
+        
         role = utils.get_role(temporary_user_params)
 
         logout_user()
@@ -96,7 +99,7 @@ def lti():
             lti_user = db_methods.get_user(user_id)
 
         # task settings
-        lti_user.file_type = file_type
+        lti_user.file_type = file_type_info
         lti_user.formats = formats
         lti_user.criteria = custom_criterion_pack
         # passback settings
@@ -150,7 +153,7 @@ def upload():
             abort(401)
     elif request.method == "GET":
         formats = set(current_user.formats)
-        file_type = current_user.file_type
+        file_type = current_user.file_type['type']
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
         return render_template("./upload.html", navi_upload=False, name=current_user.name, file_type=file_type,
                                formats=sorted(formats))
@@ -312,6 +315,7 @@ def api_criteria_pack():
     # get pack configuration info
     raw_criterions = form_data.get('raw_criterions')
     file_type = form_data.get('file_type')
+    report_type = form_data.get('report_type')
     min_score = float(form_data.get('min_score', '1'))
     # weak validation
     try:
@@ -330,7 +334,10 @@ def api_criteria_pack():
               f"min_score - {min_score}, raw_criterions - {raw_criterions}"
         return {'data': msg, 'time': datetime.now()}, 400
     #  testing pack initialization
-    inited, err = init_criterions(raw_criterions, file_type=file_type)
+    file_type_info = {'type': file_type}
+    if file_type == DEFAULT_REPORT_TYPE_INFO['type']:
+        file_type_info['report_type'] = report_type if report_type in REPORT_TYPES else DEFAULT_REPORT_TYPE_INFO['report_type']
+    inited, err = init_criterions(raw_criterions, file_type=file_type_info)
     if len(raw_criterions) != len(inited) or err:
         msg = f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. Успешно инициализированные: {inited}. Возникшие ошибки: {err}."
         return {'data': msg, 'time': datetime.now()}, 400
@@ -338,7 +345,7 @@ def api_criteria_pack():
     db_methods.save_criteria_pack({
         'name': pack_name,
         'raw_criterions': raw_criterions,
-        'file_type': file_type,
+        'file_type': file_type_info,
         'min_score': min_score
     })
     return {'data': f"Набор '{pack_name}' сохранен", 'time': datetime.now()}, 200

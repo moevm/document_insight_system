@@ -1,7 +1,7 @@
 from bson import ObjectId
 from flask_login import UserMixin
 
-from main.check_packs import BASE_PACKS, BaseCriterionPack
+from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_TYPE_INFO
 
 
 class Packable:
@@ -24,8 +24,8 @@ class User(Packable, UserMixin):
         self.name = dictionary.get('name', '')
         self.password_hash = dictionary.get('password_hash', '')
         self.presentations = dictionary.get('presentations', [])
-        self.file_type = dictionary.get('file_type', 'pres')
-        self.criteria = dictionary.get('criteria', BASE_PACKS.get(self.file_type).name)
+        self.file_type = dictionary.get('file_type', DEFAULT_TYPE_INFO)
+        self.criteria = dictionary.get('criteria', BASE_PACKS.get(self.file_type['type']).name)
         self.is_LTI = dictionary.get('is_LTI', False)
         self.lms_user_id = dictionary.get('lms_user_id', None)
         self.is_admin = dictionary.get('is_admin', False)
@@ -65,7 +65,7 @@ class Presentation(PackableWithId):
         dictionary = dictionary or {}
         self.name = dictionary.get('name', '')
         self.checks = dictionary.get('checks', [])
-        self.file_type = dictionary.get('file_type', 'pres')
+        self.file_type = dictionary.get('file_type', DEFAULT_TYPE_INFO)
 
 
 class Logs(Packable):
@@ -94,8 +94,8 @@ class Check(PackableWithId):
         self.is_passbacked = dictionary.get('is_passbacked', None)
         self.lms_passback_time = dictionary.get('lms_passback_time', None)
         self.score = dictionary.get('score', -1)
-        self.file_type = dictionary.get('file_type', 'pres')
-        self.enabled_checks = dictionary.get('enabled_checks', BASE_PACKS.get(self.file_type).name)
+        self.file_type = dictionary.get('file_type', DEFAULT_TYPE_INFO)
+        self.enabled_checks = dictionary.get('enabled_checks', BASE_PACKS.get(self.file_type['type']).name)
         self.is_failed = dictionary.get('is_failed', None)
         self.is_ended = dictionary.get('is_ended', True)
         self.is_passed = dictionary.get('is_passed', int(self.score) == 1)

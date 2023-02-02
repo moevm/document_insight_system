@@ -1,10 +1,28 @@
 const pack_form = $("#pack_form")
+const file_type = $("#file_type")
 
 $('.alert').hide()
 
 const RAW_CRITERION_VALIDATION_ERRORS = {
     'not_json': 'Строка не является JSON-строкой',
 }
+
+$("#file_type").change(function () {
+    switch($(this).val()){
+        case "pres":
+            {
+                $("#report_type").attr('disabled', true)
+                $("#report_type").attr('hidden', true)
+                break;
+            }
+        case "report":
+            {
+                $("#report_type").attr('disabled', false)
+                $("#report_type").attr('hidden', false)
+                break;
+            }
+    }
+})
 
 pack_form.submit((e) => {
     e.preventDefault();
@@ -24,6 +42,7 @@ pack_form.submit((e) => {
     let fd = new FormData();
     fd.append('pack_name', $("#pack_name").val());
     fd.append('file_type', $("#file_type").val());
+    fd.append('report_type', $("#report_type").val());
     fd.append('min_score', $("#min_score").val());
     fd.append('raw_criterions', raw_criterions_str);
     fetch(`/api/criterion_pack`, {method: "POST", body: fd})

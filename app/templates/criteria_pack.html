@@ -13,6 +13,7 @@
             {% include 'alerts.html' %}
         </div>
         <div class="row justify-content-center">
+            {{pack}}
             <form id="pack_form" action="javascript:void(0);">
 
                 <label>Название набора критериев<br>
@@ -23,10 +24,14 @@
                     Тип проверяемого файла<br>
                     <select id="file_type" name="file_type" required>
                         <option disabled>Выберите тип проверяемого файла</option>
-                        <option {% if pack['file_type'] == 'report' %}selected{% endif %} value="report">Отчет</option>
-                        <option {% if pack['file_type'] == 'pres' %}selected{% endif %} value="pres">Презентация
-                        </option>
+                        <option {% if pack['file_type']['type'] == 'report' %}selected{% endif %} value="report">Отчет</option>
+                        <option {% if pack['file_type']['type'] == 'pres' %}selected{% endif %} value="pres">Презентация</option>
                     </select>
+                        <select id="report_type" name="report_type" required {% if pack['file_type']['type'] == 'pres' %}disabled hidden{% endif %}>
+                            <option disabled>Выберите тип проверяемого файла</option>
+                            <option {% if pack['file_type']['report_type'] == 'LR' %}selected{% endif %} value="LR">ЛР</option>
+                            <option {% if pack['file_type']['report_type'] == 'VKR' %}selected{% endif %} value="VKR">ВКР</option>
+                        </select>
                 </label><br>
                 <label>
                     Минимальное количество баллов для того, чтобы зачесть прохождение набора критериев успешным
