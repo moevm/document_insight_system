@@ -7,7 +7,7 @@ RUN npm install && npm install webpack
 ADD ./assets ./assets
 RUN npm run build
 
-FROM ubuntu:20.04
+FROM python:3.8-slim-bullseye
 
 ENV LANG en_US.UTF-8
 ENV TZ=Europe/Moscow
@@ -15,9 +15,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 WORKDIR /usr/src/project
 
-RUN apt update && apt install -y software-properties-common curl gnupg python3-pip python3.8-dev
-RUN apt-add-repository ppa:libreoffice/ppa
-RUN apt install -y libreoffice-writer libreoffice-impress
+RUN apt update && apt install -y libreoffice-writer libreoffice-impress default-jre
 
 ADD requirements.txt ./
 RUN python3.8 -m pip install -r requirements.txt
