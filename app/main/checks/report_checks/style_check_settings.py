@@ -2,10 +2,6 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 
 class StyleCheckSettings:
-    EMPTY_MARKERS = ["" for _ in range(5000)]
-    APPENDIX_MARKERS = \
-        [chr(n) for n in range(ord("А"), ord("Я") + 1) if chr(n) not in ["З", "Й", "О", "Ч", "Ъ", "Ы", "Ь"]]
-    NUM_MARKERS = ["{0}. ".format(i) for i in range(1, 100)]
     APPENDIX_UNIFY_REGEX = "(?i)^приложение \\w$"
     APPENDIX_REGEX = "(?i)^ПРИЛОЖЕНИЕ (\\w)\\n(.+)"
     HEADER_1_NUM_REGEX = "^([1-9][0-9]*\\. )([\\w\\s])+$"
@@ -67,14 +63,12 @@ class StyleCheckSettings:
             "headers": ["Исходный код программы"],
             "unify_regex": APPENDIX_UNIFY_REGEX,
             "regex": APPENDIX_REGEX,
-            "markers": APPENDIX_MARKERS
         },
         {
             "style": HEADER_2_STYLE,
             "headers": ["Цель работы", "Основные теоретические положения", "Выполнение работы", "Выводы"],
             "unify_regex": None,
             "regex": HEADER_2_REGEX,
-            "markers": EMPTY_MARKERS
         }
     ]
 
