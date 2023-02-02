@@ -34,7 +34,7 @@ class ReportSectionCheck(BaseReportCriterion):
             full_style = self.construct_style_from_description(preset["style"])
             precheck_dict = {key: preset["style"].get(key) for key in self.prechecked_props}
             precheck_style = self.construct_style_from_description(precheck_dict)
-            err = self.check_marked_headers(preset["unify_regex"], preset["regex"], preset["markers"],
+            err = self.check_marked_headers(preset["unify_regex"], preset["regex"],
                                             precheck_style, full_style, preset["headers"])
             result = result and (len(err) == 0)
             result_str += ("<br>".join(err) + "<br>" if len(err) else "")
@@ -80,7 +80,7 @@ class ReportSectionCheck(BaseReportCriterion):
 
     # unify_regex is used in self.file.unify_multiline_entities()
     # header_regex has two capture groups: first is marker and second is header itself (no decorations)
-    def check_marked_headers(self, unify_regex, header_regex, markers, precheck_style, template_style, headers):
+    def check_marked_headers(self, unify_regex, header_regex, precheck_style, template_style, headers):
         if unify_regex is not None:
             self.file.unify_multiline_entities(unify_regex)
         indices = self.file.get_paragraph_indices_by_style([precheck_style])[0]
@@ -96,10 +96,6 @@ class ReportSectionCheck(BaseReportCriterion):
         while True:
             if header_idx >= len(headers):
                 break
-            if marker_idx >= len(markers):
-                errors.append("""Работа содержит больше нумерованных разделов, чем предусматривают критерии проверки.
-                Дальнейшие разделы не будут проверены.""")
-                break
             if found_idx >= len(found_texts):
                 errors.append(f'Обязательный раздел "{headers[header_idx]}" не найден.')
                 found_idx = last_found + 1
@@ -108,12 +104,7 @@ class ReportSectionCheck(BaseReportCriterion):
                 continue
             match = pattern.match(found_texts[found_idx])
             if match:
-                if markers[marker_idx].lower() != match.group(1).lower() and found_idx > last_punished:
-                    last_punished = found_idx
-                    errors.append(f'Ошибочная маркировка разделов ("{found_texts[found_idx]}"):'
-                                  f' должен следовать раздел &laquo;{markers[marker_idx]}&raquo;, '
-                                  f'фактически встречен раздел &laquo;{match.group(1)}&raquo;.')
-                if headers[header_idx].lower() == match.group(2).lower():
+                if headers[header_idx].lower() in match.group(2).lower():
                     errors.extend(self.style_diff(pars[found_idx], template_style))
                     last_found = found_idx
                     marker_idx += 1
