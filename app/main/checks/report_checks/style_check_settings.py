@@ -85,8 +85,7 @@ class StyleCheckSettings:
             "style": HEADER_2_STYLE,
             "headers": ["Цель работы", "Выполнение работы", "Выводы"],
             "unify_regex": None,
-            "regex": HEADER_1_REGEX,
-            "markers": EMPTY_MARKERS
+            "regex": HEADER_1_REGEX
         }
     ]
 
@@ -96,22 +95,19 @@ class StyleCheckSettings:
             "headers": ["РЕФЕРАТ", "ABSTRACT", "СОДЕРЖАНИЕ", "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ", "ВВЕДЕНИЕ",
                         "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ", "ПРИЛОЖЕНИЕ А", "ИСХОДНЫЙ КОД ПРОГРАММЫ"],
             "unify_regex": None,
-            "regex": HEADER_1_REGEX,
-            "markers": EMPTY_MARKERS
+            "regex": HEADER_1_REGEX
         },
         {
             "style": HEADER_1_NUM_STYLE,
             "headers": [],
             "unify_regex": None,
-            "regex": HEADER_1_NUM_REGEX,
-            "markers": EMPTY_MARKERS
+            "regex": HEADER_1_NUM_REGEX
         },
         {
             "style": HEADER_2_NUM_STYLE,
             "headers": [],
             "unify_regex": None,
-            "regex": HEADER_2_NUM_REGEX,
-            "markers": EMPTY_MARKERS
+            "regex": HEADER_2_NUM_REGEX
         },
         {
             "style": HEADER_2_STYLE,
