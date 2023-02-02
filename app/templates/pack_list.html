@@ -25,7 +25,7 @@
     </style>
 {% endblock %}
 
-{% set types = {'pres': "Презентация", 'report': "Отчёт"} %}
+{% set types = {'pres': "Презентация", 'report': "Отчёт", 'LR': "ЛР", 'VKR': "ВКР"} %}
 
 {% block main %}
 
@@ -49,7 +49,7 @@
                         {{ pack['name'] }}
                     </td>
                     <td>
-                        {{ types.get(pack['file_type']) }}
+                        {{ types.get(pack['file_type']['type']) }}{% if pack['file_type']['type'] == 'report'%}.{{types.get(pack['file_type']['report_type'])}}{% endif %}
                     </td>
                     <!--
                     <td>
