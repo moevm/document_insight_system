@@ -92,8 +92,8 @@ class StyleCheckSettings:
     VKR_CONFIG = [
         {
             "style": HEADER_1_STYLE,
-            "headers": ["РЕФЕРАТ", "ABSTRACT", "СОДЕРЖАНИЕ", "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ", "ВВЕДЕНИЕ",
-                        "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ", "ПРИЛОЖЕНИЕ А", "ИСХОДНЫЙ КОД ПРОГРАММЫ"],
+            "headers": ["СОДЕРЖАНИЕ", "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ", "ВВЕДЕНИЕ",
+                        "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
             "regex": HEADER_1_REGEX
         },
@@ -117,7 +117,7 @@ class StyleCheckSettings:
         }
     ]
 
-    LR_MAIN_TEXT_CONFIG = [
+    MAIN_TEXT_CONFIG = [
         {
             "name": "Основной текст",
             "style": MAIN_TEXT_STYLE
@@ -138,7 +138,7 @@ class StyleCheckSettings:
 
     CONFIGS = {
         'LR_HEADERS': LR_CONFIG,
-        'LR_MAIN_TEXT': LR_MAIN_TEXT_CONFIG,
+        'LR_MAIN_TEXT': MAIN_TEXT_CONFIG,
         'VKR_HEADERS': VKR_CONFIG,
-        'VKR_MAIN_TEXT': LR_MAIN_TEXT_CONFIG
+        'VKR_MAIN_TEXT': MAIN_TEXT_CONFIG
     }
