@@ -13,7 +13,7 @@ class ReportStyleCheck(BaseReportCriterion):
         super().__init__(file_info)
         self.skip_first_page = skip_first_page
         if target_styles is None:
-            self.target_styles = StyleCheckSettings.LR_MAIN_TEXT_CONFIG
+            self.target_styles = StyleCheckSettings.MAIN_TEXT_CONFIG
         else:
             self.target_styles = target_styles
         self.target_styles = list(map(lambda elem: {

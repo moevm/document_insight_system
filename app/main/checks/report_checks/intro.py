@@ -2,8 +2,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportIntroduction(BaseReportCriterion):
-    description = "Проверка наличия нужных слов во введении"
-    id = 'intro'
+    description = "Проверка наличия необходимых компонент раздела Введение"
+    id = 'introduction_word_check'
 
     def __init__(self, file_info):
         super().__init__(file_info)
@@ -24,8 +24,8 @@ class ReportIntroduction(BaseReportCriterion):
         if len(self.patterns) == 0:
             result_score = 1
         if result_score:
-            return answer(result_score, "Все нужные слова обнаружены в тексте введения!")
+            return answer(result_score, "Все необходимые компоненты раздела Введение обнаружены!")
         else:
             result_str = '</li><li>'.join([k for k in self.patterns])
             return answer(result_score,
-                          f'Не найдены следующие слова: <ul><li>{result_str}</ul>')
+                          f'Не найдены следующие компоненты Введения: <ul><li>{result_str}</ul>')
