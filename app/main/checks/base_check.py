@@ -37,4 +37,4 @@ class BasePresCriterion(BaseCheck):
 
 
 class BaseReportCriterion(BaseCheck):
-    file_type = 'report'
+    file_type = {'type': 'report', 'report_type': 'VKR'}

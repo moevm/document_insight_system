@@ -8,24 +8,35 @@ class ReportIntroduction(BaseReportCriterion):
     def __init__(self, file_info):
         super().__init__(file_info)
         self.intro = {}
-        self.patterns = ["Цель", "Задачи", "Объект", "Предмет", "Практическая ценность работы"]
+        self.patterns = [{"text": "Цель", "marker": 0}, {"text": "Задачи", "marker": 0}, {"text": "Предмет", "marker": 0}, {"text": "Объект", "marker": 0}, {"text": "Практическую ценность работы", "marker": 0}]
 
     def check(self):
+        result_str = ''
+	chapters = self.file.make_chapters(self.file_type['report_type'])
         for intro in self.file.chapters:
-            if intro["text"] == 'ВВЕДЕНИЕ':
+            header = intro["text"].lower()
+            if header.find('введение') >= 0:
                 self.intro = intro
                 break
-        for intro_par in self.intro["child"]:
-            for pattern in self.patterns:
-                if intro_par["text"].lower().find(pattern.lower()) >= 0:
-                    self.patterns.remove(pattern)
+
+        if self.intro:
+            for intro_par in self.intro["child"]:
+                par = intro_par["text"].lower()
+                for i in range(len(self.patterns)):
+                    if par.find(self.patterns[i]["text"].lower()) >= 0:
+                        self.patterns[i]["marker"] = 1
+        else:
+            return answer(0, "Раздел Введение не обнаружен!")
+
+        for pattern in self.patterns:
+            if not pattern["marker"]:
+                result_str = '</li><li>'.join(pattern["text"])
 
         result_score = 0
-        if len(self.patterns) == 0:
+        if not len(result_str):
             result_score = 1
         if result_score:
             return answer(result_score, "Все необходимые компоненты раздела Введение обнаружены!")
         else:
-            result_str = '</li><li>'.join([k for k in self.patterns])
             return answer(result_score,
                           f'Не найдены следующие компоненты Введения: <ul><li>{result_str}</ul>')

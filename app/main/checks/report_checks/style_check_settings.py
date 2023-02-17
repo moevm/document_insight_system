@@ -27,8 +27,7 @@ class StyleCheckSettings:
     }
     HEADER_1_NUM_STYLE = {
         "bold": True,
-        "italic": True,
-        "all_caps": True,
+        "italic": False,
         "alignment": WD_ALIGN_PARAGRAPH.LEFT,
         "font_name": "Times New Roman",
         "font_size_pt": 14.0,
@@ -92,8 +91,7 @@ class StyleCheckSettings:
     VKR_CONFIG = [
         {
             "style": HEADER_1_STYLE,
-            "headers": ["СОДЕРЖАНИЕ", "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ", "ВВЕДЕНИЕ",
-                        "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
+            "headers": ["ВВЕДЕНИЕ", "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
             "regex": HEADER_1_REGEX
         },
@@ -102,19 +100,19 @@ class StyleCheckSettings:
             "headers": [],
             "unify_regex": None,
             "regex": HEADER_1_NUM_REGEX
-        },
-        {
-            "style": HEADER_2_NUM_STYLE,
-            "headers": [],
-            "unify_regex": None,
-            "regex": HEADER_2_NUM_REGEX
-        },
-        {
-            "style": HEADER_2_STYLE,
-            "headers": [],
-            "unify_regex": None,
-            "regex": HEADER_2_REGEX,
         }
+        # {
+        #     "style": HEADER_2_NUM_STYLE,
+        #     "headers": [],
+        #     "unify_regex": None,
+        #     "regex": HEADER_2_NUM_REGEX
+        # },
+        # {
+        #     "style": HEADER_2_STYLE,
+        #     "headers": [],
+        #     "unify_regex": None,
+        #     "regex": HEADER_2_REGEX,
+        # }
     ]
 
     MAIN_TEXT_CONFIG = [

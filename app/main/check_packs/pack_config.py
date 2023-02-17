@@ -26,7 +26,7 @@ BASE_REPORT_CRITERION = [
     ["right_words_check"],
     ["banned_words_in_literature"],
     ["literature_references"],
-    ["intro"]
+    ["introduction_word_check"]
 ]
 
 DEFAULT_TYPE = 'pres'
