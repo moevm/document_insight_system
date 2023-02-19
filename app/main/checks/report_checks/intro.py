@@ -12,7 +12,7 @@ class ReportIntroduction(BaseReportCriterion):
 
     def check(self):
         result_str = ''
-	chapters = self.file.make_chapters(self.file_type['report_type'])
+        chapters = self.file.make_chapters(self.file_type['report_type'])
         for intro in self.file.chapters:
             header = intro["text"].lower()
             if header.find('введение') >= 0:
