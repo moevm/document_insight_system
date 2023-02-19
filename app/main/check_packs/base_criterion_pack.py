@@ -43,6 +43,7 @@ class BaseCriterionPack:
 
     @staticmethod
     def calc_score(result):
+        if len(result) == 0: return 0.
         score = 0.
         for check in result:
             score += float(check['score'])
