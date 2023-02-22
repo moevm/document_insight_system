@@ -8,11 +8,11 @@ class ReportIntroduction(BaseReportCriterion):
     def __init__(self, file_info):
         super().__init__(file_info)
         self.intro = {}
-        self.patterns = [{"text": "Цель", "marker": 0}, {"text": "Задачи", "marker": 0}, {"text": "Предмет", "marker": 0}, {"text": "Объект", "marker": 0}, {"text": "Практическую ценность работы", "marker": 0}]
+        self.patterns = [{"name": "Цель", "text": "цель","marker": 0}, {"name": "Задачи", "text": "задачи", "marker": 0}, {"name": "Объект", "text": "объект", "marker": 0}, {"name": "Предмет", "text": "предмет", "marker": 0}, {"name": "Практическая(ую) ценность работы", "text": "практическ", "marker": 0}]
 
     def check(self):
         result_str = ''
-        chapters = self.file.make_chapters(self.file_type['report_type'])
+        headers = self.file.make_chapters(self.file_type['report_type'])
         for intro in self.file.chapters:
             header = intro["text"].lower()
             if header.find('введение') >= 0:
@@ -23,17 +23,17 @@ class ReportIntroduction(BaseReportCriterion):
             for intro_par in self.intro["child"]:
                 par = intro_par["text"].lower()
                 for i in range(len(self.patterns)):
-                    if par.find(self.patterns[i]["text"].lower()) >= 0:
+                    if par.find(self.patterns[i]["text"]) >= 0:
                         self.patterns[i]["marker"] = 1
         else:
             return answer(0, "Раздел Введение не обнаружен!")
 
         for pattern in self.patterns:
             if not pattern["marker"]:
-                result_str = '</li><li>'.join(pattern["text"])
+                result_str += '</li><li>'+ pattern["name"]
 
         result_score = 0
-        if not len(result_str):
+        if len(result_str) == 0:
             result_score = 1
         if result_score:
             return answer(result_score, "Все необходимые компоненты раздела Введение обнаружены!")

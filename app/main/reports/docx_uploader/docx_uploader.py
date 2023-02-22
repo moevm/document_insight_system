@@ -1,6 +1,5 @@
 import re
 from functools import reduce
-from typing import List
 
 import docx
 
@@ -12,8 +11,6 @@ from .paragraph import Paragraph
 from .table import Table, Cell
 from .style import Style
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
-from ...checks.report_checks.style_check_settings import StyleCheckSettings
-
 
 
 class DocxUploader:
@@ -27,7 +24,6 @@ class DocxUploader:
         self.styled_paragraphs = None
         self.special_paragraph_indices = {}
         self.pdf_file = None
-        self.styles: List[Style] = []
         self.count = 0
 
     def upload(self, file):
@@ -111,8 +107,8 @@ class DocxUploader:
             self.tables.append(Table(tables[i], table))
         return tables
 
-    def build_vkr_hierarchy(self):
-        indices = self.get_paragraph_indices_by_style(self.styles)
+    def build_vkr_hierarchy(self, styles):
+        indices = self.get_paragraph_indices_by_style(styles)
         tagged_indices = [{"index": 0, "level": 0}, {"index": len(self.styled_paragraphs), "level": 0}]
         for j in range(len(indices)):
             tagged_indices.extend(list(map(lambda index: {"index": index, "level": j + 1,
