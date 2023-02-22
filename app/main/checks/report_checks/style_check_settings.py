@@ -4,8 +4,8 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 class StyleCheckSettings:
     APPENDIX_UNIFY_REGEX = "(?i)^приложение \\w$"
     APPENDIX_REGEX = "(?i)^ПРИЛОЖЕНИЕ (\\w)\\n(.+)"
-    HEADER_1_NUM_REGEX = "^([1-9][0-9]*\\. )([\\w\\s])+$"
-    HEADER_2_NUM_REGEX = "^[1-9][0-9]*\\.([1-9][0-9]*\\. )([\\w\\s]+)$"
+    HEADER_1_NUM_REGEX = "^([1-9][0-9]*\\ )([\\w\\s])+$"
+    HEADER_2_NUM_REGEX = "^[1-9][0-9]*\\.([1-9][0-9]*\\ )([\\w\\s]+)$"
     HEADER_1_REGEX = "^()([\\w\\s]+)$"
     HEADER_2_REGEX = "^()([\\w\\s]+)\\.$"
     HEADER_1_STYLE = {
@@ -21,6 +21,22 @@ class StyleCheckSettings:
         "bold": True,
         "italic": False,
         "alignment": WD_ALIGN_PARAGRAPH.JUSTIFY,
+        "font_name": "Times New Roman",
+        "font_size_pt": 14.0,
+        "first_line_indent_cm": 1.25
+    }
+    HEADER_1_NUM_STYLE = {
+        "bold": True,
+        "italic": False,
+        "alignment": WD_ALIGN_PARAGRAPH.LEFT,
+        "font_name": "Times New Roman",
+        "font_size_pt": 14.0,
+        "first_line_indent_cm": 1.25
+    }
+    HEADER_2_NUM_STYLE = {
+        "bold": True,
+        "italic": False,
+        "alignment": WD_ALIGN_PARAGRAPH.LEFT,
         "font_name": "Times New Roman",
         "font_size_pt": 14.0,
         "first_line_indent_cm": 1.25
@@ -68,11 +84,38 @@ class StyleCheckSettings:
             "style": HEADER_2_STYLE,
             "headers": ["Цель работы", "Выполнение работы", "Выводы"],
             "unify_regex": None,
-            "regex": HEADER_2_REGEX,
+            "regex": HEADER_1_REGEX
         }
     ]
 
-    LR_MAIN_TEXT_CONFIG = [
+    VKR_CONFIG = [
+        {
+            "style": HEADER_1_STYLE,
+            "headers": ["ВВЕДЕНИЕ", "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
+            "unify_regex": None,
+            "regex": HEADER_1_REGEX
+        },
+        {
+            "style": HEADER_1_NUM_STYLE,
+            "headers": [],
+            "unify_regex": None,
+            "regex": HEADER_1_NUM_REGEX
+        }
+        # {
+        #     "style": HEADER_2_NUM_STYLE,
+        #     "headers": [],
+        #     "unify_regex": None,
+        #     "regex": HEADER_2_NUM_REGEX
+        # },
+        # {
+        #     "style": HEADER_2_STYLE,
+        #     "headers": [],
+        #     "unify_regex": None,
+        #     "regex": HEADER_2_REGEX,
+        # }
+    ]
+
+    MAIN_TEXT_CONFIG = [
         {
             "name": "Основной текст",
             "style": MAIN_TEXT_STYLE
@@ -93,5 +136,7 @@ class StyleCheckSettings:
 
     CONFIGS = {
         'LR_HEADERS': LR_CONFIG,
-        'LR_MAIN_TEXT': LR_MAIN_TEXT_CONFIG
+        'LR_MAIN_TEXT': MAIN_TEXT_CONFIG,
+        'VKR_HEADERS': VKR_CONFIG,
+        'VKR_MAIN_TEXT': MAIN_TEXT_CONFIG
     }

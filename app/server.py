@@ -5,6 +5,7 @@ import tempfile
 from datetime import datetime, timedelta
 from os.path import join
 from sys import argv
+from app.main.check_packs.pack_config import DEFAULT_REPORT_TYPE_INFO
 
 import bson
 import pandas as pd
@@ -21,8 +22,7 @@ from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
-from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, \
-    init_criterions
+from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, init_criterions
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
@@ -86,7 +86,7 @@ def lti():
         file_type = file_type_info['type']
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
-
+        
         role = utils.get_role(temporary_user_params)
 
         logout_user()
@@ -227,12 +227,17 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
                    'banned_words_check': 'Проверка наличия запретных слов в тексте отчёта',
                    'page_counter': 'Проверка количества страниц',
                    'image_share_check': 'Проверка доли объема отчёта, приходящейся на изображения',
-                   'right_words_check': 'Проверка наличия определенных (правильных) слов в тексте отчёта'
+                   'right_words_check': 'Проверка наличия определенных (правильных) слов в тексте отчёта',
+                   'first_pages_check': 'Проверка наличия обязательных страниц в отчете',
+                   'needed_headers_check': 'Проверка наличия обязательных заголовков в отчете',
+                   'header_check': 'Проверка оформления заголовков отчета',
+                   'introduction_word_check': 'Проверка наличия необходимых компонент раздела Введение',
+                   'main_text_check': 'Проверка оформления основного текста отчета'
                    }
 
 
 @app.route("/results/<string:_id>", methods=["GET"])
-# @login_required
+@login_required
 def results(_id):
     try:
         oid = ObjectId(_id)
@@ -243,7 +248,7 @@ def results(_id):
     if check is not None:
         # show processing time for user
         avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
-        return render_template("./results.html", navi_upload=True, results=check, id=_id,
+        return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id,
                                columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
                                stats=format_check(check.pack()))
     else:
@@ -336,8 +341,7 @@ def api_criteria_pack():
     #  testing pack initialization
     file_type_info = {'type': file_type}
     if file_type == DEFAULT_REPORT_TYPE_INFO['type']:
-        file_type_info['report_type'] = report_type if report_type in REPORT_TYPES else DEFAULT_REPORT_TYPE_INFO[
-            'report_type']
+        file_type_info['report_type'] = report_type if report_type in REPORT_TYPES else DEFAULT_REPORT_TYPE_INFO['report_type']
     inited, err = init_criterions(raw_criterions, file_type=file_type_info)
     if len(raw_criterions) != len(inited) or err:
         msg = f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. Успешно инициализированные: {inited}. Возникшие ошибки: {err}."
@@ -678,16 +682,6 @@ def add_header(r):
         r.headers['Cache-Control'] = 'public, max-age=0'
     return r
 
-class ReverseProxied(object):
-    def __init__(self, app):
-        self.app = app
-
-    def __call__(self, environ, start_response):
-        forwarded_scheme = environ.get("HTTP_X_FORWARDED_PROTO", None)
-        preferred_scheme = app.config.get("PREFERRED_URL_SCHEME", None)
-        if "https" in [forwarded_scheme, preferred_scheme]:
-            environ["wsgi.url_scheme"] = "https"
-        return self.app(environ, start_response)
 
 if __name__ == '__main__':
     DEBUG = True
@@ -700,7 +694,6 @@ if __name__ == '__main__':
         logger.info("По умолчанию выбран отладочный режим...")
 
     if pre_luncher.init(app, DEBUG):
-        app.wsgi_app = ReverseProxied(app.wsgi_app)
         port = 8080
         ip = '0.0.0.0'
         logger.info("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +

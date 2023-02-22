@@ -25,7 +25,12 @@ BASE_REPORT_CRITERION = [
     ["banned_words_check"],
     ["right_words_check"],
     ["banned_words_in_literature"],
-    ["literature_references"]
+    ["literature_references"],
+    ["first_pages_check"],
+    ["needed_headers_check"],
+    ["header_check"],
+    ["introduction_word_check"],
+    ["main_text_check"]
 ]
 
 DEFAULT_TYPE = 'pres'

@@ -9,3 +9,9 @@ from .headers_at_page_top_check import ReportHeadersAtPageTopCheck
 from .sections_check import ReportSectionCheck
 from .style_check_settings import StyleCheckSettings
 from .short_sections_check import ReportShortSectionsCheck
+from .first_pages_check import ReportNeededPages
+from .needed_headers_check import ReportNeededHeaders
+from .chapters import ReportHeaders
+from .intro import ReportIntroduction
+from .main_text_check import ReportMainTextCheck
+
