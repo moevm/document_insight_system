@@ -7,7 +7,7 @@ RUN npm install && npm install webpack
 ADD ./assets ./assets
 RUN npm run build
 
-FROM python:3.8-slim-bullseye
+FROM osll/slides-base:20230202
 
 ENV LANG en_US.UTF-8
 ENV TZ=Europe/Moscow
