@@ -1,3 +1,4 @@
+import itertools
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -52,7 +53,7 @@ class Stemming:
 
     def get_filtered_docs(self, string, flag):
         self.parse_text(string, flag)
-        return self.filtered_docs
+        return set(itertools.chain(*self.filtered_docs))
 
     def further_dev(self):
         return {'found_dev': self.find_further_development, 'dev_sentence': self.further_dev_sentence}
