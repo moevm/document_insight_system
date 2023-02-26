@@ -17,12 +17,14 @@ class DocxUploader:
     def __init__(self):
         self.inline_shapes = []
         self.core_properties = None
+        self.chapters = []
         self.paragraphs = []
         self.tables = []
         self.file = None
         self.styled_paragraphs = None
         self.special_paragraph_indices = {}
         self.pdf_file = None
+        self.count = 0
 
     def upload(self, file):
         self.file = docx.Document(file)
@@ -33,13 +35,65 @@ class DocxUploader:
         for i in range(len(self.file.inline_shapes)):
             self.inline_shapes.append(InlineShape(self.file.inline_shapes[i]))
         self.paragraphs = self.__make_paragraphs(self.file.paragraphs)
+        self.parse_effective_styles()
         self.tables = self.__make_table(self.file.tables)
 
     def __make_paragraphs(self, paragraphs):
         tmp_paragraphs = []
         for i in range(len(paragraphs)):
-            tmp_paragraphs.append(Paragraph(paragraphs[i]))
+            if len(paragraphs[i].text.strip()):
+                tmp_paragraphs.append(Paragraph(paragraphs[i]))
         return tmp_paragraphs
+
+    def make_chapters(self, work_type):
+        headers = []
+        tmp_chapters = []
+
+        if work_type == 'VKR':
+            # find first pages
+            headers = [
+                {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный", "page": 0},
+                {"name": "Задание на выпускную квалификационную работу", "marker": False, "key": "задание", "page": 0},
+                {"name": "Календарный план", "marker": False, "key": "календарный план", "page": 0},
+                {"name": "Реферат", "marker": False, "key": "реферат", "page": 0},
+                {"name": "Abstract", "marker": False, "key": "abstract", "page": 0},
+                {"name": "Cодержание", "marker": False, "key": "содержание", "page": 0}]
+            page = 1
+            elem = 0
+            while elem < len(headers) and page < (2 * len(headers)):
+                page_text = (self.pdf_file.get_text_on_page()[page].split("\n")[0]).lower()
+                if page_text.find(headers[elem]["key"]) >= 0:
+                    headers[elem]["marker"] = True
+                    headers[elem]["page"] = page
+                    elem += 1
+                else:
+                    page_text = (self.pdf_file.get_text_on_page()[page + 1].split("\n")[0]).lower()
+                    if page_text.find(headers[elem]["key"]) >= 0:
+                        headers[elem]["marker"] = True
+                        headers[elem]["page"] = page + 1
+                        elem += 1
+                        page += 1
+                page += 1
+
+            # find headers
+            header_ind = -1
+            par_num = 0
+            head_par_ind = -1
+            for par_ind in range(len(self.styled_paragraphs)):
+                head_par_ind += 1
+                style_name = self.paragraphs[par_ind].paragraph_style_name.lower()
+                if style_name.find("heading") >= 0:
+                    print(self.paragraphs[par_ind].paragraph_style_name)
+                    print(self.paragraphs[par_ind].paragraph_text)
+                    print(self.styled_paragraphs[par_ind]["text"])
+                    header_ind += 1
+                    par_num = 0
+                    tmp_chapters.append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"], "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind, "child": []})
+                elif header_ind >= 0:
+                    par_num += 1
+                    tmp_chapters[header_ind]["child"].append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"], "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind})
+        self.chapters = tmp_chapters
+        return headers
 
     def __make_table(self, tables):
         for i in range(len(tables)):
@@ -52,6 +106,15 @@ class DocxUploader:
                 table.append(row)
             self.tables.append(Table(tables[i], table))
         return tables
+
+    def build_vkr_hierarchy(self, styles):
+        indices = self.get_paragraph_indices_by_style(styles)
+        tagged_indices = [{"index": 0, "level": 0}, {"index": len(self.styled_paragraphs), "level": 0}]
+        for j in range(len(indices)):
+            tagged_indices.extend(list(map(lambda index: {"index": index, "level": j + 1,
+                                                          "text": self.styled_paragraphs[index]["text"]}, indices[j])))
+        tagged_indices.sort(key=lambda dct: dct["index"])
+        return tagged_indices
 
     # Parses styles once; subsequent calls have no effect, since the file itself shouldn't change
     def parse_effective_styles(self):
@@ -93,6 +156,15 @@ class DocxUploader:
                     matched_pars.append(i)
             result.append(matched_pars)
         return result
+
+    def page_counter(self):
+        if not self.count:
+            for k, v in self.pdf_file.text_on_page.items():
+                if re.search('приложение [а-я][\n .]', v.lower()):
+                    break
+                self.count += 1
+        return self.count
+
 
     def upload_from_cli(self, file):
         self.upload(file=file)
