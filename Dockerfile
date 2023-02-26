@@ -9,14 +9,6 @@ RUN npm run build
 
 FROM osll/slides-base:20230202
 
-ENV LANG en_US.UTF-8
-ENV TZ=Europe/Moscow
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-WORKDIR /usr/src/project
-
-RUN apt update && apt install -y libreoffice-writer libreoffice-impress default-jre
-
 ADD requirements.txt ./
 RUN python3.8 -m pip install -r requirements.txt
 
