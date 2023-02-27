@@ -681,6 +681,16 @@ def add_header(r):
         r.headers['Cache-Control'] = 'public, max-age=0'
     return r
 
+class ReverseProxied(object):
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        forwarded_scheme = environ.get("HTTP_X_FORWARDED_PROTO", None)
+        preferred_scheme = app.config.get("PREFERRED_URL_SCHEME", None)
+        if "https" in [forwarded_scheme, preferred_scheme]:
+            environ["wsgi.url_scheme"] = "https"
+        return self.app(environ, start_response)
 
 if __name__ == '__main__':
     DEBUG = True
@@ -693,6 +703,7 @@ if __name__ == '__main__':
         logger.info("По умолчанию выбран отладочный режим...")
 
     if pre_luncher.init(app, DEBUG):
+        app.wsgi_app = ReverseProxied(app.wsgi_app)
         port = 8080
         ip = '0.0.0.0'
         logger.info("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
