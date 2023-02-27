@@ -17,6 +17,7 @@ class DocxUploader:
     def __init__(self):
         self.inline_shapes = []
         self.core_properties = None
+        self.headers = []
         self.chapters = []
         self.paragraphs = []
         self.tables = []
@@ -46,54 +47,45 @@ class DocxUploader:
         return tmp_paragraphs
 
     def make_chapters(self, work_type):
-        headers = []
-        tmp_chapters = []
+        if not len(self.chapters):
+            tmp_chapters = []
+            if work_type == 'VKR':
+                # find headers
+                header_ind = -1
+                par_num = 0
+                head_par_ind = -1
+                for par_ind in range(len(self.styled_paragraphs)):
+                    head_par_ind += 1
+                    style_name = self.paragraphs[par_ind].paragraph_style_name.lower()
+                    if style_name.find("heading") >= 0:
+                        header_ind += 1
+                        par_num = 0
+                        tmp_chapters.append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"], "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind, "child": []})
+                    elif header_ind >= 0:
+                        par_num += 1
+                        tmp_chapters[header_ind]["child"].append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"], "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind})
+            self.chapters = tmp_chapters
+        return self.chapters
 
-        if work_type == 'VKR':
-            # find first pages
-            headers = [
-                {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный", "page": 0},
-                {"name": "Задание на выпускную квалификационную работу", "marker": False, "key": "задание", "page": 0},
-                {"name": "Календарный план", "marker": False, "key": "календарный план", "page": 0},
-                {"name": "Реферат", "marker": False, "key": "реферат", "page": 0},
-                {"name": "Abstract", "marker": False, "key": "abstract", "page": 0},
-                {"name": "Cодержание", "marker": False, "key": "содержание", "page": 0}]
-            page = 1
-            elem = 0
-            while elem < len(headers) and page < (2 * len(headers)):
-                page_text = (self.pdf_file.get_text_on_page()[page].split("\n")[0]).lower()
-                if page_text.find(headers[elem]["key"]) >= 0:
-                    headers[elem]["marker"] = True
-                    headers[elem]["page"] = page
-                    elem += 1
-                else:
-                    page_text = (self.pdf_file.get_text_on_page()[page + 1].split("\n")[0]).lower()
-                    if page_text.find(headers[elem]["key"]) >= 0:
-                        headers[elem]["marker"] = True
-                        headers[elem]["page"] = page + 1
-                        elem += 1
-                        page += 1
-                page += 1
-
-            # find headers
-            header_ind = -1
-            par_num = 0
-            head_par_ind = -1
-            for par_ind in range(len(self.styled_paragraphs)):
-                head_par_ind += 1
-                style_name = self.paragraphs[par_ind].paragraph_style_name.lower()
-                if style_name.find("heading") >= 0:
-                    print(self.paragraphs[par_ind].paragraph_style_name)
-                    print(self.paragraphs[par_ind].paragraph_text)
-                    print(self.styled_paragraphs[par_ind]["text"])
-                    header_ind += 1
-                    par_num = 0
-                    tmp_chapters.append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"], "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind, "child": []})
-                elif header_ind >= 0:
-                    par_num += 1
-                    tmp_chapters[header_ind]["child"].append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"], "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind})
-        self.chapters = tmp_chapters
-        return headers
+    def make_headers(self, work_type):
+        if not len(self.headers):
+            if work_type == 'VKR':
+                # find first pages
+                headers = [
+                    {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный", "page": 0},
+                    {"name": "Задание на выпускную квалификационную работу", "marker": False, "key": "задание", "page": 0},
+                    {"name": "Календарный план", "marker": False, "key": "календарный план", "page": 0},
+                    {"name": "Реферат", "marker": False, "key": "реферат", "page": 0},
+                    {"name": "Abstract", "marker": False, "key": "abstract", "page": 0},
+                    {"name": "Cодержание", "marker": False, "key": "содержание", "page": 0}]
+                for page in range(1, self.count if self.page_counter() < 2 * len(headers) else 2 * len(headers)):
+                    page_text = (self.pdf_file.get_text_on_page()[page].split("\n")[0]).lower()
+                    for i in range(len(headers)):
+                        if page_text.find(headers[i]["key"]) >= 0:
+                            headers[i]["marker"] = True
+                            headers[i]["page"] = page
+                self.headers = headers
+        return self.headers
 
     def __make_table(self, tables):
         for i in range(len(tables)):

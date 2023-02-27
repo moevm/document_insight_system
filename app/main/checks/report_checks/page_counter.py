@@ -17,7 +17,7 @@ class ReportNumberOfPages(BaseReportCriterion):
             return answer(True, f"Пройдена! В отчете {count} стр.")
         if self.number[1]:
             return answer(False,
-                          f'Неверное количество страниц в файле: должно быть [{self.number[0]}, {self.number[1]}] стр., в отчете {count} стр.')
+                          f'Неверное количество страниц в файле: должно быть [{self.number[0]}, {self.number[1]}] стр. не считая приложения, в отчете {count} стр.')
         else:
             return answer(False,
-                          f'Неверное количество страниц в файле: должно быть не менее {self.number[0]} стр., в отчете {count} стр.')
+                          f'Неверное количество страниц в файле: должно быть не менее {self.number[0]} стр. не считая приложения, в отчете {count} стр.')

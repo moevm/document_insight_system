@@ -7,13 +7,13 @@ class ReportNeededPages(BaseReportCriterion):
 
     def __init__(self, file_info):
         super().__init__(file_info)
-        self.headers = self.file.make_chapters(self.file_type['report_type'])
+        self.headers = self.file.make_headers(self.file_type['report_type'])
 
     def check(self):
         result_str = ''
         for header in self.headers:
             if not header["marker"]:
-                result_str += '</li><li>' + header["name"]
+                result_str += '<li>' + header["name"]  + '</li>'
 
         result_score = 0
         if result_str == '':
@@ -22,5 +22,5 @@ class ReportNeededPages(BaseReportCriterion):
             return answer(result_score, "Все обязательные страницы найдены и их заголовки находятся на первой строке новой страницы.")
         else:
             return answer(result_score,
-                          f'Следующие страницы не найдены либо их заголовки расположены не на первой строке новой страницы: <ul><li>{result_str}</ul>' +
-                          'Проверьте очередность листов и орфографию заголовков')
+                          f'Следующие страницы не найдены либо их заголовки расположены не на первой строке новой страницы: <ul>{result_str}</ul>' +
+                          'Проверьте очередность листов и орфографию заголовков.')

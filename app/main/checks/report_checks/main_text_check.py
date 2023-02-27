@@ -11,7 +11,7 @@ class ReportMainTextCheck(BaseReportCriterion):
 
     def __init__(self, file_info):
         super().__init__(file_info)
-        self.headers = self.file.chapters
+        self.headers = self.file.make_chapters(self.file_type['report_type'])
         self.preset = 'VKR_MAIN_TEXT' if (self.file_type['report_type'] == 'VKR') else 'LR_MAIN_TEXT'
         self.styles: List[Style] = []
         presets = StyleCheckSettings.CONFIGS.get(self.preset)
@@ -23,36 +23,34 @@ class ReportMainTextCheck(BaseReportCriterion):
             self.styles.append(style)
 
     def check(self):
+        if self.file.page_counter() < 4:
+            return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         err = []
         if self.file_type['report_type'] == 'VKR':
             indexes = self.file.build_vkr_hierarchy(self.styles)
-            print(indexes)
             for header in self.headers:
                 for child in header["child"]:
                     for index in indexes:
                         if index["index"] > child["number"]:
                             err.append({"child": child["text"], "type": 0})
+
                             break
                         elif index["index"] == child["number"]:
                             if index["level"] == 3:
                                 if child["style"] == 'вкр_подпись для рисунков':
-                                    print(child["text"])
                                     break
                                 else:
                                     err.append({"child": child["text"], "type": 3})
                                     break
                             elif index["level"] == 4:
                                 if child["style"] == 'вкр_подпись таблицы':
-                                    print(child["text"])
                                     break
                                 else:
                                     err.append({"child": child["text"], "type": 4})
                                     break
                             elif index["level"]:
-                                print(child["text"])
                                 break
-            print(err)
             return answer(0,
                           f'Следующие листы не найдены либо их заголовки расположены не на первой строке новой страницы: <ul><li>{0}</ul>' +
-                          'Проверьте очередность листов и орфографию заголовков'+ str(err))
+                          'Проверьте очередность листов и орфографию заголовков')
 

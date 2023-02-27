@@ -11,12 +11,16 @@ class ReportShortSectionsCheck(BaseReportCriterion):
     id = "short_sections_check"
 
     default_min_len = 20
+    default_min_count = 5
 
     def __init__(self, file_info, presets: str = 'LR_HEADERS',
                  prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS, min_section_len=None):
         super().__init__(file_info)
-        self.presets = StyleCheckSettings.CONFIGS.get(presets)
+        self.headers = self.file.make_chapters(self.file_type['report_type'])
+        self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
+        self.presets = StyleCheckSettings.CONFIGS.get(self.config)
         self.min_section_len = min_section_len if min_section_len is not None else self.default_min_len
+        self.min_section_count = min_section_len if min_section_len is not None else self.default_min_count
         prechecked_props_lst = prechecked_props
         if prechecked_props_lst is None:
             prechecked_props_lst = StyleCheckSettings.PRECHECKED_PROPS
@@ -38,33 +42,57 @@ class ReportShortSectionsCheck(BaseReportCriterion):
                 self.file.unify_multiline_entities(preset["unify_regex"])
 
     def check(self):
-        self.late_init()
-        if self.cutoff_line is None:
-            return answer(False, "Отчёт содержит единственную страницу или вторая страница отчёта пуста.")
+        if self.file.page_counter() < 4:
+            return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         result = True
         result_str = ""
-        tagged_indices = self.build_header_hierarchy()
-        if len(tagged_indices) == 0:
-            return answer(False, "Заголовки не найдены.")
-        self.calc_length(tagged_indices)
-        tagged_indices = tagged_indices[1:len(tagged_indices) - 1]
-        for elem in tagged_indices:
-            texts = []
-            for i in range(elem["index"] + 1, elem["index"] + elem["length"]):
-                texts.append(self.file.styled_paragraphs[i]["text"])
-            section_text = "\n".join(texts)
-            length = len(re.findall("\\w+", section_text))
-            if length < self.min_section_len:
-                result = False
-                result_str += ("<br>" if len(result_str) else "") + \
-                              f'Фрагмент "{self.file.styled_paragraphs[elem["index"]]["text"]}" ' \
-                              f'похож на раздел с количеством слов' \
-                              f' (не считая содержимого таблиц) {length} ' \
-                              f'при минимальной рекомендуемой длине раздела в ' \
-                              f'{self.min_section_len} слов.'
-        if len(result_str) == 0:
-            result_str = "Все разделы достигают рекомендуемой длины."
-        return answer(result, result_str)
+        if self.file_type['report_type'] == 'LR':
+            self.late_init()
+            if self.cutoff_line is None:
+                return answer(False, "Отчёт содержит единственную страницу или вторая страница отчёта пуста.")
+            tagged_indices = self.build_header_hierarchy()
+            if len(tagged_indices) == 0:
+                return answer(False, "Заголовки не найдены.")
+            self.calc_length(tagged_indices)
+            tagged_indices = tagged_indices[1:len(tagged_indices) - 1]
+            for elem in tagged_indices:
+                texts = []
+                for i in range(elem["index"] + 1, elem["index"] + elem["length"]):
+                    texts.append(self.file.styled_paragraphs[i]["text"])
+                section_text = "\n".join(texts)
+                length = len(re.findall("\\w+", section_text))
+                if length < self.min_section_len:
+                    result = False
+                    result_str += ("<br>" if len(result_str) else "") + \
+                                  f'Фрагмент "{self.file.styled_paragraphs[elem["index"]]["text"]}" ' \
+                                  f'похож на раздел с количеством слов' \
+                                  f' (не считая содержимого таблиц) {length} ' \
+                                  f'при минимальной рекомендуемой длине раздела в ' \
+                                  f'{self.min_section_len} слов.'
+            if len(result_str) == 0:
+                result_str = "Все разделы достигают рекомендуемой длины."
+            return answer(result, result_str)
+        elif self.file_type['report_type'] == 'VKR':
+            if not len(self.headers):
+                return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
+            for header in self.headers:
+                header_text = header["text"].lower()
+                if header_text.find("приложение") >= 0:
+                    break
+                if header["style"] == 'heading 2' and not re.search(r'\d', header["text"]):
+                    if len(header["child"]) < self.min_section_count:
+                        result = False
+                        result_str += ("<br>" if len(result_str) else "") + \
+                                      f'Раздел "{header["text"]}" ' \
+                                      f'содержит абзацев' \
+                                      f' (не считая рисунки и таблицы) {len(header["child"])} ' \
+                                      f'при минимальной рекомендуемой длине раздела в ' \
+                                      f'{self.min_section_count} абзацев.'
+            if len(result_str) == 0:
+                result_str = "Все обязательные разделы достигают рекомендуемой длины."
+            return answer(result, result_str)
+        else:
+            return answer(False, 'Во время обработки произошла критическая ошибка')
 
     def build_header_hierarchy(self):
         cutoff_index = 0
