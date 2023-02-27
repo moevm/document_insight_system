@@ -87,6 +87,7 @@ class DocxUploader:
                 self.headers = headers
         return self.headers
 
+
     def __make_table(self, tables):
         for i in range(len(tables)):
             table = []

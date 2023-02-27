@@ -1,10 +1,10 @@
 import configparser
 
-from lti.tool_provider import ToolProvider
 
 from db.db_methods import ConsumersDBManager, get_unpassed_checks, set_passbacked_flag, get_user
 from root_logger import get_root_logger
 from utils import RepeatedTimer
+from lti_session_passback.lti_provider import LTIProvider
 
 config = configparser.ConfigParser()
 config.read('app/config.ini')
@@ -24,7 +24,7 @@ class ChecksPassBack:
             return
 
         consumer_secret = ConsumersDBManager.get_secret(passback_params['oauth_consumer_key'])
-        response = ToolProvider.from_unpacked_request(secret=consumer_secret, params=passback_params, headers=None,
+        response = LTIProvider.from_unpacked_request(secret=consumer_secret, params=passback_params, headers=None,
                                                       url=None).post_replace_result(score=check.get('score'))
 
         if response.code_major == 'success' and response.severity == 'status':

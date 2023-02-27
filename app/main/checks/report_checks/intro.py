@@ -28,6 +28,7 @@ class ReportIntroduction(BaseReportCriterion):
                 par = intro_par["text"].lower()
                 if re.search(r'(практическая|практическую) (значимость|ценность)', par):
                     result_str = ''
+
                 for i in range(len(self.patterns)):
                     if par.find(self.patterns[i]["text"]) >= 0:
                         self.patterns[i]["marker"] = 1
@@ -46,3 +47,4 @@ class ReportIntroduction(BaseReportCriterion):
         else:
             return answer(result_score,
                           f'Не найдены следующие компоненты Введения: <ul>{result_str}</ul>')
+

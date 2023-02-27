@@ -31,6 +31,7 @@ BASE_REPORT_CRITERION = [
     ["header_check"],
     ["introduction_word_check"],
     ["main_text_check"]
+
 ]
 
 DEFAULT_TYPE = 'pres'

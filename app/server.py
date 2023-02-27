@@ -147,7 +147,7 @@ def interact():
 @login_required
 def upload():
     if request.method == "POST":
-        if current_user.is_LTI or True:  # app.recaptcha.verify():
+        if current_user.is_LTI or True:  # app.recaptcha.verify(): - disable captcha (cause no login)
             return run_task()
         else:
             abort(401)
@@ -155,8 +155,7 @@ def upload():
         formats = set(current_user.formats)
         file_type = current_user.file_type['type']
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
-        return render_template("./upload.html", navi_upload=False, name=current_user.name, file_type=file_type,
-                               formats=sorted(formats))
+        return render_template("./upload.html", navi_upload=False, formats=sorted(formats))
 
 
 @app.route("/tasks", methods=["POST"])

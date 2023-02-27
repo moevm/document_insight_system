@@ -7,20 +7,14 @@ RUN npm install && npm install webpack
 ADD ./assets ./assets
 RUN npm run build
 
-FROM python:3.8-slim-bullseye
-
-ENV LANG en_US.UTF-8
-ENV TZ=Europe/Moscow
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+FROM osll/slides-base:20230202
 
 WORKDIR /usr/src/project
-
-RUN apt update && apt install -y libreoffice-writer libreoffice-impress default-jre
 
 ADD requirements.txt ./
 RUN python3.8 -m pip install -r requirements.txt
 
-COPY --from=frontend_build /app/src /usr/src/project/src
+COPY --from=frontend_build /app/src ./src/
 ADD ./scripts/local_start.sh ./scripts/
 ADD ./db_versioning ./db_versioning/
 ADD ./app ./app/

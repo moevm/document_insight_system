@@ -34,5 +34,6 @@ AVAILABLE_CHECKS = {
         ReportHeaders.id: ReportHeaders,
         ReportIntroduction.id: ReportIntroduction,
         ReportMainTextCheck.id: ReportMainTextCheck
+
     }
 }
