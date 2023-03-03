@@ -422,6 +422,7 @@ def check_list_data():
         "rows": [{
             "_id": str(item["_id"]),
             "filename": item["filename"],
+            "criteria": item.get('criteria', ''),
             "user": item["user"],
             "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
             "upload-date": (item["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
