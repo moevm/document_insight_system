@@ -16,7 +16,7 @@ class ChecksPassBack:
         self._timeout_seconds = timeout_seconds
 
     def grade_passback(self, check):
-        passback_params = check.params_for_passback
+        passback_params = check.get('params_for_passback', None)
         if not passback_params or passback_params["lis_outcome_service_url"] == "lis_outcome_service_url":
             set_passbacked_flag(check.get('_id'), None)
             return
