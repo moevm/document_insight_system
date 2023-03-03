@@ -5,8 +5,8 @@ import pymongo
 from bson import ObjectId
 from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
-
 from utils import convert_to
+
 from .db_types import User, Presentation, Check, Consumers, Logs
 
 client = MongoClient("mongodb://mongodb:27017")
@@ -133,11 +133,6 @@ def delete_presentation(user, presentation_id):
         return user, get_presentation(presentation_id)
 
 
-# Creates checks from given user check-list (not created in DB)
-def create_check(user, file_type='pres'):
-    return Check({'enabled_checks': user.criteria, 'file_type': file_type})
-
-
 # Adds checks to given presentations, updates presentations, returns presentations and checks id
 def add_check(file_id, check):
     checks_id = checks_collection.insert_one(check.pack()).inserted_id
@@ -215,7 +210,7 @@ def set_passbacked_flag(checks_id, flag):
     upd_check['$set']['is_passbacked'] = flag
     if not (flag is None):
         # None - if user without passback
-        upd_check['$set']['lms_passback_time'] = datetime.now()
+        upd_check['$set']['lms_passback_time'] = None
     check = checks_collection.update_one({'_id': checks_id}, upd_check)
     return check if check else None
 
