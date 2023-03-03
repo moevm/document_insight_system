@@ -17,6 +17,7 @@ from flask_login import (LoginManager, current_user, login_required,
 from flask_recaptcha import ReCaptcha
 
 import servants.user as user
+from app.utils import format_check_for_table
 from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
@@ -26,7 +27,7 @@ from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
-from utils import checklist_filter, decorator_assertion, get_file_len, timezone_offset, format_check
+from utils import checklist_filter, decorator_assertion, get_file_len, format_check
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
@@ -35,7 +36,7 @@ ALLOWED_EXTENSIONS = {
     'report': {'doc', 'odt', 'docx'}
 }
 DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
-TABLE_COLUMNS = ['Solution', 'User', 'File', 'Pack', 'Check added', 'LMS date', 'Score']
+TABLE_COLUMNS = ['Solution', 'User', 'File', 'Criteria', 'Check added', 'LMS date', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./templates/")
 app.config.from_pyfile('settings.py')
@@ -419,17 +420,7 @@ def check_list_data():
     # construct response
     response = {
         "total": count,
-        "rows": [{
-            "_id": str(item["_id"]),
-            "filename": item["filename"],
-            "criteria": item.get('criteria', ''),
-            "user": item["user"],
-            "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
-            "upload-date": (item["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
-            "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get(
-                'lms_passback_time') else '-',
-            "score": item["score"]
-        } for item in rows]
+        "rows": [format_check_for_table(item) for item in rows]
     }
 
     # return json data
@@ -452,17 +443,7 @@ def get_query(req):
 
 def get_stats():
     rows, count = db_methods.get_checks(**get_query(request))
-    return [{
-        "_id": str(item["_id"]),
-        "filename": item["filename"],
-        "user": item["user"],
-        "lms-username": item["user"].rsplit('_', 1)[0],
-        "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
-        "upload-date": (item["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
-        "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get(
-            'lms_passback_time') else '-',
-        "score": item["score"]
-    } for item in rows]
+    return [format_check_for_table(item) for item in rows]
 
 
 @app.route("/get_csv")
