@@ -1,10 +1,13 @@
 import configparser
 
+import urllib3
+
 from db.db_methods import ConsumersDBManager, get_unpassed_checks, set_passbacked_flag
 from lti_session_passback.lti_provider import LTIProvider
 from root_logger import get_root_logger
 from utils import RepeatedTimer
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 config = configparser.ConfigParser()
 config.read('app/config.ini')
 
