@@ -1,10 +1,9 @@
 import configparser
 
-
-from db.db_methods import ConsumersDBManager, get_unpassed_checks, set_passbacked_flag, get_user
+from db.db_methods import ConsumersDBManager, get_unpassed_checks, set_passbacked_flag
+from lti_session_passback.lti_provider import LTIProvider
 from root_logger import get_root_logger
 from utils import RepeatedTimer
-from lti_session_passback.lti_provider import LTIProvider
 
 config = configparser.ConfigParser()
 config.read('app/config.ini')
@@ -17,15 +16,14 @@ class ChecksPassBack:
         self._timeout_seconds = timeout_seconds
 
     def grade_passback(self, check):
-        user = check.get('user')
-        passback_params = get_user(user).params_for_passback
+        passback_params = check.params_for_passback
         if not passback_params or passback_params["lis_outcome_service_url"] == "lis_outcome_service_url":
             set_passbacked_flag(check.get('_id'), None)
             return
 
         consumer_secret = ConsumersDBManager.get_secret(passback_params['oauth_consumer_key'])
         response = LTIProvider.from_unpacked_request(secret=consumer_secret, params=passback_params, headers=None,
-                                                      url=None).post_replace_result(score=check.get('score'))
+                                                     url=None).post_replace_result(score=check.get('score'))
 
         if response.code_major == 'success' and response.severity == 'status':
             logger.info('Score was successfully passed back: score = {}, check_id = {}'.format(check.get('score'),

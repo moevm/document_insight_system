@@ -5,8 +5,8 @@ import pymongo
 from bson import ObjectId
 from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
-
 from utils import convert_to
+
 from .db_types import User, Presentation, Check, Consumers, Logs
 
 client = MongoClient("mongodb://mongodb:27017")
@@ -135,7 +135,7 @@ def delete_presentation(user, presentation_id):
 
 # Creates checks from given user check-list (not created in DB)
 def create_check(user, file_type='pres'):
-    return Check({'enabled_checks': user.criteria, 'file_type': file_type})
+    return Check({'enabled_checks': user.criteria, 'criteria': user.criteria, 'file_type': file_type})
 
 
 # Adds checks to given presentations, updates presentations, returns presentations and checks id
