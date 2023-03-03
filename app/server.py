@@ -188,11 +188,13 @@ def run_task():
         'user': current_user.username,
         'lms_user_id': current_user.lms_user_id,
         'enabled_checks': current_user.criteria,
+        'criteria': current_user.criteria,
         'file_type': current_user.file_type,
         'filename': file.filename,
         'score': -1,  # score=-1 -> checking in progress
         'is_ended': False,
-        'is_failed': False
+        'is_failed': False,
+        'params_for_passback': current_user.params_for_passback
     })
     db_methods.add_check(file_id, check)  # add check for parsed_file to db
     task = create_task.delay(check.pack(to_str=True))  # add check to queue
@@ -336,7 +338,8 @@ def api_criteria_pack():
     #  testing pack initialization
     file_type_info = {'type': file_type}
     if file_type == DEFAULT_REPORT_TYPE_INFO['type']:
-        file_type_info['report_type'] = report_type if report_type in REPORT_TYPES else DEFAULT_REPORT_TYPE_INFO['report_type']
+        file_type_info['report_type'] = report_type if report_type in REPORT_TYPES else DEFAULT_REPORT_TYPE_INFO[
+            'report_type']
     inited, err = init_criterions(raw_criterions, file_type=file_type_info)
     if len(raw_criterions) != len(inited) or err:
         msg = f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. Успешно инициализированные: {inited}. Возникшие ошибки: {err}."

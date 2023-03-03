@@ -133,11 +133,6 @@ def delete_presentation(user, presentation_id):
         return user, get_presentation(presentation_id)
 
 
-# Creates checks from given user check-list (not created in DB)
-def create_check(user, file_type='pres'):
-    return Check({'enabled_checks': user.criteria, 'criteria': user.criteria, 'file_type': file_type})
-
-
 # Adds checks to given presentations, updates presentations, returns presentations and checks id
 def add_check(file_id, check):
     checks_id = checks_collection.insert_one(check.pack()).inserted_id

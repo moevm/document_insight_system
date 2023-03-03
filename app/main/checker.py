@@ -3,7 +3,7 @@ from db.db_methods import get_criteria_pack
 from .check_packs import BaseCriterionPack
 
 
-def check(parsed_file, check_obj, user):
+def check(parsed_file, check_obj):
     filename = check_obj.filename
     file_info = {
         'file': parsed_file,
@@ -17,11 +17,7 @@ def check(parsed_file, check_obj, user):
     check_obj.enabled_checks = result
     check_obj.score = score
     check_obj.is_passed = is_passed
-    check_obj.filename = filename
-    check_obj.user = user.username
-    check_obj.user = user.params_for_passback
-    check_obj.lms_user_id = user.lms_user_id
-    if user.params_for_passback:
+    if check_obj.params_for_passback:
         check_obj.is_passbacked = False
 
     return check_obj
