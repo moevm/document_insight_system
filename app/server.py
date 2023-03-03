@@ -35,7 +35,7 @@ ALLOWED_EXTENSIONS = {
     'report': {'doc', 'odt', 'docx'}
 }
 DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
-TABLE_COLUMNS = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
+TABLE_COLUMNS = ['Solution', 'User', 'File', 'Pack', 'Check added', 'LMS date', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./templates/")
 app.config.from_pyfile('settings.py')
@@ -245,7 +245,7 @@ def results(_id):
     if check is not None:
         # show processing time for user
         avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
-        return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id,
+        return render_template("./results.html", navi_upload=True, results=check,
                                columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
                                stats=format_check(check.pack()))
     else:
