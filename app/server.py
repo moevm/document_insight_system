@@ -5,7 +5,6 @@ import tempfile
 from datetime import datetime, timedelta
 from os.path import join
 from sys import argv
-from app.main.check_packs.pack_config import DEFAULT_REPORT_TYPE_INFO
 
 import bson
 import pandas as pd
@@ -22,7 +21,8 @@ from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
-from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, init_criterions
+from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, \
+    init_criterions
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
@@ -86,7 +86,7 @@ def lti():
         file_type = file_type_info['type']
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
-        
+
         role = utils.get_role(temporary_user_params)
 
         logout_user()
@@ -613,18 +613,19 @@ def version():
 @app.route('/profile/<string:username>', methods=["GET"])
 @login_required
 def profile(username):
-    if current_user.is_admin:
-        if username == '':
-            return redirect(url_for("profile", username=current_user.username))
-        u = db_methods.get_user(username)
-        me = True if username == current_user.username else False
-        if u is not None:
-            return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
-        else:
-            logger.info("Запрошенный пользователь не найден: " + username)
-            return render_template("./404.html")
-    else:
-        abort(403)
+    return abort(404)
+    # if current_user.is_admin:
+    #     if username == '':
+    #         return redirect(url_for("profile", username=current_user.username))
+    #     u = db_methods.get_user(username)
+    #     me = True if username == current_user.username else False
+    #     if u is not None:
+    #         return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
+    #     else:
+    #         logger.info("Запрошенный пользователь не найден: " + username)
+    #         return render_template("./404.html")
+    # else:
+    #     abort(403)
 
 
 @app.route("/capacity", methods=["GET"])
@@ -677,6 +678,7 @@ def add_header(r):
         r.headers['Cache-Control'] = 'public, max-age=0'
     return r
 
+
 class ReverseProxied(object):
     def __init__(self, app):
         self.app = app
@@ -687,6 +689,7 @@ class ReverseProxied(object):
         if "https" in [forwarded_scheme, preferred_scheme]:
             environ["wsgi.url_scheme"] = "https"
         return self.app(environ, start_response)
+
 
 if __name__ == '__main__':
     DEBUG = True
