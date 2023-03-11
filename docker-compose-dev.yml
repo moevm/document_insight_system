@@ -54,7 +54,7 @@ services:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     depends_on:
-      - web
+      - worker
       - redis
 
   redis:

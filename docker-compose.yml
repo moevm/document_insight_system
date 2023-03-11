@@ -37,6 +37,23 @@ services:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
 
+  worker-dashboard:
+    image: slides_checker_base_image
+    command: celery flower -A monitoring --port=${FLOWER_PORT} --broker=${REDIS_URL} --persistent=True
+    ports:
+      - "${FLOWER_PORT}:5555"
+    environment:
+      - SECRET_KEY=${FLOWER_SECRET_KEY}
+      - CELERY_BROKER=${REDIS_URL}
+      - CELERY_BACKEND=${REDIS_URL}
+    volumes:
+      - flower_data:/etc/db/
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    depends_on:
+      - worker
+      - redis
+
   redis:
     image: redis:6-alpine
     restart: always
