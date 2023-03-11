@@ -15,8 +15,8 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONIOENCODING=UTF-8
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CELERY_BROKER_URL=${REDIS_URL}
+      - CELERY_RESULT_BACKEND=${REDIS_URL}
     volumes:
       - ./app:/usr/src/project/app
       - ./db_versioning:/usr/src/project/db_versioning
@@ -29,8 +29,8 @@ services:
     restart: always
     command: celery --app=app.tasks.celery worker --loglevel=info
     environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CELERY_BROKER_URL=${REDIS_URL}
+      - CELERY_RESULT_BACKEND=${REDIS_URL}
     depends_on:
       - redis
       - mongodb
@@ -44,15 +44,15 @@ services:
     image: redis:6-alpine
     restart: always
     volumes:
-      - ../slides_checker_redis_data:/data
+      - redis_data:/data
 
   mongodb:
     image: mongo:4.0.17-xenial
     restart: always
     command:
-      - '--wiredTigerCacheSizeGB=1'
+      - '--wiredTigerCacheSizeGB=${MONGODB_CACHE_SIZE:-1}'
     ports:
-      - 27017:27017
+      - "27017:27017"
     volumes:
       - ../slides_checker_mongo_data:/data/db
 
@@ -68,3 +68,5 @@ services:
 
 volumes:
   presentation_files:
+  redis_data:
+  flower_data:
