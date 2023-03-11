@@ -27,10 +27,11 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
         ignore = re.compile('[0-9][.]?|Задачи:|‹#›')  # [:]?
         cleaned_tasks = [task for task in tasks if not re.fullmatch(ignore, task)]
         task_count = len(cleaned_tasks)
-        logger.debug(str(slide_goal_and_tasks))
-        logger.debug(str(tasks))
-        logger.debug(str(ignore))
-        logger.debug(str(cleaned_tasks))
+        logger.debug(str({
+            'slide_goal_and_tasks': slide_goal_and_tasks,
+            'tasks': tasks,
+            'cleaned_tasks': cleaned_tasks
+        }))
         if len(cleaned_tasks) == 0:
             return 'Задач не существует'
 

@@ -1,8 +1,10 @@
+import configparser
 import os
 from os.path import join, exists
 
 from celery import Celery
 
+import passback_grades
 from db import db_methods
 from db.db_methods import get_user
 from db.db_types import Check
@@ -10,17 +12,28 @@ from main.checker import check
 from main.parser import parse
 from root_logger import get_root_logger
 
+config = configparser.ConfigParser()
+config.read('app/config.ini')
+
 TASK_RETRY_COUNTDOWN = 60  # default = 3 * 60
 logger = get_root_logger('tasks')
 
-celery = Celery(__name__)
-celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
-celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
-
 FILES_FOLDER = '/usr/src/project/files'
 
+celery = Celery(__name__)
+celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379")
+celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379")
 
-@celery.task(name="create_task", bind=True)
+celery.conf.beat_schedule = {
+    'passback-grades': {
+        'task': 'passback-task',
+        'schedule': config.getint('consts', 'PASSBACK_TIMER'),
+    },
+}
+celery.conf.timezone = 'Europe/Moscow'  # todo: get from env
+
+
+@celery.task(name="create_task", queue='check-solution', bind=True)
 def create_task(self, check_info):
     check_obj = Check(check_info)
     check_id = str(check_obj._id)
@@ -57,3 +70,9 @@ def create_task(self, check_info):
 def remove_files(filepaths):
     for filepath in filepaths:
         if exists(filepath): os.remove(filepath)
+
+
+@celery.task(name="passback-task", queue='passback-grade')
+def passback_task():
+    print('Run passback')
+    return passback_grades.run_passback()
