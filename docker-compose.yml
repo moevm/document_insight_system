@@ -39,17 +39,20 @@ services:
 
   worker-dashboard:
     image: slides_checker_base_image
-    command: celery flower -A core --url_prefix=/smonitor --port=5555 --broker=redis://redis:6379/0
+    command: celery flower -A monitoring --port=${FLOWER_PORT} --broker=${REDIS_URL} --persistent=True
     ports:
-      - "5555:5555"
+      - "${FLOWER_PORT}:5555"
     environment:
-      - SECRET_KEY=${SECRET_KEY}
-      - CELERY_BROKER=redis://redis:6379/0
-      - CELERY_BACKEND=redis://redis:6379/0
+      - SECRET_KEY=${FLOWER_SECRET_KEY}
+      - CELERY_BROKER=${REDIS_URL}
+      - CELERY_BACKEND=${REDIS_URL}
+    volumes:
+      - flower_data:/etc/db/
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     depends_on:
-      - web
+      - worker
       - redis
-
 
   redis:
     image: redis:6-alpine
