@@ -42,7 +42,7 @@ services:
 
   worker-dashboard:
     image: slides_checker_base_image
-    command: celery flower -A monitoring --port=5555 --broker=${REDIS_URL} --persistent=True
+    command: celery --broker=${REDIS_URL} flower --port=5555 --persistent=True
     ports:
       - "5555:5555"
     environment:
