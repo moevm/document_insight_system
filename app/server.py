@@ -239,7 +239,6 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
 
 
 @app.route("/results/<string:_id>", methods=["GET"])
-@login_required
 def results(_id):
     try:
         oid = ObjectId(_id)
@@ -343,8 +342,7 @@ def api_criteria_pack():
     #  testing pack initialization
     file_type_info = {'type': file_type}
     if file_type == DEFAULT_REPORT_TYPE_INFO['type']:
-        file_type_info['report_type'] = report_type if report_type in REPORT_TYPES else DEFAULT_REPORT_TYPE_INFO[
-            'report_type']
+        file_type_info['report_type'] = report_type if report_type in REPORT_TYPES else DEFAULT_REPORT_TYPE_INFO['report_type']
     inited, err = init_criterions(raw_criterions, file_type=file_type_info)
     if len(raw_criterions) != len(inited) or err:
         msg = f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. Успешно инициализированные: {inited}. Возникшие ошибки: {err}."
