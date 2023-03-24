@@ -10,17 +10,14 @@ class ReportShortSectionsCheck(BaseReportCriterion):
     description = "Поиск коротких разделов в отчёте"
     id = "short_sections_check"
 
-    default_min_len = 20
-    default_min_count = 5
-
-    def __init__(self, file_info, presets: str = 'LR_HEADERS',
-                 prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS, min_section_len=None):
+    def __init__(self, file_info, min_section_count = 5, min_section_len = 20,
+                 prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS):
         super().__init__(file_info)
-        self.headers = self.file.make_chapters(self.file_type['report_type'])
+        self.headers = []
         self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
         self.presets = StyleCheckSettings.CONFIGS.get(self.config)
-        self.min_section_len = min_section_len if min_section_len is not None else self.default_min_len
-        self.min_section_count = min_section_len if min_section_len is not None else self.default_min_count
+        self.min_section_len = min_section_len
+        self.min_section_count = min_section_count
         prechecked_props_lst = prechecked_props
         if prechecked_props_lst is None:
             prechecked_props_lst = StyleCheckSettings.PRECHECKED_PROPS
@@ -40,6 +37,9 @@ class ReportShortSectionsCheck(BaseReportCriterion):
         for preset in self.presets:
             if preset["unify_regex"] is not None:
                 self.file.unify_multiline_entities(preset["unify_regex"])
+
+    def late_init_vkr(self):
+        self.headers = self.file.make_chapters(self.file_type['report_type'])
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -73,6 +73,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
                 result_str = "Все разделы достигают рекомендуемой длины."
             return answer(result, result_str)
         elif self.file_type['report_type'] == 'VKR':
+            self.late_init_vkr()
             if not len(self.headers):
                 return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             for header in self.headers:
@@ -88,7 +89,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
                                       f' (не считая рисунки и таблицы) {len(header["child"])} ' \
                                       f'при минимальной рекомендуемой длине раздела в ' \
                                       f'{self.min_section_count} абзацев.'
-            if len(result_str) == 0:
+            if not result_str:
                 result_str = "Все обязательные разделы достигают рекомендуемой длины."
             return answer(result, result_str)
         else:

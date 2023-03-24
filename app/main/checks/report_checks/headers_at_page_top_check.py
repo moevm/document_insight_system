@@ -5,11 +5,17 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
     description = "Проверка расположения разделов первого уровня с новой страницы"
     id = "headers_at_page_top_check"
 
-    def __init__(self, file_info, headers):
+    def __init__(self, file_info, headers = []):
         super().__init__(file_info)
-        self.chapters = self.file.make_chapters(self.file_type['report_type'])
-        self.headers = self.find_headers() if (self.file_type['report_type'] == 'VKR') else headers
+        self.chapters = []
+        self.headers = headers
         self.pdf = self.file.pdf_file if self.file else None
+
+    def late_init_vkr(self):
+        chapters = self.file.make_chapters(self.file_type['report_type'])
+        if chapters:
+            self.chapters = chapters
+            self.headers = self.find_headers()
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -42,6 +48,7 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                     result_str += (("<br>" if len(result_str) else "")
                                    + f"Заголовка \"{header}\" нет в документе или он находится не в начале страницы.")
         elif self.file_type["report_type"] == 'VKR':
+            self.late_init_vkr()
             for page_num in range(1, self.pdf.page_count):
                 if not len(self.headers):
                     return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
@@ -68,7 +75,7 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
             result_str = "Во время обработки произошла критическая ошибка"
             return answer(False, result_str)
 
-        if not len(result_str):
+        if not result_str:
             result_str = "Все требуемые разделы начинаются с новой страницы."
         return answer(result, result_str)
 

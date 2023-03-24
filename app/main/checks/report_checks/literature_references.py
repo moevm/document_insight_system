@@ -9,6 +9,9 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
 
     def __init__(self, file_info):
         super().__init__(file_info)
+        self.headers = []
+
+    def late_init_vkr(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
 
     def check(self):
@@ -23,6 +26,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             else:
                 return answer(False, f'Нет списка литературы.')
         elif self.file_type['report_type'] == 'VKR':
+            self.late_init_vkr()
             if not len(self.headers):
                 return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             for header in self.headers:
@@ -51,7 +55,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 extras = references - all_numbers
                 unnamed = all_numbers - references
                 return answer(False,
-                              f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(extras))} <br> А также упомянуты не все источники: {", ".join(str(num) for num in sorted(unnamed))}<br><br>Убедитесь, что для ссылки на источник используются квадратные скобки и проверьте нумирацию источников.')
+                              f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(extras))} <br> А также упомянуты не все источники: {", ".join(str(num) for num in sorted(unnamed))}<br><br>Убедитесь, что для ссылки на источник используются квадратные скобки и проверьте нумерацию источников.')
         else:
             all_numbers -= references
             return answer(False,

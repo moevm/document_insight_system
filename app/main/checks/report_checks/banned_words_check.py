@@ -32,7 +32,7 @@ class ReportBannedWordsCheck(BaseReportCriterion):
             for k, v in detected_lines.items():
                 result_str += f'Страница №{k}:<br>{"<br>".join(detected_lines[k])}<br><br>'
         else:
-            result_str += 'Запретные слова не обнаружены!'
+            result_str += 'Пройдена!'
         result_score = 1
         if count > self.min_count:
             if count <= self.max_count:

@@ -19,7 +19,7 @@ AVAILABLE_CHECKS = {
     },
     'report': {
         ReportSimpleCheck.id: ReportSimpleCheck,
-        ReportNumberOfPages.id: ReportNumberOfPages,
+        ReportPageCounter.id: ReportPageCounter,
         ReportImageShareCheck.id: ReportImageShareCheck,
         ReportSectionCheck.id: ReportSectionCheck,
         ReportHeadersAtPageTopCheck.id: ReportHeadersAtPageTopCheck,
@@ -29,11 +29,10 @@ AVAILABLE_CHECKS = {
         ReportRightWordsCheck.id: ReportRightWordsCheck,
         BannedWordsInLiteratureCheck.id: BannedWordsInLiteratureCheck,
         ReferencesToLiteratureCheck.id: ReferencesToLiteratureCheck,
-        ReportNeededPages.id: ReportNeededPages,
-        ReportNeededHeaders.id: ReportNeededHeaders,
-        ReportHeaders.id: ReportHeaders,
-        ReportIntroduction.id: ReportIntroduction,
+        ReportFirstPagesCheck.id: ReportFirstPagesCheck,
+        ReportNeededHeadersCheck.id: ReportNeededHeadersCheck,
+        ReportChapters.id: ReportChapters,
+        ReportSectionComponent.id: ReportSectionComponent,
         ReportMainTextCheck.id: ReportMainTextCheck
-
     }
 }

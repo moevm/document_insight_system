@@ -9,48 +9,70 @@ class ReportMainTextCheck(BaseReportCriterion):
     description = "Проверка оформления основного текста отчета"
     id = 'main_text_check'
 
-    def __init__(self, file_info):
+    def __init__(self, file_info, main_text_styles = ["body text", "листинг", "вкр_подпись для рисунков", "вкр_подпись таблицы"]):
         super().__init__(file_info)
+        self.headers = []
+        self.main_text_styles = main_text_styles
+        self.target_styles = StyleCheckSettings.VKR_MAIN_TEXT_CONFIG
+        self.target_styles = list(map(lambda elem: {
+            "name": elem["name"],
+            "style": self.construct_style_from_description(elem["style"])
+        }, self.target_styles))
+
+    def late_init(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
-        self.preset = 'VKR_MAIN_TEXT' if (self.file_type['report_type'] == 'VKR') else 'LR_MAIN_TEXT'
-        self.styles: List[Style] = []
-        presets = StyleCheckSettings.CONFIGS.get(self.preset)
-        prechecked_props_lst = StyleCheckSettings.PRECHECKED_PROPS
-        for format_description in presets:
-            prechecked_dict = {key: format_description["style"].get(key) for key in prechecked_props_lst}
-            style = Style()
-            style.__dict__.update(prechecked_dict)
-            self.styles.append(style)
+
+    @staticmethod
+    def construct_style_from_description(style_dict):
+        style = Style()
+        style.__dict__.update(style_dict)
+        return style
+
+    @staticmethod
+    def style_diff(par, template_style):
+        err = []
+        for run in par["runs"]:
+            diff_lst = []
+            run["style"].matches(template_style, diff_lst)
+            diff_lst = list(map(
+                lambda diff: f"Абзац \"{par['text'][:17] + '...' if len(par['text']) > 20 else par['text']}\""
+                             f", фрагмент "
+                             f"\"{run['text'][:17] + '...' if len(run['text']) > 20 else run['text']}\": {diff}.",
+                diff_lst
+            ))
+            err.extend(diff_lst)
+        return err
 
     def check(self):
+        self.late_init()
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
-        err = []
+        result_str = ''
         if self.file_type['report_type'] == 'VKR':
-            indexes = self.file.build_vkr_hierarchy(self.styles)
+            if not len(self.headers):
+                return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             for header in self.headers:
                 for child in header["child"]:
-                    for index in indexes:
-                        if index["index"] > child["number"]:
-                            err.append({"child": child["text"], "type": 0})
-
+                    marked_style = 0
+                    for i in range(len(self.main_text_styles)):
+                        if child["style"].find(self.main_text_styles[i]) >= 0:
+                            marked_style = 1
+                            err = self.style_diff(child["styled_text"], self.target_styles[i]["style"])
+                            err = list(map(lambda msg: f'Стиль "{child["style"]}": ' + msg, err))
+                            result_str += ("<br>".join(err) + "<br>" if len(err) else "")
                             break
-                        elif index["index"] == child["number"]:
-                            if index["level"] == 3:
-                                if child["style"] == 'вкр_подпись для рисунков':
-                                    break
-                                else:
-                                    err.append({"child": child["text"], "type": 3})
-                                    break
-                            elif index["level"] == 4:
-                                if child["style"] == 'вкр_подпись таблицы':
-                                    break
-                                else:
-                                    err.append({"child": child["text"], "type": 4})
-                                    break
-                            elif index["level"]:
-                                break
-            return answer(0,
-                          f'Следующие листы не найдены либо их заголовки расположены не на первой строке новой страницы: <ul><li>{0}</ul>' +
-                          'Проверьте очередность листов и орфографию заголовков')
+                    if not marked_style:
+                        err = f"Абзац \"{child['text'][:17] + '...' if len(child['text']) > 20 else child['text']}\": "
+                        err += f'Стиль "{child["style"]}" не соответстует ни одному из стилей основного текста.'
+                        result_str += (str(err) + "<br>")
+
+            if not result_str:
+                return answer(True, "Форматирова"
+                                    "ние текста соответствует требованиям.")
+            else:
+                return answer(False, result_str)
+        else:
+            return answer(False, 'Во время обработки произошла критическая ошибка')
+
+
 

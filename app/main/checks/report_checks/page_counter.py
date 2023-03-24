@@ -3,13 +3,13 @@ import re
 from ..base_check import BaseReportCriterion, answer
 
 
-class ReportNumberOfPages(BaseReportCriterion):
+class ReportPageCounter(BaseReportCriterion):
     description = "Проверка количества страниц в файле"
     id = 'page_counter'
 
-    def __init__(self, file_info):
+    def __init__(self, file_info, min_number = 4, max_number = None):
         super().__init__(file_info)
-        self.number = [50, 70] if (self.file_type['report_type'] == 'VKR') else [5, None]
+        self.number = [min_number, max_number]
 
     def check(self):
         count = self.file.page_counter()

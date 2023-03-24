@@ -5,6 +5,7 @@ import tempfile
 from datetime import datetime, timedelta
 from os.path import join
 from sys import argv
+from app.main.check_packs.pack_config import DEFAULT_REPORT_TYPE_INFO
 
 import bson
 import pandas as pd
@@ -17,17 +18,15 @@ from flask_login import (LoginManager, current_user, login_required,
 from flask_recaptcha import ReCaptcha
 
 import servants.user as user
-from app.utils import format_check_for_table
 from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
-from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, \
-    init_criterions
+from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, init_criterions
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
-from utils import checklist_filter, decorator_assertion, get_file_len, format_check
+from utils import checklist_filter, decorator_assertion, get_file_len, timezone_offset, format_check
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
@@ -36,7 +35,7 @@ ALLOWED_EXTENSIONS = {
     'report': {'doc', 'odt', 'docx'}
 }
 DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
-TABLE_COLUMNS = ['Solution', 'User', 'File', 'Criteria', 'Check added', 'LMS date', 'Score']
+TABLE_COLUMNS = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./templates/")
 app.config.from_pyfile('settings.py')
@@ -87,7 +86,7 @@ def lti():
         file_type = file_type_info['type']
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
-
+        
         role = utils.get_role(temporary_user_params)
 
         logout_user()
@@ -148,7 +147,7 @@ def interact():
 @login_required
 def upload():
     if request.method == "POST":
-        if current_user.is_LTI or True:  # app.recaptcha.verify(): - disable captcha (cause no login)
+        if current_user.is_LTI or True:  # app.recaptcha.verify():
             return run_task()
         else:
             abort(401)
@@ -156,7 +155,8 @@ def upload():
         formats = set(current_user.formats)
         file_type = current_user.file_type['type']
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
-        return render_template("./upload.html", navi_upload=False, formats=sorted(formats))
+        return render_template("./upload.html", navi_upload=False, name=current_user.name, file_type=file_type,
+                               formats=sorted(formats))
 
 
 @app.route("/tasks", methods=["POST"])
@@ -189,13 +189,11 @@ def run_task():
         'user': current_user.username,
         'lms_user_id': current_user.lms_user_id,
         'enabled_checks': current_user.criteria,
-        'criteria': current_user.criteria,
         'file_type': current_user.file_type,
         'filename': file.filename,
         'score': -1,  # score=-1 -> checking in progress
         'is_ended': False,
-        'is_failed': False,
-        'params_for_passback': current_user.params_for_passback
+        'is_failed': False
     })
     db_methods.add_check(file_id, check)  # add check for parsed_file to db
     task = create_task.delay(check.pack(to_str=True))  # add check to queue
@@ -233,12 +231,13 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
                    'first_pages_check': 'Проверка наличия обязательных страниц в отчете',
                    'needed_headers_check': 'Проверка наличия обязательных заголовков в отчете',
                    'header_check': 'Проверка оформления заголовков отчета',
-                   'introduction_word_check': 'Проверка наличия необходимых компонент раздела Введение',
+                   'report_section_component': 'Проверка наличия необходимых компонент указанного раздела',
                    'main_text_check': 'Проверка оформления основного текста отчета'
                    }
 
 
 @app.route("/results/<string:_id>", methods=["GET"])
+@login_required
 def results(_id):
     try:
         oid = ObjectId(_id)
@@ -249,7 +248,7 @@ def results(_id):
     if check is not None:
         # show processing time for user
         avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
-        return render_template("./results.html", navi_upload=True, results=check,
+        return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id,
                                columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
                                stats=format_check(check.pack()))
     else:
@@ -422,7 +421,16 @@ def check_list_data():
     # construct response
     response = {
         "total": count,
-        "rows": [format_check_for_table(item) for item in rows]
+        "rows": [{
+            "_id": str(item["_id"]),
+            "filename": item["filename"],
+            "user": item["user"],
+            "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
+            "upload-date": (item["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
+            "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get(
+                'lms_passback_time') else '-',
+            "score": item["score"]
+        } for item in rows]
     }
 
     # return json data
@@ -445,7 +453,17 @@ def get_query(req):
 
 def get_stats():
     rows, count = db_methods.get_checks(**get_query(request))
-    return [format_check_for_table(item) for item in rows]
+    return [{
+        "_id": str(item["_id"]),
+        "filename": item["filename"],
+        "user": item["user"],
+        "lms-username": item["user"].rsplit('_', 1)[0],
+        "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
+        "upload-date": (item["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
+        "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get(
+            'lms_passback_time') else '-',
+        "score": item["score"]
+    } for item in rows]
 
 
 @app.route("/get_csv")
@@ -600,19 +618,18 @@ def version():
 @app.route('/profile/<string:username>', methods=["GET"])
 @login_required
 def profile(username):
-    return abort(404)
-    # if current_user.is_admin:
-    #     if username == '':
-    #         return redirect(url_for("profile", username=current_user.username))
-    #     u = db_methods.get_user(username)
-    #     me = True if username == current_user.username else False
-    #     if u is not None:
-    #         return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
-    #     else:
-    #         logger.info("Запрошенный пользователь не найден: " + username)
-    #         return render_template("./404.html")
-    # else:
-    #     abort(403)
+    if current_user.is_admin:
+        if username == '':
+            return redirect(url_for("profile", username=current_user.username))
+        u = db_methods.get_user(username)
+        me = True if username == current_user.username else False
+        if u is not None:
+            return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
+        else:
+            logger.info("Запрошенный пользователь не найден: " + username)
+            return render_template("./404.html")
+    else:
+        abort(403)
 
 
 @app.route("/capacity", methods=["GET"])
@@ -666,18 +683,6 @@ def add_header(r):
     return r
 
 
-class ReverseProxied(object):
-    def __init__(self, app):
-        self.app = app
-
-    def __call__(self, environ, start_response):
-        forwarded_scheme = environ.get("HTTP_X_FORWARDED_PROTO", None)
-        preferred_scheme = app.config.get("PREFERRED_URL_SCHEME", None)
-        if "https" in [forwarded_scheme, preferred_scheme]:
-            environ["wsgi.url_scheme"] = "https"
-        return self.app(environ, start_response)
-
-
 if __name__ == '__main__':
     DEBUG = True
     if len(argv) == 2:
@@ -689,7 +694,6 @@ if __name__ == '__main__':
         logger.info("По умолчанию выбран отладочный режим...")
 
     if pre_luncher.init(app, DEBUG):
-        app.wsgi_app = ReverseProxied(app.wsgi_app)
         port = 8080
         ip = '0.0.0.0'
         logger.info("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
