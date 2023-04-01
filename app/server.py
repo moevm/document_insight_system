@@ -239,7 +239,6 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
 
 
 @app.route("/results/<string:_id>", methods=["GET"])
-@login_required
 def results(_id):
     try:
         oid = ObjectId(_id)
@@ -676,7 +675,6 @@ class ReverseProxied(object):
         preferred_scheme = app.config.get("PREFERRED_URL_SCHEME", None)
         if "https" in [forwarded_scheme, preferred_scheme]:
             environ["wsgi.url_scheme"] = "https"
-        return self.app(environ, start_response)
         return self.app(environ, start_response)
 
 
