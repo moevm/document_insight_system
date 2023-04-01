@@ -6,9 +6,10 @@ from .style_check_settings import StyleCheckSettings
 from ..base_check import BaseReportCriterion, answer
 
 
-class ReportSectionCheck(BaseReportCriterion):
+class LRReportSectionCheck(BaseReportCriterion):
+    # TODO: DEPRECATED
     description = "Проверка соответствия заголовков разделов требуемым стилям"
-    id = "sections_check"
+    id = "lr_sections_check"
 
     def __init__(self, file_info, presets: str = 'LR_HEADERS',
                  prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS):

@@ -1,6 +1,6 @@
 from .presentation_checks import *
 from .report_checks import *
-from .report_checks.sections_check import ReportSectionCheck
+from .report_checks.sections_check import LRReportSectionCheck
 from .report_checks.headers_at_page_top_check import ReportHeadersAtPageTopCheck
 from .report_checks.style_check import ReportStyleCheck
 
@@ -21,7 +21,7 @@ AVAILABLE_CHECKS = {
         ReportSimpleCheck.id: ReportSimpleCheck,
         ReportPageCounter.id: ReportPageCounter,
         ReportImageShareCheck.id: ReportImageShareCheck,
-        ReportSectionCheck.id: ReportSectionCheck,
+        LRReportSectionCheck.id: LRReportSectionCheck,
         ReportHeadersAtPageTopCheck.id: ReportHeadersAtPageTopCheck,
         ReportShortSectionsCheck.id: ReportShortSectionsCheck,
         ReportStyleCheck.id: ReportStyleCheck,
