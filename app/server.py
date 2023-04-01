@@ -7,6 +7,7 @@ from os.path import join
 from sys import argv
 from app.main.check_packs.pack_config import DEFAULT_REPORT_TYPE_INFO
 
+
 import bson
 import pandas as pd
 from bson import ObjectId
@@ -87,7 +88,7 @@ def lti():
         file_type = file_type_info['type']
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
-        
+
         role = utils.get_role(temporary_user_params)
 
         logout_user()
@@ -202,6 +203,23 @@ def run_task():
     db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
     return {'task_id': task.id, 'check_id': str(file_id)}
 
+@app.route("/recheck/<check_id>", methods=["GET"])
+@login_required
+def recheck(check_id):
+    if not current_user.is_admin:
+        abort(403)
+    oid = ObjectId(check_id)
+    check = db_methods.get_check(oid)
+
+    if not check:
+        abort(404)
+    filepath = join(UPLOAD_FOLDER, f"{check_id}.{check.filename.rsplit('.', 1)[-1]}")
+    check.is_ended = False
+    db_methods.update_check(check)
+    db_methods.write_file_from_db_file(oid, filepath)
+    task = create_task.delay(check.pack(to_str=True))  # add check to queue
+    db_methods.add_celery_task(task.id, check_id)  # mapping celery_task to check (check_id = file_id)
+    return {'task_id': task.id, 'check_id': check_id}
 
 @app.route("/tasks/<task_id>", methods=["GET"])
 @login_required
@@ -613,7 +631,7 @@ def profile(username):
     #         return render_template("./404.html")
     # else:
     #     abort(403)
-      
+
 
 @app.route("/capacity", methods=["GET"])
 def system_capacity():
@@ -664,8 +682,8 @@ def add_header(r):
         r.headers["Expires"] = "0"
         r.headers['Cache-Control'] = 'public, max-age=0'
     return r
-  
-  
+
+
 class ReverseProxied(object):
     def __init__(self, app):
         self.app = app
