@@ -10,7 +10,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
     description = "Поиск коротких разделов в отчёте"
     id = "short_sections_check"
 
-    def __init__(self, file_info, min_section_count = 5, min_section_len = 20,
+    def __init__(self, file_info, min_section_count = 1, min_section_len = 10,
                  prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS):
         super().__init__(file_info)
         self.headers = []
