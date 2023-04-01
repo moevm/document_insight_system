@@ -5,12 +5,14 @@ class ReportSectionComponent(BaseReportCriterion):
     description = "Проверка наличия необходимых компонент указанного раздела"
     id = 'report_section_component'
 
-    def __init__(self, file_info, chapter = 'введение', patterns = [{"name": "Цель", "text": "цель", "marker": 0}, {"name": "Задачи", "text": "задачи", "marker": 0}, {"name": "Объект", "text": "объект", "marker": 0}, {"name": "Предмет", "text": "предмет", "marker": 0}]):
+    def __init__(self, file_info, chapter='введение', patterns=('цель', 'задачи', 'объект', 'предмет')):
         super().__init__(file_info)
         self.intro = {}
         self.chapter = chapter
         self.chapters = []
-        self.patterns = patterns
+        self.patterns = []
+        for pattern in patterns:
+            self.patterns.append({"name": pattern.capitalize(), "text": pattern, "marker": 0})
 
     def late_init(self):
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
@@ -37,7 +39,7 @@ class ReportSectionComponent(BaseReportCriterion):
 
         for pattern in self.patterns:
             if not pattern["marker"]:
-                result_str += '<li>'+ pattern["name"] + '</li>'
+                result_str += '<li>' + pattern["name"] + '</li>'
 
         if not result_str:
             return answer(True, "Все необходимые компоненты раздела Введение обнаружены!")
