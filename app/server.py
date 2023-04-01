@@ -5,6 +5,8 @@ import tempfile
 from datetime import datetime, timedelta
 from os.path import join
 from sys import argv
+from app.main.check_packs.pack_config import DEFAULT_REPORT_TYPE_INFO
+
 
 import bson
 import pandas as pd
@@ -22,12 +24,11 @@ from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
-from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, \
-    init_criterions
+from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, init_criterions
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
-from utils import checklist_filter, decorator_assertion, get_file_len, format_check
+from utils import checklist_filter, decorator_assertion, get_file_len, timezone_offset, format_check
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
@@ -202,6 +203,23 @@ def run_task():
     db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
     return {'task_id': task.id, 'check_id': str(file_id)}
 
+@app.route("/recheck/<check_id>", methods=["GET"])
+@login_required
+def recheck(check_id):
+    if not current_user.is_admin:
+        abort(403)
+    oid = ObjectId(check_id)
+    check = db_methods.get_check(oid)
+
+    if not check:
+        abort(404)
+    filepath = join(UPLOAD_FOLDER, f"{check_id}.{check.filename.rsplit('.', 1)[-1]}")
+    check.is_ended = False
+    db_methods.update_check(check)
+    db_methods.write_file_from_db_file(oid, filepath)
+    task = create_task.delay(check.pack(to_str=True))  # add check to queue
+    db_methods.add_celery_task(task.id, check_id)  # mapping celery_task to check (check_id = file_id)
+    return {'task_id': task.id, 'check_id': check_id}
 
 @app.route("/tasks/<task_id>", methods=["GET"])
 @login_required
@@ -230,7 +248,11 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
                    'page_counter': 'Проверка количества страниц',
                    'image_share_check': 'Проверка доли объема отчёта, приходящейся на изображения',
                    'right_words_check': 'Проверка наличия определенных (правильных) слов в тексте отчёта',
-                   'introduction_word_check': 'Проверка наличия необходимых компонент раздела Введение'
+                   'first_pages_check': 'Проверка наличия обязательных страниц в отчете',
+                   'needed_headers_check': 'Проверка наличия обязательных заголовков в отчете',
+                   'header_check': 'Проверка оформления заголовков отчета',
+                   'report_section_component': 'Проверка наличия необходимых компонент указанного раздела',
+                   'main_text_check': 'Проверка оформления основного текста отчета'
                    }
 
 

@@ -20,7 +20,7 @@ class ReportRightWordsCheck(BaseReportCriterion):
         if all(value == True for value in self.patterns.values()):
             result_score = 1
         if result_score:
-            return answer(result_score, "Все слова обнаружены в тексте!")
+            return answer(result_score, "Пройдена!")
         else:
             result_str = '</li><li>'.join([k for k, v in self.patterns.items() if not v])
             return answer(result_score, f'Не найдены слова, соответствующие следующим регулярным выражениям: <ul><li>{result_str}</ul>')

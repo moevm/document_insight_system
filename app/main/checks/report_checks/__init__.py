@@ -2,11 +2,16 @@ from .simple_check import ReportSimpleCheck
 from .literature_references import ReferencesToLiteratureCheck
 from .banned_words_in_literature import BannedWordsInLiteratureCheck
 from .banned_words_check import ReportBannedWordsCheck
-from .page_counter import ReportNumberOfPages
+from .page_counter import ReportPageCounter
 from .image_share_check import ReportImageShareCheck
 from .right_words_check import ReportRightWordsCheck
 from .headers_at_page_top_check import ReportHeadersAtPageTopCheck
-from .sections_check import ReportSectionCheck
+from .sections_check import LRReportSectionCheck
 from .style_check_settings import StyleCheckSettings
 from .short_sections_check import ReportShortSectionsCheck
-from .intro import ReportIntroduction
+from .first_pages_check import ReportFirstPagesCheck
+from .needed_headers_check import ReportNeededHeadersCheck
+from .chapters import ReportChapters
+from .section_component import ReportSectionComponent
+from .main_text_check import ReportMainTextCheck
+

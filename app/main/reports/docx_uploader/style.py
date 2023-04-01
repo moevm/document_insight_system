@@ -140,8 +140,10 @@ class Style:
                     return False
                 else:
                     flag = False
-                    error_list.append("{0}: ожидалось \"{1}\", фактически \"{2}\"".format(
-                        Style._friendly_property_names[property_name], getattr(template_style, property_name),
-                        "по умолчанию" if getattr(self, property_name) is None else getattr(self, property_name)
+                    if getattr(self, property_name):
+                        error_list.append("{0}: ожидалось \"{1}\", фактически \"{2}\"".format(
+                            Style._friendly_property_names[property_name], getattr(template_style, property_name),
+                            # "по умолчанию" if getattr(self, property_name) is None else getattr(self, property_name)
+                            getattr(self, property_name)
                     ))
         return flag
