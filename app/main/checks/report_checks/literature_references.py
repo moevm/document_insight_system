@@ -10,6 +10,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def __init__(self, file_info):
         super().__init__(file_info)
         self.headers = []
+        self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
 
     def late_init_vkr(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
@@ -30,8 +31,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             if not len(self.headers):
                 return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             for header in self.headers:
-                header_text = header["text"].lower()
-                if header_text.find('список использованных источников') >= 0:
+                header_text = header["text"].lower().strip()
+                if re.fullmatch(self.name_pattern, header_text):
                     number_of_sources = self.count_sources_vkr(header)
                     if not number_of_sources:
                         return answer(False, f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
@@ -79,9 +80,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def find_start_paragraph(self):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
-            text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
-            if re.fullmatch(r'text\s+список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы).?\s*',
-                            text_string):
+            text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1].strip()
+            if re.fullmatch(self.name_pattern, text_string):
                 start_index = i
                 break
         return start_index
@@ -106,9 +106,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             last_string = len(one_page)
 
             for j in range(len(one_page)):
-                one_str_lowercase = one_page[j].lower()
-                if re.search(r'\s+список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы).?\s*\n',
-                             one_str_lowercase):
+                one_str_lowercase = one_page[j].lower().strip()
+                if re.search(self.name_pattern, one_str_lowercase):
                     first_string = j
                     break
             for j in range(first_string, len(one_page)):
@@ -126,8 +125,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         end_page = self.file.pdf_file.page_count
         for i in self.file.pdf_file.text_on_page.keys():
             lowercase_str = self.file.pdf_file.text_on_page[i].lower()
-            if re.search(r'\s*список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы).?\s*',
-                         lowercase_str):
+            if re.search(self.name_pattern, lowercase_str):
                 start_page = i
             if re.search('приложение а[\n .]', lowercase_str):
                 end_page = i
