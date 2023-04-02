@@ -18,7 +18,7 @@ jobs:
           cp .env_example .env
           docker-compose build
       - name: Run docker-compose
-        run:
+        run: |
           docker-compose up -d
           sleep 10
       - name: Run tests
