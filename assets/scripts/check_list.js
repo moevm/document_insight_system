@@ -1,13 +1,13 @@
 const AJAX_URL = "/check_list/data"
 
-String.prototype.insert = function(index, string) {
+String.prototype.insert = function (index, string) {
     if (index > 0) {
         return this.substring(0, index) + string + this.substr(index)
     }
     return string + this
 }
 
-$(()=>{
+$(() => {
     initTable()
     window.onpopstate = onPopState
 
@@ -21,8 +21,7 @@ $(()=>{
             let expectedStr
             if (carret <= numbers[0].length) {
                 expectedStr = numbers[0].insert(carret, ".")
-            }
-            else {
+            } else {
                 expectedStr = numbers[1].insert(carret - numbers[0].length - 1, ".")
             }
 
@@ -73,7 +72,7 @@ function initTable() {
     // check correct sort query
     if (params.sort !== "") {
         let match = false
-        $table.find("th[data-sortable='true']").each(function() {
+        $table.find("th[data-sortable='true']").each(function () {
             if ($(this).data("field") === params.sort) {
                 match = true
                 return false
@@ -93,7 +92,7 @@ function initTable() {
     }
 
     // Fill filters
-    $table.on("created-controls.bs.table", function() {
+    $table.on("created-controls.bs.table", function () {
         if (params.filter) {
             params.filter = JSON.parse(decodeURI(params.filter))
             for (const [key, value] of Object.entries(params.filter)) {
@@ -146,10 +145,10 @@ function pushHistoryState(params) {
 
 function queryParams(params) {
     filters = {}
-    $('.filter-control').each(function() {
+    $('.filter-control').each(function () {
         const name = $(this).parents("th").data("field")
         const val = this.querySelector("input").value
-        if (val){
+        if (val) {
             filters[name] = val
         }
     })
@@ -174,67 +173,67 @@ function idFormatter(value, row, index, field) {
 }
 
 function timeStamp() {
-  var now = new Date();
-  var date = [ now.getMonth() + 1, now.getDate(), now.getFullYear() ];
-  var time = [ now.getHours(), now.getMinutes(), now.getSeconds() ];
-  var suffix = ( time[0] < 12 ) ? "AM" : "PM";
+    var now = new Date();
+    var date = [now.getMonth() + 1, now.getDate(), now.getFullYear()];
+    var time = [now.getHours(), now.getMinutes(), now.getSeconds()];
+    var suffix = (time[0] < 12) ? "AM" : "PM";
 
-  time[0] = ( time[0] < 12 ) ? time[0] : time[0] - 12;
-  time[0] = time[0] || 12;
-  for ( var i = 1; i < 3; i++ ) {
-    if ( time[i] < 10 ) {
-      time[i] = "0" + time[i];
+    time[0] = (time[0] < 12) ? time[0] : time[0] - 12;
+    time[0] = time[0] || 12;
+    for (var i = 1; i < 3; i++) {
+        if (time[i] < 10) {
+            time[i] = "0" + time[i];
+        }
     }
-  }
-  return '[' + date.join(".") + "_" + time.join(".") + suffix + ']';
+    return '[' + date.join(".") + "_" + time.join(".") + suffix + ']';
 }
 
 function buttons() {
     if (is_admin)
         return {
-        FetchCSV: {
-            text: 'CSV',
-            event: function () {
-                const queryString = window.location.search
-                const params = Object.fromEntries(new URLSearchParams(queryString).entries())
-                $("[name=FetchCSV]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Exporting..."
-                fetch('get_csv' + '?' + $.param(params))
-                    .then(response => response.blob())
-                    .then(blob => {
-                        $("[name=FetchCSV]")[0].textContent = "CSV"
-                        downdloadBlob(blob, `Презентации.csv`)
-                    });
-            }
-        },
-        FetchZip: {
-            text: 'Скачать архив',
-            event: function () {
-                const queryString = window.location.search
-                const params = Object.fromEntries(new URLSearchParams(queryString).entries())
-                $("[name=FetchZip]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Архивирование..."
-                fetch('get_zip' + '?' + $.param(params))
-                    .then(response => response.ok ? response.blob() : false)
-                    .then(blob => {
-                        $("[name=FetchZip]")[0].textContent = "Скачать архив"
-                        if (blob)
-                            downdloadBlob(blob, `Презентации.zip`)
-                        else
-                            alert("Error during file download")
-                    });
-            }
-        },
-        LatestChecks: {
-            text: 'Latest',
-            event: function () {
-                $("#check-list-table").bootstrapTable('refresh', { query: { latest: true } });
+            FetchCSV: {
+                text: 'CSV',
+                event: function () {
+                    const queryString = window.location.search
+                    const params = Object.fromEntries(new URLSearchParams(queryString).entries())
+                    $("[name=FetchCSV]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Exporting..."
+                    fetch('get_csv' + '?' + $.param(params))
+                        .then(response => response.blob())
+                        .then(blob => {
+                            $("[name=FetchCSV]")[0].textContent = "CSV"
+                            downdloadBlob(blob, `Презентации.csv`)
+                        });
+                }
+            },
+            FetchZip: {
+                text: 'Скачать архив',
+                event: function () {
+                    const queryString = window.location.search
+                    const params = Object.fromEntries(new URLSearchParams(queryString).entries())
+                    $("[name=FetchZip]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Архивирование..."
+                    fetch('get_zip' + '?' + $.param(params))
+                        .then(response => response.ok ? response.blob() : false)
+                        .then(blob => {
+                            $("[name=FetchZip]")[0].textContent = "Скачать архив"
+                            if (blob)
+                                downdloadBlob(blob, `Презентации.zip`)
+                            else
+                                alert("Error during file download")
+                        });
+                }
+            },
+            LatestChecks: {
+                text: 'Latest',
+                event: function () {
+                    $("#check-list-table").bootstrapTable('refresh', {query: {latest: true}});
+                }
             }
         }
-    }
     else
         return {}
 }
 
-function downdloadBlob(blob, filename){
+function downdloadBlob(blob, filename) {
     var url = window.URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;

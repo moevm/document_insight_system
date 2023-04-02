@@ -1,5 +1,6 @@
 from docx.shared import Cm
 
+
 class StyleInfo:
     def __init__(self, docx_paragraph_style):
         if docx_paragraph_style is not None:
@@ -27,16 +28,16 @@ class StyleInfo:
 
     def __str__(self):
         return ("{0} font, {1} pt\nBold: {2}\nItalic: {3}\nAll caps: {4}\nAlignment:"
-                + "{5}\nFirst line indent: {6}\nLine spacing: {7}")\
-                    .format(self.font_name,
-                            self.__pretty_print(self.font_size),
-                            self.bold,
-                            self.italic,
-                            self.all_caps,
-                            self.alignment,
-                            self.__pretty_print(self.first_line_indent),
-                            self.__pretty_print(self.line_spacing)
-                            )
+                + "{5}\nFirst line indent: {6}\nLine spacing: {7}") \
+            .format(self.font_name,
+                    self.__pretty_print(self.font_size),
+                    self.bold,
+                    self.italic,
+                    self.all_caps,
+                    self.alignment,
+                    self.__pretty_print(self.first_line_indent),
+                    self.__pretty_print(self.line_spacing)
+                    )
 
     @staticmethod
     def __pretty_print(prop):

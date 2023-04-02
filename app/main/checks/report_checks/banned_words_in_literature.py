@@ -1,5 +1,6 @@
-from ..base_check import BaseReportCriterion, answer, morph
 import re
+
+from ..base_check import BaseReportCriterion, answer, morph
 
 
 class BannedWordsInLiteratureCheck(BaseReportCriterion):

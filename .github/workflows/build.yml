@@ -1,0 +1,27 @@
+name: CI
+
+on: pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build system images (non-pulling)
+        run: |
+          # build base image
+          docker build -f Dockerfile_base -t osll/slides-base:20230202 .
+      - name: Build docker-compose
+        run: |
+          cp .env_example .env
+          docker-compose build
+      - name: Run docker-compose
+        run: |
+          docker-compose up -d
+          sleep 10
+      - name: Run tests
+        run: |
+          curl http://localhost:8080
+          curl http://localhost:5555

@@ -1,13 +1,13 @@
 import hashlib
 import logging
 
-from pymongo.errors import ConnectionFailure
-
 from db.db_methods import add_user, get_user, get_client, edit_user, save_criteria_pack
 from main.check_packs.pack_config import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO
+from pymongo.errors import ConnectionFailure
 from server import ALLOWED_EXTENSIONS
 
 logger = logging.getLogger('root_logger')
+
 
 def get_hash(password): return hashlib.md5(password.encode()).hexdigest()
 

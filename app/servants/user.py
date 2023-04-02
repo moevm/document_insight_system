@@ -1,8 +1,7 @@
 import logging
 
-from flask_login import logout_user, current_user
-
 from db import db_methods
+from flask_login import logout_user, current_user
 
 logger = logging.getLogger('root_logger')
 

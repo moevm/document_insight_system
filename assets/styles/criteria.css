@@ -17,11 +17,9 @@
 }
 
 
-
-.form-control-range:disabled~.form-range-input, .form-control-range[disabled]~.form-range-input {
+.form-control-range:disabled ~ .form-range-input, .form-control-range[disabled] ~ .form-range-input {
     color: #6c757d;
 }
-
 
 
 #slides_number_options_holder {

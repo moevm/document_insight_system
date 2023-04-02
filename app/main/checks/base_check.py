@@ -2,6 +2,7 @@ import pymorphy2
 
 morph = pymorphy2.MorphAnalyzer()
 
+
 def answer(mod, *args):
     return {
         'score': float(mod),

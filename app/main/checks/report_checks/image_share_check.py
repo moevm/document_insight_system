@@ -5,7 +5,7 @@ class ReportImageShareCheck(BaseReportCriterion):
     description = "Проверка доли объема отчёта, приходящейся на изображения"
     id = 'image_share_check'
 
-    def __init__(self, file_info, limit = 0.3):
+    def __init__(self, file_info, limit=0.3):
         super().__init__(file_info)
         self.limit = limit
 
@@ -16,7 +16,8 @@ class ReportImageShareCheck(BaseReportCriterion):
         for image in self.file.inline_shapes:
             images_height += image.height.cm
         if len(self.file.file.sections):
-            available_space = self.file.file.sections[0].page_height.cm - self.file.file.sections[0].bottom_margin.cm - self.file.file.sections[0].top_margin.cm
+            available_space = self.file.file.sections[0].page_height.cm - self.file.file.sections[0].bottom_margin.cm - \
+                              self.file.file.sections[0].top_margin.cm
             images_pages = images_height / available_space
             share = images_pages / self.file.count
             if share > self.limit:

@@ -6,7 +6,6 @@ from celery import Celery
 
 import passback_grades
 from db import db_methods
-from db.db_methods import get_user
 from db.db_types import Check
 from main.checker import check
 from main.parser import parse

@@ -1,6 +1,5 @@
-from oauthlib.oauth1 import RequestValidator
-
 from db.db_methods import ConsumersDBManager
+from oauthlib.oauth1 import RequestValidator
 
 
 class LTIRequestValidator(RequestValidator):

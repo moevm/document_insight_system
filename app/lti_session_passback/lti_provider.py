@@ -1,5 +1,7 @@
-from lti.tool_provider import ToolProvider, ProxyValidator
+from lti.tool_provider import ToolProvider
+
 from .lti_outcome import LTIOutcomeRequest
+
 
 class LTIProvider(ToolProvider):
     """

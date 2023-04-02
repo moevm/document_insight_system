@@ -1,8 +1,9 @@
 import requests
-from requests_oauthlib import OAuth1
-from requests_oauthlib.oauth1_auth import SIGNATURE_TYPE_AUTH_HEADER
 from lti.outcome_request import OutcomeRequest, InvalidLTIConfigError
 from lti.outcome_response import OutcomeResponse
+from requests_oauthlib import OAuth1
+from requests_oauthlib.oauth1_auth import SIGNATURE_TYPE_AUTH_HEADER
+
 
 class LTIOutcomeRequest(OutcomeRequest):
     """
