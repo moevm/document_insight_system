@@ -8,19 +8,17 @@ const RAW_CRITERION_VALIDATION_ERRORS = {
 }
 
 $("#file_type").change(function () {
-    switch($(this).val()){
-        case "pres":
-            {
-                $("#report_type").attr('disabled', true)
-                $("#report_type").attr('hidden', true)
-                break;
-            }
-        case "report":
-            {
-                $("#report_type").attr('disabled', false)
-                $("#report_type").attr('hidden', false)
-                break;
-            }
+    switch ($(this).val()) {
+        case "pres": {
+            $("#report_type").attr('disabled', true)
+            $("#report_type").attr('hidden', true)
+            break;
+        }
+        case "report": {
+            $("#report_type").attr('disabled', false)
+            $("#report_type").attr('hidden', false)
+            break;
+        }
     }
 })
 
