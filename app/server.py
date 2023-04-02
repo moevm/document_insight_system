@@ -412,28 +412,30 @@ def check_list():
     return render_template("./check_list.html", name=current_user.name, navi_upload=True)
 
 
+
 @app.route("/check_list/data")
 @login_required
 def check_list_data():
-    filter_query = checklist_filter(request)
+    data = request.args.copy()
+    filter_query = checklist_filter(data)
     # parse and validate rest query
-    limit = request.args.get("limit", "")
-    limit = int(limit) if limit.isnumeric() else 10
+    limit = data.get("limit")
+    limit = limit if isinstance(limit, int) else 10
 
-    offset = request.args.get("offset", "")
-    offset = int(offset) if offset.isnumeric() else 0
+    offset = data.get("offset")
+    offset = offset if isinstance(offset, int) else 0
 
-    sort = request.args.get("sort", "")
+    sort = data.get("sort")
     sort = 'upload-date' if not sort else sort
 
-    order = request.args.get("order", "")
+    order = data.get("order")
     order = 'desc' if not order else order
 
     sort = "_id" if sort == "upload-date" else sort
 
     query = dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
 
-    if request.args.get("latest"):
+    if data.get("latest"):
         rows, count = db_methods.get_latest_check_cursor(**query)
     else:
         # get data and records count
@@ -451,7 +453,7 @@ def check_list_data():
 
 def get_query(req):
     # query for download csv/zip
-    filter_query = checklist_filter(req)
+    filter_query = checklist_filter(req.args)
     limit = False
     offset = False
     sort = req.args.get("sort", "")
@@ -476,9 +478,10 @@ def get_csv():
     response = get_stats()
     df = pd.read_json(json.dumps(response))
     return Response(
-        df.to_csv(),
+        df.to_csv(sep=',', encoding='utf-8'),
         mimetype="text/csv",
-        headers={"Content-disposition": "attachment"})
+        headers={"Content-disposition": "attachment"}
+    )
 
 
 @app.route("/get_zip")
@@ -501,7 +504,7 @@ def get_zip():
     # add csv
     response = get_stats()
     df = pd.read_json(json.dumps(response))
-    df.to_csv(f"{dirpath.name}/Презентации.csv")
+    df.to_csv(f"{dirpath.name}/Статистика.csv")
 
     # zip
     tmp = tempfile.TemporaryDirectory()
