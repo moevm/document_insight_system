@@ -195,57 +195,57 @@ class Version30(Version):
     @staticmethod
     def map(key, value):
         if key == 'slides_number':
-            result =  {
+            result = {
                 'id': key,
                 'name': "Количество основных слайдов"
             }
         if key == 'slides_enum':
-            result =  {
+            result = {
                 'id': key,
                 'name': "Нумерация слайдов"
             }
         if key == 'slides_headers':
-            result =  {
+            result = {
                 'id': key,
                 'name': "Заголовки слайдов присутствуют и занимают не более двух строк"
             }
         if key == 'goals_slide':
-            result =  {
+            result = {
                 'id': 'find_slides',
                 'name': "Слайд 'Цель и задачи'"
             }
         if key == 'probe_slide':
-            result =  {
+            result = {
                 'id': 'find_slides',
                 'name': "Слайд 'Апробация работы'"
             }
         if key == 'actual_slide':
-            result =  {
+            result = {
                 'id': 'find_on_slide',
                 'name': "Слайд с описанием актуальности работы"
             }
         if key == 'conclusion_slide':
-            result =  {
+            result = {
                 'id': 'find_slides',
                 'name': "Слайд с заключением"
             }
         if key == 'slide_every_task':
-            result =  {
+            result = {
                 'id': key,
                 'name': "Наличие слайдов, посвященных задачам"
             }
         if key == 'conclusion_actual':
-            result =  {
+            result = {
                 'id': key,
                 'name': "Соответствие заключения задачам",
             }
         if key == 'conclusion_along':
-            result =  {
+            result = {
                 'id': 'future_dev',
                 'name': "Наличие направлений дальнейшего развития"
             }
         if key == 'template_name':
-            result =  {
+            result = {
                 'id': key,
                 'name': 'Соответствие названия файла шаблону'
             }
@@ -255,13 +255,13 @@ class Version30(Version):
 
     @classmethod
     def update_database(cls, collections, prev_version):
-        if prev_version in (Version22.VERSION_NAME, ):
+        if prev_version in (Version22.VERSION_NAME,):
             base_pres_pack = 'BasePresentationCriterionPack'
             # set criteria for all user as base pres pack id
             collections['users'].update_many({}, {'$set': {'criteria': base_pres_pack, 'file_type': 'pres'}})
             # update criteria results
             for check in collections['checks'].find():
-                new_list = [cls.map(k,v) for k, v in check['enabled_checks'].items() if v]
+                new_list = [cls.map(k, v) for k, v in check['enabled_checks'].items() if v]
                 collections['checks'].update_one({'_id': check['_id']}, {'$set': {'enabled_checks': new_list}})
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
@@ -273,18 +273,20 @@ class Version31(Version):
 
     @classmethod
     def update_database(cls, collections, prev_version):
-        if prev_version in (Version30.VERSION_NAME, ):
+        if prev_version in (Version30.VERSION_NAME,):
             packs = {
                 'pres': {'type': 'pres'},
                 'report': {'type': 'report', 'report_type': 'LR'}
             }
             # set new file_type for pack depends on old type
             for pack_name in packs:
-                collections['criteria_pack'].update_many({'file_type': pack_name}, {'$set': {'file_type': packs[pack_name]}})
+                collections['criteria_pack'].update_many({'file_type': pack_name},
+                                                         {'$set': {'file_type': packs[pack_name]}})
                 collections['users'].update_many({'file_type': pack_name}, {'$set': {'file_type': packs[pack_name]}})
                 collections['checks'].update_many({'file_type': pack_name}, {'$set': {'file_type': packs[pack_name]}})
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
+
 
 VERSIONS = {
     '1.0': Version10,

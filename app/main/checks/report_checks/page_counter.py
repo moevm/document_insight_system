@@ -1,5 +1,3 @@
-import re
-
 from ..base_check import BaseReportCriterion, answer
 
 
@@ -7,7 +5,7 @@ class ReportPageCounter(BaseReportCriterion):
     description = "Проверка количества страниц в файле"
     id = 'page_counter'
 
-    def __init__(self, file_info, min_number = 4, max_number = None):
+    def __init__(self, file_info, min_number=4, max_number=None):
         super().__init__(file_info)
         self.number = [min_number, max_number]
 

@@ -1,5 +1,7 @@
-from .db_methods import client
 import logging
+
+from .db_methods import client
+
 logger = logging.getLogger('root_logger')
 
 client.drop_database('pres-parser-db')

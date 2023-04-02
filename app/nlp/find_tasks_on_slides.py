@@ -1,9 +1,8 @@
 import logging
 import re
 
-from scipy.spatial import distance
-
 from nlp.stemming import Stemming
+from scipy.spatial import distance
 
 logger = logging.getLogger('root_logger')
 
@@ -45,7 +44,7 @@ def find_tasks_on_slides(slide_goal_and_tasks, titles, intersection):
                     found_descriptions.append(task)
                     founded_title = title
                     break
-            cleaned_titles.discard(founded_title) # remove founded title
+            cleaned_titles.discard(founded_title)  # remove founded title
         not_found_tasks = list(set(cleaned_tasks) - set(found_descriptions))
         return {
             'count': task_count,

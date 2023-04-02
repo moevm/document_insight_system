@@ -21,7 +21,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         number_of_sources = 0
         start_literature_par = 0
         if self.file_type['report_type'] == 'LR':
-            start_literature_par= self.find_start_paragraph()
+            start_literature_par = self.find_start_paragraph()
             if start_literature_par:
                 number_of_sources = self.count_sources()
             else:
@@ -29,16 +29,19 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         elif self.file_type['report_type'] == 'VKR':
             self.late_init_vkr()
             if not len(self.headers):
-                return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
+                return answer(False,
+                              "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             for header in self.headers:
                 header_text = header["text"].lower().strip()
                 if re.fullmatch(self.name_pattern, header_text):
                     number_of_sources = self.count_sources_vkr(header)
                     if not number_of_sources:
-                        return answer(False, f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
+                        return answer(False,
+                                      f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
                     start_literature_par = header["number"]
             if not start_literature_par:
-                return answer(False, f'Не найден Список использованных источников.<br><br>Проверьте корректность использования стилей.')
+                return answer(False,
+                              f'Не найден Список использованных источников.<br><br>Проверьте корректность использования стилей.')
         else:
             return answer(False, 'Во время обработки произошла критическая ошибка')
         references = self.search_references(start_literature_par)

@@ -154,10 +154,12 @@ def add_file_to_db(filename, filepath, file_id=None):
     fs.upload_from_stream_with_id(file_id, filename, open(filepath, 'rb'))
     return file_id
 
+
 def write_file_from_db_file(file_id, abs_filepath):
     with open(abs_filepath, 'wb+') as file:
         fs.download_to_stream(file_id, file)
     return True
+
 
 # Returns checks with given id or None
 def get_check(checks_id):

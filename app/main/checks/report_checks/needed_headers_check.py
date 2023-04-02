@@ -1,5 +1,5 @@
-from ..base_check import BaseReportCriterion, answer
 from .style_check_settings import StyleCheckSettings
+from ..base_check import BaseReportCriterion, answer
 
 
 class ReportNeededHeadersCheck(BaseReportCriterion):
@@ -30,7 +30,7 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
             for i in range(len(patterns)):
                 pattern = patterns[i]["pattern"]
                 if header_text.find(pattern.lower()) >= 0:
-                   patterns[i]["marker"] = 1
+                    patterns[i]["marker"] = 1
 
         for pattern in patterns:
             if not pattern["marker"]:

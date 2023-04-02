@@ -10,7 +10,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
     description = "Поиск коротких разделов в отчёте"
     id = "short_sections_check"
 
-    def __init__(self, file_info, min_section_count = 1, min_section_len = 10,
+    def __init__(self, file_info, min_section_count=1, min_section_len=10,
                  prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS):
         super().__init__(file_info)
         self.headers = []
@@ -75,7 +75,8 @@ class ReportShortSectionsCheck(BaseReportCriterion):
         elif self.file_type['report_type'] == 'VKR':
             self.late_init_vkr()
             if not len(self.headers):
-                return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
+                return answer(False,
+                              "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             for header in self.headers:
                 header_text = header["text"].lower()
                 if header_text.find("приложение") >= 0:

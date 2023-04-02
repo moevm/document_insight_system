@@ -1,9 +1,9 @@
 import re
-from typing import List
 
-from ..base_check import BaseReportCriterion, answer
 from .style_check_settings import StyleCheckSettings
+from ..base_check import BaseReportCriterion, answer
 from ...reports.docx_uploader.style import Style
+
 
 class ReportChapters(BaseReportCriterion):
     description = "Проверка оформления заголовков отчета"
@@ -58,7 +58,8 @@ class ReportChapters(BaseReportCriterion):
         result_str = ''
         if self.file_type['report_type'] == 'VKR':
             if not len(self.headers):
-                return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
+                return answer(False,
+                              "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             for header in self.headers:
                 marked_style = 0
                 for key in self.docx_styles.keys():
@@ -91,6 +92,3 @@ class ReportChapters(BaseReportCriterion):
                 return answer(False, result_string)
         else:
             return answer(False, 'Во время обработки произошла критическая ошибка')
-
-
-

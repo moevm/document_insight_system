@@ -1,2 +1,2 @@
-from .document import Document
 from .chapter import *
+from .document import Document

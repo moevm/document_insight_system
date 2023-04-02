@@ -1,5 +1,6 @@
-from .slide_pptx import SlidePPTX
 from pptx import Presentation
+
+from .slide_pptx import SlidePPTX
 from ..presentation_basic import PresentationBasic
 
 

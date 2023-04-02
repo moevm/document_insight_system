@@ -5,8 +5,6 @@ import tempfile
 from datetime import datetime, timedelta
 from os.path import join
 from sys import argv
-from app.main.check_packs.pack_config import DEFAULT_REPORT_TYPE_INFO
-
 
 import bson
 import pandas as pd
@@ -24,11 +22,12 @@ from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
-from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, init_criterions
+from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, \
+    init_criterions
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
-from utils import checklist_filter, decorator_assertion, get_file_len, timezone_offset, format_check
+from utils import checklist_filter, decorator_assertion, get_file_len, format_check
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
@@ -203,6 +202,7 @@ def run_task():
     db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
     return {'task_id': task.id, 'check_id': str(file_id)}
 
+
 @app.route("/recheck/<check_id>", methods=["GET"])
 @login_required
 def recheck(check_id):
@@ -220,6 +220,7 @@ def recheck(check_id):
     task = create_task.delay(check.pack(to_str=True))  # add check to queue
     db_methods.add_celery_task(task.id, check_id)  # mapping celery_task to check (check_id = file_id)
     return {'task_id': task.id, 'check_id': check_id}
+
 
 @app.route("/tasks/<task_id>", methods=["GET"])
 @login_required
@@ -360,7 +361,8 @@ def api_criteria_pack():
     #  testing pack initialization
     file_type_info = {'type': file_type}
     if file_type == DEFAULT_REPORT_TYPE_INFO['type']:
-        file_type_info['report_type'] = report_type if report_type in REPORT_TYPES else DEFAULT_REPORT_TYPE_INFO['report_type']
+        file_type_info['report_type'] = report_type if report_type in REPORT_TYPES else DEFAULT_REPORT_TYPE_INFO[
+            'report_type']
     inited, err = init_criterions(raw_criterions, file_type=file_type_info)
     if len(raw_criterions) != len(inited) or err:
         msg = f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. Успешно инициализированные: {inited}. Возникшие ошибки: {err}."

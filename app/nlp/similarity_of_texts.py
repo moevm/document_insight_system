@@ -1,8 +1,8 @@
 import re
-import random
 
 from nlp.find_tasks_on_slides import compare_sentences
 from nlp.stemming import Stemming
+
 
 def check_similarity(string1, string2):
     stemming = Stemming()

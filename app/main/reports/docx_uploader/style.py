@@ -1,6 +1,3 @@
-from docx.enum.text import WD_LINE_SPACING
-
-
 class Style:
     _friendly_property_names = {
         "font_name": "Имя шрифта",
@@ -145,5 +142,5 @@ class Style:
                             Style._friendly_property_names[property_name], getattr(template_style, property_name),
                             # "по умолчанию" if getattr(self, property_name) is None else getattr(self, property_name)
                             getattr(self, property_name)
-                    ))
+                        ))
         return flag

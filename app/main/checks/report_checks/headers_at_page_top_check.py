@@ -5,7 +5,7 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
     description = "Проверка расположения разделов первого уровня с новой страницы"
     id = "headers_at_page_top_check"
 
-    def __init__(self, file_info, headers = []):
+    def __init__(self, file_info, headers=[]):
         super().__init__(file_info)
         self.chapters = []
         self.headers = headers
@@ -51,11 +51,13 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
             self.late_init_vkr()
             for page_num in range(1, self.pdf.page_count):
                 if not len(self.headers):
-                    return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
+                    return answer(False,
+                                  "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
                 for header in self.headers:
                     header_text = header["text"].lower()
                     try:
-                        line = self.pdf.get_text_on_page()[page_num + 1].split("\n")[0] + ' ' + self.pdf.get_text_on_page()[page_num + 1].split("\n")[1]
+                        line = self.pdf.get_text_on_page()[page_num + 1].split("\n")[0] + ' ' + \
+                               self.pdf.get_text_on_page()[page_num + 1].split("\n")[1]
                     except:
                         try:
                             line = self.pdf.get_text_on_page()[page_num + 1].split("\n")[0]
@@ -70,7 +72,8 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
             for header in self.headers:
                 if not header["marker"]:
                     result = False
-                    result_str += (("<br>" if len(result_str) else "") + f"Заголовок второго уровня \"{header['text']}\" находится не в начале страницы или занимает больше двух строк.")
+                    result_str += (("<br>" if len(
+                        result_str) else "") + f"Заголовок второго уровня \"{header['text']}\" находится не в начале страницы или занимает больше двух строк.")
         else:
             result_str = "Во время обработки произошла критическая ошибка"
             return answer(False, result_str)
@@ -78,7 +81,6 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
         if not result_str:
             result_str = "Все требуемые разделы начинаются с новой страницы."
         return answer(result, result_str)
-
 
     def find_headers(self):
         chapters = []

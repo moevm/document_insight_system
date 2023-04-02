@@ -1,4 +1,5 @@
 import re
+
 from ..base_check import BaseReportCriterion, answer
 
 
@@ -6,7 +7,7 @@ class ReportRightWordsCheck(BaseReportCriterion):
     description = "Проверка наличия определенных (правильных) слов в тексте отчёта"
     id = 'right_words_check'
 
-    def __init__(self, file_info, patterns = []):
+    def __init__(self, file_info, patterns=[]):
         super().__init__(file_info)
         self.patterns = dict.fromkeys(patterns, False)
 
@@ -23,4 +24,5 @@ class ReportRightWordsCheck(BaseReportCriterion):
             return answer(result_score, "Пройдена!")
         else:
             result_str = '</li><li>'.join([k for k, v in self.patterns.items() if not v])
-            return answer(result_score, f'Не найдены слова, соответствующие следующим регулярным выражениям: <ul><li>{result_str}</ul>')
+            return answer(result_score,
+                          f'Не найдены слова, соответствующие следующим регулярным выражениям: <ul><li>{result_str}</ul>')

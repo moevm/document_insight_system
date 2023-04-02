@@ -3,13 +3,11 @@ from functools import reduce
 
 import docx
 
-from app.main.reports.pdf_document.pdf_document_manager import PdfDocumentManager
-
 from .core_properties import CoreProperties
 from .inline_shape import InlineShape
 from .paragraph import Paragraph
-from .table import Table, Cell
 from .style import Style
+from .table import Table, Cell
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
 
 
@@ -60,10 +58,14 @@ class DocxUploader:
                     if style_name.find("heading") >= 0:
                         header_ind += 1
                         par_num = 0
-                        tmp_chapters.append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"], "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind, "child": []})
+                        tmp_chapters.append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"],
+                                             "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind,
+                                             "child": []})
                     elif header_ind >= 0:
                         par_num += 1
-                        tmp_chapters[header_ind]["child"].append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"], "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind})
+                        tmp_chapters[header_ind]["child"].append(
+                            {"style": style_name, "text": self.styled_paragraphs[par_ind]["text"],
+                             "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind})
             self.chapters = tmp_chapters
         return self.chapters
 
@@ -72,8 +74,10 @@ class DocxUploader:
             if work_type == 'VKR':
                 # find first pages
                 headers = [
-                    {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный", "page": 0},
-                    {"name": "Задание на выпускную квалификационную работу", "marker": False, "key": "задание", "page": 0},
+                    {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный",
+                     "page": 0},
+                    {"name": "Задание на выпускную квалификационную работу", "marker": False, "key": "задание",
+                     "page": 0},
                     {"name": "Календарный план", "marker": False, "key": "календарный план", "page": 0},
                     {"name": "Реферат", "marker": False, "key": "реферат", "page": 0},
                     {"name": "Abstract", "marker": False, "key": "abstract", "page": 0},
@@ -134,12 +138,12 @@ class DocxUploader:
         pattern = re.compile(first_line_regex_str)
         pars_to_delete = []
         skip_flag = False
-        for i in range(len(self.styled_paragraphs)-1):
+        for i in range(len(self.styled_paragraphs) - 1):
             if skip_flag:
                 skip_flag = False
                 continue
             par = self.styled_paragraphs[i]
-            next_par = self.styled_paragraphs[i+1]
+            next_par = self.styled_paragraphs[i + 1]
             if pattern.match(par["text"]):
                 skip_flag = True
                 par["text"] += ("\n" + next_par["text"])
@@ -168,7 +172,6 @@ class DocxUploader:
                 self.count += 1
         return self.count
 
-
     def upload_from_cli(self, file):
         self.upload(file=file)
 
@@ -178,7 +181,8 @@ class DocxUploader:
             print(self.paragraphs[i].to_string())
 
     def __str__(self):
-        return self.core_properties.to_string() + '\n' + '\n'.join([self.paragraphs[i].to_string() for i in range(len(self.paragraphs))])
+        return self.core_properties.to_string() + '\n' + '\n'.join(
+            [self.paragraphs[i].to_string() for i in range(len(self.paragraphs))])
 
 
 def main(args):

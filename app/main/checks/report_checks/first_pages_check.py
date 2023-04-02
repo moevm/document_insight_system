@@ -17,10 +17,11 @@ class ReportFirstPagesCheck(BaseReportCriterion):
         result_str = ''
         for header in self.headers:
             if not header["marker"]:
-                result_str += '<li>' + header["name"]  + '</li>'
+                result_str += '<li>' + header["name"] + '</li>'
 
         if not result_str:
-            return answer(True, "Все обязательные страницы найдены и их заголовки находятся на первой строке новой страницы.")
+            return answer(True,
+                          "Все обязательные страницы найдены и их заголовки находятся на первой строке новой страницы.")
         else:
             return answer(False,
                           f'Следующие страницы не найдены либо их заголовки расположены не на первой строке новой страницы: <ul>{result_str}</ul>' +

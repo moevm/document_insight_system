@@ -1,7 +1,5 @@
-from typing import List
-
-from ..base_check import BaseReportCriterion, answer
 from .style_check_settings import StyleCheckSettings
+from ..base_check import BaseReportCriterion, answer
 from ...reports.docx_uploader.style import Style
 
 
@@ -9,7 +7,8 @@ class ReportMainTextCheck(BaseReportCriterion):
     description = "Проверка оформления основного текста отчета"
     id = 'main_text_check'
 
-    def __init__(self, file_info, main_text_styles = ["body text", "листинг", "вкр_подпись для рисунков", "вкр_подпись таблицы"]):
+    def __init__(self, file_info,
+                 main_text_styles=["body text", "листинг", "вкр_подпись для рисунков", "вкр_подпись таблицы"]):
         super().__init__(file_info)
         self.headers = []
         self.main_text_styles = main_text_styles
@@ -50,7 +49,8 @@ class ReportMainTextCheck(BaseReportCriterion):
         result_str = ''
         if self.file_type['report_type'] == 'VKR':
             if not len(self.headers):
-                return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
+                return answer(False,
+                              "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             for header in self.headers:
                 for child in header["child"]:
                     marked_style = 0
@@ -73,6 +73,3 @@ class ReportMainTextCheck(BaseReportCriterion):
                 return answer(False, result_str)
         else:
             return answer(False, 'Во время обработки произошла критическая ошибка')
-
-
-
