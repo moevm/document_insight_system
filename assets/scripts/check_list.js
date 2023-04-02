@@ -1,4 +1,5 @@
 const AJAX_URL = "/check_list/data"
+const filter_prefix = 'filter_'
 
 String.prototype.insert = function (index, string) {
     if (index > 0) {
@@ -55,14 +56,28 @@ function isFloat(str) {
     return true;
 }
 
+function extract_filters(params){
+    var filters = {}
+    for (const [key, value] of Object.entries(params)) {
+        const index = key.indexOf(filter_prefix) !== -1
+        if (index !== -1) {
+            filters[key.substring(filter_prefix.length)] = value
+        }
+    }
+    return filters
+}
+
 function initTable() {
     const $table = $("#check-list-table")
 
     // get query string
     const queryString = window.location.search
-
+    console.log(queryString)
     // parse query search to js object
-    const params = Object.fromEntries(new URLSearchParams(queryString).entries())
+    const params = Object.fromEntries(new URLSearchParams(decodeURIComponent(queryString)).entries())
+    // configure filter
+    params.filter = extract_filters(params)
+    console.log(params)
 
     // check correct order query
     if (params.order !== "asc" && params.order !== "desc" && params.order !== "") {
@@ -94,7 +109,7 @@ function initTable() {
     // Fill filters
     $table.on("created-controls.bs.table", function () {
         if (params.filter) {
-            params.filter = JSON.parse(decodeURI(params.filter))
+            console.log(params.filter)
             for (const [key, value] of Object.entries(params.filter)) {
                 const $input = $(`.bootstrap-table-filter-control-${key}`)
                 $input.val(value)
@@ -121,26 +136,22 @@ function initTable() {
 }
 
 function ajaxRequest(params) {
-    const queryString = "?" + $.param(params.data)
+    const encodedData = $.param(params.data);
+    console.log(encodedData)
+    const queryString = "?" + encodedData
     const url = AJAX_URL + queryString
     console.log("ajax:", url);
     $.get(url).then(res => params.success(res))
 
-    pushHistoryState(params)
+    pushHistoryState(encodedData, queryString)
 }
 
 function onPopState() {
     location.reload()
 }
 
-function pushHistoryState(params) {
-    // replace limit and offset to page and page-size
-    const {limit, offset, sort, order, filter, latest} = params.data;
-    const page = offset / limit + 1
-    const size = limit
-
-    // push history state
-    history.pushState(params.data, "", "?" + $.param({page, size, filter, sort, order, latest}))
+function pushHistoryState(encodedData, queryString) {
+    history.pushState(encodedData, "", queryString)
 }
 
 function queryParams(params) {
@@ -162,7 +173,9 @@ function queryParams(params) {
     }
 
     if (!$.isEmptyObject(filters)) {
-        query.filter = JSON.stringify(filters)
+        for (const [key, value] of Object.entries(filters)){
+            query[`${filter_prefix}${key}`] = value
+        }
     }
 
     return query
@@ -191,44 +204,43 @@ function timeStamp() {
 function buttons() {
     if (is_admin)
         return {
-            FetchCSV: {
-                text: 'CSV',
-                event: function () {
-                    const queryString = window.location.search
-                    const params = Object.fromEntries(new URLSearchParams(queryString).entries())
-                    $("[name=FetchCSV]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Exporting..."
-                    fetch('get_csv' + '?' + $.param(params))
-                        .then(response => response.blob())
-                        .then(blob => {
-                            $("[name=FetchCSV]")[0].textContent = "CSV"
-                            downdloadBlob(blob, `Презентации.csv`)
-                        });
-                }
-            },
-            FetchZip: {
-                text: 'Скачать архив',
-                event: function () {
-                    const queryString = window.location.search
-                    const params = Object.fromEntries(new URLSearchParams(queryString).entries())
-                    $("[name=FetchZip]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Архивирование..."
-                    fetch('get_zip' + '?' + $.param(params))
-                        .then(response => response.ok ? response.blob() : false)
-                        .then(blob => {
-                            $("[name=FetchZip]")[0].textContent = "Скачать архив"
-                            if (blob)
-                                downdloadBlob(blob, `Презентации.zip`)
-                            else
-                                alert("Error during file download")
-                        });
-                }
-            },
-            LatestChecks: {
-                text: 'Latest',
-                event: function () {
-                    $("#check-list-table").bootstrapTable('refresh', {query: {latest: true}});
-                }
+        FetchCSV: {
+            text: 'CSV',
+            event: function () {
+                //const queryString = window.location.search
+                const params = window.location.search
+                $("[name=FetchCSV]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Exporting..."
+                fetch('get_csv' + '?' + params)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        $("[name=FetchCSV]")[0].textContent = "CSV"
+                        downdloadBlob(blob, `Статистика.csv`)
+                    });
+            }
+        },
+        FetchZip: {
+            text: 'Скачать архив',
+            event: function () {
+                const params = window.location.search
+                $("[name=FetchZip]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Архивирование..."
+                fetch('get_zip' + '?' + params)
+                    .then(response => response.ok ? response.blob() : false)
+                    .then(blob => {
+                        $("[name=FetchZip]")[0].textContent = "Скачать архив"
+                        if (blob)
+                            downdloadBlob(blob, `Статистика_и_файлы.zip`)
+                        else
+                            alert("Error during file download")
+                    });
+            }
+        },
+        LatestChecks: {
+            text: 'Latest',
+            event: function () {
+                $("#check-list-table").bootstrapTable('refresh', { query: { latest: true } });
             }
         }
+    }
     else
         return {}
 }
