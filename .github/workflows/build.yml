@@ -15,10 +15,10 @@ jobs:
           docker build -f Dockerfile_base -t osll/slides-base:20230202 .
       - name: Build docker-compose
         run: |
+          cp .env_example .env
           docker-compose build
       - name: Run docker-compose
         run:
-          cp .env_example .env
           docker-compose up -d
       - name: Run tests
         run: |
