@@ -20,6 +20,7 @@ jobs:
       - name: Run docker-compose
         run:
           docker-compose up -d
+          sleep 10
       - name: Run tests
         run: |
           curl http://localhost:8080
