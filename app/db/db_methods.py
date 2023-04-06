@@ -214,9 +214,13 @@ def get_unpassed_checks():
 def set_passbacked_flag(checks_id, flag):
     upd_check = {"$set": {}}
     upd_check['$set']['is_passbacked'] = flag
-    if not (flag is None):
-        # None - if user without passback
+
+    if flag is None:
+        # flag = None - if user without passback
         upd_check['$set']['lms_passback_time'] = None
+    elif flag:
+        upd_check['$set']['lms_passback_time'] = datetime.now()
+
     check = checks_collection.update_one({'_id': checks_id}, upd_check)
     return check if check else None
 
