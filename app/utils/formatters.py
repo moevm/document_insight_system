@@ -1,5 +1,5 @@
 from .timezone import timezone_offset
-
+from flask import url_for
 
 def format_check(check):
     grade_passback_time = check['lms_passback_time']
@@ -10,7 +10,7 @@ def format_check(check):
             grade_passback_ts, check['score'])
 
 
-def format_check_for_table(check):
+def format_check_for_table(check, set_link=None):
     return {
         "_id": str(check["_id"]),
         "filename": check["filename"],
@@ -21,5 +21,6 @@ def format_check_for_table(check):
         "upload-date": (check["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
         "moodle-date": check['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if check.get(
             'lms_passback_time') else '-',
-        "score": check["score"]
+        "score": check["score"],
+        "link": f"{set_link}{url_for('results',_id=check['_id'])}" if set_link else ''
     }

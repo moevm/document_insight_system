@@ -37,6 +37,7 @@ ALLOWED_EXTENSIONS = {
 }
 DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
 TABLE_COLUMNS = ['Solution', 'User', 'File', 'Criteria', 'Check added', 'LMS date', 'Score']
+URL_DOMEN = os.environ.get('URL_DOMEN', f"http://localhost:{os.environ.get('WEB_PORT', 8080)}")
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./templates/")
 app.config.from_pyfile('settings.py')
@@ -467,16 +468,17 @@ def get_query(req):
 
 def get_stats():
     rows, count = db_methods.get_checks(**get_query(request))
-    return [format_check_for_table(item) for item in rows]
+    return [format_check_for_table(item, set_link=URL_DOMEN) for item in rows]
 
 
 @app.route("/get_csv")
 @login_required
 def get_csv():
+    from io import StringIO
     if not current_user.is_admin:
         abort(403)
     response = get_stats()
-    df = pd.read_json(json.dumps(response))
+    df = pd.read_json(StringIO(json.dumps(response)))
     return Response(
         df.to_csv(sep=',', encoding='utf-8'),
         mimetype="text/csv",
