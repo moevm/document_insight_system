@@ -6,12 +6,11 @@ from bson import ObjectId
 from flask_login import current_user
 
 logger = logging.getLogger('root_logger')
-
+FILTER_PREFIX = 'filter_'
 
 def checklist_filter(data):
     from utils import timezone_offset
 
-    FILTER_PREFIX = 'filter_'
     filters = {key[len(FILTER_PREFIX):]: data[key] for key in data if key.startswith(FILTER_PREFIX)}
 
     # req filter to mongo query filter conversion
@@ -24,7 +23,8 @@ def checklist_filter(data):
         filter_query["user"] = {"$regex": f_user, "$options": 'i'}
 
     if f_criteria := filters.get("criteria"):
-        filter_query["criteria"] = {"$regex": f_criteria, "$options": 'i'}
+        f_criteria = filter(lambda x: x, map(str.strip, f_criteria.split(',')))
+        filter_query["criteria"] = {"$regex": '|'.join(f_criteria), "$options": 'i'}
 
     f_upload_date = filters.get("upload-date", "")
     f_upload_date_list = list(
@@ -82,5 +82,5 @@ def checklist_filter(data):
     # set user filter for current non-admin user
     if not current_user.is_admin:
         filter_query["user"] = current_user.username
-    print(filter_query)
+
     return filter_query

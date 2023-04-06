@@ -1,5 +1,6 @@
 const AJAX_URL = "/check_list/data"
 const filter_prefix = 'filter_'
+let is_latest = false
 
 String.prototype.insert = function (index, string) {
     if (index > 0) {
@@ -237,7 +238,12 @@ function buttons() {
         LatestChecks: {
             text: 'Latest',
             event: function () {
-                $("#check-list-table").bootstrapTable('refresh', { query: { latest: true } });
+                is_latest = !is_latest;
+                let query = {}
+                if (is_latest === true){
+                    query = { query: { latest: is_latest } }
+                }
+                $("#check-list-table").bootstrapTable('refresh', query);
             }
         }
     }
