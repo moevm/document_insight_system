@@ -27,8 +27,8 @@ def grade_passback(check):
     provider = LTIProvider.from_unpacked_request(secret=consumer_secret, params=passback_params, headers=None,
                                                  url=None)
 
-    current_lms_result = provider.post_read_result()
-    current_lms_score = float(current_lms_result.score) if check_success_response(current_lms_result) else 0.0
+    #current_lms_result = provider.post_read_result()
+    current_lms_score = -1 #float(current_lms_result.score) if check_success_response(current_lms_result) else 0.0
     system_score = check.get('score')
 
     if round(system_score, 2) > current_lms_score:
