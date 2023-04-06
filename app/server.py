@@ -419,11 +419,11 @@ def check_list_data():
     data = request.args.copy()
     filter_query = checklist_filter(data)
     # parse and validate rest query
-    limit = data.get("limit")
-    limit = limit if isinstance(limit, int) else 10
+    limit = data.get("limit", '')
+    limit = int(limit) if limit.isdigit() else 10
 
-    offset = data.get("offset")
-    offset = offset if isinstance(offset, int) else 0
+    offset = data.get("offset", '')
+    offset = int(offset) if offset.isdigit() else 0
 
     sort = data.get("sort")
     sort = 'upload-date' if not sort else sort
