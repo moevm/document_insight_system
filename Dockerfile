@@ -14,10 +14,10 @@ WORKDIR /usr/src/project
 ADD requirements.txt ./
 RUN python3.8 -m pip install -r requirements.txt
 
-COPY --from=frontend_build /app/src ./src/
 ADD ./scripts/local_start.sh ./scripts/
 ADD ./db_versioning ./db_versioning/
 ADD ./app ./app/
+COPY --from=frontend_build /app/src ./src/
 
 ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project/app"
 
