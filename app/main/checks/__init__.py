@@ -28,6 +28,8 @@ AVAILABLE_CHECKS = {
         ReportRightWordsCheck.id: ReportRightWordsCheck,
         BannedWordsInLiteratureCheck.id: BannedWordsInLiteratureCheck,
         ReferencesToLiteratureCheck.id: ReferencesToLiteratureCheck,
+        ImageReferences.id: ImageReferences,
+        TableReferences.id: TableReferences,
         ReportFirstPagesCheck.id: ReportFirstPagesCheck,
         ReportNeededHeadersCheck.id: ReportNeededHeadersCheck,
         ReportChapters.id: ReportChapters,

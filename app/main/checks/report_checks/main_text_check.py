@@ -8,10 +8,13 @@ class ReportMainTextCheck(BaseReportCriterion):
     id = 'main_text_check'
 
     def __init__(self, file_info,
-                 main_text_styles=["body text", "листинг", "вкр_подпись для рисунков", "вкр_подпись таблицы"]):
+                 main_text_styles=["body text", "листинг", "вкр_подпись для рисунков", "вкр_подпись таблицы"],
+                 main_text_styles_names=["Основной текст;ВКР_Основной текст", "ВКР_Подпись таблицы",
+                                         "ВКР_Подпись для рисунков, схем", "ВКР_Содержимое таблицы"]):
         super().__init__(file_info)
         self.headers = []
         self.main_text_styles = main_text_styles
+        self.main_text_styles_names = main_text_styles_names
         self.target_styles = StyleCheckSettings.VKR_MAIN_TEXT_CONFIG
         self.target_styles = list(map(lambda elem: {
             "name": elem["name"],
@@ -52,6 +55,8 @@ class ReportMainTextCheck(BaseReportCriterion):
                 return answer(False,
                               "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             for header in self.headers:
+                if header["text"].find("ПРИЛОЖЕНИЕ") >= 0:
+                    break
                 for child in header["child"]:
                     marked_style = 0
                     for i in range(len(self.main_text_styles)):
@@ -67,9 +72,11 @@ class ReportMainTextCheck(BaseReportCriterion):
                         result_str += (str(err) + "<br>")
 
             if not result_str:
-                return answer(True, "Форматирова"
-                                    "ние текста соответствует требованиям.")
+                return answer(True, "Форматирование текста соответствует требованиям.")
             else:
+                result_str += f'<br><br>Перечень допустимых стилей основного текста (Названия как в документе):<br><br>{"<br>".join(x for x in self.main_text_styles_names)}'
                 return answer(False, result_str)
         else:
             return answer(False, 'Во время обработки произошла критическая ошибка')
+
+

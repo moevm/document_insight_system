@@ -20,6 +20,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         number_of_sources = 0
         start_literature_par = 0
+        result_str = ''
         if self.file_type['report_type'] == 'LR':
             start_literature_par = self.find_start_paragraph()
             if start_literature_par:
@@ -32,8 +33,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 return answer(False,
                               "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             for header in self.headers:
-                header_text = header["text"].lower().strip()
-                if re.fullmatch(self.name_pattern, header_text):
+                header_text = header["text"].lower()
+                if header_text.find('список использованных источников') >= 0:
                     number_of_sources = self.count_sources_vkr(header)
                     if not number_of_sources:
                         return answer(False,
@@ -53,17 +54,23 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         elif len(references.difference(all_numbers)):
             if len(all_numbers.difference(references)) == 0:
                 references -= all_numbers
-                return answer(False,
-                              f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(references))}')
+                result_str += f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(references))} <br> Всего источников: {number_of_sources}<br><br>'
             else:
                 extras = references - all_numbers
                 unnamed = all_numbers - references
-                return answer(False,
-                              f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(extras))} <br> А также упомянуты не все источники: {", ".join(str(num) for num in sorted(unnamed))}<br><br>Убедитесь, что для ссылки на источник используются квадратные скобки и проверьте нумерацию источников.')
+                result_str += f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(extras))} <br> А также упомянуты не все источники: {", ".join(str(num) for num in sorted(unnamed))} <br> Всего источников: {number_of_sources}<br><br>'
         else:
             all_numbers -= references
-            return answer(False,
-                          f'Упомянуты не все источники из списка.<br>Список источников без упоминания: {", ".join(str(num) for num in sorted(all_numbers))}<br><br>Убедитесь, что для ссылки на источник используются квадратные скобки.')
+            result_str = f'Упомянуты не все источники из списка.<br>Список источников без упоминания: {", ".join(str(num) for num in sorted(all_numbers))} <br> Всего источников: {number_of_sources}<br><br>'
+        result_str += '''
+                    Если возникли проблемы, попробуйте сделать следующее:
+                    <ul>
+                        <li>Убедитесь, что для ссылки на источник используются квадратные скобки;</li>
+                        <li>Убедитесь, что для оформления списка литературы был использован нумированный список;</li>
+                        <li>Убедитесь, что после и перед нумированным списком отсутствуют непустые абзацы.</li>
+                    </ul>
+                    '''
+        return answer(False, result_str)
 
     def search_references(self, start_par):
         array_of_references = set()
@@ -83,7 +90,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def find_start_paragraph(self):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
-            text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1].strip()
+            text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
             if re.fullmatch(self.name_pattern, text_string):
                 start_index = i
                 break
@@ -94,10 +101,10 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         if not len(header["child"]):
             return literature_counter
         for child in header["child"]:
-            if re.search('приложение а', child["text"].lower()):
+            if child["text"].startswith('ПРИЛОЖЕНИЕ'):
                 break
-            if re.search(f"{literature_counter + 1}.", child["text"]):
-                literature_counter += 1
+            # if re.search(f"дата обращения", child["text"].lower()):
+            literature_counter += 1
         return literature_counter
 
     def count_sources(self):
@@ -109,7 +116,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             last_string = len(one_page)
 
             for j in range(len(one_page)):
-                one_str_lowercase = one_page[j].lower().strip()
+                one_str_lowercase = one_page[j].lower()
                 if re.search(self.name_pattern, one_str_lowercase):
                     first_string = j
                     break
@@ -134,3 +141,4 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 end_page = i
                 break
         return start_page, end_page
+

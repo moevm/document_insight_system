@@ -24,6 +24,7 @@ class DocxUploader:
         self.special_paragraph_indices = {}
         self.pdf_file = None
         self.count = 0
+        self.first_lines = []
 
     def upload(self, file):
         self.file = docx.Document(file)
@@ -167,9 +168,19 @@ class DocxUploader:
     def page_counter(self):
         if not self.count:
             for k, v in self.pdf_file.text_on_page.items():
-                if re.search('приложение [а-я][\n .]', v.lower()):
+                line = v[:20] if len(v) > 21 else v
+                if re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip()):
                     break
                 self.count += 1
+                line = ''
+                lines = v.split("\n")
+                for i in range(len(lines)):
+                    if i > 1:
+                        break
+                    if i > 0:
+                        line += " "
+                    line += lines[i].strip()
+                self.first_lines.append(line.lower())
         return self.count
 
     def upload_from_cli(self, file):

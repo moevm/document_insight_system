@@ -5,6 +5,8 @@ from .first_pages_check import ReportFirstPagesCheck
 from .headers_at_page_top_check import ReportHeadersAtPageTopCheck
 from .image_share_check import ReportImageShareCheck
 from .literature_references import ReferencesToLiteratureCheck
+from .image_references import ImageReferences
+from .table_references import TableReferences
 from .main_text_check import ReportMainTextCheck
 from .needed_headers_check import ReportNeededHeadersCheck
 from .page_counter import ReportPageCounter

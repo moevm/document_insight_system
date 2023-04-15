@@ -1,7 +1,7 @@
 from bson import ObjectId
 from flask_login import UserMixin
 
-from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_TYPE_INFO
+from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_TYPE_INFO, DEFAULT_REPORT_TYPE_INFO
 
 
 class Packable:
@@ -24,8 +24,11 @@ class User(Packable, UserMixin):
         self.name = dictionary.get('name', '')
         self.password_hash = dictionary.get('password_hash', '')
         self.presentations = dictionary.get('presentations', [])
-        self.file_type = dictionary.get('file_type', DEFAULT_TYPE_INFO)
-        self.criteria = dictionary.get('criteria', BASE_PACKS.get(self.file_type['type']).name)
+        self.file_type = dictionary.get('file_type', DEFAULT_REPORT_TYPE_INFO)
+        try:
+            self.criteria = dictionary.get('criteria', BASE_PACKS.get(self.file_type['type']).name)
+        except:
+            self.criteria = dictionary.get('criteria', BASE_PACKS.get(self.file_type).name)
         self.is_LTI = dictionary.get('is_LTI', False)
         self.lms_user_id = dictionary.get('lms_user_id', None)
         self.is_admin = dictionary.get('is_admin', False)

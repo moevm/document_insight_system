@@ -6,14 +6,24 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
     description = "Проверка наличия обязательных заголовков в отчете"
     id = 'needed_headers_check'
 
-    def __init__(self, file_info):
+    def __init__(self, file_info, main_heading_style="heading 2"):
         super().__init__(file_info)
         self.headers = []
+        self.main_heading_style = main_heading_style
         self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
         self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
 
     def late_init(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
+
+    def show_chapters(self):
+        chapters_str = "<br>"
+        for header in self.headers:
+            if header["style"] == self.main_heading_style:
+                chapters_str += header["text"] + "<br>"
+            else:
+                chapters_str += "&nbsp;&nbsp;&nbsp;&nbsp;" + header["text"] + "<br>"
+        return chapters_str
 
     def check(self):
         self.late_init()
@@ -30,14 +40,18 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
             for i in range(len(patterns)):
                 pattern = patterns[i]["pattern"]
                 if header_text.find(pattern.lower()) >= 0:
-                    patterns[i]["marker"] = 1
+                   patterns[i]["marker"] = 1
 
         for pattern in patterns:
             if not pattern["marker"]:
                 result_string += '<li>' + pattern["pattern"] + '</li>'
 
         if not result_string:
-            return answer(True, "Все необходимые заголовки обнаружены!")
+            result_str = f'Все необходимые заголовки обнаружены!'
+            result_str += '<br><br>Ниже представлена иерархия обработанных заголовков:'
+            result_str += self.show_chapters()
+            result_str += '<br>Если список не точный, убедитесь, что для каждого заголовка указан верный стиль.'
+            return answer(True, result_str)
         else:
             result_str = f'Не найдены следующие обязательные заголовки: <ul>{result_string}</ul>'
             result_str += '''
@@ -47,4 +61,9 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
                             <li>Убедитесь в соответствии стиля заголовка требованиям к отчету по ВКР;</li>
                             <li>Убедитесь, что заголовок состоит из одного абзаца.</li>
                         '''
+            result_str += '<br><br>Ниже представлена иерархия обработанных заголовков:'
+            result_str += self.show_chapters()
+            result_str += '<br>Если список не точный, убедитесь, что для каждого заголовка указан верный стиль.'
             return answer(False, result_str)
+
+

@@ -82,8 +82,8 @@ class LRReportSectionCheck(BaseReportCriterion):
     # unify_regex is used in self.file.unify_multiline_entities()
     # header_regex has two capture groups: first is marker and second is header itself (no decorations)
     def check_marked_headers(self, unify_regex, header_regex, precheck_style, template_style, headers):
-        if unify_regex is not None:
-            self.file.unify_multiline_entities(unify_regex)
+        # if unify_regex is not None:
+        #     self.file.unify_multiline_entities(unify_regex)
         indices = self.file.get_paragraph_indices_by_style([precheck_style])[0]
         found_texts = list(map(lambda i: self.file.styled_paragraphs[i]["text"], indices))
         pars = list(map(lambda i: self.file.styled_paragraphs[i], indices))

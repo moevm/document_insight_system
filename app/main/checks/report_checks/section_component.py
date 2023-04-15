@@ -5,7 +5,7 @@ class ReportSectionComponent(BaseReportCriterion):
     description = "Проверка наличия необходимых компонент указанного раздела"
     id = 'report_section_component'
 
-    def __init__(self, file_info, chapter='введение', patterns=('цель', 'задачи', 'объект', 'предмет')):
+    def __init__(self, file_info, chapter='Введение', patterns=('цель', 'задачи', 'объект', 'предмет')):
         super().__init__(file_info)
         self.intro = {}
         self.chapter = chapter
@@ -24,7 +24,7 @@ class ReportSectionComponent(BaseReportCriterion):
         result_str = ''
         for intro in self.chapters:
             header = intro["text"].lower()
-            if header.find(self.chapter) >= 0:
+            if header.find(self.chapter.lower()) >= 0:
                 self.intro = intro
                 break
 
@@ -35,14 +35,14 @@ class ReportSectionComponent(BaseReportCriterion):
                     if par.find(self.patterns[i]["text"]) >= 0:
                         self.patterns[i]["marker"] = 1
         else:
-            return answer(0, "Раздел Введение не обнаружен!")
+            return answer(0, f"Раздел {self.chapter} не обнаружен!")
 
         for pattern in self.patterns:
             if not pattern["marker"]:
                 result_str += '<li>' + pattern["name"] + '</li>'
 
         if not result_str:
-            return answer(True, "Все необходимые компоненты раздела Введение обнаружены!")
+            return answer(True, f"Все необходимые компоненты раздела {self.chapter} обнаружены!")
         else:
             return answer(False,
-                          f'Не найдены следующие компоненты Введения: <ul>{result_str}</ul>')
+                          f'Не найдены следующие компоненты раздела {self.chapter}: <ul>{result_str}</ul>')
