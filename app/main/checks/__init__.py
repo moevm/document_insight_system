@@ -16,7 +16,8 @@ AVAILABLE_CHECKS = {
         SldSimilarity.id: SldSimilarity,
         PresRightWordsCheck.id: PresRightWordsCheck,
         PresImageShareCheck.id: PresImageShareCheck,
-        FurtherDev.id: FurtherDev
+        FurtherDev.id: FurtherDev,
+        PresBannedWordsCheck.id: PresBannedWordsCheck
     },
     'report': {
         ReportSimpleCheck.id: ReportSimpleCheck,
