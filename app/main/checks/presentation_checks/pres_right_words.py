@@ -12,7 +12,9 @@ class PresRightWordsCheck(BasePresCriterion):
         self.patterns = dict.fromkeys(patterns, False)
 
     def check(self):
-        for text_on_page in self.file.get_text_from_slides():
+        for i, text_on_page in enumerate(self.file.get_text_from_slides()):
+            if i == 0:
+            	continue #skip title page
             lower_text = text_on_page.lower()
             for pattern in self.patterns:
                 if re.search(pattern, lower_text):
