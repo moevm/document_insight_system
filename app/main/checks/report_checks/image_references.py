@@ -26,7 +26,7 @@ class ImageReferences(BaseReportCriterion):
                 return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             number_of_images, all_numbers = self.count_images_vkr()
             if not number_of_images:
-                return answer(False, f'Не найдено ни одного рисунка.<br><br>Убедитесь, что для подписи рисунка был использован стиль {self.image_style}, а рисунок подписан "Рисунок <номер рисунка> -- <Название рисунка>".')
+                return answer(False, f'Не найдено ни одного рисунка.<br><br>Убедитесь, что для подписи рисунка был использован стиль {self.image_style}, а рисунок подписан "Рисунок <Номер рисунка> -- <Название рисунка>".')
         else:
             return answer(False, 'Во время обработки произошла критическая ошибка')
         references = self.search_references()

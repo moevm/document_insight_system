@@ -26,7 +26,7 @@ class TableReferences(BaseReportCriterion):
                 return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             number_of_tables, all_numbers = self.count_tables_vkr()
             if not number_of_tables:
-                return answer(False, f'Не найдено ни одной таблицы.<br><br>Убедитесь, что для подписи таблиц был использован стиль {self.table_style}, а таблица подписана "Таблица <номер таблицы> -- <Название таблицы>".')
+                return answer(False, f'Не найдено ни одной таблицы.<br><br>Убедитесь, что для подписи таблиц был использован стиль {self.table_style}, а таблица подписана "Таблица <Номер таблицы> -- <Название таблицы>".')
         else:
             return answer(False, 'Во время обработки произошла критическая ошибка')
         references = self.search_references()

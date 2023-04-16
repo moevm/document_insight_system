@@ -7,22 +7,56 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
     description = "Проверка на наличие запрещенных слов в списке литературы"
     id = 'banned_words_in_literature'
 
-    def __init__(self, file_info, banned_words=[]):
+    def __init__(self, file_info, banned_words=["wikipedia"]):
         super().__init__(file_info)
-        self.name_pattern = r'text\s+список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
+        self.headers = []
         self.banned_words = [morph.normal_forms(word)[0] for word in banned_words]
+        self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
+
+    def late_init_vkr(self):
+        self.headers = self.file.make_chapters(self.file_type['report_type'])
 
     def check(self):
-        list_of_literature = self.find_literature()
-        if len(list_of_literature) == 0:
-            return answer(False, f"Нет списка литературы!")
-        detected_words_dict = self.find_banned_words(list_of_literature)
+        if self.file.page_counter() < 4:
+            return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
+        detected_words_dict = {}
+        if self.file_type['report_type'] == 'LR':
+            list_of_literature = self.find_literature()
+            if len(list_of_literature) == 0:
+                return answer(False, f"Нет списка литературы!")
+            detected_words_dict = self.find_banned_words(list_of_literature)
+        if self.file_type['report_type'] == 'VKR':
+            self.late_init_vkr()
+            if not self.headers:
+                return answer(False,
+                              "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
+            header_number = 0
+            for header in self.headers:
+                header_text = header["text"].lower()
+                if header_text.find('список использованных источников') >= 0:
+                    if not header["child"]:
+                        return answer(False, "Не найдено ни одного источника.")
+                    header_number = header["number"]
+                    for child in header["child"]:
+                        child_number = child["number"] - header_number
+                        words = re.split(r'\W+', child["text"])
+                        words = [morph.normal_forms(word)[0] for word in words]
+                        for banned_word in self.banned_words:
+                            if banned_word in words:
+                                if child_number in detected_words_dict.keys():
+                                    detected_words_dict[child_number] += ", " + banned_word
+                                else:
+                                    detected_words_dict[child_number] = banned_word
+            if not header_number:
+                return answer(False, f"Нет списка использованных источников!")
         if detected_words_dict:
             result_str = ""
             for i in sorted(detected_words_dict.keys()):
-                result_str += f"{i}: {detected_words_dict[i]}.<br>"
-            return answer(False, f'Есть запрещенные слова в списке источников.<br>{result_str}')
+                result_str += f"Абзац {i}: {detected_words_dict[i]}.<br>"
+            return answer(False, f'Есть запрещенные слова в списке источников:<br><br>{result_str}')
         return answer(True, f"Пройдена!")
+
+
 
     def find_banned_words(self, list_of_literature):
         detected_words = {}
@@ -55,3 +89,4 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
             if re.fullmatch(self.name_pattern, text_string):
                 start_index = i
         return start_index
+

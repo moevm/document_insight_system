@@ -30,6 +30,7 @@ BASE_REPORT_CRITERION = [
     ["image_references"],
     ["table_references"],
     ["first_pages_check"],
+    ["main_character_check"],
     ["needed_headers_check"],
     ["header_check"],
     ["report_section_component"],

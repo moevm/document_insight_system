@@ -7,13 +7,15 @@ class ReportBannedWordsCheck(BaseReportCriterion):
     description = "Проверка наличия запретных слов в тексте отчёта"
     id = 'banned_words_check'
 
-    def __init__(self, file_info, words=[], min_count=3, max_count=6):
+    def __init__(self, file_info, words=["я", "мы", "цель"], min_count=3, max_count=6):
         super().__init__(file_info)
         self.words = [morph.normal_forms(word)[0] for word in words]
         self.min_count = min_count
         self.max_count = max_count
 
     def check(self):
+        if self.file.page_counter() < 4:
+            return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         detected_lines = {}
         result_str = f'<b>Запрещенные слова: {"; ".join(self.words)}</b><br>'
         count = 0
@@ -27,7 +29,7 @@ class ReportBannedWordsCheck(BaseReportCriterion):
                     count += len(count_banned_words)
                     if k not in detected_lines.keys():
                         detected_lines[k] = []
-                    detected_lines[k].append(f'[{index + 1}]: {line} <b>[{"; ".join(count_banned_words)}]</b>')
+                    detected_lines[k].append(f'Строка {index + 1}: {line} <b>[{"; ".join(count_banned_words)}]</b>')
         if len(detected_lines):
             result_str += 'Обнаружены запретные слова! <br><br>'
             for k, v in detected_lines.items():

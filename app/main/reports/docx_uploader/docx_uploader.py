@@ -71,24 +71,27 @@ class DocxUploader:
         return self.chapters
 
     def make_headers(self, work_type):
-        if not len(self.headers):
+        if not self.headers:
             if work_type == 'VKR':
                 # find first pages
                 headers = [
                     {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный",
-                     "page": 0},
+                     "main_character": True, "page": 0},
                     {"name": "Задание на выпускную квалификационную работу", "marker": False, "key": "задание",
+                     "main_character": True, "page": 0},
+                    {"name": "Календарный план", "marker": False, "key": "календарный план", "main_character": True,
                      "page": 0},
-                    {"name": "Календарный план", "marker": False, "key": "календарный план", "page": 0},
-                    {"name": "Реферат", "marker": False, "key": "реферат", "page": 0},
-                    {"name": "Abstract", "marker": False, "key": "abstract", "page": 0},
-                    {"name": "Cодержание", "marker": False, "key": "содержание", "page": 0}]
+                    {"name": "Реферат", "marker": False, "key": "реферат", "main_character": False,  "page": 0},
+                    {"name": "Abstract", "marker": False, "key": "abstract", "main_character": False, "page": 0},
+                    {"name": "Cодержание", "marker": False, "key": "содержание", "main_character": False, "page": 0}]
                 for page in range(1, self.count if self.page_counter() < 2 * len(headers) else 2 * len(headers)):
                     page_text = (self.pdf_file.get_text_on_page()[page].split("\n")[0]).lower()
                     for i in range(len(headers)):
-                        if page_text.find(headers[i]["key"]) >= 0:
-                            headers[i]["marker"] = True
-                            headers[i]["page"] = page
+                        if not headers[i]["marker"]:
+                            if page_text.find(headers[i]["key"]) >= 0:
+                                headers[i]["marker"] = True
+                                headers[i]["page"] = page
+                                break
                 self.headers = headers
         return self.headers
 

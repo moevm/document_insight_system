@@ -52,9 +52,9 @@ class ReportChapters(BaseReportCriterion):
         return err
 
     def check(self):
-        self.late_init()
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
+        self.late_init()
         result_str = ''
         if self.file_type['report_type'] == 'VKR':
             if not len(self.headers):

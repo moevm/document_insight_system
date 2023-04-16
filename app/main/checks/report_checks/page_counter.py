@@ -13,11 +13,11 @@ class ReportPageCounter(BaseReportCriterion):
         result_str = ''
         count = self.file.page_counter()
         if count >= self.number[0] and (self.number[1] is None or count <= self.number[1]):
-            return answer(True, f"Пройдена! В отчете {count} стр не считая Приложения.")
+            return answer(True, f"Пройдена! В отчете {count} стр не считая Приложения. <br>Последняя страница {self.format_page_link([self.file.count])}.")
         if self.number[1]:
-            result_str += f'Неверное количество страниц в файле: должно быть [{self.number[0]}, {self.number[1]}] стр. не считая приложения, в отчете {count} стр.<br><br>'
+            result_str += f'Неверное количество страниц в файле: должно быть [{self.number[0]}, {self.number[1]}] стр. не считая приложения, в отчете {count} стр. <br>Последняя страница {self.format_page_link([self.file.count])}.<br><br>'
         else:
-            result_str += f'Неверное количество страниц в файле: должно быть не менее {self.number[0]} стр. не считая приложения, в отчете {count} стр. <br><br>'
+            result_str += f'Неверное количество страниц в файле: должно быть не менее {self.number[0]} стр. не считая приложения, в отчете {count} стр. <br>Последняя страница {self.format_page_link([self.file.count])}.<br><br>'
         result_str += '''
                     Если количество страниц неверное, попробуйте сделать следующее:
                     <ul>

@@ -31,6 +31,7 @@ AVAILABLE_CHECKS = {
         ImageReferences.id: ImageReferences,
         TableReferences.id: TableReferences,
         ReportFirstPagesCheck.id: ReportFirstPagesCheck,
+        ReportMainCharacterCheck.id: ReportMainCharacterCheck,
         ReportNeededHeadersCheck.id: ReportNeededHeadersCheck,
         ReportChapters.id: ReportChapters,
         ReportSectionComponent.id: ReportSectionComponent,

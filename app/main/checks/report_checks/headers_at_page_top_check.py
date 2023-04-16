@@ -63,7 +63,8 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                         elif collected_text.find(header_text.strip()) > 0:
                             result_str += (("<br>" if len(result_str) else "") +
                                            f"Заголовок второго уровня \"{header['text']}\" "
-                                           f"находится не в начале страницы или пронумирован с помощью списка.")
+                                           f"находится не в начале страницы или пронумирован с помощью списка. "
+                                           f"<br>Проверьте PDF, страница {self.format_page_link([page_num])} и DOCX")
                             header["marker"] = 1
                             break
 

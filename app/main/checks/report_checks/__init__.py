@@ -2,6 +2,7 @@ from .banned_words_check import ReportBannedWordsCheck
 from .banned_words_in_literature import BannedWordsInLiteratureCheck
 from .chapters import ReportChapters
 from .first_pages_check import ReportFirstPagesCheck
+from .main_character_check import ReportMainCharacterCheck
 from .headers_at_page_top_check import ReportHeadersAtPageTopCheck
 from .image_share_check import ReportImageShareCheck
 from .literature_references import ReferencesToLiteratureCheck
@@ -16,3 +17,4 @@ from .sections_check import LRReportSectionCheck
 from .short_sections_check import ReportShortSectionsCheck
 from .simple_check import ReportSimpleCheck
 from .style_check_settings import StyleCheckSettings
+
