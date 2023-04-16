@@ -14,6 +14,7 @@ AVAILABLE_CHECKS = {
         SearchKeyWord.id: SearchKeyWord,
         FindTasks.id: FindTasks,
         SldSimilarity.id: SldSimilarity,
+        PresRightWordsCheck.id: PresRightWordsCheck,
         FurtherDev.id: FurtherDev
     },
     'report': {
