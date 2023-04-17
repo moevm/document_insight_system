@@ -1,10 +1,9 @@
 import hashlib
 import logging
 
-from pymongo.errors import ConnectionFailure
-
 from db.db_methods import add_user, get_user, get_client, edit_user, save_criteria_pack
-from main.check_packs.pack_config import BASE_PACKS
+from main.check_packs.pack_config import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO
+from pymongo.errors import ConnectionFailure
 from server import ALLOWED_EXTENSIONS
 
 logger = logging.getLogger('root_logger')
@@ -35,11 +34,13 @@ def init(app, debug):
         user.name = cred_id
         user.is_admin = True
         edit_user(user)
-
-    user.file_type = 'report'
-    user.criteria = BASE_PACKS[user.file_type].name
-    user.formats = list(ALLOWED_EXTENSIONS.get(user.file_type))
+        
+    user.file_type = DEFAULT_REPORT_TYPE_INFO
+    file_type = DEFAULT_REPORT_TYPE_INFO['type']
+    user.criteria = BASE_PACKS[file_type].name
+    user.formats = list(ALLOWED_EXTENSIONS.get(file_type))
     user.two_files = True
+    
     edit_user(user)
 
     logger.info(f"Создан администратор по умолчанию: логин: {user.username}, пароль уточняйте у разработчика")

@@ -2,69 +2,42 @@ version: '2'
 
 services:
   web:
-    build: .
-    image: slides_checker_base_image
-    restart: always
+    extends:
+      file: docker-compose.yml
+      service: web
     ports:
       - "8080:8080"
-    depends_on:
-      - mongodb
-      - worker
-    env_file:
-      - .env
-    environment:
-      - PYTHONUNBUFFERED=1
-      - PYTHONIOENCODING=UTF-8
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     volumes:
       - ./app:/usr/src/project/app
-      - ./db_versioning:/usr/src/project/db_versioning
-      - presentation_files:/usr/src/project/files/
-      - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/localtime:/etc/localtime:ro"
 
   worker:
-    image: slides_checker_base_image
-    restart: always
-    command: celery --app=app.tasks.celery worker --loglevel=info
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-    depends_on:
-      - redis
-      - mongodb
+    extends:
+      file: docker-compose.yml
+      service: worker
     volumes:
       - ./app:/usr/src/project/app
-      - presentation_files:/usr/src/project/files/
-      - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/localtime:/etc/localtime:ro"
+
+  worker-dashboard:
+    extends:
+      file: docker-compose.yml
+      service: worker-dashboard
+    command: celery --broker=${REDIS_URL} flower --port=5555 --persistent=True
+    ports:
+      - "5555:5555"
 
   redis:
-    image: redis:6-alpine
-    restart: always
-    volumes:
-      - ../slides_checker_redis_data:/data
+    extends:
+      file: docker-compose.yml
+      service: redis
 
   mongodb:
-    image: mongo:4.0.17-xenial
-    restart: always
-    command:
-      - '--wiredTigerCacheSizeGB=1'
+    extends:
+      file: docker-compose.yml
+      service: mongodb
     ports:
-      - 27017:27017
-    volumes:
-      - ../slides_checker_mongo_data:/data/db
-
-  passback_grades:
-    image: slides_checker_base_image
-    command: python3 ./app/passback_grades.py
-    restart: always
-    depends_on:
-      - mongodb
-    volumes:
-      - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/localtime:/etc/localtime:ro"
+      - "27017:27017"
 
 volumes:
   presentation_files:
+  redis_data:
+  flower_data:

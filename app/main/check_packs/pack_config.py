@@ -14,10 +14,34 @@ BASE_PRES_CRITERION = [
     ['future_dev']
 ]
 BASE_REPORT_CRITERION = [
-    ["simple_check"]
+    ["simple_check"],
+    ["banned_words_in_literature"],
+    ["page_counter"],
+    ["image_share_check"],
+    ["headers_at_page_top_check", {"headers": ["Приложение А Исходный код программы"]}],
+    ["lr_sections_check"],
+    ["style_check"],
+    ["short_sections_check"],
+    ["banned_words_check"],
+    ["right_words_check"],
+    ["banned_words_in_literature"],
+    ["literature_references"],
+    ["first_pages_check"],
+    ["needed_headers_check"],
+    ["header_check"],
+    ["report_section_component"],
+    ["main_text_check"]
 ]
 
+DEFAULT_TYPE = 'pres'
+REPORT_TYPES = ('LR', 'VKR')
+DEFAULT_REPORT_TYPE_INFO = {'type': 'report', 'report_type': REPORT_TYPES[1]}
+DEFAULT_PRES_TYPE_INFO = {'type': 'pres'}
+DEFAULT_TYPE_INFO = DEFAULT_PRES_TYPE_INFO
+
 BASE_PACKS = {
-    'pres': BaseCriterionPack(BASE_PRES_CRITERION, 'pres', min_score=1.0, name="BasePresentationCriterionPack"),
-    'report': BaseCriterionPack(BASE_REPORT_CRITERION, 'report', min_score=1.0, name="BaseReportCriterionPack")
+    'pres': BaseCriterionPack(BASE_PRES_CRITERION, DEFAULT_PRES_TYPE_INFO, min_score=1.0,
+                              name="BasePresentationCriterionPack"),
+    'report': BaseCriterionPack(BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, min_score=1.0,
+                                name="BaseReportCriterionPack")
 }

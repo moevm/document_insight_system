@@ -1,5 +1,6 @@
 from threading import Timer
 
+
 class RepeatedTimer:
     """
     Utility class to call a function with a given interval between the end and the beginning of consecutive calls

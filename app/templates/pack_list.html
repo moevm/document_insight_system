@@ -1,0 +1,81 @@
+{% extends "root.html" %}
+
+{% block title %}Список именованных критериев проверки{% endblock %}
+
+{% block head %}
+    <style>
+        .table {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 1px solid #dddddd;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            font-weight: bold;
+            padding: 5px;
+            background: #efefef;
+            border: 1px solid #dddddd;
+        }
+
+        .table td {
+            border: 1px solid #dddddd;
+            padding: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% set types = {'pres': "Презентация", 'report': "Отчёт", 'LR': "ЛР", 'VKR': "ВКР"} %}
+
+{% block main %}
+
+    <div class="header row">{% include "header.html" %}</div>
+    <div class="row justify-content-center">
+
+        <a href="{{ url_for('criteria_pack_new') }}">Создать новый набор</a><br>
+        <table class="table" border="1px">
+            <thead>
+            <tr>
+                <th>Название набора</th>
+                <th>Тип документа</th>
+                <th>Последнее изменение</th>
+                <th>Редактировать</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for pack in packs %}
+                <tr>
+                    <td>
+                        {{ pack['name'] }}
+                    </td>
+                    <td>
+                        {{ types.get(pack['file_type']['type']) }}{% if pack['file_type']['type'] == 'report' %}.
+                            {{ types.get(pack['file_type']['report_type']) }}{% endif %}
+                    </td>
+                    <!--
+                    <td>
+                        <ul>
+                            {% for criterion in pack.criterions %}
+                                <li>
+                                    <a href=
+                        {{ url_for("routes_criterion.get_critetion", criterion_name=criterion.name) }}>
+                        {{ criterion.name }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                    </td>
+                    -->
+                    <td>
+                        <script> document.write((new Date({{ "%d"|format(pack['updated'].timestamp()*1000)}})).toLocaleString());</script>
+                    </td>
+                    <td>
+                        <a href="{{ url_for("criteria_pack", name=pack['name']) }}">>>>>></a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

@@ -9,8 +9,7 @@
     border: 1px solid #54585d
 }
 
-#version-table td:nth-child(1)
-{
+#version-table td:nth-child(1) {
     text-align: right;
 }
 

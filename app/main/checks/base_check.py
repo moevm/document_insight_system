@@ -1,3 +1,8 @@
+import pymorphy2
+
+morph = pymorphy2.MorphAnalyzer()
+
+
 def answer(mod, *args):
     return {
         'score': float(mod),
@@ -12,7 +17,7 @@ class BaseCheck:
 
     def __init__(self, file_info):
         self.file = file_info.get('file')
-        self.filename = file_info.get('filename')
+        self.filename = file_info.get('filename', '')
         self.pdf_id = file_info.get('pdf_id')
 
     def check(self):
@@ -33,4 +38,4 @@ class BasePresCriterion(BaseCheck):
 
 
 class BaseReportCriterion(BaseCheck):
-    file_type = 'report'
+    file_type = {'type': 'report', 'report_type': 'VKR'}

@@ -1,13 +1,15 @@
 const AJAX_URL = "/check_list/data"
+const filter_prefix = 'filter_'
+let is_latest = false
 
-String.prototype.insert = function(index, string) {
+String.prototype.insert = function (index, string) {
     if (index > 0) {
         return this.substring(0, index) + string + this.substr(index)
     }
     return string + this
 }
 
-$(()=>{
+$(() => {
     initTable()
     window.onpopstate = onPopState
 
@@ -21,8 +23,7 @@ $(()=>{
             let expectedStr
             if (carret <= numbers[0].length) {
                 expectedStr = numbers[0].insert(carret, ".")
-            }
-            else {
+            } else {
                 expectedStr = numbers[1].insert(carret - numbers[0].length - 1, ".")
             }
 
@@ -56,14 +57,28 @@ function isFloat(str) {
     return true;
 }
 
+function extract_filters(params){
+    var filters = {}
+    for (const [key, value] of Object.entries(params)) {
+        const index = key.indexOf(filter_prefix) !== -1
+        if (index !== -1) {
+            filters[key.substring(filter_prefix.length)] = value
+        }
+    }
+    return filters
+}
+
 function initTable() {
     const $table = $("#check-list-table")
 
     // get query string
     const queryString = window.location.search
-
+    console.log(queryString)
     // parse query search to js object
-    const params = Object.fromEntries(new URLSearchParams(queryString).entries())
+    const params = Object.fromEntries(new URLSearchParams(decodeURIComponent(queryString)).entries())
+    // configure filter
+    params.filter = extract_filters(params)
+    console.log(params)
 
     // check correct order query
     if (params.order !== "asc" && params.order !== "desc" && params.order !== "") {
@@ -73,7 +88,7 @@ function initTable() {
     // check correct sort query
     if (params.sort !== "") {
         let match = false
-        $table.find("th[data-sortable='true']").each(function() {
+        $table.find("th[data-sortable='true']").each(function () {
             if ($(this).data("field") === params.sort) {
                 match = true
                 return false
@@ -93,9 +108,9 @@ function initTable() {
     }
 
     // Fill filters
-    $table.on("created-controls.bs.table", function() {
+    $table.on("created-controls.bs.table", function () {
         if (params.filter) {
-            params.filter = JSON.parse(decodeURI(params.filter))
+            console.log(params.filter)
             for (const [key, value] of Object.entries(params.filter)) {
                 const $input = $(`.bootstrap-table-filter-control-${key}`)
                 $input.val(value)
@@ -122,34 +137,30 @@ function initTable() {
 }
 
 function ajaxRequest(params) {
-    const queryString = "?" + $.param(params.data)
+    const encodedData = $.param(params.data);
+    console.log(encodedData)
+    const queryString = "?" + encodedData
     const url = AJAX_URL + queryString
     console.log("ajax:", url);
     $.get(url).then(res => params.success(res))
 
-    pushHistoryState(params)
+    pushHistoryState(encodedData, queryString)
 }
 
 function onPopState() {
     location.reload()
 }
 
-function pushHistoryState(params) {
-    // replace limit and offset to page and page-size
-    const {limit, offset, sort, order, filter, latest} = params.data;
-    const page = offset / limit + 1
-    const size = limit
-
-    // push history state
-    history.pushState(params.data, "", "?" + $.param({page, size, filter, sort, order, latest}))
+function pushHistoryState(encodedData, queryString) {
+    history.pushState(encodedData, "", queryString)
 }
 
 function queryParams(params) {
     filters = {}
-    $('.filter-control').each(function() {
+    $('.filter-control').each(function () {
         const name = $(this).parents("th").data("field")
         const val = this.querySelector("input").value
-        if (val){
+        if (val) {
             filters[name] = val
         }
     })
@@ -163,7 +174,9 @@ function queryParams(params) {
     }
 
     if (!$.isEmptyObject(filters)) {
-        query.filter = JSON.stringify(filters)
+        for (const [key, value] of Object.entries(filters)){
+            query[`${filter_prefix}${key}`] = value
+        }
     }
 
     return query
@@ -174,19 +187,19 @@ function idFormatter(value, row, index, field) {
 }
 
 function timeStamp() {
-  var now = new Date();
-  var date = [ now.getMonth() + 1, now.getDate(), now.getFullYear() ];
-  var time = [ now.getHours(), now.getMinutes(), now.getSeconds() ];
-  var suffix = ( time[0] < 12 ) ? "AM" : "PM";
+    var now = new Date();
+    var date = [now.getMonth() + 1, now.getDate(), now.getFullYear()];
+    var time = [now.getHours(), now.getMinutes(), now.getSeconds()];
+    var suffix = (time[0] < 12) ? "AM" : "PM";
 
-  time[0] = ( time[0] < 12 ) ? time[0] : time[0] - 12;
-  time[0] = time[0] || 12;
-  for ( var i = 1; i < 3; i++ ) {
-    if ( time[i] < 10 ) {
-      time[i] = "0" + time[i];
+    time[0] = (time[0] < 12) ? time[0] : time[0] - 12;
+    time[0] = time[0] || 12;
+    for (var i = 1; i < 3; i++) {
+        if (time[i] < 10) {
+            time[i] = "0" + time[i];
+        }
     }
-  }
-  return '[' + date.join(".") + "_" + time.join(".") + suffix + ']';
+    return '[' + date.join(".") + "_" + time.join(".") + suffix + ']';
 }
 
 function buttons() {
@@ -195,29 +208,28 @@ function buttons() {
         FetchCSV: {
             text: 'CSV',
             event: function () {
-                const queryString = window.location.search
-                const params = Object.fromEntries(new URLSearchParams(queryString).entries())
+                //const queryString = window.location.search
+                const params = window.location.search
                 $("[name=FetchCSV]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Exporting..."
-                fetch('get_csv' + '?' + $.param(params))
+                fetch('get_csv' + '?' + params)
                     .then(response => response.blob())
                     .then(blob => {
                         $("[name=FetchCSV]")[0].textContent = "CSV"
-                        downdloadBlob(blob, `Презентации.csv`)
+                        downdloadBlob(blob, `Статистика.csv`)
                     });
             }
         },
         FetchZip: {
             text: 'Скачать архив',
             event: function () {
-                const queryString = window.location.search
-                const params = Object.fromEntries(new URLSearchParams(queryString).entries())
+                const params = window.location.search
                 $("[name=FetchZip]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Архивирование..."
-                fetch('get_zip' + '?' + $.param(params))
+                fetch('get_zip' + '?' + params)
                     .then(response => response.ok ? response.blob() : false)
                     .then(blob => {
                         $("[name=FetchZip]")[0].textContent = "Скачать архив"
                         if (blob)
-                            downdloadBlob(blob, `Презентации.zip`)
+                            downdloadBlob(blob, `Статистика_и_файлы.zip`)
                         else
                             alert("Error during file download")
                     });
@@ -226,7 +238,12 @@ function buttons() {
         LatestChecks: {
             text: 'Latest',
             event: function () {
-                $("#check-list-table").bootstrapTable('refresh', { query: { latest: true } });
+                is_latest = !is_latest;
+                let query = {}
+                if (is_latest === true){
+                    query = { query: { latest: is_latest } }
+                }
+                $("#check-list-table").bootstrapTable('refresh', query);
             }
         }
     }
@@ -234,7 +251,7 @@ function buttons() {
         return {}
 }
 
-function downdloadBlob(blob, filename){
+function downdloadBlob(blob, filename) {
     var url = window.URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;

@@ -6,7 +6,7 @@ services:
     image: slides_checker_base_image
     restart: always
     ports:
-      - "8080:8080"
+      - "${WEB_PORT:-8080}:8080"
     depends_on:
       - mongodb
       - worker
@@ -15,8 +15,8 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONIOENCODING=UTF-8
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CELERY_BROKER_URL=${REDIS_URL}
+      - CELERY_RESULT_BACKEND=${REDIS_URL}
     volumes:
       - presentation_files:/usr/src/project/files/
       - "/etc/timezone:/etc/timezone:ro"
@@ -25,10 +25,10 @@ services:
   worker:
     image: slides_checker_base_image
     restart: always
-    command: celery --app=app.tasks.celery worker --loglevel=info
+    command: celery --app=app.tasks.celery worker -n celery@worker --beat -Q ${CELERY_QUERIES} --loglevel=info
     environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CELERY_BROKER_URL=${REDIS_URL}
+      - CELERY_RESULT_BACKEND=${REDIS_URL}
     depends_on:
       - redis
       - mongodb
@@ -37,29 +37,38 @@ services:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
 
+  worker-dashboard:
+    image: slides_checker_base_image
+    command: celery --broker=${REDIS_URL} flower --port=${FLOWER_PORT} --url_prefix=${FLOWER_PREFIX} --basic_auth=${FLOWER_AUTH} --persistent=True
+    ports:
+      - "${FLOWER_PORT}:5555"
+    environment:
+      - SECRET_KEY=${FLOWER_SECRET_KEY}
+      - CELERY_BROKER=${REDIS_URL}
+      - CELERY_BACKEND=${REDIS_URL}
+    volumes:
+      - flower_data:/etc/db/
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    depends_on:
+      - worker
+      - redis
+
   redis:
     image: redis:6-alpine
     restart: always
     volumes:
-      - ../slides_checker_redis_data:/data
+      - redis_data:/data
 
   mongodb:
     image: mongo:4.0.17-xenial
     restart: always
     command:
-      - '--wiredTigerCacheSizeGB=1'
+      - '--wiredTigerCacheSizeGB=${MONGODB_CACHE_SIZE:-1}'
     volumes:
       - ../slides_checker_mongo_data:/data/db
 
-  passback_grades:
-    image: slides_checker_base_image
-    restart: always
-    command: python3 ./app/passback_grades.py
-    depends_on:
-      - mongodb
-    volumes:
-      - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/localtime:/etc/localtime:ro"
-
 volumes:
   presentation_files:
+  redis_data:
+  flower_data:

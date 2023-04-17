@@ -1,0 +1,58 @@
+{% extends "root.html" %}
+
+{% block title %}Настройка набора критериев{% endblock %}
+
+{% if not (pack is defined) %}
+    {% set pack = {'name': '', 'file_type': 'report', 'min_score': '1',
+                    'raw_criterions': "[[\"criterion_name\", \"criterion_params_as_dict\"]]"} %}
+{% endif %}
+{% block main %}
+    <div class="header row">{% include "header.html" %}</div>
+    <div class="holder">
+        <div class="row justify-content-center">
+            {% include 'alerts.html' %}
+        </div>
+        <div class="row justify-content-center">
+            <form id="pack_form" action="javascript:void(0);">
+
+                <label>Название набора критериев<br>
+                    <input id="pack_name" type="text" size="40" name="pack_name"
+                           value="{{ pack['name'] }}" required>
+                </label><br>
+                <label>
+                    Тип проверяемого файла<br>
+                    <select id="file_type" name="file_type" required>
+                        <option disabled>Выберите тип проверяемого файла</option>
+                        <option {% if pack['file_type']['type'] == 'report' %}selected{% endif %} value="report">Отчет
+                        </option>
+                        <option {% if pack['file_type']['type'] == 'pres' %}selected{% endif %} value="pres">
+                            Презентация
+                        </option>
+                    </select>
+                    <select id="report_type" name="report_type" required
+                            {% if pack['file_type']['type'] == 'pres' %}disabled hidden{% endif %}>
+                        <option disabled>Выберите тип проверяемого файла</option>
+                        <option {% if pack['file_type']['report_type'] == 'LR' %}selected{% endif %} value="LR">ЛР
+                        </option>
+                        <option {% if pack['file_type']['report_type'] == 'VKR' %}selected{% endif %} value="VKR">ВКР
+                        </option>
+                    </select>
+                </label><br>
+                <label>
+                    Минимальное количество баллов для того, чтобы зачесть прохождение набора критериев успешным
+                    [0;1]<br>
+                    <input id="min_score" min="0.0" max="1.0" step="0.01" type="number" value="{{ pack['min_score'] }}"
+                           required>
+                </label><br>
+                <label>
+                    Список критериев набора (однажды тут будет подробнейшая <a
+                        href="https://github.com/moevm/mse_auto_checking_slides_vaganov/issues/351">инструкция</a>)<br>
+                    # укажите здесь конфигурацию набора в формате JSON<br>
+                    <textarea id="raw_criterions" rows=10 cols=80
+                              required>{{ pack['raw_criterions'] }}</textarea>
+                </label><br>
+                <input id="pack_submit_button" value="Сохранить" type="submit">
+            </form>
+        </div>
+    </div>
+{% endblock %}

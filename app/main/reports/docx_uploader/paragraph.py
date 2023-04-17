@@ -5,6 +5,7 @@ class Paragraph:
 
     def __init__(self, paragraph):
         self.paragraph_text = paragraph.text
+        self.paragraph_style_name = paragraph.style.name
         self.paragraph_alignment = paragraph.paragraph_format.alignment
         self.paragraph_left_indent = paragraph.paragraph_format.left_indent
         self.paragraph_right_indent = paragraph.paragraph_format.right_indent

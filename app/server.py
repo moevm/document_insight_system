@@ -17,15 +17,17 @@ from flask_login import (LoginManager, current_user, login_required,
 from flask_recaptcha import ReCaptcha
 
 import servants.user as user
+from app.utils import format_check_for_table
 from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
-from main.check_packs import init_criterions
+from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, \
+    init_criterions
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
-from utils import checklist_filter, decorator_assertion, get_file_len, timezone_offset, format_check
+from utils import checklist_filter, decorator_assertion, get_file_len, format_check
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
@@ -34,7 +36,8 @@ ALLOWED_EXTENSIONS = {
     'report': {'doc', 'odt', 'docx'}
 }
 DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
-TABLE_COLUMNS = ['Solution', 'User', 'File', 'Check added', 'LMS date', 'Score']
+TABLE_COLUMNS = ['Solution', 'User', 'File', 'Criteria', 'Check added', 'LMS date', 'Score']
+URL_DOMEN = os.environ.get('URL_DOMEN', f"http://localhost:{os.environ.get('WEB_PORT', 8080)}")
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./templates/")
 app.config.from_pyfile('settings.py')
@@ -67,11 +70,26 @@ def lti():
         lms_user_id = temporary_user_params.get('user_id', '')
         params_for_passback = utils.extract_passback_params(temporary_user_params)
         custom_params = utils.get_custom_params(temporary_user_params)
-        file_type = custom_params.get('file_type', 'pres')
         two_files = custom_params.get('two_files', False)
+
+        # task settings
+        # pack name
+        custom_criterion_pack = custom_params.get('pack', BASE_PACKS.get(DEFAULT_TYPE).name)
+        criterion_pack_info = db_methods.get_criteria_pack(custom_criterion_pack)
+        if not criterion_pack_info:
+            default_criterion_pack = BASE_PACKS.get(DEFAULT_TYPE).name
+            logger.error(
+                f"Ошибка при lti-авторизации. Несуществующий набор {custom_criterion_pack} пользователя {username}. Установлен набор по умолчанию: {default_criterion_pack}")
+            logger.debug(f"lti-параметры: {temporary_user_params}")
+            custom_criterion_pack = default_criterion_pack
+            criterion_pack_info = db_methods.get_criteria_pack(custom_criterion_pack)
+        custom_criterion_pack_obj = BaseCriterionPack(**criterion_pack_info)
+        # get file type and formats from pack
+        file_type_info = custom_criterion_pack_obj.file_type
+        file_type = file_type_info['type']
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
-        custom_criteria = utils.get_criteria_from_launch(temporary_user_params)
+
         role = utils.get_role(temporary_user_params)
 
         logout_user()
@@ -82,15 +100,20 @@ def lti():
             lti_user.is_admin = role
         else:
             lti_user = db_methods.get_user(user_id)
+
+        # task settings
+        lti_user.file_type = file_type_info
         lti_user.formats = formats
-        lti_user.file_type = file_type
         lti_user.two_files = two_files
+        lti_user.criteria = custom_criterion_pack
+        # passback settings
         lti_user.params_for_passback = params_for_passback
         lti_user.lms_user_id = lms_user_id
+
         db_methods.edit_user(lti_user)
 
         login_user(lti_user)
-        user.update_criteria(custom_criteria)
+        
         return redirect(url_for('upload'))
     else:
         abort(403)
@@ -121,8 +144,6 @@ def interact():
         return user.logout()
     elif request.method == "PUT":
         return user.edit(request.json)
-    elif request.method == "DELETE":
-        return user.signout()
 
 
 # Main chapters req handlers:
@@ -131,17 +152,16 @@ def interact():
 @login_required
 def upload():
     if request.method == "POST":
-        if current_user.is_LTI or True:  # app.recaptcha.verify():
+        if current_user.is_LTI or True:  # app.recaptcha.verify(): - disable captcha (cause no login)
             return run_task()
         else:
             abort(401)
     elif request.method == "GET":
         formats = set(current_user.formats)
-        file_type = current_user.file_type
-        two_files = current_user.two_files
+        file_type = current_user.file_type['type']
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
-        return render_template("./upload.html", navi_upload=False, name=current_user.name, file_type=file_type,
-                               two_files=two_files, formats=sorted(formats))
+        two_files = current_user.two_files
+        return render_template("./upload.html", navi_upload=False, formats=sorted(formats), two_files=two_files)
 
 
 @app.route("/tasks", methods=["POST"])
@@ -188,16 +208,37 @@ def run_task():
         'user': current_user.username,
         'lms_user_id': current_user.lms_user_id,
         'enabled_checks': current_user.criteria,
+        'criteria': current_user.criteria,
         'file_type': current_user.file_type,
         'filename': file.filename,
         'score': -1,  # score=-1 -> checking in progress
         'is_ended': False,
-        'is_failed': False
+        'is_failed': False,
+        'params_for_passback': current_user.params_for_passback
     })
     db_methods.add_check(file_id, check)  # add check for parsed_file to db
     task = create_task.delay(check.pack(to_str=True))  # add check to queue
     db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
     return {'task_id': task.id, 'check_id': str(file_id)}
+
+
+@app.route("/recheck/<check_id>", methods=["GET"])
+@login_required
+def recheck(check_id):
+    if not current_user.is_admin:
+        abort(403)
+    oid = ObjectId(check_id)
+    check = db_methods.get_check(oid)
+
+    if not check:
+        abort(404)
+    filepath = join(UPLOAD_FOLDER, f"{check_id}.{check.filename.rsplit('.', 1)[-1]}")
+    check.is_ended = False
+    db_methods.update_check(check)
+    db_methods.write_file_from_db_file(oid, filepath)
+    task = create_task.delay(check.pack(to_str=True))  # add check to queue
+    db_methods.add_celery_task(task.id, check_id)  # mapping celery_task to check (check_id = file_id)
+    return {'task_id': task.id, 'check_id': check_id}
 
 
 @app.route("/tasks/<task_id>", methods=["GET"])
@@ -221,11 +262,21 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
                    'slide_every_task': 'Наличие слайдов, посвященных задачам',
                    'conclusion_actual': 'Соответствие заключения задачам',
                    'conclusion_along': 'Наличие направлений дальнейшего развития',
-                   'simple_check': 'Простейшая проверка отчёта'}
+                   'simple_check': 'Простейшая проверка отчёта',
+                   'banned_words_in_literature': 'Наличие запрещенных слов в списке литературы',
+                   'banned_words_check': 'Проверка наличия запретных слов в тексте отчёта',
+                   'page_counter': 'Проверка количества страниц',
+                   'image_share_check': 'Проверка доли объема отчёта, приходящейся на изображения',
+                   'right_words_check': 'Проверка наличия определенных (правильных) слов в тексте отчёта',
+                   'first_pages_check': 'Проверка наличия обязательных страниц в отчете',
+                   'needed_headers_check': 'Проверка наличия обязательных заголовков в отчете',
+                   'header_check': 'Проверка оформления заголовков отчета',
+                   'report_section_component': 'Проверка наличия необходимых компонент указанного раздела',
+                   'main_text_check': 'Проверка оформления основного текста отчета'
+                   }
 
 
 @app.route("/results/<string:_id>", methods=["GET"])
-@login_required
 def results(_id):
     try:
         oid = ObjectId(_id)
@@ -236,7 +287,7 @@ def results(_id):
     if check is not None:
         # show processing time for user
         avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
-        return render_template("./results.html", navi_upload=True, name=current_user.name, results=check, id=_id,
+        return render_template("./results.html", navi_upload=True, results=check,
                                columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
                                stats=format_check(check.pack()))
     else:
@@ -266,6 +317,87 @@ def checks(_id):
         return render_template("./404.html")
 
 
+################### Criterion packs ###################
+
+@app.route("/criterion_pack", methods=["GET"])
+@login_required
+def criteria_pack_new():
+    if not current_user.is_admin:
+        abort(403)
+    return render_template('./criteria_pack.html', name=current_user.name, navi_upload=True)
+
+
+@app.route("/criterion_packs", methods=["GET"])
+@login_required
+def criteria_packs():
+    if not current_user.is_admin:
+        abort(403)
+    packs = db_methods.get_criterion_pack_list()
+    return render_template('./pack_list.html', packs=packs, name=current_user.name, navi_upload=True)
+
+
+@app.route("/criterion_pack/<string:name>", methods=["GET"])
+@login_required
+def criteria_pack(name):
+    if not current_user.is_admin:
+        abort(403)
+
+    pack = db_methods.get_criteria_pack(name)
+    if not pack:
+        abort(404)
+    pack['raw_criterions'] = json.dumps(pack['raw_criterions'], indent=4, ensure_ascii=False)
+    return render_template('./criteria_pack.html', pack=pack, name=current_user.name, navi_upload=True)
+
+
+@app.route("/api/criterion_pack", methods=["POST"])
+@login_required
+def api_criteria_pack():
+    if not current_user.is_admin:
+        abort(403)
+    form_data = dict(request.form)
+    pack_name = form_data.get('pack_name')
+    # get pack configuration info
+    raw_criterions = form_data.get('raw_criterions')
+    file_type = form_data.get('file_type')
+    report_type = form_data.get('report_type')
+    min_score = float(form_data.get('min_score', '1'))
+    # weak validation
+    try:
+        raw_criterions = json.loads(raw_criterions)
+    except:
+        msg = f"Ошибка при парсинге критериев {raw_criterions} для набора {pack_name} от пользователя {current_user.name}"
+        logger.info(msg)
+        return msg, 400
+    raw_criterions = raw_criterions if type(raw_criterions) is list else None
+    file_type = file_type if file_type in BASE_PACKS.keys() else None
+    min_score = min_score if min_score and (0 <= min_score <= 1) else None
+    if not (raw_criterions and file_type and min_score):
+        msg = f"Конфигурация набора критериев должна содержать список критериев (непустой список в формате JSON)," \
+              f"тип файла (один из {list(BASE_PACKS.keys())})," \
+              f"пороговый балл (0<=x<=1). Получено: {form_data}, после обработки: file_type - {file_type}," \
+              f"min_score - {min_score}, raw_criterions - {raw_criterions}"
+        return {'data': msg, 'time': datetime.now()}, 400
+    #  testing pack initialization
+    file_type_info = {'type': file_type}
+    if file_type == DEFAULT_REPORT_TYPE_INFO['type']:
+        file_type_info['report_type'] = report_type if report_type in REPORT_TYPES else DEFAULT_REPORT_TYPE_INFO[
+            'report_type']
+    inited, err = init_criterions(raw_criterions, file_type=file_type_info)
+    if len(raw_criterions) != len(inited) or err:
+        msg = f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. Успешно инициализированные: {inited}. Возникшие ошибки: {err}."
+        return {'data': msg, 'time': datetime.now()}, 400
+    # if ok - save to DB
+    db_methods.save_criteria_pack({
+        'name': pack_name,
+        'raw_criterions': raw_criterions,
+        'file_type': file_type_info,
+        'min_score': min_score
+    })
+    return {'data': f"Набор '{pack_name}' сохранен", 'time': datetime.now()}, 200
+
+
+################### ###################
+
 @app.route("/get_last_check_results/<string:moodle_id>", methods=["GET"])
 @login_required
 def get_latest_user_check(moodle_id):
@@ -293,47 +425,36 @@ def get_pdf(_id):
         return render_template("./404.html")
 
 
-@app.route("/criteria", methods=["GET", "POST"])
-@login_required
-def criteria():
-    if current_user.is_admin:
-        if request.method == "GET":
-            return render_template("./criteria.html", navi_upload=True, name=current_user.name,
-                                   crit=current_user.criteria)
-        elif request.method == "POST":
-            return user.update_criteria(request.json)
-    else:
-        abort(403)
-
-
 @app.route("/check_list")
 @login_required
 def check_list():
     return render_template("./check_list.html", name=current_user.name, navi_upload=True)
 
 
+
 @app.route("/check_list/data")
 @login_required
 def check_list_data():
-    filter_query = checklist_filter(request)
+    data = request.args.copy()
+    filter_query = checklist_filter(data)
     # parse and validate rest query
-    limit = request.args.get("limit", "")
-    limit = int(limit) if limit.isnumeric() else 10
+    limit = data.get("limit", '')
+    limit = int(limit) if limit.isdigit() else 10
 
-    offset = request.args.get("offset", "")
-    offset = int(offset) if offset.isnumeric() else 0
+    offset = data.get("offset", '')
+    offset = int(offset) if offset.isdigit() else 0
 
-    sort = request.args.get("sort", "")
+    sort = data.get("sort")
     sort = 'upload-date' if not sort else sort
 
-    order = request.args.get("order", "")
+    order = data.get("order")
     order = 'desc' if not order else order
 
     sort = "_id" if sort == "upload-date" else sort
 
     query = dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
 
-    if request.args.get("latest"):
+    if data.get("latest"):
         rows, count = db_methods.get_latest_check_cursor(**query)
     else:
         # get data and records count
@@ -342,16 +463,7 @@ def check_list_data():
     # construct response
     response = {
         "total": count,
-        "rows": [{
-            "_id": str(item["_id"]),
-            "filename": item["filename"],
-            "user": item["user"],
-            "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
-            "upload-date": (item["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
-            "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get(
-                'lms_passback_time') else '-',
-            "score": item["score"]
-        } for item in rows]
+        "rows": [format_check_for_table(item) for item in rows]
     }
 
     # return json data
@@ -360,7 +472,7 @@ def check_list_data():
 
 def get_query(req):
     # query for download csv/zip
-    filter_query = checklist_filter(req)
+    filter_query = checklist_filter(req.args)
     limit = False
     offset = False
     sort = req.args.get("sort", "")
@@ -374,30 +486,22 @@ def get_query(req):
 
 def get_stats():
     rows, count = db_methods.get_checks(**get_query(request))
-    return [{
-        "_id": str(item["_id"]),
-        "filename": item["filename"],
-        "user": item["user"],
-        "lms-username": item["user"].rsplit('_', 1)[0],
-        "lms-user-id": item["lms_user_id"] if item.get("lms_user_id") else '-',
-        "upload-date": (item["_id"].generation_time + timezone_offset).strftime("%d.%m.%Y %H:%M:%S"),
-        "moodle-date": item['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if item.get(
-            'lms_passback_time') else '-',
-        "score": item["score"]
-    } for item in rows]
+    return [format_check_for_table(item, set_link=URL_DOMEN) for item in rows]
 
 
 @app.route("/get_csv")
 @login_required
 def get_csv():
+    from io import StringIO
     if not current_user.is_admin:
         abort(403)
     response = get_stats()
-    df = pd.read_json(json.dumps(response))
+    df = pd.read_json(StringIO(json.dumps(response)))
     return Response(
-        df.to_csv(),
+        df.to_csv(sep=',', encoding='utf-8'),
         mimetype="text/csv",
-        headers={"Content-disposition": "attachment"})
+        headers={"Content-disposition": "attachment"}
+    )
 
 
 @app.route("/get_zip")
@@ -420,7 +524,7 @@ def get_zip():
     # add csv
     response = get_stats()
     df = pd.read_json(json.dumps(response))
-    df.to_csv(f"{dirpath.name}/Презентации.csv")
+    df.to_csv(f"{dirpath.name}/Статистика.csv")
 
     # zip
     tmp = tempfile.TemporaryDirectory()
@@ -539,18 +643,19 @@ def version():
 @app.route('/profile/<string:username>', methods=["GET"])
 @login_required
 def profile(username):
-    if current_user.is_admin:
-        if username == '':
-            return redirect(url_for("profile", username=current_user.username))
-        u = db_methods.get_user(username)
-        me = True if username == current_user.username else False
-        if u is not None:
-            return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
-        else:
-            logger.info("Запрошенный пользователь не найден: " + username)
-            return render_template("./404.html")
-    else:
-        abort(403)
+    return abort(404)
+    # if current_user.is_admin:
+    #     if username == '':
+    #         return redirect(url_for("profile", username=current_user.username))
+    #     u = db_methods.get_user(username)
+    #     me = True if username == current_user.username else False
+    #     if u is not None:
+    #         return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
+    #     else:
+    #         logger.info("Запрошенный пользователь не найден: " + username)
+    #         return render_template("./404.html")
+    # else:
+    #     abort(403)
 
 
 @app.route("/capacity", methods=["GET"])
@@ -604,6 +709,18 @@ def add_header(r):
     return r
 
 
+class ReverseProxied(object):
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        forwarded_scheme = environ.get("HTTP_X_FORWARDED_PROTO", None)
+        preferred_scheme = app.config.get("PREFERRED_URL_SCHEME", None)
+        if "https" in [forwarded_scheme, preferred_scheme]:
+            environ["wsgi.url_scheme"] = "https"
+        return self.app(environ, start_response)
+
+
 if __name__ == '__main__':
     DEBUG = True
     if len(argv) == 2:
@@ -615,6 +732,7 @@ if __name__ == '__main__':
         logger.info("По умолчанию выбран отладочный режим...")
 
     if pre_luncher.init(app, DEBUG):
+        app.wsgi_app = ReverseProxied(app.wsgi_app)
         port = 8080
         ip = '0.0.0.0'
         logger.info("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +

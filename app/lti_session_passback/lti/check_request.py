@@ -1,7 +1,7 @@
-from lti.contrib.flask import FlaskToolProvider
-
 from db.db_methods import ConsumersDBManager
+from lti.contrib.flask import FlaskToolProvider
 from utils.mock_lti_auth import mock_lti_auth
+
 from .lti_validator import LTIRequestValidator
 
 

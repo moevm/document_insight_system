@@ -31,7 +31,7 @@
             <tr style="text-align: left;">
             <tr>
                 {% for item in columns %}
-                    <th>{{ item }} </th>
+                    <th>{{ item }}</th>
                 {% endfor %}
             </tr>
             </thead>
@@ -45,14 +45,17 @@
             </tr>
             </tbody>
         </table>
+
         <!-- Download links -->
-        <a href="{{ url_for('checks', _id=id) }}" id="file_download" class="col text-center"
-           download="{{ results.filename }}">
-            Скачать файл в исходном формате ({{ results.filename.upper().rsplit('.', 1)[-1] }})
-        </a>
-        {% if results.conv_pdf_fs_id %}
-            <a href="{{ url_for('get_pdf', _id=results.conv_pdf_fs_id) }}" id="pdf_download"
-               class="col text-center">Скачать файл в PDF-формате</a>
+        {% if not current_user.is_anonymous %}
+            <a href="{{ url_for('checks', _id=results._id) }}" id="file_download" class="col text-center"
+               download="{{ results.filename }}">
+                Скачать файл в исходном формате ({{ results.filename.upper().rsplit('.', 1)[-1] }})
+            </a>
+            {% if results.conv_pdf_fs_id %}
+                <a href="{{ url_for('get_pdf', _id=results.conv_pdf_fs_id) }}" id="pdf_download"
+                   class="col text-center">Скачать файл в PDF-формате</a>
+            {% endif %}
         {% endif %}
         <!-- Checks table -->
         {% if results.is_ended and not results.is_failed %}
@@ -82,7 +85,8 @@
                     <tr>
                         <td colspan="4" class="hiddenRow">
                             <div id="verd{{ loop.index }}" class="accordian-body collapse" style="margin-left: 2em;">
-                                {% for item in criterion_info.get('verdict', ["Пройдена!"] if criterion_info.get('score')==1.0 else ["Не пройдена"]) %}
+                                {% for item in criterion_info.get('verdict', ["Пройдена!"] if criterion_info.get('score')==1.0 else
+                    ["Не пройдена"]) %}
                                     {{ item|safe }}
                                 {% endfor %}
                             </div>
@@ -93,7 +97,7 @@
             </table>
         {% endif %}
         <!-- PDF viewer -->
-        {% if results.conv_pdf_fs_id %}
+        {% if not current_user.is_anonymous and results.conv_pdf_fs_id %}
             <div style="text-align:center; width:100%">
                 <div class="top-bar">
                     <button class="btn" id="prev-page"><i class="bi bi-arrow-left"></i></button>

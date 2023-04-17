@@ -11,8 +11,8 @@ config = configparser.ConfigParser()
 config.read(ini_file)
 
 # read version file
-version_ph = os.path.dirname(current_ph)
-version_file = os.path.join(version_ph, "VERSION.json")
+project_ph = os.path.dirname(current_ph)
+version_file = os.path.join(project_ph, "app", "VERSION.json")
 try:
     with open(version_file) as vfp:
         json_string = vfp.read()

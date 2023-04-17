@@ -1,7 +1,6 @@
 {# Accepts: header dependicies #}
 
 
-
 {% extends "root.html" %}
 
 {% block title %}{{ name }}{% endblock %}
@@ -13,51 +12,33 @@
             <h2 class="texteous text-center ins">{{ user.name }}</h2>
             <table class="table fixed" id="profile_table">
                 <tbody>
+                <tr>
+                    <td class="ins">Логин:</td>
+                    <td class="ins">{{ user.username }}</td>
+                </tr>
+                <tr>
+                    <td class="ins">Администратор:</td>
+                    <td class="ins">{{ "Да" if user.is_admin else "Нет" }}</td>
+                </tr>
+                {% if me %}
                     <tr>
-                        <td class="ins">Логин:</td>
-                        <td class="ins">{{ user.username }}</td>
+                        <td>
+                            <label id="name_label" for="name_text_field">Имя:</label>
+                        </td>
+                        <td>
+                            <input type="text" class="inputous" id="name_text_field" value="{{ user.name }}">
+                        </td>
                     </tr>
-                    <tr>
-                        <td class="ins">Администратор:</td>
-                        <td class="ins">{{ "Да" if user.is_admin else "Нет" }}</td>
-                    </tr>
-                    {% if me %}
-                        <tr>
-                            <td>
-                                <label id="name_label" for="name_text_field">Имя:</label>
-                            </td>
-                            <td>
-                                <input type="text" class="inputous" id="name_text_field" value="{{ user.name }}">
-                            </td>
-                        </tr>
-                    {% endif %}
+                {% endif %}
                 </tbody>
             </table>
             {% if me %}
                 <div class="row justify-content-center h-box">
                     <button type="button" class="btn blue_button" id="user_save_button">Сохранить</button>
                     <button type="button" class="pale_button" id="user_logout_button">Выйти</button>
-                    <button type="button" class="pale_button" data-toggle="modal" data-target="#delete_user_confirmation">Удалить</button>
                 </div>
             {% endif %}
         </div>
     </div>
 
-    <div class="modal fade" id="delete_user_confirmation" tabindex="-1" role="dialog" aria-labelledby="delete_user_confirmation_title" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title ins" id="delete_user_confirmation_title">Вы уверены?</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body ins">Вы уверены, что хотите удалить Ваш профиль? Вместе с ним будет удалена информация обо всех проверенных презентациях!</div>
-                <div class="modal-footer">
-                    <button type="button" class="btn blue_button" data-dismiss="modal">Не удалять</button>
-                    <button type="button" class="btn btn-danger" data-dismiss="modal" id="user_delete_button">Удалить!</button>
-                </div>
-            </div>
-        </div>
-    </div>
 {% endblock %}

@@ -1,5 +1,5 @@
-from ..slide_basic import SlideBasic
 from app.utils import tict
+from ..slide_basic import SlideBasic
 
 
 def _is_title(node):

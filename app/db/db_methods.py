@@ -5,8 +5,8 @@ import pymongo
 from bson import ObjectId
 from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
-
 from utils import convert_to
+
 from .db_types import User, Presentation, Check, Consumers, Logs
 
 client = MongoClient("mongodb://mongodb:27017")
@@ -133,11 +133,6 @@ def delete_presentation(user, presentation_id):
         return user, get_presentation(presentation_id)
 
 
-# Creates checks from given user check-list (not created in DB)
-def create_check(user, file_type='pres'):
-    return Check({'enabled_checks': user.criteria, 'file_type': file_type})
-
-
 # Adds checks to given presentations, updates presentations, returns presentations and checks id
 def add_check(file_id, check):
     checks_id = checks_collection.insert_one(check.pack()).inserted_id
@@ -158,6 +153,12 @@ def add_file_to_db(filename, filepath, file_id=None):
     if not file_id: file_id = ObjectId()
     fs.upload_from_stream_with_id(file_id, filename, open(filepath, 'rb'))
     return file_id
+
+
+def write_file_from_db_file(file_id, abs_filepath):
+    with open(abs_filepath, 'wb+') as file:
+        fs.download_to_stream(file_id, file)
+    return True
 
 
 # Returns checks with given id or None
@@ -211,8 +212,15 @@ def get_unpassed_checks():
 
 
 def set_passbacked_flag(checks_id, flag):
-    upd_check = {"$set": {'is_passbacked': flag,
-                          'lms_passback_time': datetime.now()}}
+    upd_check = {"$set": {}}
+    upd_check['$set']['is_passbacked'] = flag
+
+    if flag is None:
+        # flag = None - if user without passback
+        upd_check['$set']['lms_passback_time'] = None
+    elif flag:
+        upd_check['$set']['lms_passback_time'] = datetime.now()
+
     check = checks_collection.update_one({'_id': checks_id}, upd_check)
     return check if check else None
 
@@ -368,11 +376,16 @@ def get_criteria_pack(name):
 
 
 def save_criteria_pack(pack_info):
-    # pack_info - dict, that includes name, criterions, check_file_type, min_score}
+    """
+    pack_info - dict, that includes name, raw_criterions, file_type, min_score
+    """
+    pack_info['updated'] = datetime.now()
     return criteria_pack_collection.update_one({'name': pack_info.get('name')}, {'$set': pack_info}, upsert=True)
 
 
-# criterions, check_file_type, min_score=1.0, name
+def get_criterion_pack_list():
+    return criteria_pack_collection.find()
+
 
 # mapping celery_task to check
 

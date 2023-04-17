@@ -14,22 +14,26 @@
             {% if "error" not in config["VERSION_DATA"] %}
                 <table id="version-table">
                     <tbody>
-                        <tr id="commit">
-                            <td class="name">Commit:</td>
-                            <td class="value">{{ config["VERSION_DATA"]["commit"] }}</td>
-                        </tr>
-                        <tr id="date">
-                            <td class="name">Date:</td>
-                            <td class="value">{{ config["VERSION_DATA"]["date"] }}</td>
-                        </tr>
-                        <tr id="branch">
-                            <td class="name">Branch:</td>
-                            <td class="value">{{ config["VERSION_DATA"]["branch"] }}</td>
-                        </tr>
-                        <tr id="version">
-                            <td class="name">Version:</td>
-                            <td class="value">{{ config["VERSION_DATA"]["version"] }}</td>
-                        </tr>
+                    <tr id="commit">
+                        <td class="name">Commit:</td>
+                        <td class="value">{{ config["VERSION_DATA"]["commit"] }}</td>
+                    </tr>
+                    <tr id="message">
+                        <td class="name">Commit message:</td>
+                        <td class="value">{{ config["VERSION_DATA"]["message"] }}</td>
+                    </tr>
+                    <tr id="date">
+                        <td class="name">Deploy date:</td>
+                        <td class="value">{{ config["VERSION_DATA"]["date"] }}</td>
+                    </tr>
+                    <tr id="branch">
+                        <td class="name">Branch:</td>
+                        <td class="value">{{ config["VERSION_DATA"]["branch"] }}</td>
+                    </tr>
+                    <tr id="version">
+                        <td class="name">Version:</td>
+                        <td class="value">{{ config["VERSION_DATA"]["version"] }}</td>
+                    </tr>
                     </tbody>
                 </table>
             {% else %}
