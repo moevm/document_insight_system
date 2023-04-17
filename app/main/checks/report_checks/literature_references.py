@@ -10,10 +10,12 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def __init__(self, file_info):
         super().__init__(file_info)
         self.headers = []
+        self.literature_header = []
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
 
     def late_init_vkr(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
+        self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -29,22 +31,17 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 return answer(False, f'Нет списка литературы.')
         elif self.file_type['report_type'] == 'VKR':
             self.late_init_vkr()
-            if not len(self.headers):
-                return answer(False,
-                              "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
-            for header in self.headers:
-                header_text = header["text"].lower()
-                if header_text.find('список использованных источников') >= 0:
-                    number_of_sources = self.count_sources_vkr(header)
-                    if not number_of_sources:
-                        return answer(False,
-                                      f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
-                    start_literature_par = header["number"]
-            if not start_literature_par:
+            header = self.literature_header
+            if not header:
                 return answer(False,
                               f'Не найден Список использованных источников.<br><br>Проверьте корректность использования стилей.')
+            start_literature_par = header["number"]
+            number_of_sources = self.count_sources_vkr(header)
         else:
             return answer(False, 'Во время обработки произошла критическая ошибка')
+        if not number_of_sources:
+            return answer(False,
+                          f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
         references = self.search_references(start_literature_par)
         all_numbers = set()
         for i in range(1, number_of_sources + 1):

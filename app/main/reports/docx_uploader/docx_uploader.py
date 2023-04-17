@@ -25,6 +25,7 @@ class DocxUploader:
         self.pdf_file = None
         self.count = 0
         self.first_lines = []
+        self.literature_header = []
 
     def upload(self, file):
         self.file = docx.Document(file)
@@ -106,6 +107,14 @@ class DocxUploader:
                 table.append(row)
             self.tables.append(Table(tables[i], table))
         return tables
+
+    def find_literature_vkr(self, work_type):
+        if not self.literature_header:
+            for header in self.make_chapters(work_type):
+                header_text = header["text"].lower()
+                if header_text.find('список использованных источников') >= 0:
+                    self.literature_header = header
+        return self.literature_header
 
     def build_vkr_hierarchy(self, styles):
         indices = self.get_paragraph_indices_by_style(styles)

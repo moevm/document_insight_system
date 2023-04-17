@@ -7,7 +7,7 @@ class ReportBannedWordsCheck(BaseReportCriterion):
     description = "Проверка наличия запретных слов в тексте отчёта"
     id = 'banned_words_check'
 
-    def __init__(self, file_info, words=["я", "мы", "цель"], min_count=3, max_count=6):
+    def __init__(self, file_info, words=["мы"], min_count=3, max_count=6):
         super().__init__(file_info)
         self.words = [morph.normal_forms(word)[0] for word in words]
         self.min_count = min_count
