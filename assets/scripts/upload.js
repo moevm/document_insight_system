@@ -35,8 +35,7 @@ file_input.change(() => {
     }
     file_uploaded = true;
     label.html(fileName);
-    if ((two_files == 'False') || (pdf_uploaded === true) || (file_type === 'pres')) {
-        upload_button.prop("disabled", false);
+    upload_button.prop("disabled", false);
     }
 });
 
