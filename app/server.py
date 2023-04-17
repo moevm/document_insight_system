@@ -158,7 +158,7 @@ def run_task():
         return 'storage_overload'
     logger.info(
         f"Запуск обработки файла {file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
-    if pdf_file:
+    if current_user.two_files and pdf_file:
         if get_file_len(pdf_file) * 2 + db_methods.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
             logger.critical('Storage overload has occured')
             return 'storage_overload'
