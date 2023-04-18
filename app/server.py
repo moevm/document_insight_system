@@ -86,6 +86,7 @@ def lti():
         # get file type and formats from pack
         file_type_info = custom_criterion_pack_obj.file_type
         file_type = file_type_info['type']
+        two_files = bool(custom_params.get('two_files'))
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
 
@@ -102,6 +103,7 @@ def lti():
 
         # task settings
         lti_user.file_type = file_type_info
+        lti_user.two_files = two_files
         lti_user.formats = formats
         lti_user.criteria = custom_criterion_pack
         # passback settings
@@ -164,6 +166,7 @@ def upload():
 @login_required
 def run_task():
     file = request.files.get("file")
+    pdf_file = request.files.get("pdf_file")
     file_type = request.form.get('file_type', 'pres')
     if not file:
         logger.critical("request doesn't include file")
@@ -174,16 +177,27 @@ def run_task():
     logger.info(
         f"Запуск обработки файла {file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
 
-    file_id = ObjectId()
     # save to file on disk for future checking
+    file_id = ObjectId()
     filename, extension = file.filename.rsplit('.', 1)
     filepath = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
     file.save(filepath)
     # add file and file's info to db
     file_id = db_methods.add_file_info_and_content(current_user.username, filepath, file_type, file_id)
-    # convert to pdf and save on disk and db
-    converted_id = db_methods.write_pdf(filename, filepath)  # convert to pdf for preview
-    # TODO: validate that enabled_checks match file_type
+    # use pdf from response or convert to pdf and save on disk and db
+    if current_user.two_files and pdf_file:
+        if get_file_len(pdf_file) * 2 + db_methods.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
+            logger.critical('Storage overload has occured')
+            return 'storage_overload'
+        logger.info(
+            f"Запуск обработки файла {pdf_file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
+        pdf_file_id = ObjectId()
+        filenamepdf, extension = pdf_file.filename.rsplit('.', 1)
+        filepathpdf = join(UPLOAD_FOLDER, f"{pdf_file_id}.{extension}")
+        pdf_file.save(filepathpdf)
+        converted_id = db_methods.add_file_to_db(filenamepdf, filepathpdf)
+    else:
+        converted_id = db_methods.write_pdf(filename, filepath)
     check = Check({
         '_id': file_id,
         'conv_pdf_fs_id': converted_id,

@@ -39,6 +39,7 @@ def init(app, debug):
     file_type = DEFAULT_REPORT_TYPE_INFO['type']
     user.criteria = BASE_PACKS[file_type].name
     user.formats = list(ALLOWED_EXTENSIONS.get(file_type))
+    user.two_files = True
     edit_user(user)
 
     logger.info(f"Создан администратор по умолчанию: логин: {user.username}, пароль уточняйте у разработчика")

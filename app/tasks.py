@@ -9,6 +9,7 @@ from db import db_methods
 from db.db_types import Check
 from main.checker import check
 from main.parser import parse
+from main.check_packs import BASE_PACKS
 from root_logger import get_root_logger
 
 config = configparser.ConfigParser()

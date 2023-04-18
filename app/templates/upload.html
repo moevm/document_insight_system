@@ -29,6 +29,18 @@
                                 <div class="invalid-feedback ins">Возникла ошибка</div>
                             </div>
                         </div>
+                        {% if current_user.two_files %}
+                        <div>
+                            <h6 class="text-center ins" id="upload_titlee">Прикрепите файл в формате pdf (опционально)</h6>
+                            <div class="form-group">
+                                <div id="uploading_form_pdf" class="custom-file">
+                                    <input type="file" class="custom-file-input" id="upload_file_pdf" accept=".pdf">
+                                    <label class="custom-file-label" id="upload_file_label_pdf" for="upload_file">Допустимые форматы: pdf</label>
+                                    <div class="invalid-feedback ins">Возникла ошибка</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
                         <div id="uploading_progress_holder" class="form-group" style="display: none">
                             <div class="progress">
                                 <div id="uploading_progress"
