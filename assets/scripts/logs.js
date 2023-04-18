@@ -1,13 +1,13 @@
 const AJAX_URL = "/logs/data"
 
-String.prototype.insert = function(index, string) {
+String.prototype.insert = function (index, string) {
     if (index > 0) {
         return this.substring(0, index) + string + this.substr(index)
     }
     return string + this
 }
 
-$(()=>{
+$(() => {
     initTable()
     window.onpopstate = onPopState
 
@@ -21,8 +21,7 @@ $(()=>{
             let expectedStr
             if (carret <= numbers[0].length) {
                 expectedStr = numbers[0].insert(carret, ".")
-            }
-            else {
+            } else {
                 expectedStr = numbers[1].insert(carret - numbers[0].length - 1, ".")
             }
 
@@ -73,7 +72,7 @@ function initTable() {
     // check correct sort query
     if (params.sort !== "") {
         let match = false
-        $table.find("th[data-sortable='true']").each(function() {
+        $table.find("th[data-sortable='true']").each(function () {
             if ($(this).data("field") === params.sort) {
                 match = true
                 return false
@@ -93,7 +92,7 @@ function initTable() {
     }
 
     // Fill filters
-    $table.on("created-controls.bs.table", function() {
+    $table.on("created-controls.bs.table", function () {
         if (params.filter) {
             params.filter = JSON.parse(decodeURI(params.filter))
             for (const [key, value] of Object.entries(params.filter)) {
@@ -109,7 +108,7 @@ function initTable() {
         pageSize: parseInt(params.size) || 10,
         sortName: params.sort,
         sortOrder: params.order,
-        detailView:true,
+        detailView: true,
         detailViewIcon: false,
         detailViewByClick: true,
         detailFormatter: detailFormatter,
@@ -144,10 +143,10 @@ function pushHistoryState(params) {
 
 function queryParams(params) {
     filters = {}
-    $('.filter-control').each(function() {
+    $('.filter-control').each(function () {
         const name = $(this).parents("th").data("field")
         const val = this.querySelector("input").value
-        if (val){
+        if (val) {
             filters[name] = val
         }
     })
@@ -167,10 +166,11 @@ function queryParams(params) {
 }
 
 function detailFormatter(index, row) {
-  var html = []
-  $.each(row, function (key, value) {
-    if (key === 'message' || key === 'pathname'){
-        html.push('<p><b>' + key + ':</b> ' + row[key] + '</p>')
-    }})
-  return html.join('')
+    var html = []
+    $.each(row, function (key, value) {
+        if (key === 'message' || key === 'pathname') {
+            html.push('<p><b>' + key + ':</b> ' + row[key] + '</p>')
+        }
+    })
+    return html.join('')
 }

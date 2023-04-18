@@ -5,11 +5,11 @@ class ChapterObject:
     def __init__(self, object_type, data):
         self.type = object_type
         self.data = data
-        
+
         self.style_info = StyleInfo(data.style)
         self.table = None
-        
-  
+
+
 class ChapterObjectHeader(ChapterObject):
     def __init__(self, object_type, data):
         super().__init__(object_type, data)

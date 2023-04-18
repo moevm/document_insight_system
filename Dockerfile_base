@@ -1,0 +1,7 @@
+FROM python:3.8-slim-bullseye
+
+ENV LANG en_US.UTF-8
+ENV TZ=Europe/Moscow
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN apt update && apt install -y libreoffice-writer libreoffice-impress default-jre

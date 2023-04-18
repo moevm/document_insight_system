@@ -1,4 +1,5 @@
 import configparser
+
 checks_config = configparser.ConfigParser()
 checks_config.read('app/main/checks_config/main.ini')
 

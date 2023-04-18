@@ -20,13 +20,15 @@ class DBCollections:
         self.users = self.db['users']
         self.presentations = self.db['presentations']
         self.checks = self.db['checks']
+        self.criteria_pack = self.db['criteria_pack']
         self.db_version = self.db['db_version']
 
     def get_by_name(self, name):
         return dict(
             users=self.db['users'],
             presentations=self.db['presentations'],
-            checks=self.db['checks']
+            checks=self.db['checks'],
+            criteria_pack=self.db['criteria_pack']
         ).get(name)
 
     def to_dict(self):
@@ -42,7 +44,7 @@ def update_db_version():
     version_doc = DBCollections().db_version.find_one()
 
     if not version_doc:
-        version_doc_id = add_version(VERSIONS['1.0'])  # if no version == 1.0
+        version_doc_id = add_version(VERSIONS[LAST_VERSION])  # if no version == LAST_VERSION
         version_doc = DBCollections().db_version.find_one({'_id': version_doc_id})
     version_doc_id = version_doc['_id']
 

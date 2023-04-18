@@ -1,1 +1,1 @@
-from pdf_document_manager import PdfDocumentManager
+from .pdf_document_manager import PdfDocumentManager

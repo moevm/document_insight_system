@@ -1,5 +1,6 @@
-from ..slide_basic import SlideBasic
 from pptx.enum.shapes import PP_PLACEHOLDER
+
+from ..slide_basic import SlideBasic
 
 
 class SlidePPTX(SlideBasic):

@@ -13,7 +13,7 @@ $("#login_button").click(async () => {
 
     const post_data = {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
             username: params["login_text_field"],
             password_hash: hash(params["password_text_field"])

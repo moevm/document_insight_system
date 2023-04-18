@@ -21,9 +21,10 @@ class FindTasks(BasePresCriterion):
         titles = self.file.get_titles()
         slides_with_tasks = find_tasks_on_slides(get_goals, titles, self.intersection_number)
 
-        if slides_with_tasks == 0:
-            return answer(True, "Все задачи найдены на слайдах")
-        elif len(slides_with_tasks) == 3:
-            return answer(False, *find_tasks_on_slides_feedback(slides_with_tasks))
+        if isinstance(slides_with_tasks, dict):
+            if slides_with_tasks['not_found']:
+                return answer(slides_with_tasks['found_ratio'], *find_tasks_on_slides_feedback(slides_with_tasks))
+            else:
+                return answer(1, "Все задачи найдены на слайдах")
         else:
             return answer(False, slides_with_tasks)
