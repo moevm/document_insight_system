@@ -24,6 +24,8 @@ class DocxUploader:
         self.special_paragraph_indices = {}
         self.pdf_file = None
         self.count = 0
+        self.first_lines = []
+        self.literature_header = []
 
     def upload(self, file):
         self.file = docx.Document(file)
@@ -70,24 +72,27 @@ class DocxUploader:
         return self.chapters
 
     def make_headers(self, work_type):
-        if not len(self.headers):
+        if not self.headers:
             if work_type == 'VKR':
                 # find first pages
                 headers = [
                     {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный",
-                     "page": 0},
+                     "main_character": True, "page": 0},
                     {"name": "Задание на выпускную квалификационную работу", "marker": False, "key": "задание",
+                     "main_character": True, "page": 0},
+                    {"name": "Календарный план", "marker": False, "key": "календарный план", "main_character": True,
                      "page": 0},
-                    {"name": "Календарный план", "marker": False, "key": "календарный план", "page": 0},
-                    {"name": "Реферат", "marker": False, "key": "реферат", "page": 0},
-                    {"name": "Abstract", "marker": False, "key": "abstract", "page": 0},
-                    {"name": "Cодержание", "marker": False, "key": "содержание", "page": 0}]
+                    {"name": "Реферат", "marker": False, "key": "реферат", "main_character": False,  "page": 0},
+                    {"name": "Abstract", "marker": False, "key": "abstract", "main_character": False, "page": 0},
+                    {"name": "Cодержание", "marker": False, "key": "содержание", "main_character": False, "page": 0}]
                 for page in range(1, self.count if self.page_counter() < 2 * len(headers) else 2 * len(headers)):
                     page_text = (self.pdf_file.get_text_on_page()[page].split("\n")[0]).lower()
                     for i in range(len(headers)):
-                        if page_text.find(headers[i]["key"]) >= 0:
-                            headers[i]["marker"] = True
-                            headers[i]["page"] = page
+                        if not headers[i]["marker"]:
+                            if page_text.find(headers[i]["key"]) >= 0:
+                                headers[i]["marker"] = True
+                                headers[i]["page"] = page
+                                break
                 self.headers = headers
         return self.headers
 
@@ -102,6 +107,14 @@ class DocxUploader:
                 table.append(row)
             self.tables.append(Table(tables[i], table))
         return tables
+
+    def find_literature_vkr(self, work_type):
+        if not self.literature_header:
+            for header in self.make_chapters(work_type):
+                header_text = header["text"].lower()
+                if header_text.find('список использованных источников') >= 0:
+                    self.literature_header = header
+        return self.literature_header
 
     def build_vkr_hierarchy(self, styles):
         indices = self.get_paragraph_indices_by_style(styles)
@@ -167,9 +180,19 @@ class DocxUploader:
     def page_counter(self):
         if not self.count:
             for k, v in self.pdf_file.text_on_page.items():
-                if re.search('приложение [а-я][\n .]', v.lower()):
+                line = v[:20] if len(v) > 21 else v
+                if re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip()):
                     break
                 self.count += 1
+                line = ''
+                lines = v.split("\n")
+                for i in range(len(lines)):
+                    if i > 1:
+                        break
+                    if i > 0:
+                        line += " "
+                    line += lines[i].strip()
+                self.first_lines.append(line.lower())
         return self.count
 
     def upload_from_cli(self, file):

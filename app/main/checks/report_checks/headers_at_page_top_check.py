@@ -13,9 +13,8 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
 
     def late_init_vkr(self):
         chapters = self.file.make_chapters(self.file_type['report_type'])
-        if chapters:
-            self.chapters = chapters
-            self.headers = self.find_headers()
+        self.chapters = chapters
+        self.headers = self.find_headers()
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -49,31 +48,32 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                                    + f"Заголовка \"{header}\" нет в документе или он находится не в начале страницы.")
         elif self.file_type["report_type"] == 'VKR':
             self.late_init_vkr()
-            for page_num in range(1, self.pdf.page_count):
-                if not len(self.headers):
+            for page_num in range(1, self.file.page_counter() + 1):
+                if not self.headers:
                     return answer(False,
-                                  "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
+                                  "Не найдено ни одного заголовка второго уровня.<br><br>"
+                                  "Проверьте корректность использования стилей.")
+                collected_text = self.file.first_lines[page_num - 1]
                 for header in self.headers:
-                    header_text = header["text"].lower()
-                    try:
-                        line = self.pdf.get_text_on_page()[page_num + 1].split("\n")[0] + ' ' + \
-                               self.pdf.get_text_on_page()[page_num + 1].split("\n")[1]
-                    except:
-                        try:
-                            line = self.pdf.get_text_on_page()[page_num + 1].split("\n")[0]
-                        except:
-                            return answer(False, f'В отчете обнаружен лист {page_num + 1}, не содержащий текста.')
-
-                    collected_text = line.lower()
-                    if collected_text.startswith(header_text.strip()):
-                        header["marker"] = 1
-                        break
+                    if not header["marker"]:
+                        header_text = header["text"].lower()
+                        if collected_text.startswith(header_text.strip()):
+                            header["marker"] = 1
+                            break
+                        elif collected_text.find(header_text.strip()) > 0:
+                            result_str += (("<br>" if len(result_str) else "") +
+                                           f"Заголовок второго уровня \"{header['text']}\" "
+                                           f"находится не в начале страницы или пронумирован с помощью списка. "
+                                           f"<br>Проверьте PDF, страница {self.format_page_link([page_num])} и DOCX")
+                            header["marker"] = 1
+                            break
 
             for header in self.headers:
                 if not header["marker"]:
                     result = False
-                    result_str += (("<br>" if len(
-                        result_str) else "") + f"Заголовок второго уровня \"{header['text']}\" находится не в начале страницы или занимает больше двух строк.")
+                    result_str += (("<br>" if len(result_str) else "") +
+                                   f"Заголовок второго уровня \"{header['text']}\" "
+                                   f"находится не в начале страницы или занимает больше двух строк.")
         else:
             result_str = "Во время обработки произошла критическая ошибка"
             return answer(False, result_str)
@@ -86,5 +86,8 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
         chapters = []
         for header in self.chapters:
             if header["style"] == 'heading 2':
+                if header["text"].find("ПРИЛОЖЕНИЕ") >= 0:
+                    break
                 chapters.append({"text": header["text"], "marker": 0})
         return chapters
+
