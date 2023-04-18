@@ -177,6 +177,15 @@ def run_task():
         return 'storage_overload'
     logger.info(
         f"Запуск обработки файла {file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
+
+    # save to file on disk for future checking
+    file_id = ObjectId()
+    filename, extension = file.filename.rsplit('.', 1)
+    filepath = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
+    file.save(filepath)
+    # add file and file's info to db
+    file_id = db_methods.add_file_info_and_content(current_user.username, filepath, file_type, file_id)
+    # use pdf from response or convert to pdf and save on disk and db
     if current_user.two_files and pdf_file:
         if get_file_len(pdf_file) * 2 + db_methods.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
             logger.critical('Storage overload has occured')
@@ -190,16 +199,6 @@ def run_task():
         converted_id = db_methods.add_file_to_db(filenamepdf, filepathpdf)
     else:
         converted_id = db_methods.write_pdf(filename, filepath)
-        # convert to pdf for preview
-
-    # save to file on disk for future checking
-    file_id = ObjectId()
-    filename, extension = file.filename.rsplit('.', 1)
-    filepath = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
-    file.save(filepath)
-    # add file and file's info to db
-    file_id = db_methods.add_file_info_and_content(current_user.username, filepath, file_type, file_id)
-    # convert to pdf and save on disk and db
     check = Check({
         '_id': file_id,
         'conv_pdf_fs_id': converted_id,
