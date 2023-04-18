@@ -86,7 +86,7 @@ def lti():
         # get file type and formats from pack
         file_type_info = custom_criterion_pack_obj.file_type
         file_type = file_type_info['type']
-        two_files = custom_params.get('two_files', False)
+        two_files = bool(custom_params.get('two_files'))
         formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
             file_type] or ALLOWED_EXTENSIONS[file_type]))
 
@@ -158,7 +158,6 @@ def upload():
     elif request.method == "GET":
         formats = set(current_user.formats)
         file_type = current_user.file_type['type']
-        two_files = current_user.two_files
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
         return render_template("./upload.html", navi_upload=False, formats=sorted(formats))
 
