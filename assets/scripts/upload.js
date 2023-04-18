@@ -36,7 +36,6 @@ file_input.change(() => {
     file_uploaded = true;
     label.html(fileName);
     upload_button.prop("disabled", false);
-    }
 });
 
 async function upload() {
