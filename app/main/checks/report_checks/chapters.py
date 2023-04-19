@@ -91,4 +91,3 @@ class ReportChapters(BaseReportCriterion):
                 return answer(False, result_string)
         else:
             return answer(False, 'Во время обработки произошла критическая ошибка')
-

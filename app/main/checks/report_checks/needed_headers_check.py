@@ -8,6 +8,7 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
 
     def __init__(self, file_info, main_heading_style="heading 2"):
         super().__init__(file_info)
+        self.headers_page = 1
         self.headers = []
         self.main_heading_style = main_heading_style
         self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
@@ -15,6 +16,7 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
 
     def late_init(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
+        self.headers_page = self.file.find_header_page(self.file_type['report_type'])
 
     def show_chapters(self):
         chapters_str = "<br>"
@@ -26,9 +28,9 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
         return chapters_str
 
     def check(self):
-        self.late_init()
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
+        self.late_init()
         result_string = ''
         patterns = []
         for pattern in self.patterns:
@@ -40,7 +42,7 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
             for i in range(len(patterns)):
                 pattern = patterns[i]["pattern"]
                 if header_text.find(pattern.lower()) >= 0:
-                   patterns[i]["marker"] = 1
+                    patterns[i]["marker"] = 1
 
         for pattern in patterns:
             if not pattern["marker"]:
@@ -48,7 +50,8 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
 
         if not result_string:
             result_str = f'Все необходимые заголовки обнаружены!'
-            result_str += '<br><br>Ниже представлена иерархия обработанных заголовков:'
+            result_str += f'<br><br><b>&nbsp;&nbsp;&nbsp;&nbsp;Ниже представлена иерархия обработанных заголовков, ' \
+                          f'сравните с Содержанием {self.format_page_link([self.headers_page])}:</b>'
             result_str += self.show_chapters()
             result_str += '<br>Если список не точный, убедитесь, что для каждого заголовка указан верный стиль.'
             return answer(True, result_str)
@@ -60,10 +63,10 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
                             <li>Убедитесь в отсутствии опечаток и лишних пробельных символов в названии раздела;</li>
                             <li>Убедитесь в соответствии стиля заголовка требованиям к отчету по ВКР;</li>
                             <li>Убедитесь, что заголовок состоит из одного абзаца.</li>
+                        </ul>
                         '''
-            result_str += '<br><br>Ниже представлена иерархия обработанных заголовков:'
+            result_str += f'<br><br><b>&nbsp;&nbsp;&nbsp;&nbsp;Ниже представлена иерархия обработанных заголовков, ' \
+                          f'сравните с Содержанием {self.format_page_link([self.headers_page])}:</b>'
             result_str += self.show_chapters()
             result_str += '<br>Если список не точный, убедитесь, что для каждого заголовка указан верный стиль.'
             return answer(False, result_str)
-
-

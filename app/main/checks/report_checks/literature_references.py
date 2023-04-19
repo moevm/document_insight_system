@@ -138,4 +138,3 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 end_page = i
                 break
         return start_page, end_page
-
