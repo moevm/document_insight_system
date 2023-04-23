@@ -6,7 +6,7 @@ class ReportMainCharacterCheck(BaseReportCriterion):
     id = 'main_character_check'
 
     def __init__(self, file_info, main_character_name_right="А.А. Лисс", main_character_name_wrong="К.В. Кринкин",
-                 main_character_job_right="И.о зав. кафедрой", main_character_job_wrong="Зав. кафедрой"):
+                 main_character_job_right="И.о. зав. кафедрой", main_character_job_wrong="Зав. кафедрой"):
         super().__init__(file_info)
         self.headers = []
         self.main_character_name_right = main_character_name_right
