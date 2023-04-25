@@ -9,14 +9,14 @@ logger = logging.getLogger('root_logger')
 
 
 def parse(filepath):
-    if filepath.endswith('.ppt') or filepath.endswith('.pptx'):
+    if filepath.endswith('.pptx'):
         try:
             return PresentationPPTX(filepath), None
         except Exception as err:
             logger.error(err, exc_info=True)
             return None, None
         
-    elif filepath.endswith('.odp'):
+    elif filepath.endswith('.ppt') or filepath.endswith('.odp'):
         try:
             converted_file_path = convert_to(filepath, target_format='pptx')
             return PresentationPPTX(converted_file_path), converted_file_path
