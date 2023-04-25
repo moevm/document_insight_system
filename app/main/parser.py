@@ -11,10 +11,10 @@ logger = logging.getLogger('root_logger')
 def parse(filepath):
     if filepath.endswith('.ppt') or filepath.endswith('.pptx'):
         try:
-            return PresentationPPTX(filepath)
+            return PresentationPPTX(filepath), None
         except Exception as err:
             logger.error(err, exc_info=True)
-            return None
+            return None, None
         
     elif filepath.endswith('.odp'):
         try:
@@ -22,7 +22,7 @@ def parse(filepath):
             return PresentationPPTX(converted_file_path), converted_file_path
         except Exception as err:
             logger.error(err, exc_info=True)
-            return None
+            return None, None
         
     elif filepath.endswith('.doc') or filepath.endswith('.odt'):
         try:
@@ -33,17 +33,17 @@ def parse(filepath):
             return docx, converted_file_path
         except Exception as err:
             logger.error(err, exc_info=True)
-            return None
+            return None, None
 
     elif filepath.endswith('.docx'):
         try:
             docx = DocxUploader()
             docx.upload(filepath)
             docx.parse()
-            return docx
+            return docx, None
         except Exception as err:
             logger.error(err, exc_info=True)
-            return None
+            return None, None
         
     else:
         raise ValueError("Файл с недопустимым именем или недопустимого формата: " + filepath)
