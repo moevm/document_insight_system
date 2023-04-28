@@ -4,6 +4,7 @@ class SlideBasic:
         self.text = ""  # Maybe should be a list for multiple text nodes.
         self.page_number = [-1, -1, -1]
         self.dimensions = [-1, -1]
+        self.images = []
 
     def get_title(self):
         return self.title
@@ -13,6 +14,9 @@ class SlideBasic:
 
     def get_page_number(self):
         return self.page_number
+        
+    def get_images(self):
+    	return self.images
 
     def __str__(self):
         return f"\tTitle: {self.title}.\n\tText: {self.text}.\n\tPage_num: {self.page_number}"
