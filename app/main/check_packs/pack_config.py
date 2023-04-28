@@ -12,6 +12,7 @@ BASE_PRES_CRITERION = [
     ['slide_every_task', {'min_percent': 70}],
     ['conclusion_actual', {'min_percent': 70}],
     ['pres_right_words'],
+    ['pres_image_share'],
     ['future_dev']
 ]
 BASE_REPORT_CRITERION = [
