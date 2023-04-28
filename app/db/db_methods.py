@@ -227,8 +227,8 @@ def set_passbacked_flag(checks_id, flag):
 
 def get_latest_users_check():
     return db.checks.aggregate([
-        {'$sort': {'_id': -1}},
-        {'$group': {'_id': '$user', 'check_id': {'$first': '$_id'}}}
+        {'$group': {'_id': '$user', 'check_id': {'$last': '$_id'}}},
+        {'$sort': {'check_id': -1}},
     ])
 
 
