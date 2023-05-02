@@ -1,5 +1,7 @@
 from .utils import init_criterions
 
+PRIORITY_CHECK_FAILED_MSG = "<b>Данный критерий является обязательным для прохождения.<br>Результат всей проверки обнулен, но вы можете ознакомиться с результатами каждого критерия.</b><br>"
+
 
 class BaseCriterionPack:
 
@@ -16,12 +18,19 @@ class BaseCriterionPack:
 
     def check(self):
         result = []
+        failed_priority_check = False
         for criterion in self.criterions:
+            criterion_check_result = criterion.check()
+            if criterion.priority and not criterion_check_result['score']:
+                failed_priority_check = True
+                criterion_check_result['verdict'] = [PRIORITY_CHECK_FAILED_MSG] + list(criterion_check_result['verdict'])
             result.append(dict(
                 id=criterion.id,
                 name=criterion.name,
-                **criterion.check()
+                **criterion_check_result
             ))
+        if failed_priority_check:  # if priority criterion is failed -> check is failed
+            return result, 0, False
         score = self.calc_score(result)
         return result, score, self.is_correct(score)
 
