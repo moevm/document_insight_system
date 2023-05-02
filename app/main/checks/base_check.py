@@ -10,10 +10,11 @@ def answer(mod, *args):
     }
 
 
-class BaseCheck:
+class BaseCriterion:
     description = None
     file_type = None
     id = None
+    priority = False  # if priority criterion is failed -> check is failed
 
     def __init__(self, file_info):
         self.file = file_info.get('file')
@@ -33,9 +34,9 @@ class BaseCheck:
         return self.description
 
 
-class BasePresCriterion(BaseCheck):
+class BasePresCriterion(BaseCriterion):
     file_type = 'pres'
 
 
-class BaseReportCriterion(BaseCheck):
+class BaseReportCriterion(BaseCriterion):
     file_type = {'type': 'report', 'report_type': 'VKR'}
