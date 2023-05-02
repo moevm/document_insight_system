@@ -4,6 +4,7 @@ from ..base_check import BaseReportCriterion, answer
 class ReportFirstPagesCheck(BaseReportCriterion):
     description = "Проверка наличия обязательных страниц в отчете"
     id = 'first_pages_check'
+    priority = True
 
     def __init__(self, file_info):
         super().__init__(file_info)

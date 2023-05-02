@@ -4,6 +4,7 @@ from ..base_check import BaseReportCriterion, answer
 class ReportPageCounter(BaseReportCriterion):
     description = "Проверка количества страниц в файле"
     id = 'page_counter'
+    priority = True
 
     def __init__(self, file_info, min_number=50, max_number=None):
         super().__init__(file_info)

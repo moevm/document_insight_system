@@ -5,6 +5,7 @@ from ..base_check import BaseReportCriterion, answer
 class ReportNeededHeadersCheck(BaseReportCriterion):
     description = "Проверка наличия обязательных заголовков в отчете"
     id = 'needed_headers_check'
+    priority = True
 
     def __init__(self, file_info, main_heading_style="heading 2"):
         super().__init__(file_info)
