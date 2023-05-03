@@ -7,7 +7,7 @@ class TemplateNameCheck(BasePresCriterion):
     description = "Проверка соответствия названия файла шаблону"
     id = 'template_name'
 
-    def __init__(self, file_info, regex="(\bПрезентация|\bПРЕЗЕНТАЦИЯ)_(ВКР|НИР)_(([А-ЯЁ][а-яё]+)|([А-ЯЁ]*))"):
+    def __init__(self, file_info, regex="(Презентация|ПРЕЗЕНТАЦИЯ)_(ВКР|НИР)_(([А-ЯЁ][а-яё]+)|([А-ЯЁ]*))"):
         super().__init__(file_info)
         self.filename = self.filename.split('.', 1)[0]
         self.reg = regex
