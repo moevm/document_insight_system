@@ -79,7 +79,7 @@ class ImageReferences(BaseReportCriterion):
                 child_number = child["number"]
                 if child["style"] == self.image_style.lower():
                     child_text = child["text"].strip()
-                    if re.search(r'Рисунок[. \d]+', child_text):
+                    if re.search(r'Рисунок [.\d]+', child_text):
                         number_seq = child_text.split('Рисунок')[1]
                         for number in re.split(r' ', number_seq):
                             if number:
