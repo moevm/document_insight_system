@@ -8,7 +8,7 @@ from utils import convert_to
 logger = logging.getLogger('root_logger')
 
 
-def parse(filepath):
+def parse(filepath, pdf_filepath):
     if filepath.endswith('.ppt') or filepath.endswith('.pptx'):
         try:
             return PresentationPPTX(filepath)
@@ -25,7 +25,7 @@ def parse(filepath):
         try:
             converted_file_path = convert_to(filepath, target_format='docx')
             docx = DocxUploader()
-            docx.upload(converted_file_path)
+            docx.upload(converted_file_path, pdf_filepath)
             docx.parse()
             return docx
         except Exception as err:
@@ -35,7 +35,7 @@ def parse(filepath):
     elif filepath.endswith('.docx'):
         try:
             docx = DocxUploader()
-            docx.upload(filepath)
+            docx.upload(filepath, pdf_filepath)
             docx.parse()
             return docx
         except Exception as err:
@@ -43,7 +43,6 @@ def parse(filepath):
             return None
     else:
         raise ValueError("Файл с недопустимым именем или недопустимого формата: " + filename)
-
 
 def save_to_temp_file(file):
     temp_file = tempfile.NamedTemporaryFile(delete=False)

@@ -191,9 +191,8 @@ def run_task():
             return 'storage_overload'
         logger.info(
             f"Запуск обработки файла {pdf_file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
-        pdf_file_id = ObjectId()
         filenamepdf, extension = pdf_file.filename.rsplit('.', 1)
-        filepathpdf = join(UPLOAD_FOLDER, f"{pdf_file_id}.{extension}")
+        filepathpdf = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
         pdf_file.save(filepathpdf)
         converted_id = db_methods.add_file_to_db(filenamepdf, filepathpdf)
     else:
@@ -265,7 +264,7 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
                    'image_share_check': 'Проверка доли объема отчёта, приходящейся на изображения',
                    'right_words_check': 'Проверка наличия определенных (правильных) слов в тексте отчёта',
                    'first_pages_check': 'Проверка наличия обязательных страниц в отчете',
-                   'main_character_check': 'Проверка фамилии заведующего кафедрой',
+                   'main_character_check': 'Проверка фамилии и должности заведующего кафедрой',
                    'needed_headers_check': 'Проверка наличия обязательных заголовков в отчете',
                    'header_check': 'Проверка оформления заголовков отчета',
                    'literature_references': 'Проверка наличия ссылок на все источники',

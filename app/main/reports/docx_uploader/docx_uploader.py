@@ -26,10 +26,11 @@ class DocxUploader:
         self.count = 0
         self.first_lines = []
         self.literature_header = []
+        self.headers_page = 0
 
-    def upload(self, file):
+    def upload(self, file, pdf_filepath=''):
         self.file = docx.Document(file)
-        self.pdf_file = PdfDocumentManager(file)
+        self.pdf_file = PdfDocumentManager(file, pdf_filepath)
 
     def parse(self):
         self.core_properties = CoreProperties(self.file)
@@ -60,7 +61,7 @@ class DocxUploader:
                     if style_name.find("heading") >= 0:
                         header_ind += 1
                         par_num = 0
-                        tmp_chapters.append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"],
+                        tmp_chapters.append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"].strip(),
                                              "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind,
                                              "child": []})
                     elif header_ind >= 0:
@@ -107,6 +108,20 @@ class DocxUploader:
                 table.append(row)
             self.tables.append(Table(tables[i], table))
         return tables
+
+    def find_header_page(self, work_type):
+        if not self.headers_page:
+            if work_type != 'VKR':
+                self.headers_page = 1
+                return self.headers_page
+            for header in self.make_headers(work_type):
+                if header["name"].find('Cодержание') >= 0:
+                    if not header["page"]:
+                        self.headers_page = 1
+                    else:
+                        self.headers_page = header["page"]
+                    break
+        return self.headers_page
 
     def find_literature_vkr(self, work_type):
         if not self.literature_header:
