@@ -12,6 +12,6 @@ def check_similarity(string1, string2):
     clear_conclusions = [ch for ch in base_conclusions if not re.fullmatch(ignore, ch)]
     recognized_conclusions = [s for s in clear_conclusions if s != further_dev.get('dev_sentence')]
 
-    percentage_of_similarity = compare_sentences(string1, string2)
+    percentage_of_similarity = int(compare_sentences(string1, string2) * 100)
 
     return percentage_of_similarity, further_dev, recognized_conclusions
