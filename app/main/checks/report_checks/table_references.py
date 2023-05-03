@@ -80,7 +80,7 @@ class TableReferences(BaseReportCriterion):
                 child_number = child["number"]
                 if child["style"] == self.table_style.lower():
                     child_text = child["text"].strip()
-                    if re.search(r'Таблица[. \d]+', child_text):
+                    if re.search(r'Таблица [.\d]+', child_text):
                         number_seq = child_text.split('Таблица')[1]
                         for number in re.split(r' ', number_seq):
                             if number:
