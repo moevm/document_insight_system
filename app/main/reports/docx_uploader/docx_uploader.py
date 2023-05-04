@@ -196,7 +196,7 @@ class DocxUploader:
         if not self.count:
             for k, v in self.pdf_file.text_on_page.items():
                 line = v[:20] if len(v) > 21 else v
-                if re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip()):
+                if re.search('^ПРИЛОЖЕНИЕ [А-Я]$', line.strip()):
                     break
                 self.count += 1
                 line = ''
