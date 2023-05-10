@@ -27,6 +27,7 @@ class DocxUploader:
         self.first_lines = []
         self.literature_header = []
         self.headers_page = 0
+        self.image_volume = 0
 
     def upload(self, file, pdf_filepath=''):
         self.file = docx.Document(file)
@@ -192,11 +193,16 @@ class DocxUploader:
             result.append(matched_pars)
         return result
 
-    def page_counter(self):
+        def page_counter(self):
         if not self.count:
             for k, v in self.pdf_file.text_on_page.items():
                 line = v[:20] if len(v) > 21 else v
                 if re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip()):
+                    page_image_list = self.pdf_file.page_images(k)
+                    print(page_image_list)
+                    for image in page_image_list:
+                        self.image_volume += image[3]
+                    print(self.image_volume)
                     break
                 self.count += 1
                 line = ''
