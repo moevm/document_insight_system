@@ -1,4 +1,5 @@
 import pdfplumber
+import fitz
 
 from app.utils import convert_to
 
@@ -7,8 +8,10 @@ class PdfDocumentManager:
     def __init__(self, path_to_file, pdf_filepath=''):
         if not pdf_filepath:
             self.pdf_file = pdfplumber.open(convert_to(path_to_file, target_format='pdf'))
+            self.pdf_fitz = fitz.open(convert_to(path_to_file, target_format='pdf'))
         else:
             self.pdf_file = pdfplumber.open(pdf_filepath)
+            self.pdf_fitz = fitz.open(pdf_filepath)
         self.pages = self.pdf_file.pages
         self.page_count = len(self.pages)
         self.text_on_page = self.get_text_on_page()
@@ -17,6 +20,13 @@ class PdfDocumentManager:
 
     def get_text_on_page(self):
         return {page + 1: self.pages[page].extract_text() for page in range(self.page_count)}
+
+    def page_images(self, page):
+        print(len(self.pdf_fitz))
+        list_of_pages = [i for i in range(page)]
+        # self.pdf_fitz.select(list_of_pages)
+        print(list_of_pages)
+        return self.pdf_fitz.get_page_images(0)
 
     # def get_only_text_on_page(self):
     #     if not self.only_text_on_page:
