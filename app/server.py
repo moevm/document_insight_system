@@ -500,7 +500,7 @@ def get_csv():
     response = get_stats()
     df = pd.read_json(StringIO(json.dumps(response)))
     return Response(
-        df.to_csv(sep=',', encoding='utf-8'),
+        df.to_csv(sep=',', encoding='utf-8', decimal='.'),
         mimetype="text/csv",
         headers={"Content-disposition": "attachment"}
     )
