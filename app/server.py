@@ -11,7 +11,7 @@ import pandas as pd
 from bson import ObjectId
 from celery.result import AsyncResult
 from flask import (Flask, Response, abort, jsonify, redirect, render_template,
-                   request, url_for)
+                   request, url_for, flash)
 from flask_login import (LoginManager, current_user, login_required,
                          login_user, logout_user)
 from flask_recaptcha import ReCaptcha
@@ -173,7 +173,7 @@ def run_task():
         return "request doesn't include file"
     if get_file_len(file) * 2 + db_methods.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
-        return 'storage_overload'
+        return
     logger.info(
         f"Запуск обработки файла {file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
 
