@@ -14,8 +14,13 @@ pdf_file_input.change(() => {
     const fileName = pdf_file_input.val().split("\\")[2];
     let file = pdf_file_input.prop("files")[0];
     let label = $("#upload_file_label_pdf")
+    let file_limit = file_upload_limit/1024/1024
     if (file.size > file_upload_limit) {
-        label.html(`Exceeded the ${file_upload_limit / 1024 / 1024} MB file limit.`);
+        label.html(`Формат: pptx (объем не больше ${file_upload_limit / 1024 / 1024} Мб.)`);
+        alert(
+        "Объем загружаемого вами документа " + (fileName) + " превышает максимально разрешенный объем " + (file_limit) + " МБ." +
+        " Для уменьшения объема файла, мы рекомендуем следующие действия: \n" +
+        "    ∙ общее — снизить разрешение изображений, \n    ∙ для презентаций — временно убрать дополнительные слайды.");
         return;
     }
     pdf_uploaded = true;
@@ -29,8 +34,13 @@ file_input.change(() => {
     const fileName = file_input.val().split("\\")[2];
     let file = file_input.prop("files")[0];
     let label = $("#upload_file_label")
+    let file_limit = file_upload_limit/1024/1024
     if (file.size > file_upload_limit) {
-        label.html(`Exceeded the ${file_upload_limit / 1024 / 1024} MB file limit.`);
+        label.html(`Формат: pptx (объем не больше ${file_upload_limit / 1024 / 1024} Мб.)`);
+        alert(
+        "Объем загружаемого вами документа " + (fileName) + " превышает максимально разрешенный объем " + (file_limit) + " МБ." +
+        " Для уменьшения объема файла, мы рекомендуем следующие действия: \n" +
+        "    ∙ общее — снизить разрешение изображений, \n    ∙ для презентаций — временно убрать дополнительные слайды.");
         return;
     }
     file_uploaded = true;
