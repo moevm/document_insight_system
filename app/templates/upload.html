@@ -24,7 +24,7 @@
                             <div id="uploading_form" class="custom-file">
                                 <input type="file" class="custom-file-input" id="upload_file"
                                        accept=".{{ ', .'.join(formats) }}">
-                                <label class="custom-file-label" id="upload_file_label" for="upload_file">Формат: pptx (объем не больше 16 Mб.)</label>
+                                <label class="custom-file-label" id="upload_file_label" for="upload_file">Формат: pptx (объем не больше {{ config.MAX_CONTENT_LENGTH//1024//1024 }} Mб.)</label>
                                 <div class="invalid-feedback ins">Возникла ошибка</div>
                             </div>
                         </div>
@@ -37,7 +37,7 @@
                                 <div id="uploading_form_pdf" class="custom-file">
                                     <input type="file" class="custom-file-input" id="upload_file_pdf" accept=".pdf">
                                     <label class="custom-file-label" id="upload_file_label_pdf" for="upload_file">
-                                        Формат: pdf (объем не больше 16 Mб.)</label>
+                                        Формат: pdf (объем не больше {{ config.MAX_CONTENT_LENGTH//1024//1024 }} Mб.)</label>
                                     <div class="invalid-feedback ins">Возникла ошибка</div>
                                 </div>
                             </div>
