@@ -96,6 +96,7 @@
                 </tbody>
             </table>
         {% endif %}
+
         <!-- PDF viewer -->
         {% if not current_user.is_anonymous and results.conv_pdf_fs_id %}
             <div style="text-align:center; width:100%">
@@ -108,6 +109,17 @@
                 </div>
                 <canvas id="the-canvas" style="border: 1px solid #000000; direction: ltr;"></canvas>
             </div>
+
+        <!-- links for lists of sended presentation -->
+            <div>
+                <a href="{{ url_for('check_list', _id=results._id) }}&filter_criteria={{current_user.criteria}}">
+                    Посмотреть список загрузок для кретерия "{{current_user.criteria}}"</a>
+                <br>
+                <a href="{{ url_for('check_list', _id=results._id) }}">
+                    Посмотреть список всех загрузок</a>
+            </div>
         {% endif %}
+
     </div>
+
 {% endblock %}
