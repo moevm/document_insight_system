@@ -14,7 +14,8 @@ BASE_PRES_CRITERION = [
     ['pres_right_words'],
     ['pres_image_share'],
     ['future_dev'],
-    ['pres_banned_words_check']
+    ['pres_banned_words_check'],
+    ['pres_empty_slide'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
