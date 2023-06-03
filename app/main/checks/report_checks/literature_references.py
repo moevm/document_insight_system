@@ -7,11 +7,13 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     description = "Проверка наличия ссылок на все источники"
     id = 'literature_references'
 
-    def __init__(self, file_info):
+    def __init__(self, file_info, min_ref=0, max_ref=10000):
         super().__init__(file_info)
         self.headers = []
         self.literature_header = []
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
+        self.min_ref = min_ref
+        self.max_ref = max_ref
 
     def late_init_vkr(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
@@ -47,7 +49,12 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         for i in range(1, number_of_sources + 1):
             all_numbers.add(i)
         if len(references.symmetric_difference(all_numbers)) == 0:
-            return answer(True, f"Пройдена!")
+            if number_of_sources < self.min_ref:
+                return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) меньше необходимого критерия ({self.min_ref})')
+            elif number_of_sources > self.max_ref:
+                return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) больше необходимого критерия ({self.max_ref})')
+            else:
+                return answer(True, f"Пройдена!")
         elif len(references.difference(all_numbers)):
             if len(all_numbers.difference(references)) == 0:
                 references -= all_numbers
