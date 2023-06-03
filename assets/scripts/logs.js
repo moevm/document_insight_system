@@ -108,6 +108,7 @@ function initTable() {
         pageSize: parseInt(params.size) || 10,
         sortName: params.sort,
         sortOrder: params.order,
+        buttons: buttons,
         detailView: true,
         detailViewIcon: false,
         detailViewByClick: true,
@@ -163,6 +164,19 @@ function queryParams(params) {
     }
 
     return query
+}
+
+function buttons() {
+    buttonsObj = {}
+
+    buttonsObj["RefreshTable"] = {
+        text: 'Refresh',
+        event: function () {
+            window.location.href = window.location.href.split('?')[0];
+        }
+    }
+
+    return buttonsObj
 }
 
 function detailFormatter(index, row) {

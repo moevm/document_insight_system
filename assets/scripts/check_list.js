@@ -203,9 +203,17 @@ function timeStamp() {
 }
 
 function buttons() {
-    if (is_admin)
-        return {
-        FetchCSV: {
+    buttonsObj = {};
+
+    buttonsObj["RefreshTable"] = {
+        text: 'Refresh',
+        event: function () {
+            window.location.href = window.location.href.split('?')[0];
+        }
+    };
+
+    if (is_admin) {
+        buttonsObj["FetchCSV"] = {
             text: 'CSV',
             event: function () {
                 //const queryString = window.location.search
@@ -218,8 +226,9 @@ function buttons() {
                         downdloadBlob(blob, `Статистика.csv`)
                     });
             }
-        },
-        FetchZip: {
+        };
+
+        buttonsObj["FetchZip"] = {
             text: 'Скачать архив',
             event: function () {
                 const params = window.location.search
@@ -234,8 +243,9 @@ function buttons() {
                             alert("Error during file download")
                     });
             }
-        },
-        LatestChecks: {
+        };
+
+        buttonsObj["LatestChecks"] = {
             text: 'Latest',
             event: function () {
                 is_latest = !is_latest;
@@ -245,10 +255,9 @@ function buttons() {
                 }
                 $("#check-list-table").bootstrapTable('refresh', query);
             }
-        }
+        };
     }
-    else
-        return {}
+    return buttonsObj;
 }
 
 function downdloadBlob(blob, filename) {
