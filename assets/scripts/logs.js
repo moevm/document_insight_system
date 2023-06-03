@@ -1,4 +1,7 @@
+import { debounce } from "./utils"
+
 const AJAX_URL = "/logs/data"
+let debounceInterval = 500;
 
 String.prototype.insert = function (index, string) {
     if (index > 0) {
@@ -115,7 +118,7 @@ function initTable() {
         detailFormatter: detailFormatter,
 
         queryParams: queryParams,
-        ajax: ajaxRequest
+        ajax: debouncedAjaxRequest
     })
 }
 
@@ -127,6 +130,8 @@ function ajaxRequest(params) {
 
     pushHistoryState(params)
 }
+// debounced ajax calls.
+const debouncedAjaxRequest = debounce(ajaxRequest, debounceInterval);
 
 function onPopState() {
     location.reload()
@@ -143,7 +148,7 @@ function pushHistoryState(params) {
 }
 
 function queryParams(params) {
-    filters = {}
+    let filters = {}
     $('.filter-control').each(function () {
         const name = $(this).parents("th").data("field")
         const val = this.querySelector("input").value
@@ -167,7 +172,7 @@ function queryParams(params) {
 }
 
 function buttons() {
-    buttonsObj = {}
+    let buttonsObj = {}
 
     buttonsObj["RefreshTable"] = {
         text: 'Refresh',

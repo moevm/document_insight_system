@@ -1,6 +1,9 @@
-const AJAX_URL = "/check_list/data"
-const filter_prefix = 'filter_'
-let is_latest = false
+import { debounce } from "./utils"
+
+const AJAX_URL = "/check_list/data";
+const filter_prefix = 'filter_';
+let is_latest = false;
+let debounceInterval = 500;
 
 String.prototype.insert = function (index, string) {
     if (index > 0) {
@@ -127,7 +130,7 @@ function initTable() {
         buttons: buttons,
 
         queryParams: queryParams,
-        ajax: ajaxRequest,
+        ajax: debouncedAjaxRequest,
 
         columns: [{
             field: "_id",
@@ -142,10 +145,12 @@ function ajaxRequest(params) {
     const queryString = "?" + encodedData
     const url = AJAX_URL + queryString
     console.log("ajax:", url);
-    $.get(url).then(res => params.success(res))
 
-    pushHistoryState(encodedData, queryString)
+    $.get(url).then(res => params.success(res));
+    pushHistoryState(encodedData, queryString);
 }
+// debounced ajax calls.
+const debouncedAjaxRequest = debounce(ajaxRequest, debounceInterval);
 
 function onPopState() {
     location.reload()
@@ -156,7 +161,7 @@ function pushHistoryState(encodedData, queryString) {
 }
 
 function queryParams(params) {
-    filters = {}
+    let filters = {}
     $('.filter-control').each(function () {
         const name = $(this).parents("th").data("field")
         const val = this.querySelector("input").value
@@ -203,7 +208,7 @@ function timeStamp() {
 }
 
 function buttons() {
-    buttonsObj = {};
+    let buttonsObj = {};
 
     buttonsObj["RefreshTable"] = {
         text: 'Refresh',
