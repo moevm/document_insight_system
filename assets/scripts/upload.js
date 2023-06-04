@@ -2,24 +2,36 @@ import '../styles/upload.css';
 
 
 let upload_id;
-var pdf_uploaded = false;
-var file_uploaded = false;
+let pdf_uploaded = false;
+let file_uploaded = false;
 const file_input = $("#upload_file");
+const label = $("#upload_file_label");
 const pdf_file_input = $("#upload_file_pdf");
+const label_pdf = $("#upload_file_label_pdf");
 const upload_button = $("#upload_upload_button");
+
+let file_ext_re = /(?:\.([^.]+))?$/;
+let formats = $("#upload_file_label").text().split(":");
+formats = formats[formats.length - 1];
+formats = formats.replaceAll(" ", "");
+formats = formats.split(",");
 
 upload_button.prop("disabled", true);
 
 pdf_file_input.change(() => {
     const fileName = pdf_file_input.val().split("\\")[2];
     let file = pdf_file_input.prop("files")[0];
-    let label = $("#upload_file_label_pdf")
     if (file.size > file_upload_limit) {
-        label.html(`Exceeded the ${file_upload_limit / 1024 / 1024} MB file limit.`);
+        label_pdf.html(`<span style="color:red;"> Exceeded the ${file_upload_limit / 1024 / 1024} MB file limit. </span>`);
+        upload_button.prop("disabled", true);
+        return;
+    } else if (file_ext_re.exec(fileName)[1] !== 'pdf') {
+        label_pdf.html(`<span style="color:red;"> Not supported file extension. (Must be pdf) </span>`);
+        upload_button.prop("disabled", true);
         return;
     }
     pdf_uploaded = true;
-    label.html(fileName);
+    label_pdf.html(fileName);
     if (file_uploaded === true) {
         upload_button.prop("disabled", false);
     }
@@ -28,9 +40,13 @@ pdf_file_input.change(() => {
 file_input.change(() => {
     const fileName = file_input.val().split("\\")[2];
     let file = file_input.prop("files")[0];
-    let label = $("#upload_file_label")
     if (file.size > file_upload_limit) {
-        label.html(`Exceeded the ${file_upload_limit / 1024 / 1024} MB file limit.`);
+        label.html(`<span style="color:red;"> Exceeded the ${file_upload_limit / 1024 / 1024} MB file limit. </span>`);
+        upload_button.prop("disabled", true);
+        return;
+    } else if (! formats.includes(file_ext_re.exec(fileName)[1])) {
+        label.html(`<span style="color:red;"> Not supported file extension. (Must be ${formats}) </span>`);
+        upload_button.prop("disabled", true);
         return;
     }
     file_uploaded = true;
