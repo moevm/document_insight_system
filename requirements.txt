@@ -1,7 +1,7 @@
 werkzeug==2.0.0
 Flask==2.0.3
 jinja2==3.0.0
-requests==2.24.0
+requests~=2.31.0
 python-pptx==0.6.18
 odfpy==1.4.1
 pymongo==3.11.1
@@ -25,3 +25,7 @@ docx2python~=2.0.4
 oauthlib~=3.1.0
 pdfplumber==0.6.1
 pytest~=7.1.2
+
+lxml~=4.9.2
+urllib3~=2.0.3
+beautifulsoup4~=4.12.2
