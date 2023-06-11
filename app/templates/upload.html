@@ -14,6 +14,7 @@
         </script>
         <div class="col-11 col-sm-8 col-md-5 col-lg-4 my-auto">
             <h3 class="text-center ins" id="upload_title">{{ upload_title }}</h3>
+            <p class="text-center" style="color:grey;font-size:15px;"><i>Общий объем загружаемых файлов не должен превышать {{ config.MAX_CONTENT_LENGTH//1024//1024 }} Mб.</i></p>
             <p class="text-center" id="criteria_pack_name">Для проверки используется набор
                 критериев<br><b>{{ current_user.criteria }}</b></p>
             <div class="row justify-content-center" id="uploading_body">
@@ -24,7 +25,7 @@
                             <div id="uploading_form" class="custom-file">
                                 <input type="file" class="custom-file-input" id="upload_file"
                                        accept=".{{ ', .'.join(formats) }}">
-                                <label class="custom-file-label" id="upload_file_label" for="upload_file">Форматы: {{ ", ".join(formats) }} (объем не больше {{ config.MAX_CONTENT_LENGTH//1024//1024 }} Mб.) </label>
+                                <label class="custom-file-label" id="upload_file_label" for="upload_file">Допустимые форматы: {{ ", ".join(formats) }} </label>
                                 <div class="invalid-feedback ins">Возникла ошибка</div>
                             </div>
                         </div>
@@ -37,7 +38,7 @@
                                 <div id="uploading_form_pdf" class="custom-file">
                                     <input type="file" class="custom-file-input" id="upload_file_pdf" accept=".pdf">
                                     <label class="custom-file-label" id="upload_file_label_pdf" for="upload_file">
-                                        Формат: pdf (объем не больше {{ config.MAX_CONTENT_LENGTH//1024//1024 }} Mб.)</label>
+                                        Допустимые форматы: pdf </label>
                                     <div class="invalid-feedback ins">Возникла ошибка</div>
                                 </div>
                             </div>
