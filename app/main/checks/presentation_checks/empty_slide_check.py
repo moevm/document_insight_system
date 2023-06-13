@@ -11,13 +11,9 @@ class PresEmptySlideCheck(BasePresCriterion):
         super().__init__(file_info)
 
     def check(self):
-        empty_pages = []
-        for page, slide in enumerate(self.file.get_text_from_slides(), 1):
-            if not slide.strip():
-                empty_pages.append(page)
+        empty_pages = [page for page, slide in enumerate(self.file.get_text_from_slides(), 1) if not slide.strip()]
         if empty_pages:
-            empty_pages = self.format_page_link(empty_pages)
             return answer(False, format_header(
-                'Не пройдена, обнаружены пустые слайды: {}'.format(', '.join(map(str, empty_pages)))))
+                'Не пройдена, обнаружены пустые слайды: {}'.format(', '.join(self.format_page_link(empty_pages)))))
         else:
             return answer(True, "Пройдена!")
