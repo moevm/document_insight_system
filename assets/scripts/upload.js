@@ -1,52 +1,76 @@
 import '../styles/upload.css';
 
-
 let upload_id;
 var pdf_uploaded = false;
 var file_uploaded = false;
 const file_input = $("#upload_file");
-const pdf_file_input = $("#upload_file_pdf");
-const upload_button = $("#upload_upload_button");
+const file_label = $("#upload_file_label");
+const return_file_label = file_label.text();
 
+const pdf_file_input = $("#upload_file_pdf");
+const pdf_file_label = $("#upload_file_label_pdf");
+const return_pdf_file_label = pdf_file_label.text();
+
+const upload_button = $("#upload_upload_button");
 upload_button.prop("disabled", true);
 
-pdf_file_input.change(() => {
-    const fileName = pdf_file_input.val().split("\\")[2];
-    let file = pdf_file_input.prop("files")[0];
-    let label = $("#upload_file_label_pdf")
-    let file_limit = file_upload_limit/1024/1024
-    if (file.size > file_upload_limit) {
-        label.html(`Формат: pptx (объем не больше ${file_upload_limit / 1024 / 1024} Мб.)`);
-        alert(
-        "Объем загружаемого вами документа " + (fileName) + " превышает максимально разрешенный объем " + (file_limit) + " МБ." +
+const showMessage = () => {
+  alert(
+        "Объем загружаемых вами файлов превышает максимально разрешенный объем " + (file_upload_limit/1024/1024) + " МБ." +
         " Для уменьшения объема файла, мы рекомендуем следующие действия: \n" +
         "    ∙ общее — снизить разрешение изображений, \n    ∙ для презентаций — временно убрать дополнительные слайды.");
-        return;
-    }
-    pdf_uploaded = true;
-    label.html(fileName);
-    if (file_uploaded === true) {
-        upload_button.prop("disabled", false);
-    }
-});
+};
 
-file_input.change(() => {
-    const fileName = file_input.val().split("\\")[2];
-    let file = file_input.prop("files")[0];
-    let label = $("#upload_file_label")
-    let file_limit = file_upload_limit/1024/1024
-    if (file.size > file_upload_limit) {
-        label.html(`Формат: pptx (объем не больше ${file_upload_limit / 1024 / 1024} Мб.)`);
-        alert(
-        "Объем загружаемого вами документа " + (fileName) + " превышает максимально разрешенный объем " + (file_limit) + " МБ." +
-        " Для уменьшения объема файла, мы рекомендуем следующие действия: \n" +
-        "    ∙ общее — снизить разрешение изображений, \n    ∙ для презентаций — временно убрать дополнительные слайды.");
-        return;
+const resetFileUpload = () => {
+  pdf_file_input.val('');
+  pdf_file_label.html(return_pdf_file_label);
+  file_input.val('');
+  file_label.html(return_file_label);
+  pdf_uploaded = false;
+  file_uploaded = false;
+  upload_button.prop("disabled", true);
+};
+
+const changeUploadButton = () => {
+  if (pdf_uploaded || file_uploaded) {
+    const pdf_size = pdf_file_input.prop("files")[0]?.size || 0;
+    const file_size = file_input.prop("files")[0]?.size || 0;
+    if (pdf_size + file_size <= file_upload_limit) {
+      upload_button.prop("disabled", false);
+    } else {
+      showMessage();
+      resetFileUpload();
+      upload_button.prop("disabled", true);
     }
-    file_uploaded = true;
-    label.html(fileName);
-    upload_button.prop("disabled", false);
-});
+  } else {
+    upload_button.prop("disabled", true);
+  }
+};
+
+const selectFileUpload = (input, label) => {
+  const fileName = input.val().split("\\")[2];
+  const file = input.prop("files")[0];
+  if (file && file.size > file_upload_limit) {
+    showMessage();
+    resetFileUpload();
+    return;
+  }
+  file_uploaded = true;
+  pdf_uploaded = true;
+  label.html(fileName);
+
+  if (label.attr("id") === "upload_file_label_pdf") {
+    pdf_uploaded = !!file;
+    pdf_file_label.html(file ? fileName : original_pdf_file_label);
+  } else {
+    file_uploaded = !!file;
+    file_label.html(file ? fileName : original_file_label);
+  }
+  changeUploadButton();
+}
+
+pdf_file_input.change(() => selectFileUpload(pdf_file_input, pdf_file_label));
+file_input.change(() => selectFileUpload(file_input, file_label));
 
 async function upload() {
     let file = file_input.prop("files")[0];
