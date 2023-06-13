@@ -17,7 +17,7 @@ class PresIfRefGitHubWork(BasePresCriterion):
         empty_repo_ref = []
         string_from_text = ''
         text_from_slide = []
-        string_result = 'Непройдена! '
+        string_result = 'Не пройдена! '
         for page, slide in enumerate(self.file.get_text_from_slides(), 1):
             text_from_slide.append(slide)
             string_from_text = ''.join(text_from_slide)
@@ -33,19 +33,18 @@ class PresIfRefGitHubWork(BasePresCriterion):
                     if link.status_code != 200:
                         raise requests.exceptions.ConnectionError
                     tree = html.fromstring(link.content)
-                    if not tree.xpath("//a[contains(concat(' ',normalize-space(@class),' '),' tree-item-link ')][contains(@href,'/tree/master/')]/text()"):
-                    # @ class ='js-navigation-open Link--primary' or
+                    if not tree.xpath("//a[@class ='js-navigation-open Link--primary']"):
                         empty_repo_ref.append(i[0])
                 except (requests.exceptions.SSLError, requests.exceptions.ConnectionError):
                     wrong_repo_ref.append(i[0])
             if wrong_repo_ref and not empty_repo_ref:
-                string_result += f"Найдены некорректные ссылки на репозитории! {wrong_repo_ref} ВСЕГО {result}"
+                string_result += f"Найдены некорректные ссылки на репозитории: {wrong_repo_ref} "
                 check_result = False
             elif empty_repo_ref and not wrong_repo_ref:
-                string_result += f"Найдены пустые репозитории! {empty_repo_ref} ВСЕГО {result}"
+                string_result += f"Найдены пустые репозитории: {empty_repo_ref} "
                 check_result = False
             elif empty_repo_ref and wrong_repo_ref:
-                string_result += f"Найдены пустые репозитории! {empty_repo_ref} Также Найдены некорректные репозитории! {wrong_repo_ref} ВСЕГО {result}"
+                string_result += f"Найдены пустые репозитории: {empty_repo_ref} Также Найдены некорректные репозитории: {wrong_repo_ref}"
                 check_result = False
             else:
                 string_result = 'Пройдена!'
