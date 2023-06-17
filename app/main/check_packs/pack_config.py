@@ -15,7 +15,7 @@ BASE_PRES_CRITERION = [
     ['pres_image_share'],
     ['future_dev'],
     ['pres_banned_words_check'],
-    ['if_github'],
+    ['verify_git_link'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
