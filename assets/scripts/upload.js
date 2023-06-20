@@ -102,7 +102,7 @@ async function upload() {
     bar.css("width", "100%").attr('aria-valuenow', 100);
     console.log(file);
     if (response_text === 'storage_overload') {
-        alert('Система перегружена, попробуйте повторить запрос позднее');
+        alert('База данных перегружена (недостаточно места для загрузки новых файлов). Свяжитесь с администратором');
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");
         pdf_file_input.addClass("is-invalid");
