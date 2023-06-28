@@ -7,14 +7,15 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
 
     def __init__(self, file_info, headers=[]):
         super().__init__(file_info)
+        self.headers_page = 1
         self.chapters = []
         self.headers = headers
         self.pdf = self.file.pdf_file if self.file else None
 
     def late_init_vkr(self):
-        chapters = self.file.make_chapters(self.file_type['report_type'])
-        self.chapters = chapters
+        self.chapters = self.file.make_chapters(self.file_type['report_type'])
         self.headers = self.find_headers()
+        self.headers_page = self.file.find_header_page(self.file_type['report_type'])
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -63,8 +64,8 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                         elif collected_text.find(header_text.strip()) > 0:
                             result_str += (("<br>" if len(result_str) else "") +
                                            f"Заголовок второго уровня \"{header['text']}\" "
-                                           f"находится не в начале страницы или пронумирован с помощью списка. "
-                                           f"<br>Проверьте PDF, страница {self.format_page_link([page_num])} и DOCX")
+                                           f"находится не в начале страницы или пронумирован с помощью списка "
+                                           f"{self.format_page_link([page_num])}. ")
                             header["marker"] = 1
                             break
 
@@ -80,6 +81,9 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
 
         if not result_str:
             result_str = "Все требуемые разделы начинаются с новой страницы."
+        else:
+            result_str += f"<br><br>Если сгенерированный PDF-файл {self.format_page_link([self.headers_page])} " \
+                          f"имеет проблемы с оформлением, попробуйте загрузить свой PDF."
         return answer(result, result_str)
 
     def find_headers(self):
@@ -90,4 +94,3 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                     break
                 chapters.append({"text": header["text"], "marker": 0})
         return chapters
-

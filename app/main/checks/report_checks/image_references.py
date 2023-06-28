@@ -26,7 +26,9 @@ class ImageReferences(BaseReportCriterion):
                 return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             number_of_images, all_numbers = self.count_images_vkr()
             if not number_of_images:
-                return answer(False, f'Не найдено ни одного рисунка.<br><br>Убедитесь, что для подписи рисунка был использован стиль {self.image_style}, а рисунок подписан "Рисунок <Номер рисунка> -- <Название рисунка>".')
+                return answer(False, f'Не найдено ни одного рисунка.<br><br>Убедитесь, что для подписи рисунка был '
+                                     f'использован стиль {self.image_style}, а рисунок подписан '
+                                     f'"Рисунок <Номер рисунка> -- <Название рисунка>".')
         else:
             return answer(False, 'Во время обработки произошла критическая ошибка')
         references = self.search_references()
@@ -35,18 +37,22 @@ class ImageReferences(BaseReportCriterion):
         elif len(references.difference(all_numbers)):
             if len(all_numbers.difference(references)) == 0:
                 references -= all_numbers
-                result_str += f'Упомянуты несуществующие рисунки: {", ".join(str(num) for num in sorted(references))} <br> Номера рисунков: {", ".join(num for num in sorted(all_numbers))}<br><br>'
+                result_str += f'Упомянуты несуществующие рисунки: {", ".join(str(num) for num in sorted(references))} ' \
+                              f'<br> Номера рисунков: {", ".join(num for num in sorted(all_numbers))}<br><br>'
             else:
                 extras = references - all_numbers
                 unnamed = all_numbers - references
-                result_str += f'Упомянуты несуществующие рисунки: {", ".join(str(num) for num in sorted(extras))} <br> А также упомянуты не все рисунки: {", ".join(str(num) for num in sorted(unnamed))} <br> Номера рисунков: {", ".join(num for num in sorted(all_numbers))}<br><br>'
+                result_str += f'Упомянуты несуществующие рисунки: {", ".join(str(num) for num in sorted(extras))} ' \
+                              f'<br> А также упомянуты не все рисунки: {", ".join(str(num) for num in sorted(unnamed))} ' \
+                              f'<br> Номера рисунков: {", ".join(num for num in sorted(all_numbers))}<br><br>'
         else:
             all_numbers -= references
-            result_str = f'Упомянуты не все рисунки.<br>Список рисунков без упоминания: {", ".join(str(num) for num in sorted(all_numbers))} <br> Номера рисунков: {", ".join(num for num in sorted(all_numbers))}<br><br>'
+            result_str = f'Упомянуты не все рисунки.<br>Список рисунков без упоминания: ' \
+                         f'{", ".join(str(num) for num in sorted(all_numbers))} <br> Номера рисунков: ' \
+                         f'{", ".join(num for num in sorted(all_numbers))}<br><br>'
         result_str += f'''
                     Если возникли проблемы, попробуйте сделать следующее:
                     <ul>
-                        <li>Убедитесь, что нумирация рисунков не сбита;</li>
                         <li>Убедитесь, что для подписи рисунка используется шаблон "Рисунок <Номер рисунка> -- <Название рисунка>";</li>
                         <li>Убедитесь, что для ссылки на рисунок используется шаблон "рис. <Номер рисунка>";</li>
                         <li>Убедитесь, что для оформления подписи рисунка был использован стиль "{self.image_style}";</li>
@@ -73,13 +79,11 @@ class ImageReferences(BaseReportCriterion):
         child_number = 0
         all_numbers = set()
         for header in self.headers:
-            if header["text"].find("ПРИЛОЖЕНИЕ") >= 0:
-                break
             for child in header["child"]:
                 child_number = child["number"]
                 if child["style"] == self.image_style.lower():
                     child_text = child["text"].strip()
-                    if re.search(r'Рисунок[. \d]+', child_text):
+                    if re.search(r'Рисунок [.\d]+', child_text):
                         number_seq = child_text.split('Рисунок')[1]
                         for number in re.split(r' ', number_seq):
                             if number:
@@ -91,4 +95,3 @@ class ImageReferences(BaseReportCriterion):
                                     break
         self.last_child_number = child_number
         return images_counter, all_numbers
-

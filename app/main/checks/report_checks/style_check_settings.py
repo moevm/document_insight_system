@@ -77,12 +77,11 @@ class StyleCheckSettings:
         "alignment": WD_ALIGN_PARAGRAPH.JUSTIFY,
         "font_name": "Times New Roman",
         "font_size_pt": 14.0,
-        "first_line_indent_cm": 0.0,
+        "first_line_indent_cm": 1.25,
         "line_spacing": 1.0
     }
 
-    # Order of styles may be significant! First level 1, then level 2, if config is used with short_sections_check.
-    # Otherwise, order doesn't matter.
+    # Order of styles may be significant! First level 1, then level 2 and so on.
     LR_CONFIG = [
         {
             "style": HEADER_1_STYLE,

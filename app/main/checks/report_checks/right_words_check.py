@@ -12,6 +12,8 @@ class ReportRightWordsCheck(BaseReportCriterion):
         self.patterns = dict.fromkeys(patterns, False)
 
     def check(self):
+        if self.file.page_counter() < 4:
+            return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         for text_on_page in self.file.pdf_file.get_text_on_page().values():
             lower_text = text_on_page.lower()
             for pattern in self.patterns:
@@ -25,4 +27,5 @@ class ReportRightWordsCheck(BaseReportCriterion):
         else:
             result_str = '</li><li>'.join([k for k, v in self.patterns.items() if not v])
             return answer(result_score,
-                          f'Не найдены слова, соответствующие следующим регулярным выражениям: <ul><li>{result_str}</ul>')
+                          f'Не найдены слова, соответствующие следующим регулярным выражениям: '
+                          f'<ul><li>{result_str}</ul>')

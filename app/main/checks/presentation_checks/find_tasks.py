@@ -22,7 +22,7 @@ class FindTasks(BasePresCriterion):
         slides_with_tasks = find_tasks_on_slides(get_goals, titles, self.intersection_number)
 
         if isinstance(slides_with_tasks, dict):
-            if slides_with_tasks['not_found']:
+            if slides_with_tasks['not_found'] and self.intersection_number > slides_with_tasks['found_ratio'] * 100:
                 return answer(slides_with_tasks['found_ratio'], *find_tasks_on_slides_feedback(slides_with_tasks))
             else:
                 return answer(1, "Все задачи найдены на слайдах")

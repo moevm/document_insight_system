@@ -1,42 +1,76 @@
 import '../styles/upload.css';
 
-
 let upload_id;
 var pdf_uploaded = false;
 var file_uploaded = false;
 const file_input = $("#upload_file");
-const pdf_file_input = $("#upload_file_pdf");
-const upload_button = $("#upload_upload_button");
+const file_label = $("#upload_file_label");
+const return_file_label = file_label.text();
 
+const pdf_file_input = $("#upload_file_pdf");
+const pdf_file_label = $("#upload_file_label_pdf");
+const return_pdf_file_label = pdf_file_label.text();
+
+const upload_button = $("#upload_upload_button");
 upload_button.prop("disabled", true);
 
-pdf_file_input.change(() => {
-    const fileName = pdf_file_input.val().split("\\")[2];
-    let file = pdf_file_input.prop("files")[0];
-    let label = $("#upload_file_label_pdf")
-    if (file.size > file_upload_limit) {
-        label.html(`Exceeded the ${file_upload_limit / 1024 / 1024} MB file limit.`);
-        return;
-    }
-    pdf_uploaded = true;
-    label.html(fileName);
-    if (file_uploaded === true) {
-        upload_button.prop("disabled", false);
-    }
-});
+const showMessage = () => {
+    alert(
+        "Объем загружаемых вами файлов превышает максимально разрешенный объем " + (file_upload_limit / 1024 / 1024) + " МБ." +
+        " Для уменьшения объема файла, мы рекомендуем следующие действия: \n" +
+        "    ∙ общее — снизить разрешение изображений, \n    ∙ для презентаций — временно убрать дополнительные слайды.");
+};
 
-file_input.change(() => {
-    const fileName = file_input.val().split("\\")[2];
-    let file = file_input.prop("files")[0];
-    let label = $("#upload_file_label")
-    if (file.size > file_upload_limit) {
-        label.html(`Exceeded the ${file_upload_limit / 1024 / 1024} MB file limit.`);
+const resetFileUpload = () => {
+    pdf_file_input.val('');
+    pdf_file_label.html(return_pdf_file_label);
+    file_input.val('');
+    file_label.html(return_file_label);
+    pdf_uploaded = false;
+    file_uploaded = false;
+    upload_button.prop("disabled", true);
+};
+
+const changeUploadButton = () => {
+    if (pdf_uploaded || file_uploaded) {
+        const pdf_size = pdf_file_input.prop("files")[0]?.size || 0;
+        const file_size = file_input.prop("files")[0]?.size || 0;
+        if (pdf_size + file_size <= file_upload_limit) {
+            upload_button.prop("disabled", false);
+        } else {
+            showMessage();
+            resetFileUpload();
+            upload_button.prop("disabled", true);
+        }
+    } else {
+        upload_button.prop("disabled", true);
+    }
+};
+
+const selectFileUpload = (input, label) => {
+    const fileName = input.val().split("\\")[2];
+    const file = input.prop("files")[0];
+    if (file && file.size > file_upload_limit) {
+        showMessage();
+        resetFileUpload();
         return;
     }
     file_uploaded = true;
+    pdf_uploaded = true;
     label.html(fileName);
-    upload_button.prop("disabled", false);
-});
+
+    if (label.attr("id") === "upload_file_label_pdf") {
+        pdf_uploaded = !!file;
+        pdf_file_label.html(file ? fileName : original_pdf_file_label);
+    } else {
+        file_uploaded = !!file;
+        file_label.html(file ? fileName : original_file_label);
+    }
+    changeUploadButton();
+}
+
+pdf_file_input.change(() => selectFileUpload(pdf_file_input, pdf_file_label));
+file_input.change(() => selectFileUpload(file_input, file_label));
 
 async function upload() {
     let file = file_input.prop("files")[0];
@@ -68,7 +102,7 @@ async function upload() {
     bar.css("width", "100%").attr('aria-valuenow', 100);
     console.log(file);
     if (response_text === 'storage_overload') {
-        alert('Система перегружена, попробуйте повторить запрос позднее');
+        alert('База данных перегружена (недостаточно места для загрузки новых файлов). Свяжитесь с администратором');
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");
         pdf_file_input.addClass("is-invalid");

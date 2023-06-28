@@ -4,6 +4,7 @@ from ..base_check import BaseReportCriterion, answer
 class ReportFirstPagesCheck(BaseReportCriterion):
     description = "Проверка наличия обязательных страниц в отчете"
     id = 'first_pages_check'
+    priority = True
 
     def __init__(self, file_info):
         super().__init__(file_info)
@@ -24,5 +25,5 @@ class ReportFirstPagesCheck(BaseReportCriterion):
                           "Все обязательные страницы найдены и их заголовки находятся на первой строке новой страницы.")
         else:
             return answer(False,
-                          f'Следующие страницы не найдены либо их заголовки расположены не на первой строке новой страницы: <ul>{result_str}</ul>' +
-                          'Проверьте очередность листов и орфографию заголовков.')
+                          f'Следующие страницы не найдены либо их заголовки расположены не на первой строке новой '
+                          f'страницы: <ul>{result_str}</ul> Проверьте очередность листов и орфографию заголовков.')

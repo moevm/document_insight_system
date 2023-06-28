@@ -18,9 +18,9 @@ class ReportSectionComponent(BaseReportCriterion):
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
 
     def check(self):
-        self.late_init()
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
+        self.late_init()
         result_str = ''
         for intro in self.chapters:
             header = intro["text"].lower()

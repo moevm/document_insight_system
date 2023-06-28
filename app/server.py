@@ -5,6 +5,7 @@ import tempfile
 from datetime import datetime, timedelta
 from os.path import join
 from sys import argv
+from io import StringIO
 
 import bson
 import pandas as pd
@@ -191,9 +192,8 @@ def run_task():
             return 'storage_overload'
         logger.info(
             f"Запуск обработки файла {pdf_file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
-        pdf_file_id = ObjectId()
         filenamepdf, extension = pdf_file.filename.rsplit('.', 1)
-        filepathpdf = join(UPLOAD_FOLDER, f"{pdf_file_id}.{extension}")
+        filepathpdf = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
         pdf_file.save(filepathpdf)
         converted_id = db_methods.add_file_to_db(filenamepdf, filepathpdf)
     else:
@@ -256,6 +256,9 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
                    'goals_slide': 'Слайд "Цель и задачи"', 'probe_slide': 'Слайд "Апробация работы"',
                    'actual_slide': 'Слайд с описанием актуальности работы', 'conclusion_slide': 'Слайд с заключением',
                    'slide_every_task': 'Наличие слайдов, посвященных задачам',
+                   'pres_right_words': 'Проверка наличия определенных (правильных) слов в презентации',
+                   'pres_image_share': 'Проверка доли объема презентации, приходящейся на изображения',
+                   'pres_banned_words_check': 'Проверка наличия запретных слов в презентации',
                    'conclusion_actual': 'Соответствие заключения задачам',
                    'conclusion_along': 'Наличие направлений дальнейшего развития',
                    'simple_check': 'Простейшая проверка отчёта',
@@ -265,7 +268,7 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
                    'image_share_check': 'Проверка доли объема отчёта, приходящейся на изображения',
                    'right_words_check': 'Проверка наличия определенных (правильных) слов в тексте отчёта',
                    'first_pages_check': 'Проверка наличия обязательных страниц в отчете',
-                   'main_character_check': 'Проверка фамилии заведующего кафедрой',
+                   'main_character_check': 'Проверка фамилии и должности заведующего кафедрой',
                    'needed_headers_check': 'Проверка наличия обязательных заголовков в отчете',
                    'header_check': 'Проверка оформления заголовков отчета',
                    'literature_references': 'Проверка наличия ссылок на все источники',
@@ -498,7 +501,7 @@ def get_csv():
     response = get_stats()
     df = pd.read_json(StringIO(json.dumps(response)))
     return Response(
-        df.to_csv(sep=',', encoding='utf-8'),
+        df.to_csv(sep=',', encoding='utf-8', decimal=','),
         mimetype="text/csv",
         headers={"Content-disposition": "attachment"}
     )
@@ -523,7 +526,7 @@ def get_zip():
 
     # add csv
     response = get_stats()
-    df = pd.read_json(json.dumps(response))
+    df = pd.read_json(StringIO(json.dumps(response)))
     df.to_csv(f"{dirpath.name}/Статистика.csv")
 
     # zip

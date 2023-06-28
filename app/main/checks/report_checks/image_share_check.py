@@ -21,8 +21,8 @@ class ReportImageShareCheck(BaseReportCriterion):
             images_pages = images_height / available_space
             share = images_pages / self.file.count
             if share > self.limit:
-                result_str = f'Проверка не пройдена! Изображения в работе занимают около {round(share, 2)} объема документа без учета приложения, \
-                                        ограничение - {round(self.limit, 2)}'
+                result_str = f'Проверка не пройдена! Изображения в работе занимают около {round(share, 2)} объема ' \
+                             f'документа без учета приложения, ограничение - {round(self.limit, 2)}'
                 result_str += '''
                             Если доля отчета, приходящаяся на изображения, больше нормы, попробуйте сделать следующее:
                             <ul>

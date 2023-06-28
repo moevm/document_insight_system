@@ -11,7 +11,10 @@ BASE_PRES_CRITERION = [
     ['find_slides', {'key_slide': 'Заключение'}],
     ['slide_every_task', {'min_percent': 70}],
     ['conclusion_actual', {'min_percent': 70}],
-    ['future_dev']
+    ['pres_right_words'],
+    ['pres_image_share'],
+    ['future_dev'],
+    ['pres_banned_words_check']
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
