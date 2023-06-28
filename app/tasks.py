@@ -41,10 +41,7 @@ def create_task(self, check_info):
     original_filepath = join(FILES_FOLDER, f"{check_id}.{check_obj.filename.rsplit('.', 1)[-1]}")
     pdf_filepath = join(FILES_FOLDER, f"{check_id}.pdf")
     try:
-        parsed_files, tmp_file_path = parse(original_filepath)
-        # remove temporary converted to another format file.
-        if tmp_file_path:
-            remove_files([tmp_file_path])
+        parsed_files = parse(original_filepath)
         updated_check = check(parsed_files, check_obj)
         updated_check.is_ended = True
         updated_check.is_failed = False
