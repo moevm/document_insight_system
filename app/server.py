@@ -5,6 +5,7 @@ import tempfile
 from datetime import datetime, timedelta
 from os.path import join
 from sys import argv
+from io import StringIO
 
 import bson
 import pandas as pd
@@ -525,7 +526,7 @@ def get_zip():
 
     # add csv
     response = get_stats()
-    df = pd.read_json(json.dumps(response))
+    df = pd.read_json(StringIO(json.dumps(response)))
     df.to_csv(f"{dirpath.name}/Статистика.csv")
 
     # zip
