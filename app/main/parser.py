@@ -1,3 +1,5 @@
+import os
+
 import logging
 import tempfile
 
@@ -11,39 +13,46 @@ logger = logging.getLogger('root_logger')
 def parse(filepath):
     if filepath.endswith('.pptx'):
         try:
-            return PresentationPPTX(filepath), None
+            return PresentationPPTX(filepath)
         except Exception as err:
             logger.error(err, exc_info=True)
-            return None, None
+            return None
         
     elif filepath.endswith('.ppt') or filepath.endswith('.odp'):
         try:
+            logger.info(f"Презентация {filepath} старого формата. Временно преобразована в pptx для обработки.")
             converted_file_path = convert_to(filepath, target_format='pptx')
-            return PresentationPPTX(converted_file_path), converted_file_path
+            pres_pptx = PresentationPPTX(converted_file_path)
+            # remove temporary converted to another format file.
+            os.remove(converted_file_path)
+            return pres_pptx
         except Exception as err:
             logger.error(err, exc_info=True)
-            return None, None
+            return None
         
     elif filepath.endswith('.doc') or filepath.endswith('.odt'):
         try:
+            logger.info(f"Отчёт {filepath} старого формата. Временно преобразован в docx для обработки.")
             converted_file_path = convert_to(filepath, target_format='docx')
             docx = DocxUploader()
             docx.upload(converted_file_path)
             docx.parse()
-            return docx, converted_file_path
+            # remove temporary converted to another format file.
+            os.remove(converted_file_path)
+            return docx
         except Exception as err:
             logger.error(err, exc_info=True)
-            return None, None
+            return None
 
     elif filepath.endswith('.docx'):
         try:
             docx = DocxUploader()
             docx.upload(filepath)
             docx.parse()
-            return docx, None
+            return docx
         except Exception as err:
             logger.error(err, exc_info=True)
-            return None, None
+            return None
         
     else:
         raise ValueError("Файл с недопустимым именем или недопустимого формата: " + filepath)
