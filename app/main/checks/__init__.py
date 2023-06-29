@@ -17,7 +17,8 @@ AVAILABLE_CHECKS = {
         PresRightWordsCheck.id: PresRightWordsCheck,
         PresImageShareCheck.id: PresImageShareCheck,
         FurtherDev.id: FurtherDev,
-        PresBannedWordsCheck.id: PresBannedWordsCheck
+        PresBannedWordsCheck.id: PresBannedWordsCheck,
+        FindThemeInPres.id: FindThemeInPres,
     },
     'report': {
         ReportSimpleCheck.id: ReportSimpleCheck,
@@ -38,6 +39,8 @@ AVAILABLE_CHECKS = {
         ReportNeededHeadersCheck.id: ReportNeededHeadersCheck,
         ReportChapters.id: ReportChapters,
         ReportSectionComponent.id: ReportSectionComponent,
-        ReportMainTextCheck.id: ReportMainTextCheck
+        ReportMainTextCheck.id: ReportMainTextCheck,
+        FindThemeInReport.id: FindThemeInReport,
+
     }
 }

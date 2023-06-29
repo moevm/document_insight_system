@@ -17,4 +17,5 @@ from .sections_check import LRReportSectionCheck
 from .short_sections_check import ReportShortSectionsCheck
 from .simple_check import ReportSimpleCheck
 from .style_check_settings import StyleCheckSettings
+from .find_theme_in_report import FindThemeInReport
 
