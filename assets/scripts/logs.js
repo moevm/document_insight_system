@@ -1,7 +1,9 @@
-import { debounce } from "./utils"
+import { debounce, isFloat, resetTable, ajaxRequest, onPopState } from "./utils"
 
+let $table;
 const AJAX_URL = "/logs/data"
 let debounceInterval = 500;
+
 
 String.prototype.insert = function (index, string) {
     if (index > 0) {
@@ -9,6 +11,7 @@ String.prototype.insert = function (index, string) {
     }
     return string + this
 }
+
 
 $(() => {
     initTable()
@@ -47,22 +50,12 @@ $(() => {
     })
 })
 
-function isFloat(str) {
-    const floatRegex = /^-?\d+(?:[.,]\d*?)?$/;
-    if (!floatRegex.test(str))
-        return false;
-
-    str = parseFloat(str);
-    if (isNaN(str))
-        return false;
-    return true;
-}
 
 function initTable() {
-    const $table = $("#logs-table")
+    $table = $("#logs-table");
 
     // get query string
-    const queryString = window.location.search
+    const queryString = window.location.search;
 
     // parse query search to js object
     const params = Object.fromEntries(new URLSearchParams(queryString).entries())
@@ -122,30 +115,10 @@ function initTable() {
     })
 }
 
-function ajaxRequest(params) {
-    const queryString = "?" + $.param(params.data)
-    const url = AJAX_URL + queryString
-    console.log("ajax:", url);
-    $.get(url).then(res => params.success(res))
 
-    pushHistoryState(params)
-}
 // debounced ajax calls.
-const debouncedAjaxRequest = debounce(ajaxRequest, debounceInterval);
+const debouncedAjaxRequest = debounce(function(params) {ajaxRequest(AJAX_URL, params)}, debounceInterval);
 
-function onPopState() {
-    location.reload()
-}
-
-function pushHistoryState(params) {
-    // replace limit and offset to page and page-size
-    const {limit, offset, sort, order, filter} = params.data;
-    const page = offset / limit + 1
-    const size = limit
-
-    // push history state
-    history.pushState(params.data, "", "?" + $.param({page, size, filter, sort, order}))
-}
 
 function queryParams(params) {
     let filters = {}
@@ -171,18 +144,18 @@ function queryParams(params) {
     return query
 }
 
+
 function buttons() {
     let buttonsObj = {}
 
-    buttonsObj["RefreshTable"] = {
-        text: 'Refresh',
-        event: function () {
-            window.location.href = window.location.href.split('?')[0];
-        }
+    buttonsObj["ResetTable"] = {
+        text: 'Reset',
+        event: function() { resetTable($table, queryParams) }
     }
 
     return buttonsObj
 }
+
 
 function detailFormatter(index, row) {
     var html = []
