@@ -225,11 +225,18 @@ def set_passbacked_flag(checks_id, flag):
     return check if check else None
 
 
-def get_latest_users_check():
-    return db.checks.aggregate([
-        {'$group': {'_id': '$user', 'check_id': {'$last': '$_id'}}},
-        {'$sort': {'check_id': -1}},
-    ])
+def get_latest_users_check(filter=None):
+    local_filter = filter
+    user = local_filter.get('user')
+    username_filter = {'username': user} if user else {} 
+    all_users = [user['username'] for user in users_collection.find(username_filter, {'username': 1})]
+    latest_checks = []
+    for user in all_users:
+        local_filter['user'] = user
+        check, count = get_checks_cursor(local_filter, limit=1, sort='_id', order='desc')
+        if count:
+            latest_checks.append(check[0])
+    return latest_checks, len(latest_checks)
 
 
 def get_latest_user_check_by_moodle(moodle_id):
@@ -239,9 +246,7 @@ def get_latest_user_check_by_moodle(moodle_id):
 
 
 def get_latest_check_cursor(filter, *args, **kwargs):
-    checks = [result['check_id'] for result in get_latest_users_check()]
-    filter['_id'] = {'$in': checks}
-    return get_checks_cursor(filter, *args, **kwargs)
+    return get_latest_users_check(filter)
 
 
 # Return no of bytes stored in gridfs
