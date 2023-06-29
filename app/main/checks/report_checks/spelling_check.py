@@ -7,17 +7,11 @@ class SpellingCheck(BaseReportCriterion):
     description = "Проверка наличия орфографических ошибок в тексте."
     id = 'spelling_check'
 
-    # If it is, then errors_count is equal to the number of possible errors on 1 page 
-    # (i.e. the maximum number of errors that can be allowed is errors_count*number_of_pages)
-    # Else errors_count is equal to the maximum number of errors that can be allowed.
-    def __init__(self, file_info, errors_count=4, scale_with_num_of_pages=True):
+    def __init__(self, file_info, min_errors_count=200, max_errors_count=400):
         super().__init__(file_info)
         self.spell_checker = LanguageTool('ru-RU')
-        self.max_errors_count = errors_count
-        if scale_with_num_of_pages:
-            self.max_errors_count = errors_count * self.file.page_counter()
-        else:
-            self.max_errors_count = errors_count
+        self.min_errors_count = min_errors_count
+        self.max_errors_count = max_errors_count
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -37,10 +31,18 @@ class SpellingCheck(BaseReportCriterion):
                         f"Возможные исправления: {replacements}"
                     )
 
-        if len(possible_errors_list) < self.max_errors_count:
-            return answer(True, "Пройдена!")
+        if len(possible_errors_list) <= self.min_errors_count:
+            grade = 1
+            return answer(1, "Пройдена!")
+        elif len(possible_errors_list) < self.max_errors_count:
+            grade = (self.max_errors_count - len(possible_errors_list)) / self.min_errors_count
+            result_str = '</li><li>'.join([error for error in possible_errors_list])
+            return answer(grade, 
+                          f'Частично пройдена. '
+                          f'Найдены следующие ошибки написания (общее их число - {len(possible_errors_list)}): '
+                          f'<ul><li>{result_str}</ul>')
         else:
             result_str = '</li><li>'.join([error for error in possible_errors_list])
-            return answer(False,
+            return answer(0,
                           f'Найдены следующие ошибки написания (общее их число - {len(possible_errors_list)}): '
                           f'<ul><li>{result_str}</ul>')
