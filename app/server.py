@@ -180,11 +180,13 @@ def run_task():
         return 'storage_overload'
     file_check_response = check_file(file, extension, ALLOWED_EXTENSIONS[file_ext_type], check_mime=True)
     if file_check_response != "ok":
+        logger.info('Пользователь загрузил файл с ошибочным расширением: ' + file_check_response)
         return file_check_response
 
     if pdf_file:
         pdf_file_check_response = check_file(pdf_file, pdf_file.filename.rsplit('.', 1)[1], "pdf", check_mime=True)
         if pdf_file_check_response != "ok":
+            logger.info('Пользователь загрузил файл с ошибочным расширением: pdf_' + pdf_file_check_response)
             return "pdf_" + pdf_file_check_response
     
     
