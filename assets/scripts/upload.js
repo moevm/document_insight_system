@@ -14,20 +14,41 @@ const return_pdf_file_label = pdf_file_label.text();
 const upload_button = $("#upload_upload_button");
 upload_button.prop("disabled", true);
 
-const showMessage = () => {
+// Для проверки расширения файла.
+let file_ext_re = /(?:\.([^.]+))?$/;
+let file_formats = $("#upload_file_label").text().split(":");
+file_formats = file_formats[file_formats.length - 1];
+file_formats = file_formats.replaceAll(" ", "");
+file_formats = file_formats.split(",");
+
+const showSizeExceedMessage = () => {
     alert(
         "Объем загружаемых вами файлов превышает максимально разрешенный объем " + (file_upload_limit / 1024 / 1024) + " МБ." +
         " Для уменьшения объема файла, мы рекомендуем следующие действия: \n" +
         "    ∙ общее — снизить разрешение изображений, \n    ∙ для презентаций — временно убрать дополнительные слайды.");
 };
 
+const showWrongExtensionMessage = () => {
+    alert("Был загружен файл неправильного расширения.")
+};
+
+const showBdOverwhelmedMessage = () => {
+    alert('База данных перегружена (недостаточно места для загрузки новых файлов). Свяжитесь с администратором');
+}
+
+const showRecaptchaMessage = () => {
+    alert('Пройдите recaptcha, чтобы продолжить!');
+}
+
 const resetFileUpload = () => {
+    pdf_uploaded = false;
     pdf_file_input.val('');
     pdf_file_label.html(return_pdf_file_label);
+
+    file_uploaded = false;
     file_input.val('');
     file_label.html(return_file_label);
-    pdf_uploaded = false;
-    file_uploaded = false;
+    
     upload_button.prop("disabled", true);
 };
 
@@ -36,9 +57,10 @@ const changeUploadButton = () => {
         const pdf_size = pdf_file_input.prop("files")[0]?.size || 0;
         const file_size = file_input.prop("files")[0]?.size || 0;
         if (pdf_size + file_size <= file_upload_limit) {
-            upload_button.prop("disabled", false);
+            if (file_uploaded)
+                upload_button.prop("disabled", false);
         } else {
-            showMessage();
+            showSizeExceedMessage();
             resetFileUpload();
             upload_button.prop("disabled", true);
         }
@@ -50,21 +72,37 @@ const changeUploadButton = () => {
 const selectFileUpload = (input, label) => {
     const fileName = input.val().split("\\")[2];
     const file = input.prop("files")[0];
+
+    // Проверка на валидность загруженного файла.
     if (file && file.size > file_upload_limit) {
-        showMessage();
+        showSizeExceedMessage();
         resetFileUpload();
         return;
+    } else if (file) {
+        if (label.attr("id") === "upload_file_label_pdf") {
+            // Загружен pdf.
+            if (file_ext_re.exec(fileName)[1] !== 'pdf') {
+                showWrongExtensionMessage();
+                resetFileUpload();
+                return;
+            }
+        } else {
+            // Загружен основной документ.
+            if (! file_formats.includes(file_ext_re.exec(fileName)[1])) {
+                showWrongExtensionMessage();
+                resetFileUpload();
+                return;
+            }
+        }
     }
-    file_uploaded = true;
-    pdf_uploaded = true;
-    label.html(fileName);
 
+    // Если все верно загружено.
     if (label.attr("id") === "upload_file_label_pdf") {
         pdf_uploaded = !!file;
-        pdf_file_label.html(file ? fileName : original_pdf_file_label);
+        label.html(file ? fileName : return_pdf_file_label);
     } else {
         file_uploaded = !!file;
-        file_label.html(file ? fileName : original_file_label);
+        label.html(file ? fileName : return_file_label);
     }
     changeUploadButton();
 }
@@ -102,12 +140,12 @@ async function upload() {
     bar.css("width", "100%").attr('aria-valuenow', 100);
     console.log(file);
     if (response_text === 'storage_overload') {
-        alert('База данных перегружена (недостаточно места для загрузки новых файлов). Свяжитесь с администратором');
+        showBdOverwhelmedMessage();
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");
         pdf_file_input.addClass("is-invalid");
     } else if (response_text.includes('Not OK') || response_text === 'File exceeded the upload limit') {
-        alert(response_text);
+        showSizeExceedMessage();
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");
         pdf_file_input.addClass("is-invalid");
@@ -122,7 +160,7 @@ async function upload() {
 
 upload_button.click(async () => {
     if ($('div.g-recaptcha').length && grecaptcha.getResponse().length === 0) {
-        alert('Check recaptcha to continue!');
+        showRecaptchaMessage();
     } else {
         upload_button.prop("disabled", true);
         await upload();
