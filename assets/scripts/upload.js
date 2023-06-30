@@ -32,6 +32,10 @@ const showWrongExtensionMessage = () => {
     alert("Был загружен файл неправильного расширения.")
 };
 
+const showRealTypeMessage = () => {
+    alert("Один из загруженных файлов имеет расширение не соответствующее реальному типу файлу.")
+};
+
 const showBdOverwhelmedMessage = () => {
     alert('База данных перегружена (недостаточно места для загрузки новых файлов). Свяжитесь с администратором');
 }
@@ -48,7 +52,7 @@ const resetFileUpload = () => {
     file_uploaded = false;
     file_input.val('');
     file_label.html(return_file_label);
-    
+
     upload_button.prop("disabled", true);
 };
 
@@ -149,6 +153,26 @@ async function upload() {
         bar.addClass("bg-danger");
         file_input.addClass("is-invalid");
         pdf_file_input.addClass("is-invalid");
+    } else if (response_text === 'not_allowed_extension') {
+        showWrongExtensionMessage();
+        bar.addClass("bg-danger");
+        file_input.addClass("is-invalid");
+        resetFileUpload();
+    } else if (response_text === 'pdf_not_allowed_extension') {
+        showWrongExtensionMessage();
+        bar.addClass("bg-danger");
+        pdf_file_input.addClass("is-invalid");
+        resetFileUpload();
+    } else if (response_text === 'mime_type_does_not_match_extension') {
+        showRealTypeMessage();
+        bar.addClass("bg-danger");
+        file_input.addClass("is-invalid");
+        resetFileUpload();
+    } else if (response_text === 'pdf_mime_type_does_not_match_extension') {
+        showRealTypeMessage();
+        bar.addClass("bg-danger");
+        pdf_file_input.addClass("is-invalid");
+        resetFileUpload();
     } else {
         file_uploaded = false;
         pdf_uploaded = false;
