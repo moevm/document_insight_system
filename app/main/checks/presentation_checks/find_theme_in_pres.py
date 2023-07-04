@@ -3,7 +3,7 @@ from ..base_check import BasePresCriterion, answer
 from .find_def_sld import FindDefSld
 from app.nlp.stemming import Stemming
 
-import  string
+import string
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
@@ -18,9 +18,10 @@ class FindThemeInPres(BasePresCriterion):
     description = "Проверка упоминания темы в презентации"
     id = 'theme_in_pres_check'
 
-    def __init__(self, file_info):
+    def __init__(self, file_info, limit = 40):
         super().__init__(file_info)
         self.check_conclusion = FindDefSld(file_info=file_info, key_slide="Заключение")
+        self.limit = limit
 
     def check(self):
 
@@ -35,7 +36,6 @@ class FindThemeInPres(BasePresCriterion):
         translator = str.maketrans('', '', string.punctuation)
         theme_without_punct = theme.translate(translator)
         words_in_theme = word_tokenize(theme_without_punct)
-        # for word in words_in_theme:
         lemma_theme = {MORPH_ANALYZER.parse(word)[0].normal_form for word in words_in_theme if word.lower() not in stop_words}
 
 
@@ -47,11 +47,12 @@ class FindThemeInPres(BasePresCriterion):
 
         lemma_text = {MORPH_ANALYZER.parse(word)[0].normal_form for word in words_in_text if word.lower() not in stop_words}
 
-        intersection = round(len(lemma_theme.intersection(lemma_text))//len(lemma_theme))*100
+        value_intersection = round(len(lemma_theme.intersection(lemma_text))*100//len(lemma_theme))
 
-        if intersection == 0:
-            return answer(False, f"Не пройдена! {intersection}")
-        elif 1 < intersection < 40:
-            return answer(False, f"Обратите внимание! {intersection} %")
+        if value_intersection == 0:
+            return answer(False, f"Не пройдена! В презентации не упоминаются слова, завяленные в теме.")
+        elif 1 < value_intersection < self.limit:
+            return answer(False,
+                          f"Не пройдена! Процент упоминания темы в вашей презентации ({value_intersection} %) ниже требуемого ({self.limit} %).")
         else:
-            return answer (True, f'Пройдена! {intersection} %')
+            return answer(True, f'Пройдена! Процент упоминания темы в презентации: {value_intersection} %')

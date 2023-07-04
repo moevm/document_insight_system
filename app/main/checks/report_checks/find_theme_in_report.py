@@ -2,11 +2,6 @@ import re
 import string
 
 from ..base_check import BaseReportCriterion, answer
-# from .find_def_sld import FindDefSld
-# from app.nlp.stemming import Stemming
-from ...reports.pdf_document.pdf_document_manager import PdfDocumentManager
-import pdfplumber
-from ...reports.docx_uploader import DocxUploader
 
 import  string
 import nltk
@@ -23,12 +18,13 @@ class FindThemeInReport(BaseReportCriterion):
     description = "Проверка упоминания темы в отчете"
     id = 'theme_in_report_check'
 
-    def __init__(self, file_info):
+    def __init__(self, file_info, limit = 40):
         super().__init__(file_info)
         self.intro = {}
         self.chapters = []
         self.text_par = []
         self.full_text = set()
+        self.limit = limit
 
     def late_init(self):
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
@@ -47,22 +43,22 @@ class FindThemeInReport(BaseReportCriterion):
                     par = intro_par['text'].lower()
                     self.text_par.append(par)
         lemma_theme = self.find_theme()
-        for i in self.text_par:
+
+        for text in self.text_par:
             translator = str.maketrans('', '', string.punctuation)
-            theme_without_punct = i.translate(translator)
+            theme_without_punct = text.translate(translator)
             word_in_text = word_tokenize(theme_without_punct)
             lemma_text = {MORPH_ANALYZER.parse(w)[0].normal_form for w in word_in_text if w.lower() not in stop_words}
             self.full_text.update(lemma_text)
 
         intersection = lemma_theme.intersection(self.full_text)
-        int_pr = round(len(intersection)*100//len(lemma_theme))
-
-        return answer(True, f'{lemma_theme} {intersection} hhh {int_pr}')
-
-
-
-
-
+        value_intersection = round(len(intersection)*100//len(lemma_theme))
+        if value_intersection == 0:
+            return answer(False, f"Не пройдена! В отчете не упоминаются слова, завяленные в теме отчета.")
+        elif 1 < value_intersection < self.limit:
+            return answer(False, f"Не пройдена! Процент упоминания темы в вашем отчете ({value_intersection} %) ниже требуемого ({self.limit} %).")
+        else:
+            return answer (True, f'Пройдена! Процент упоминания темы в ответе: {value_intersection} %.')
 
     def find_theme(self):
         stop_words = set(stopwords.words("russian"))
@@ -78,73 +74,3 @@ class FindThemeInReport(BaseReportCriterion):
                 lemma_theme = {MORPH_ANALYZER.parse(word)[0].normal_form for word in list_theme if
                                 word not in stop_words}
             return lemma_theme
-
-
-
-
-
-        # full_text_pre = self.file.pdf_file.text_on_page
-        # full_text = ''.jo
-        # start_text = full_text.index['1.']
-        # end_text = full_text.index['ЗАКЛЮЧЕНИЕ']
-        # text_for_analys = full_text[start_text:end_text]
-        # lemma_text = {MORPH_ANALYZER.parse(word)[0].normal_form for word in text_for_analys if word not in stop_words}
-
-        # for text_on_page in self.file.pdf_file.get_text_on_page().values():
-        #
-        #     lower_text = text_on_page.lower()
-        #     text_without_punct = lower_text.translate(str.maketrans('', '', string.punctuation))
-        #     list_full = text_without_punct.split()
-        #     start = list_full.index('тема')
-        #     end = list_full.index('студент')
-        #     list_theme = list_full[start:end]
-        #     lemma_theme = ({MORPH_ANALYZER.parse(word)[0].normal_form for word in list_theme if
-        #                    word not in stop_words})
-
-
-
-
-
-
-# class FindThemeInReport(BaseReportCriterion):
-#
-#     description = "Проверка упоминания темы в отчете"
-#     id = 'theme_in_report_check'
-#
-#     def __init__(self, file_info):
-#         super().__init__(file_info)
-#         self.check_conclusion = FindDefSld(file_info=file_info, key_slide="Заключение")
-#
-#     def check(self):
-#
-#         stop_words = set(stopwords.words("russian"))
-#
-#         self.check_conclusion.check()
-#         page_conclusion = ''.join((str(item) for item in self.check_conclusion.__getattribute__("found_idxs")))
-#
-#         text_from_title = [slide for page, slide in enumerate(self.file.get_titles(), 1) if str(page) != page_conclusion]
-#         theme = ''.join(word for word in text_from_title[0])
-#
-#         translator = str.maketrans('', '', string.punctuation)
-#         theme_without_punct = theme.translate(translator)
-#         words_in_theme = word_tokenize(theme_without_punct)
-#         # for word in words_in_theme:
-#         lemma_theme = {MORPH_ANALYZER.parse(word)[0].normal_form for word in words_in_theme if word.lower() not in stop_words}
-#
-#
-#         text_from_slide = [slide for page, slide in enumerate(self.file.get_text_from_slides(), 1) if page > 1]
-#         string_from_text = ''.join(text_from_slide)
-#
-#         text_without_punct = string_from_text.translate(translator)
-#         words_in_text = word_tokenize(text_without_punct)
-#
-#         lemma_text = {MORPH_ANALYZER.parse(word)[0].normal_form for word in words_in_text if word.lower() not in stop_words}
-#
-#         intersection = round(len(lemma_theme.intersection(lemma_text))//len(lemma_theme))*100
-#
-#         if intersection == 0:
-#             return answer(False, f"Не пройдена! {intersection}")
-#         elif 1 < intersection < 40:
-#             return answer(False, f"Обратите внимание! {intersection} %")
-#         else:
-#             return answer (True, f'Пройдена! {intersection} %')
