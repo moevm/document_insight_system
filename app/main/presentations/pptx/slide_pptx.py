@@ -26,6 +26,8 @@ class SlidePPTX(SlideBasic):
                 self.images.append(shape)
             if hasattr(shape, "text"):
                 self.text += "\n" + shape.text
+            if shape.has_table:
+                self.table.append(shape)
 
     def __str__(self):
         return super().__str__()
