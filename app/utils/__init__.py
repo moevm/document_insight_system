@@ -8,3 +8,4 @@ from .parse_for_html import format_descriptions, format_header, find_tasks_on_sl
     tasks_conclusions_feedback
 from .repeated_timer import RepeatedTimer
 from .timezone import timezone_offset
+from .check_file import check_file

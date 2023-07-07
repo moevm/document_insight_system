@@ -17,4 +17,8 @@ from .sections_check import LRReportSectionCheck
 from .short_sections_check import ReportShortSectionsCheck
 from .simple_check import ReportSimpleCheck
 from .style_check_settings import StyleCheckSettings
+from .headers_at_page_top_check import ReportHeadersAtPageTopCheck
+from .sections_check import LRReportSectionCheck
+from .style_check import ReportStyleCheck
+from .spelling_check import SpellingCheck
 

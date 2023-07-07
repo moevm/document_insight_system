@@ -38,7 +38,8 @@ BASE_REPORT_CRITERION = [
     ["needed_headers_check"],
     ["header_check"],
     ["report_section_component"],
-    ["main_text_check"]
+    ["main_text_check"],
+    ["spelling_check"]
 ]
 
 DEFAULT_TYPE = 'pres'
