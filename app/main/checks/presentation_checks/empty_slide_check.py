@@ -1,3 +1,4 @@
+import re
 
 from app.utils.parse_for_html import format_header
 from ..base_check import BasePresCriterion, answer
@@ -22,7 +23,9 @@ class PresEmptySlideCheck(BasePresCriterion):
                              if slide.get_images() or slide.get_table()]
 
         for page, slide in enumerate(self.file.get_text_from_slides(), 1):
-            slide_without_page = slide.replace("\n", " ").replace(str(page), '')
+            slide_string = ''.join(slide.replace("\n", " "))
+            slide_without_page = re.sub(r'\d+(?=\s*$)', '', slide_string)
+            print(slide_without_page)
             full_pages[str(page)] = ''.join(char for char in slide_without_page.strip() if char.isprintable())
             if not full_pages[str(page)]:
                 empty_pages.append(page)
