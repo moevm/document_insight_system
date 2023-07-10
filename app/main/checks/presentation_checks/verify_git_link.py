@@ -44,47 +44,48 @@ class PresVerifyGitLinkCheck(BasePresCriterion):
         found_repo = re.findall(self.pattern_for_repo, string_from_text)
         found_repo_aprb = re.findall(self.pattern_for_repo, string_from_text_aprb)
         found_repo_aprb_incorrect = re.findall(self.pattern_for_repo_incorrect, string_from_text_aprb)
-        print(f'page:{a}, {text_from_slide_aprb}')
+        print(f'page:{a}, {page_aprb} !!!!!!!!!{text_from_slide_aprb}')
+        return answer(False, found_repo_aprb_incorrect, found_repo_aprb)
 
-        if not found_repo:
-            return answer(True, 'Нечего проверять!')
-        else:
-            if found_repo_aprb_incorrect:
-                string_result += f" <br> В слайде 'Апробация' вместо выражений {', '.join([repr(repo) for repo in found_repo_aprb_incorrect])}" \
-                                 f" следует привести ссылки вида 'https//github.com/...'"
-            if not found_repo_aprb and not found_repo_aprb_incorrect and re.findall(self.pattern_repo_mention, string_from_text_aprb):
-                string_result += f' <br> В слайде "Апробация" есть упоминания репозиториев,' \
-                                 f'однако ссылки на них либо некорректны, либо отсутствуют.'
-            for i in found_repo:
-                try:
-                    link = requests.get(i[0])
-                    if link.status_code != 200:
-                        raise requests.exceptions.ConnectionError
-                    else:
-                        if self.deep_check:
-                            self.deep_check_repo(i, link)
-                except (requests.exceptions.SSLError, requests.exceptions.ConnectionError):
-                    self.wrong_repo_ref.append(i[0])
-        if self.wrong_repo_ref and not self.empty_repo_ref:
-            string_result += f" <br> Найдены несуществующие или закрытые репозитории: {', '.join([repr(repo) for repo in self.wrong_repo_ref])}"
-            check_result = False
-        elif self.empty_repo_ref and not self.wrong_repo_ref:
-            string_result += f" <br> Найдены пустые репозитории: {', '.join([repr(repo) for repo in self.empty_repo_ref])}"
-            check_result = False
-        elif self.empty_repo_ref and self.wrong_repo_ref:
-            string_result += f" <br> Найдены пустые репозитории: {', '.join([repr(repo) for repo in self.empty_repo_ref])}" \
-                             f" <br> Также найдены несуществующие или закрытые репозитории: {', '.join([repr(repo) for repo in self.wrong_repo_ref])}"
-            check_result = False
-        else:
-            string_result = 'Пройдена!'
-            check_result = True
-        return answer(check_result, string_result)
-
-    def deep_check_repo(self, repo, link):
-        if re.findall(r'github', repo[0]):
-            tree = html.fromstring(link.content)
-            if not tree.xpath("//a[@class ='js-navigation-open Link--primary']"):
-                self.empty_repo_ref.append(repo[0])
+    #     if not found_repo:
+    #         return answer(True, 'Нечего проверять!')
+    #     else:
+    #         # if found_repo_aprb_incorrect:
+    #         #     string_result += f" <br> В слайде 'Апробация' вместо выражений {', '.join([repr(repo) for repo in found_repo_aprb_incorrect])}" \
+    #         #                      f" следует привести ссылки вида 'https//github.com/...'"
+    #         # if not found_repo_aprb and not found_repo_aprb_incorrect and re.findall(self.pattern_repo_mention, string_from_text_aprb):
+    #         #     string_result += f' <br> В слайде "Апробация" есть упоминания репозиториев,' \
+    #         #                      f'однако ссылки на них либо некорректны, либо отсутствуют.'
+    #         for i in found_repo:
+    #             try:
+    #                 link = requests.get(i[0])
+    #                 if link.status_code != 200:
+    #                     raise requests.exceptions.ConnectionError
+    #                 else:
+    #                     if self.deep_check:
+    #                         self.deep_check_repo(i, link)
+    #             except (requests.exceptions.SSLError, requests.exceptions.ConnectionError):
+    #                 self.wrong_repo_ref.append(i[0])
+    #     if self.wrong_repo_ref and not self.empty_repo_ref:
+    #         string_result += f" <br> Найдены несуществующие или закрытые репозитории: {', '.join([repr(repo) for repo in self.wrong_repo_ref])}"
+    #         check_result = False
+    #     elif self.empty_repo_ref and not self.wrong_repo_ref:
+    #         string_result += f" <br> Найдены пустые репозитории: {', '.join([repr(repo) for repo in self.empty_repo_ref])}"
+    #         check_result = False
+    #     elif self.empty_repo_ref and self.wrong_repo_ref:
+    #         string_result += f" <br> Найдены пустые репозитории: {', '.join([repr(repo) for repo in self.empty_repo_ref])}" \
+    #                          f" <br> Также найдены несуществующие или закрытые репозитории: {', '.join([repr(repo) for repo in self.wrong_repo_ref])}"
+    #         check_result = False
+    #     else:
+    #         string_result = 'Пройдена!'
+    #         check_result = True
+    #     return answer(check_result, string_result)
+    #
+    # def deep_check_repo(self, repo, link):
+    #     if re.findall(r'github', repo[0]):
+    #         tree = html.fromstring(link.content)
+    #         if not tree.xpath("//a[@class ='js-navigation-open Link--primary']"):
+    #             self.empty_repo_ref.append(repo[0])
 
         # if re.findall(r'gitlab', i[0]):
         #     project_id = quote(i[0].replace('https://gitlab.com/', ''), safe='')
