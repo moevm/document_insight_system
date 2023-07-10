@@ -30,7 +30,7 @@ class PresVerifyGitLinkCheck(BasePresCriterion):
     def check(self):
         string_result = 'Не пройдена!'
 
-        self.check_aprb.check()
+        a = self.check_aprb.check()
         page_aprb = ''.join((str(item) for item in self.check_aprb.__getattribute__("found_idxs")))
 
         text_from_slide = [slide for page, slide in enumerate(self.file.get_text_from_slides(), 1)]
@@ -44,6 +44,7 @@ class PresVerifyGitLinkCheck(BasePresCriterion):
         found_repo = re.findall(self.pattern_for_repo, string_from_text)
         found_repo_aprb = re.findall(self.pattern_for_repo, string_from_text_aprb)
         found_repo_aprb_incorrect = re.findall(self.pattern_for_repo_incorrect, string_from_text_aprb)
+        print(f'page:{a}, {text_from_slide_aprb}')
 
         if not found_repo:
             return answer(True, 'Нечего проверять!')
