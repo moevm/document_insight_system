@@ -19,6 +19,10 @@ class FindDefSld(BasePresCriterion):
         if len(found_slides) == 0:
             return answer(False, 'Слайд не найден')
         else:
+            if self.type_of_slide == 'Заключение':
+                self.file.found_index['Заключение'] = ''.join(str(item) for item in self.found_idxs)
+            else:
+                self.file.found_index['Заключение'] = None
             found_idxs_link = self.format_page_link(self.found_idxs)
             return answer(True, 'Найден под номером: {}'.format(', '.join(map(str, found_idxs_link))))
 

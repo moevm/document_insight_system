@@ -18,26 +18,27 @@ class FindThemeInPres(BasePresCriterion):
     description = "Проверка упоминания темы в презентации"
     id = 'theme_in_pres_check'
 
-    def __init__(self, file_info, limit = 40):
+    def __init__(self, file_info, limit = 60):
         super().__init__(file_info)
-        self.check_conclusion = FindDefSld(file_info=file_info, key_slide="Заключение")
+        # self.check_conclusion = FindDefSld(file_info=file_info, key_slide="Заключение")
         self.limit = limit
 
     def check(self):
 
         stop_words = set(stopwords.words("russian"))
+        if self.file.found_index['Заключение'] is not None:
+            page_conclusion = self.file.found_index['Заключение']
 
-        self.check_conclusion.check()
-        page_conclusion = ''.join((str(item) for item in self.check_conclusion.__getattribute__("found_idxs")))
+        # self.check_conclusion.check()
+        # page_conclusion = ''.join((str(item) for item in self.check_conclusion.__getattribute__("found_idxs")))
 
-        text_from_title = [slide for page, slide in enumerate(self.file.get_titles(), 1) if str(page) != page_conclusion]
-        theme = ''.join(word for word in text_from_title[0])
+            text_from_title = [slide for page, slide in enumerate(self.file.get_titles(), 1) if str(page) != page_conclusion]
+            theme = ''.join(word for word in text_from_title[0])
 
         translator = str.maketrans('', '', string.punctuation)
         theme_without_punct = theme.translate(translator)
         words_in_theme = word_tokenize(theme_without_punct)
         lemma_theme = {MORPH_ANALYZER.parse(word)[0].normal_form for word in words_in_theme if word.lower() not in stop_words}
-
 
         text_from_slide = [slide for page, slide in enumerate(self.file.get_text_from_slides(), 1) if page > 1]
         string_from_text = ''.join(text_from_slide)

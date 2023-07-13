@@ -12,6 +12,7 @@ class PresentationODP(PresentationBasic):
         self.prs = opendocument.load(presentation_name)
         self.parse_styles()
         self.add_slides()
+        self.found_index = {}
 
     def add_slides(self):
         for slide in self.prs.getElementsByType(draw.Page):
