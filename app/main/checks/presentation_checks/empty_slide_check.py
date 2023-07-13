@@ -25,15 +25,15 @@ class PresEmptySlideCheck(BasePresCriterion):
         for page, slide in enumerate(self.file.get_text_from_slides(), 1):
             slide_string = ''.join(slide.replace("\n", " "))
             slide_without_page = re.sub(r'\d+(?=\s*$)', '', slide_string)
-            print(slide_without_page, self.file.get_text_from_slides)
             full_pages[str(page)] = ''.join(char for char in slide_without_page.strip() if char.isprintable())
             if not full_pages[str(page)]:
                 empty_pages.append(page)
 
         for page, slide in enumerate(self.file.get_titles(), 1):
             page_titles[str(page)] = slide
-            if slide == full_pages[str(page)] and page not in pages_with_images and page not in empty_pages:
-                pages_with_title.append(page)
+            if slide != "Запасные слайды":
+                if slide == full_pages[str(page)] and page not in pages_with_images and page not in empty_pages:
+                    pages_with_title.append(page)
 
         if self.file.presentation_name.endswith('.ppt') or self.file.presentation_name.endswith('.pptx'):
 
