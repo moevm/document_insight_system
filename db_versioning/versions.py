@@ -290,13 +290,15 @@ class Version31(Version):
 
 class Version41(Version):
     VERSION_NAME = '4.1'
-    CHANGES = 'В коллекцию criteria_pack добавлен атрибут point_levels'
+    CHANGES = 'В коллекции criteria_pack и checks добавлен атрибут point_levels'
 
     @classmethod
     def update_database(cls, collections, prev_version):
         if prev_version in (Version31.VERSION_NAME,):
             collections['criteria_pack'].update_many({}, {
-                '$set': {'point_levels': {"0.2": "Message1", "0.5": "Message2", "0.7": "Message3", "0.929": "Допущен с рекомендацией снизить оценку", "1.0": "Допущен"}}})
+                '$set': {'point_levels': {}}})
+            collections['checks'].update_many({}, {
+                '$set': {'point_levels': {}}})
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 

@@ -1,6 +1,5 @@
 {# Accepts: header dependicies, results, id, filename #}
 
-
 {% extends "root.html" %}
 
 {% block title %}Результаты проверки{% endblock %}
@@ -21,20 +20,9 @@
             {% endif %}
     <div>
         {% if results.point_levels %}
-            {% if results.point_levels == "Допущен" %}
-                <h6 id="results_message" class="col text-left">
-                    <br>
-                    <br>
-                    <br> Уровень вашего допуска: <b>"Допущен"</b>.
-                </h6>
-            {% else %}
-            <h6 id="results_message" class="col text-left">
-                Вы набрали необходимый минимум для дальнейшего допуска на защиту ВКР с оценкой
-                <b>"{{ results.point_levels }}"</b>.
-                <br>Однако, мы рекомендуем вам продолжить исправления презентации для получения максимального балла.
-                Это повысит ваш допуск до уровня <b>"Допущен"</b>.
-            </h6>
-            {% endif %}
+        <h6 id="results_message" class="col text-left">
+            <b>{{ results.point_levels }}</b>
+        </h6>
         <p>
         {% endif %}
     </div>
