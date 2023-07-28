@@ -379,6 +379,7 @@ def api_criteria_pack():
     file_type = form_data.get('file_type')
     report_type = form_data.get('report_type')
     min_score = float(form_data.get('min_score', '1'))
+    point_levels = form_data.get('point_levels')
     # weak validation
     try:
         raw_criterions = json.loads(raw_criterions)
@@ -409,7 +410,8 @@ def api_criteria_pack():
         'name': pack_name,
         'raw_criterions': raw_criterions,
         'file_type': file_type_info,
-        'min_score': min_score
+        'min_score': min_score,
+        'point_levels': point_levels
     })
     return {'data': f"Набор '{pack_name}' сохранен", 'time': datetime.now()}, 200
 

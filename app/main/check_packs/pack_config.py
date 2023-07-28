@@ -46,10 +46,15 @@ REPORT_TYPES = ('LR', 'VKR')
 DEFAULT_REPORT_TYPE_INFO = {'type': 'report', 'report_type': REPORT_TYPES[1]}
 DEFAULT_PRES_TYPE_INFO = {'type': 'pres'}
 DEFAULT_TYPE_INFO = DEFAULT_PRES_TYPE_INFO
+POINT_LEVELS = {"0.2": "Message1",
+                "0.5": "Message2",
+                "0.714": "Допущен с рекомендацией значительно снизить оценку",
+                "0.929": "Допущен с рекомендацией снизить оценку",
+                "0.357": "Допущен"}
 
 BASE_PACKS = {
-    'pres': BaseCriterionPack(BASE_PRES_CRITERION, DEFAULT_PRES_TYPE_INFO, min_score=1.0,
+    'pres': BaseCriterionPack(BASE_PRES_CRITERION, DEFAULT_PRES_TYPE_INFO, point_levels=POINT_LEVELS, min_score=1.0,
                               name="BasePresentationCriterionPack"),
-    'report': BaseCriterionPack(BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, min_score=1.0,
+    'report': BaseCriterionPack(BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, point_levels=POINT_LEVELS, min_score=1.0,
                                 name="BaseReportCriterionPack")
 }

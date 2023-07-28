@@ -43,6 +43,7 @@ pack_form.submit((e) => {
     fd.append('report_type', $("#report_type").val());
     fd.append('min_score', $("#min_score").val());
     fd.append('raw_criterions', raw_criterions_str);
+    fd.append('point_levels', $("#point_levels").val());
     fetch(`/api/criterion_pack`, {method: "POST", body: fd})
         .then(response => {
             if (response.status === 200) {

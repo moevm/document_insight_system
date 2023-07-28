@@ -5,12 +5,13 @@ PRIORITY_CHECK_FAILED_MSG = "<b>Данный критерий является �
 
 class BaseCriterionPack:
 
-    def __init__(self, raw_criterions, file_type, min_score=1.0, name=None, **kwargs):
+    def __init__(self, raw_criterions, file_type, point_levels, min_score=1, name=None, **kwargs):
         self.file_type = file_type
         self.name = name if name else self.__class__.__name__
         self.raw_criterions = raw_criterions
         self.criterions = []
         self.min_score = min_score  # min score to pass
+        self.point_levels = point_levels
 
     def init(self, file_info):
         # create criterion objects, ignore errors - validation was performed earlier
@@ -43,7 +44,8 @@ class BaseCriterionPack:
             'name': self.name,
             'raw_criterions': self.raw_criterions,
             'file_type': self.file_type,
-            'min_score': self.min_score
+            'min_score': self.min_score,
+            'point_levels': self.point_levels,
         }
 
     @staticmethod

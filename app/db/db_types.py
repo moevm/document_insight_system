@@ -1,7 +1,7 @@
 from bson import ObjectId
 from flask_login import UserMixin
 
-from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_TYPE_INFO, DEFAULT_REPORT_TYPE_INFO
+from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_TYPE_INFO, DEFAULT_REPORT_TYPE_INFO, POINT_LEVELS
 
 class Packable:
     def __init__(self, dictionary):
@@ -104,6 +104,7 @@ class Check(PackableWithId):
         self.is_failed = dictionary.get('is_failed', None)
         self.is_ended = dictionary.get('is_ended', True)
         self.is_passed = dictionary.get('is_passed', int(self.score) == 1)
+        self.point_levels = self.get_point_levels()
 
     def calc_score(self):
         # check after implementation criterion pack
@@ -145,3 +146,8 @@ class Check(PackableWithId):
         is_ended = none_to_true(self.is_ended)  # None for old checks => True, True->True, False->False
         is_failed = none_to_false(self.is_failed)  # None for old checks => False, True->True, False->False
         return {'is_ended': is_ended, 'is_failed': is_failed}
+
+    def get_point_levels(self):
+        if str(self.score) in POINT_LEVELS:
+            point_levels = POINT_LEVELS[str(self.score)]
+            return point_levels

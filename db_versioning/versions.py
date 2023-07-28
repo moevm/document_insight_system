@@ -288,6 +288,19 @@ class Version31(Version):
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
 
+class Version41(Version):
+    VERSION_NAME = '4.1'
+    CHANGES = 'В коллекцию criteria_pack добавлен атрибут point_levels'
+
+    @classmethod
+    def update_database(cls, collections, prev_version):
+        if prev_version in (Version31.VERSION_NAME,):
+            collections['criteria_pack'].update_many({}, {
+                '$set': {'point_levels': {"0.2": "Message1", "0.5": "Message2", "0.7": "Message3", "0.929": "Допущен с рекомендацией снизить оценку", "1.0": "Допущен"}}})
+        else:
+            raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
+
+
 VERSIONS = {
     '1.0': Version10,
     '1.1': Version11,
@@ -296,8 +309,9 @@ VERSIONS = {
     '2.2': Version22,
     '3.0': Version30,
     '3.1': Version31,
+    '4.1': Version41,
 }
-LAST_VERSION = '3.1'
+LAST_VERSION = '4.1'
 
 for _, ver in VERSIONS.items():
     print(ver.to_dict())
