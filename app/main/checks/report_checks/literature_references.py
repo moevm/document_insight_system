@@ -129,7 +129,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
 
     def search_literature_start_pdf(self):
         start_page = 0
-        end_page = self.file.pdf_file.page_count
+        end_page = self.file.pdf_file.page_count_all
         for i in self.file.pdf_file.text_on_page.keys():
             lowercase_str = self.file.pdf_file.text_on_page[i].lower()
             if re.search(self.name_pattern, lowercase_str):

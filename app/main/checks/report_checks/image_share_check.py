@@ -11,8 +11,8 @@ class ReportImageShareCheck(BaseReportCriterion):
     def check(self):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
-        images_height = self.file.pdf_file.page_images()
-        available_space = self.file.pdf_file.page_height()
+        images_height = self.file.pdf_file.page_images(page_without_pril=self.file.count)
+        available_space = self.file.pdf_file.page_height(page_without_pril=self.file.count)
 
         images_value = images_height/available_space
 
