@@ -190,3 +190,12 @@ upload_button.click(async () => {
         await upload();
     }
 });
+
+async function toggleTable() {
+            var table = document.getElementById("table_info");
+            if (table.style.display === "none") {
+                table.style.display = "table";
+            } else {
+                table.style.display = "none";
+            }
+        }
