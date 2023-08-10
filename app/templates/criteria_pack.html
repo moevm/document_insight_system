@@ -47,10 +47,49 @@
                 <label>
                     Список критериев набора (однажды тут будет подробнейшая <a
                         href="https://github.com/moevm/mse_auto_checking_slides_vaganov/issues/351">инструкция</a>)<br>
-                    # укажите здесь конфигурацию набора в формате JSON<br>
-                    <textarea id="raw_criterions" rows=10 cols=80
-                              required>{{ pack['raw_criterions'] }}</textarea>
+                    # укажите здесь конфигурацию набора критериев и сообщений об уровне допуска в формате JSON<br>
+<!--                    <textarea id="raw_criterions" rows=10 cols=80-->
+<!--                              required>{{ pack['raw_criterions'] }}</textarea>-->
                 </label><br>
+
+<!--                    <script src="criterion_pack.js" ></script>-->
+                <style>
+                    .tab {
+                      display: none;
+                    }
+                  </style>
+                  <script>
+                    function openTab(tabName) {
+                      var i, tabs;
+                      tabs = document.getElementsByClassName("tab");
+                      for (i = 0; i < tabs.length; i++) {
+                        tabs[i].style.display = "none";
+                      }
+                      document.getElementById(tabName).style.display = "block";
+                    }
+                  </script>
+
+
+
+                <button onclick="openTab('tab1')">Набор критериев</button>
+                <button onclick="openTab('tab2')">Конфигурация point_levels</button>
+
+                <div id="tab1" class="tab" style="display: block">
+                  <textarea id="raw_criterions" rows=10 cols=80
+                              required>{{ pack['raw_criterions'] }}</textarea>
+                </div>
+
+                <div id="tab2" class="tab">
+                  <textarea id="point_levels" rows=10 cols=80
+                              required>{{ pack['point_levels'] }}</textarea>
+                </div>
+
+<!--                <label>-->
+<!--                    Сообщение об уровне оценки:-->
+<!--                    Измените параметры point_levels<br>-->
+<!--                    <textarea id="point_levels" rows=10 cols=80-->
+<!--                              required>{{ pack['point_levels'] }}</textarea>-->
+<!--                </label><br>-->
                 <input id="pack_submit_button" value="Сохранить" type="submit">
             </form>
         </div>

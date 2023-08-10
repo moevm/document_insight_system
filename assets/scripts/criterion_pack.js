@@ -74,3 +74,12 @@ function verifyRawCriterions(text) {
         return 1;
     }
 }
+
+function openTab(tabName) {
+    var i, tabs;
+    tabs = document.getElementsByClassName("tab");
+    for (i = 0; i < tabs.length; i++) {
+    tabs[i].style.display = "none";
+    }
+    document.getElementById(tabName).style.display = "block";
+    }
