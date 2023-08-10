@@ -7,6 +7,13 @@ const RAW_CRITERION_VALIDATION_ERRORS = {
     'not_json': 'Строка не является JSON-строкой',
 }
 
+$("#btn_tab1").click(function(){
+  openTab('tab1');
+});
+$("#btn_tab2").click(function(){
+  openTab('tab2');
+});
+
 $("#file_type").change(function () {
     switch ($(this).val()) {
         case "pres": {
@@ -83,3 +90,7 @@ function openTab(tabName) {
     }
     document.getElementById(tabName).style.display = "block";
     }
+
+window.onload = function() {
+    openTab('tab1');
+};

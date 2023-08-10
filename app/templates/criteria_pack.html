@@ -4,7 +4,7 @@
 
 {% if not (pack is defined) %}
     {% set pack = {'name': '', 'file_type': 'report', 'min_score': '1',
-                    'raw_criterions': "[[\"criterion_name\", \"criterion_params_as_dict\"]]"} %}
+                    'raw_criterions': "[[\"criterion_name\", \"criterion_params_as_dict\"]]", 'point_levels': ""} %}
 {% endif %}
 {% block main %}
     <div class="header row">{% include "header.html" %}</div>
@@ -45,45 +45,22 @@
                            required>
                 </label><br>
                 <label>
-                    Список критериев набора (однажды тут будет подробнейшая <a
+                    <li>Список критериев набора (однажды тут будет подробнейшая <a
                         href="https://github.com/moevm/mse_auto_checking_slides_vaganov/issues/351">инструкция</a>)<br>
+                    <li>Сообщения пользователям при достижении определенных уровней баллов <br>
                     # укажите здесь конфигурацию набора критериев и сообщений об уровне допуска в формате JSON<br>
-<!--                    <textarea id="raw_criterions" rows=10 cols=80-->
-<!--                              required>{{ pack['raw_criterions'] }}</textarea>-->
+
                 </label><br>
-
-<!--                    <script src="criterion_pack.js" ></script>-->
-                <style>
-                    .tab {
-                      display: none;
-                    }
-                  </style>
-                  <script>
-                    function openTab(tabName) {
-                      var i, tabs;
-                      tabs = document.getElementsByClassName("tab");
-                      for (i = 0; i < tabs.length; i++) {
-                        tabs[i].style.display = "none";
-                      }
-                      document.getElementById(tabName).style.display = "block";
-                    }
-                  </script>
-
-
-
-                <button onclick="openTab('tab1')">Набор критериев</button>
-                <button onclick="openTab('tab2')">Конфигурация point_levels</button>
-
+                <button id="btn_tab1">Набор критериев</button>
+                <button id="btn_tab2">Конфигурация point_levels</button>
                 <div id="tab1" class="tab" style="display: block">
-                  <textarea id="raw_criterions" rows=10 cols=80
+                    <textarea id="raw_criterions" rows=10 cols=80
                               required>{{ pack['raw_criterions'] }}</textarea>
                 </div>
-
                 <div id="tab2" class="tab">
-                  <textarea id="point_levels" rows=10 cols=80
+                    <textarea id="point_levels" rows=10 cols=80
                               required>{{ pack['point_levels'] }}</textarea>
                 </div>
-
 <!--                <label>-->
 <!--                    Сообщение об уровне оценки:-->
 <!--                    Измените параметры point_levels<br>-->
