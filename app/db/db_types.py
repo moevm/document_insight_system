@@ -148,8 +148,11 @@ class Check(PackableWithId):
         return {'is_ended': is_ended, 'is_failed': is_failed}
 
     def get_point_levels(self):
-        for key in POINT_LEVELS:
-            value = POINT_LEVELS[key]
-            if value[0] < self.score < value[1]:
-                point_levels = key
-                return point_levels
+        try:
+            for key in POINT_LEVELS:
+                value = POINT_LEVELS[key]
+                if value[0] < self.score < value[1]:
+                    point_levels = key
+                    return point_levels
+        except TypeError:
+            return None

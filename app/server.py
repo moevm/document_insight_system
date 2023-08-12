@@ -391,7 +391,7 @@ def api_criteria_pack():
     raw_criterions = raw_criterions if type(raw_criterions) is list else None
     file_type = file_type if file_type in BASE_PACKS.keys() else None
     min_score = min_score if min_score and (0 <= min_score <= 1) else None
-    point_levels = point_levels if point_levels else None
+    point_levels = json.loads(point_levels) if point_levels else None
     if not (raw_criterions and file_type and min_score):
         msg = f"Конфигурация набора критериев должна содержать список критериев (непустой список в формате JSON)," \
               f"тип файла (один из {list(BASE_PACKS.keys())})," \

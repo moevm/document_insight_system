@@ -77,7 +77,7 @@ function verifyRawCriterions(text) {
         JSON.parse(text);
         return 0;
     } catch (e) {
-        console.log(text, e)
+        console.log(text, e);
         return 1;
     }
 }
@@ -86,10 +86,10 @@ function openTab(tabName) {
     var i, tabs;
     tabs = document.getElementsByClassName("tab");
     for (i = 0; i < tabs.length; i++) {
-    tabs[i].style.display = "none";
+        tabs[i].style.display = "none";
     }
     document.getElementById(tabName).style.display = "block";
-    }
+}
 
 window.onload = function() {
     openTab('tab1');
