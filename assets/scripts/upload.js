@@ -7,6 +7,8 @@ const file_input = $("#upload_file");
 const file_label = $("#upload_file_label");
 const return_file_label = file_label.text();
 
+const pt = $("#upload_file_pdf");
+pdf_uploaded = pt.length > 0 ? !!pt.prop("files")[0] : false; //проверка наличия pdf
 const pdf_file_input = $("#upload_file_pdf");
 const pdf_file_label = $("#upload_file_label_pdf");
 const return_pdf_file_label = pdf_file_label.text();
@@ -58,7 +60,7 @@ const resetFileUpload = () => {
 
 const changeUploadButton = () => {
     if (pdf_uploaded || file_uploaded) {
-        const pdf_size = pdf_file_input.prop("files")[0]?.size || 0;
+        const pdf_size = pdf_uploaded ? (pt.prop("files")[0]?.size || 0) : 0;
         const file_size = file_input.prop("files")[0]?.size || 0;
         if (pdf_size + file_size <= file_upload_limit) {
             if (file_uploaded)
