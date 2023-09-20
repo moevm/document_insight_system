@@ -3,7 +3,7 @@ import re
 
 class MdParser:
     def __init__(self):
-        self.path_to_md_file = '/home/marina/src/2/mse_auto_checking_slides_vaganov/app/main/reports/md_parser/example.md'
+        self.path_to_md_file = '' #insert path to file
         self.headers = []
         self.chapters = []
         self.paragraphs = []
@@ -58,7 +58,3 @@ file.get_html_from_md()
 # print(file.get_chapters())
 # print(file.get_chapter_with_text())
 print(file.get_tables_size())
-
-# if __name__ == '__main__':e
-#     get_html_from_md()
-
