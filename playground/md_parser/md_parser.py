@@ -57,5 +57,5 @@ class MdParser:
         return f"{self.headers} \n {self.chapters} \n {self.chapter_with_text} \n {self.get_tables_size()}"
 
          
-md_file = MdParser('')
+md_file = MdParser('/home/marina/src/2/mse_auto_checking_slides_vaganov/playground/md_parser/example.md')
 print(md_file.parse_md_file())
