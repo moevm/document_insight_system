@@ -45,7 +45,6 @@ BASE_REPORT_CRITERION = [
 DEFAULT_TYPE = 'pres'
 REPORT_TYPES = ('LR', 'VKR')
 DEFAULT_REPORT_TYPE_INFO = {'type': 'report', 'report_type': REPORT_TYPES[1]}
-# DEFAULT_REPORT_TYPE_INFO = {'type': 'report', 'report_type': REPORT_TYPES[0]}
 DEFAULT_PRES_TYPE_INFO = {'type': 'pres'}
 DEFAULT_TYPE_INFO = DEFAULT_PRES_TYPE_INFO
 
@@ -53,7 +52,5 @@ BASE_PACKS = {
     'pres': BaseCriterionPack(BASE_PRES_CRITERION, DEFAULT_PRES_TYPE_INFO, min_score=1.0,
                               name="BasePresentationCriterionPack"),
     'report': BaseCriterionPack(BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, min_score=1.0,
-                                name="BaseReportCriterionPack ")
-    # 'report': BaseCriterionPack(BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, min_score=1.0,
-    #                             name="LabReportPack ")
+                                name="BaseReportCriterionPack")
 }
