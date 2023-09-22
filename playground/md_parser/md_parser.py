@@ -1,4 +1,4 @@
-import markdown
+import markdown #installation: pip install markdown
 import re
 
 class MdParser:
@@ -54,7 +54,7 @@ class MdParser:
         self.get_chapters()
         self.get_chapter_with_text()
         self.get_tables_size()
-        return f"{self.headers} \n {self.chapters} \n {self.chapter_with_text} \n {self.get_tables_size()}"
+        return f"Заголовки:\n{self.headers}\n\nГлавы:\n{self.chapters}\n\nГлавы с текстом:\n{self.chapter_with_text}\n\nДоля таблиц в тексте:\n{self.get_tables_size()}"
 
 if __name__ == "__main__":
     md_file = MdParser('playground/md_parser/example.md')
