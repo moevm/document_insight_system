@@ -45,7 +45,7 @@ class MdParser:
         for line in self.paragraphs:
             if "|" in line:
                 count_table_line +=1
-        return count_table_line/count_paragraph
+        return round(count_table_line/count_paragraph, 4)
     
     def parse_md_file(self):
         md_text = self.read_md_file()
@@ -56,6 +56,6 @@ class MdParser:
         self.get_tables_size()
         return f"{self.headers} \n {self.chapters} \n {self.chapter_with_text} \n {self.get_tables_size()}"
 
-         
-md_file = MdParser('/home/marina/src/2/mse_auto_checking_slides_vaganov/playground/md_parser/example.md')
-print(md_file.parse_md_file())
+if __name__ == "__main__":
+    md_file = MdParser('playground/md_parser/example.md')
+    print(md_file.parse_md_file())
