@@ -178,7 +178,7 @@ def run_task():
     if get_file_len(file) * 2 + db_methods.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
         return 'storage_overload'
-    file_check_response = check_file(file, extension, ALLOWED_EXTENSIONS[file_ext_type], check_mime=True)
+    file_check_response = check_file(file, extension, ALLOWED_EXTENSIONS[file_ext_type], check_mime=False)
     if file_check_response != "ok":
         logger.info('Пользователь загрузил файл с ошибочным расширением: ' + file_check_response)
         return file_check_response
