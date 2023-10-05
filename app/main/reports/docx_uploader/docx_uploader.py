@@ -9,9 +9,10 @@ from .paragraph import Paragraph
 from .style import Style
 from .table import Table, Cell
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
+from ..document_uploader import DocumentUploader
 
 
-class DocxUploader:
+class DocxUploader(DocumentUploader):
     def __init__(self):
         self.inline_shapes = []
         self.core_properties = None

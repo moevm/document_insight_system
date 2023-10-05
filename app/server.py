@@ -34,7 +34,7 @@ logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
 ALLOWED_EXTENSIONS = {
     'pres': {'ppt', 'pptx', 'odp'},
-    'report': {'doc', 'odt', 'docx'}
+    'report': {'doc', 'odt', 'docx', 'md'}
 }
 DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
 TABLE_COLUMNS = ['Solution', 'User', 'File', 'Criteria', 'Check added', 'LMS date', 'Score']

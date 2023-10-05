@@ -5,6 +5,7 @@ import tempfile
 
 from main.presentations import PresentationPPTX
 from main.reports.docx_uploader import DocxUploader
+from main.reports.md_uploader import MdUpload
 from utils import convert_to
 
 logger = logging.getLogger('root_logger')
@@ -19,15 +20,24 @@ def parse(filepath, pdf_filepath):
                 logger.info(f"Презентация {filepath} старого формата. Временно преобразована в pptx для обработки.")
                 new_filepath = convert_to(filepath, target_format='pptx')
             file_object = PresentationPPTX(new_filepath)
-        elif tmp_filepath.endswith(('.doc', '.odt', '.docx')):
+        elif tmp_filepath.endswith(('.doc', '.odt', '.docx', )):
             new_filepath = filepath
             if tmp_filepath.endswith(('.doc', '.odt')):
                 logger.info(f"Отчёт {filepath} старого формата. Временно преобразован в docx для обработки.")
                 new_filepath = convert_to(filepath, target_format='docx')
+
             docx = DocxUploader()
             docx.upload(new_filepath, pdf_filepath)
             docx.parse()
             file_object = docx
+
+        elif tmp_filepath.endswith('.md' ):
+            new_filepath = filepath
+            doc = MdUpload(new_filepath)
+            md_text = doc.upload()
+            doc.parse(md_text)
+            file_object = doc
+
         else:
             raise ValueError("Файл с недопустимым именем или недопустимого формата: " + filepath)
         # Если была конвертация, то удаляем временный файл.
