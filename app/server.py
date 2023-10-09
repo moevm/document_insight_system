@@ -36,6 +36,10 @@ ALLOWED_EXTENSIONS = {
     'pres': {'ppt', 'pptx', 'odp'},
     'report': {'doc', 'odt', 'docx', 'md'}
 }
+
+# сохраняем те форматы, в которых НЕ НУЖНО проверять MIME:
+NOT_MIME_TYPE = {'md'}
+
 DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
 TABLE_COLUMNS = ['Solution', 'User', 'File', 'Criteria', 'Check added', 'LMS date', 'Score']
 URL_DOMEN = os.environ.get('URL_DOMEN', f"http://localhost:{os.environ.get('WEB_PORT', 8080)}")
@@ -171,6 +175,7 @@ def run_task():
     file_type = request.form.get('file_type', 'pres')
     filename, extension = file.filename.rsplit('.', 1)
     file_ext_type = current_user.file_type['type']
+    check_mime = True if extension not in NOT_MIME_TYPE else False
 
     if not file:
         logger.critical("request doesn't include file")
@@ -178,13 +183,13 @@ def run_task():
     if get_file_len(file) * 2 + db_methods.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
         return 'storage_overload'
-    file_check_response = check_file(file, extension, ALLOWED_EXTENSIONS[file_ext_type], check_mime=False)
+    file_check_response = check_file(file, extension, ALLOWED_EXTENSIONS[file_ext_type], check_mime)
     if file_check_response != "ok":
         logger.info('Пользователь загрузил файл с ошибочным расширением: ' + file_check_response)
         return file_check_response
 
     if pdf_file:
-        pdf_file_check_response = check_file(pdf_file, pdf_file.filename.rsplit('.', 1)[1], "pdf", check_mime=True)
+        pdf_file_check_response = check_file(pdf_file, pdf_file.filename.rsplit('.', 1)[1], "pdf", check_mime)
         if pdf_file_check_response != "ok":
             logger.info('Пользователь загрузил файл с ошибочным расширением: pdf_' + pdf_file_check_response)
             return "pdf_" + pdf_file_check_response
