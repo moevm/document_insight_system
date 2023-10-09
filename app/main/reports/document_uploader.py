@@ -10,6 +10,10 @@ class DocumentUploader(ABC):
     def parse(self):
         pass
 
+    @abstractmethod
+    def page_counter(self):
+        pass
+
     # @abstractmethod
     # def make_chapters(self):
     #     pass

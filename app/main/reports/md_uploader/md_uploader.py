@@ -12,6 +12,8 @@ class MdUpload(DocumentUploader):
         self.html_text = ''
         self.tables = []
         self.chapter_with_text = []
+        self.literature_header = []
+        self.headers_page = 1
 
     def upload(self):
         with open(self.path_to_md_file, "r", encoding="utf-8") as f:
@@ -21,6 +23,9 @@ class MdUpload(DocumentUploader):
     def parse(self, md_text):
             self.html_text = markdown.markdown(md_text)
             self.paragraphs = self.html_text.split('\n')
+
+    def page_counter(self):
+        return 5   
 
     def get_headers(self):
         header_regex = "<h1>(.*?)<\/h1>"
@@ -47,6 +52,16 @@ class MdUpload(DocumentUploader):
             if "|" in line:
                 count_table_line +=1
         return round(count_table_line/count_paragraph, 4)
+    
+    def find_literature_vkr(self, work_type):
+        if not self.literature_header:
+            for header in self.chapters:
+                if header.lower() == "список использованных источников" or header == "список литературы":
+                    self.literature_header = header
+        return self.literature_header
+    
+    def find_header_page(self, work_type):
+        return self.headers_page
     
     def parse_md_file(self):
         md_text = self.upload()
