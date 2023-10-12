@@ -3,6 +3,7 @@ import logging
 
 from db.db_methods import add_user, get_user, get_client, edit_user, save_criteria_pack
 from main.check_packs.pack_config import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO
+
 from pymongo.errors import ConnectionFailure
 from server import ALLOWED_EXTENSIONS
 
@@ -40,6 +41,7 @@ def init(app, debug):
     user.criteria = BASE_PACKS[file_type].name
     user.formats = list(ALLOWED_EXTENSIONS.get(file_type))
     user.two_files = True
+
     edit_user(user)
 
     logger.info(f"Создан администратор по умолчанию: логин: {user.username}, пароль уточняйте у разработчика")
