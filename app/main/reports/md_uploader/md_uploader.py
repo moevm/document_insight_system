@@ -25,6 +25,7 @@ class MdUpload(DocumentUploader):
     def parse(self, md_text):
         self.html_text = markdown.markdown(md_text)
         self.paragraphs = self.make_paragraphs(self.html_text)
+        self.parse_effective_styles()
 
     def make_paragraphs(self, html_text):
         self.paragraphs = html_text.split('\n')
@@ -38,9 +39,10 @@ class MdUpload(DocumentUploader):
         self.headers_main = re.findall(header_main_regex, self.html_text)
 
     def make_headers(self, work_type):
-        headers_regex = "<h2>(.*?)<\/h2>"
-        self.headers = re.findall(headers_regex, self.html_text)
-        return self.headers
+        if not self.headers_page:
+            headers_regex = "<h2>(.*?)<\/h2>"
+            self.headers = re.findall(headers_regex, self.html_text)
+            return self.headers
 
     def parse_effective_styles(self):
         for par in self.paragraphs:
@@ -63,6 +65,7 @@ class MdUpload(DocumentUploader):
                 par_num = 0
                 head_par_ind = -1
                 for par_ind in range(len(self.styled_paragraphs)):
+                    
                     head_par_ind += 1
                     style_name = self.styled_paragraphs[par_ind]['runs'][0]['style']     
                     if "heading" in style_name:
@@ -107,10 +110,8 @@ class MdUpload(DocumentUploader):
         self.parse_effective_styles()
         self.make_chapters(work_type="VKR")
         self.late_init_vkr()
-        return f"Заголовки:\n{self.headers}\n\nГлавы:\n\n\nДоля таблиц в тексте:\n{self.get_tables_size()}\n\nParagraphs"
+        return f"Заголовки:\n{len(self.styled_paragraphs)}\n\nГлавы:\n\n\nДоля таблиц в тексте:\n{self.get_tables_size()}\n\nParagraphs"
 
-    def late_init_vkr(self):
-        self.headers = self.make_chapters(work_type='VKR')
 
 def main(args):
     md_file = MdUpload(args.mdfile)
