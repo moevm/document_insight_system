@@ -13,6 +13,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
         self.literature_header = []
         self.banned_words = [morph.normal_forms(word)[0] for word in banned_words]
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
+        self.md_name_pattern = r'<h2>список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)</h2>'
 
     def late_init_vkr(self):
         self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
@@ -83,6 +84,6 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
             text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
-            if re.fullmatch(self.name_pattern, text_string):
+            if re.fullmatch(f'{self.name_pattern}|{self.md_name_pattern}', text_string):
                 start_index = i
         return start_index
