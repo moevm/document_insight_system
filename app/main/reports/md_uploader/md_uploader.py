@@ -1,3 +1,55 @@
+'''Available checks for md-file:
+pack "BaseReportCriterionPackMd"
+
+[
+    [
+        "simple_check"
+    ],
+    [
+        "banned_words_in_literature"
+    ],
+    [
+        "page_counter"
+    ],
+    [
+        "short_sections_check"
+    ],
+    [
+        "banned_words_check"
+    ],
+    [
+        "right_words_check"
+    ],
+    [
+        "banned_words_in_literature"
+    ],
+    [
+        "literature_references"
+    ],
+    [
+        "image_references"
+    ],
+    [
+        "table_references"
+    ],
+    [
+        "first_pages_check"
+    ],
+    [
+        "main_character_check"
+    ],
+    [
+        "needed_headers_check"
+    ],
+    [
+        "report_section_component"
+    ],
+    [
+        "spelling_check"
+    ]
+]
+'''
+
 import markdown #installation: pip install markdown
 from md2pdf.core import md2pdf #installation: pip install md2pdf
 import re
@@ -168,20 +220,6 @@ class MdUpload(DocumentUploader):
     
     def find_header_page(self, work_type):
         return self.headers_page
-    
-    # def get_paragraph_indices_by_style(self, style_list):
-    #     result = []
-    #     for template_style in style_list:
-    #         matched_pars = []
-    #         for i in range(len(self.styled_paragraphs)):
-    #             par = self.styled_paragraphs[i]
-    #             if reduce(lambda prev, run: prev and run["style"].matches(template_style), par["runs"], True):
-    #                 matched_pars.append(i)
-    #         result.append(matched_pars)
-    #         print(result)
-    #         print('!!!!!!!!!!!')
-    #     return result
-    
 
     def parse_md_file(self):
         md_text = self.upload()
