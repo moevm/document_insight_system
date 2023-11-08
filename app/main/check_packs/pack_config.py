@@ -15,7 +15,7 @@ BASE_PRES_CRITERION = [
     ['pres_image_share'],
     ['future_dev'],
     ['pres_banned_words_check'],
-    ['pres_empty_slide'],,
+    ['pres_empty_slide'],
     ['theme_in_pres_check'],
 ]
 BASE_REPORT_CRITERION = [
