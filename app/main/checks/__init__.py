@@ -15,7 +15,11 @@ AVAILABLE_CHECKS = {
         PresImageShareCheck.id: PresImageShareCheck,
         FurtherDev.id: FurtherDev,
         PresBannedWordsCheck.id: PresBannedWordsCheck,
+<<<<<<< HEAD
         PresVerifyGitLinkCheck.id: PresVerifyGitLinkCheck
+=======
+        PresEmptySlideCheck.id: PresEmptySlideCheck,
+>>>>>>> master
     },
     'report': {
         ReportSimpleCheck.id: ReportSimpleCheck,
