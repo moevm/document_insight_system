@@ -1,6 +1,6 @@
 # Запуск и тестирование
 
-Пререквизиты: `argparse`, `python-docx`, `docx2python`, `re`, `subprocess`. Для парсинга `.doc`-файлов потребуется
+Пререквизиты: `argparse`, `python-docx`, `docx2python`, `re`, `subprocess`, `markdown`. Для парсинга `.doc`-файлов потребуется
 LibreOffice.
 
 Здесь и далее считается, что корневая директория репозитория добавлена в `PYTHONPATH`.
@@ -65,10 +65,19 @@ Proof-of-concept парсинг файлов `.docx` с выводом стру�
 ```bash
 $ python3 -m app.main.mse22.pdf_document text_from_pages --filename path_to_file
 ```
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 ## `MD`
 
 Парсинг файлов `.md` с выводом структуры файла в текстовом виде в stdout.
 
 ```bash
 $ python3 -m app.main.reports.md_uploader md_parser --mdfile path_to_md_file
+<<<<<<< HEAD
 ```
+=======
+```
+
+>>>>>>> master
