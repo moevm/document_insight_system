@@ -25,15 +25,8 @@ docx2python~=2.0.4
 oauthlib~=3.1.0
 pdfplumber==0.6.1
 pytest~=7.1.2
-
-
 lxml~=4.9.2
 urllib3~=2.0.3
-
 filetype==1.2.0
 language-tool-python==2.7.1
-<<<<<<< HEAD
-
-=======
 markdown==3.4.4
->>>>>>> master
