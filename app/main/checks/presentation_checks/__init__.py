@@ -11,3 +11,4 @@ from .pres_right_words import PresRightWordsCheck
 from .image_share import PresImageShareCheck
 from .banned_words import PresBannedWordsCheck
 from .find_theme_in_pres import FindThemeInPres
+from .empty_slide_check import PresEmptySlideCheck

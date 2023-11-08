@@ -1,6 +1,11 @@
-const AJAX_URL = "/check_list/data"
-const filter_prefix = 'filter_'
-let is_latest = false
+import { debounce, isFloat, resetTable, ajaxRequest, onPopState } from "./utils"
+
+let $table;
+const AJAX_URL = "/check_list/data";
+const filter_prefix = 'filter_';
+let is_latest = false;
+let debounceInterval = 500;
+
 
 String.prototype.insert = function (index, string) {
     if (index > 0) {
@@ -8,6 +13,7 @@ String.prototype.insert = function (index, string) {
     }
     return string + this
 }
+
 
 $(() => {
     initTable()
@@ -46,16 +52,6 @@ $(() => {
     })
 })
 
-function isFloat(str) {
-    const floatRegex = /^-?\d+(?:[.,]\d*?)?$/;
-    if (!floatRegex.test(str))
-        return false;
-
-    str = parseFloat(str);
-    if (isNaN(str))
-        return false;
-    return true;
-}
 
 function extract_filters(params){
     var filters = {}
@@ -68,11 +64,12 @@ function extract_filters(params){
     return filters
 }
 
+
 function initTable() {
-    const $table = $("#check-list-table")
+    $table = $("#check-list-table");
 
     // get query string
-    const queryString = window.location.search
+    const queryString = window.location.search;
     console.log(queryString)
     // parse query search to js object
     const params = Object.fromEntries(new URLSearchParams(decodeURIComponent(queryString)).entries())
@@ -127,7 +124,7 @@ function initTable() {
         buttons: buttons,
 
         queryParams: queryParams,
-        ajax: ajaxRequest,
+        ajax: debouncedAjaxRequest,
 
         columns: [{
             field: "_id",
@@ -136,27 +133,13 @@ function initTable() {
     })
 }
 
-function ajaxRequest(params) {
-    const encodedData = $.param(params.data);
-    console.log(encodedData)
-    const queryString = "?" + encodedData
-    const url = AJAX_URL + queryString
-    console.log("ajax:", url);
-    $.get(url).then(res => params.success(res))
 
-    pushHistoryState(encodedData, queryString)
-}
+// debounced ajax calls.
+const debouncedAjaxRequest = debounce(function(params) {ajaxRequest(AJAX_URL, params)}, debounceInterval);
 
-function onPopState() {
-    location.reload()
-}
-
-function pushHistoryState(encodedData, queryString) {
-    history.pushState(encodedData, "", queryString)
-}
 
 function queryParams(params) {
-    filters = {}
+    let filters = {}
     $('.filter-control').each(function () {
         const name = $(this).parents("th").data("field")
         const val = this.querySelector("input").value
@@ -182,9 +165,11 @@ function queryParams(params) {
     return query
 }
 
+
 function idFormatter(value, row, index, field) {
     return `<a href="/results/${value}">${value.slice(0, 5)}-${value.slice(-5)}</a>`
 }
+
 
 function timeStamp() {
     var now = new Date();
@@ -202,10 +187,17 @@ function timeStamp() {
     return '[' + date.join(".") + "_" + time.join(".") + suffix + ']';
 }
 
+
 function buttons() {
-    if (is_admin)
-        return {
-        FetchCSV: {
+    let buttonsObj = {};
+
+    buttonsObj["ResetTable"] = {
+        text: 'Reset',
+        event: function() { resetTable($table, queryParams) }
+    };
+
+    if (is_admin) {
+        buttonsObj["FetchCSV"] = {
             text: 'CSV',
             event: function () {
                 //const queryString = window.location.search
@@ -218,8 +210,9 @@ function buttons() {
                         downdloadBlob(blob, `Статистика.csv`)
                     });
             }
-        },
-        FetchZip: {
+        };
+
+        buttonsObj["FetchZip"] = {
             text: 'Скачать архив',
             event: function () {
                 const params = window.location.search
@@ -234,8 +227,9 @@ function buttons() {
                             alert("Error during file download")
                     });
             }
-        },
-        LatestChecks: {
+        };
+
+        buttonsObj["LatestChecks"] = {
             text: 'Latest',
             event: function () {
                 is_latest = !is_latest;
@@ -245,11 +239,11 @@ function buttons() {
                 }
                 $("#check-list-table").bootstrapTable('refresh', query);
             }
-        }
+        };
     }
-    else
-        return {}
+    return buttonsObj;
 }
+
 
 function downdloadBlob(blob, filename) {
     var url = window.URL.createObjectURL(blob);

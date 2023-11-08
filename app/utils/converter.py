@@ -10,7 +10,8 @@ def convert_to(filepath, target_format='pdf'):
     new_filename, outdir = None, dirname(filepath)
     convert_cmd = {
         'pdf': f"soffice --headless --convert-to pdf --outdir {outdir} {filepath}",
-        'docx': f"soffice --headless --convert-to docx --outdir {outdir} {filepath}"
+        'docx': f"soffice --headless --convert-to docx --outdir {outdir} {filepath}",
+        'pptx': f"soffice --headless --convert-to pptx --outdir {outdir} {filepath}",
     }[target_format]
 
     if run_process(convert_cmd).returncode == 0:
