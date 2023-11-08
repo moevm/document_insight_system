@@ -1,7 +1,9 @@
+import os
+
 import logging
 import tempfile
 
-from main.presentations import PresentationODP, PresentationPPTX
+from main.presentations import PresentationPPTX
 from main.reports.docx_uploader import DocxUploader
 from utils import convert_to
 
@@ -10,40 +12,32 @@ logger = logging.getLogger('root_logger')
 
 def parse(filepath, pdf_filepath):
     tmp_filepath = filepath.lower()
-    if tmp_filepath.endswith('.ppt') or tmp_filepath.endswith('.pptx'):
-        try:
-            return PresentationPPTX(filepath)
-        except Exception as err:
-            logger.error(err, exc_info=True)
-            return None
-    elif tmp_filepath.endswith('.odp'):
-        try:
-            return PresentationODP(filepath)
-        except Exception as err:
-            logger.error(err, exc_info=True)
-            return None
-    elif tmp_filepath.endswith('.doc') or tmp_filepath.endswith('.odt'):
-        try:
-            converted_file_path = convert_to(filepath, target_format='docx')
+    try:
+        if tmp_filepath.endswith(('.odp', '.ppt', '.pptx')):
+            new_filepath = filepath
+            if tmp_filepath.endswith(('.odp', '.ppt')):
+                logger.info(f"Презентация {filepath} старого формата. Временно преобразована в pptx для обработки.")
+                new_filepath = convert_to(filepath, target_format='pptx')
+            file_object = PresentationPPTX(new_filepath)
+        elif tmp_filepath.endswith(('.doc', '.odt', '.docx')):
+            new_filepath = filepath
+            if tmp_filepath.endswith(('.doc', '.odt')):
+                logger.info(f"Отчёт {filepath} старого формата. Временно преобразован в docx для обработки.")
+                new_filepath = convert_to(filepath, target_format='docx')
             docx = DocxUploader()
-            docx.upload(converted_file_path, pdf_filepath)
+            docx.upload(new_filepath, pdf_filepath)
             docx.parse()
-            return docx
-        except Exception as err:
+            file_object = docx
+        else:
+            raise ValueError("Файл с недопустимым именем или недопустимого формата: " + filepath)
+        # Если была конвертация, то удаляем временный файл.
+        if new_filepath != filepath:
+            os.remove(new_filepath)
+        return file_object
+    except Exception as err:
             logger.error(err, exc_info=True)
             return None
 
-    elif tmp_filepath.endswith('.docx'):
-        try:
-            docx = DocxUploader()
-            docx.upload(filepath, pdf_filepath)
-            docx.parse()
-            return docx
-        except Exception as err:
-            logger.error(err, exc_info=True)
-            return None
-    else:
-        raise ValueError("Файл с недопустимым именем или недопустимого формата: " + filepath)
 
 def save_to_temp_file(file):
     temp_file = tempfile.NamedTemporaryFile(delete=False)

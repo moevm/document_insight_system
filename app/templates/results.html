@@ -46,16 +46,19 @@
             </tbody>
         </table>
 
-        <!-- Download links -->
+        <!-- Download / statistic links -->
         {% if not current_user.is_anonymous %}
             <a href="{{ url_for('checks', _id=results._id) }}" id="file_download" class="col text-center"
-               download="{{ results.filename }}">
-                Скачать файл в исходном формате ({{ results.filename.upper().rsplit('.', 1)[-1] }})
-            </a>
+               download="{{ results.filename }}">Скачать файл в исходном формате ({{ results.filename.upper().rsplit('.', 1)[-1] }})</a>
             {% if results.conv_pdf_fs_id %}
                 <a href="{{ url_for('get_pdf', _id=results.conv_pdf_fs_id) }}" id="pdf_download"
-                   class="col text-center">Скачать файл в PDF-формате</a>
+                   class="col text-center link">Скачать файл в PDF-формате</a>
             {% endif %}
+            <!-- links for lists of sent presentation -->
+            <a href="{{ url_for('check_list', filter_user=current_user.username) }}"
+                class="col text-center link">Список всех загрузок пользователя</a>
+            <a href="{{ url_for('check_list', filter_user=current_user.username, filter_criteria=current_user.criteria) }}"
+                class="col text-center link">Cписок загрузок пользователя по критерию "{{current_user.criteria}}"</a>
         {% endif %}
         <!-- Checks table -->
         {% if results.is_ended and not results.is_failed %}
@@ -96,6 +99,7 @@
                 </tbody>
             </table>
         {% endif %}
+
         <!-- PDF viewer -->
         {% if not current_user.is_anonymous and results.conv_pdf_fs_id %}
             <div style="text-align:center; width:100%">
@@ -109,5 +113,7 @@
                 <canvas id="the-canvas" style="border: 1px solid #000000; direction: ltr;"></canvas>
             </div>
         {% endif %}
+
     </div>
+
 {% endblock %}

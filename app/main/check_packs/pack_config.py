@@ -14,7 +14,8 @@ BASE_PRES_CRITERION = [
     ['pres_right_words'],
     ['pres_image_share'],
     ['future_dev'],
-    ['pres_banned_words_check']
+    ['pres_banned_words_check'],
+    ['pres_empty_slide'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
@@ -37,7 +38,8 @@ BASE_REPORT_CRITERION = [
     ["needed_headers_check"],
     ["header_check"],
     ["report_section_component"],
-    ["main_text_check"]
+    ["main_text_check"],
+    ["spelling_check"]
 ]
 
 DEFAULT_TYPE = 'pres'

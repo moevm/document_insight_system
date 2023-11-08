@@ -5,6 +5,7 @@ import tempfile
 from datetime import datetime, timedelta
 from os.path import join
 from sys import argv
+from io import StringIO
 
 import bson
 import pandas as pd
@@ -17,7 +18,7 @@ from flask_login import (LoginManager, current_user, login_required,
 from flask_recaptcha import ReCaptcha
 
 import servants.user as user
-from app.utils import format_check_for_table
+from app.utils import format_check_for_table, check_file
 from db import db_methods
 from db.db_types import Check
 from lti_session_passback.lti import utils
@@ -168,18 +169,33 @@ def run_task():
     file = request.files.get("file")
     pdf_file = request.files.get("pdf_file")
     file_type = request.form.get('file_type', 'pres')
+    filename, extension = file.filename.rsplit('.', 1)
+    file_ext_type = current_user.file_type['type']
+
     if not file:
         logger.critical("request doesn't include file")
         return "request doesn't include file"
     if get_file_len(file) * 2 + db_methods.get_storage() > app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
         return 'storage_overload'
+    file_check_response = check_file(file, extension, ALLOWED_EXTENSIONS[file_ext_type], check_mime=True)
+    if file_check_response != "ok":
+        logger.info('Пользователь загрузил файл с ошибочным расширением: ' + file_check_response)
+        return file_check_response
+
+    if pdf_file:
+        pdf_file_check_response = check_file(pdf_file, pdf_file.filename.rsplit('.', 1)[1], "pdf", check_mime=True)
+        if pdf_file_check_response != "ok":
+            logger.info('Пользователь загрузил файл с ошибочным расширением: pdf_' + pdf_file_check_response)
+            return "pdf_" + pdf_file_check_response
+    
+    
     logger.info(
-        f"Запуск обработки файла {file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
+        f"Запуск обработки файла {file.filename} пользователя {current_user.username} с критериями {current_user.criteria}"
+    )
 
     # save to file on disk for future checking
     file_id = ObjectId()
-    filename, extension = file.filename.rsplit('.', 1)
     filepath = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
     file.save(filepath)
     # add file and file's info to db
@@ -525,7 +541,7 @@ def get_zip():
 
     # add csv
     response = get_stats()
-    df = pd.read_json(json.dumps(response))
+    df = pd.read_json(StringIO(json.dumps(response)))
     df.to_csv(f"{dirpath.name}/Статистика.csv")
 
     # zip
