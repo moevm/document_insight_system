@@ -49,7 +49,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         for i in range(1, number_of_sources + 1):
             all_numbers.add(i)
         if len(references.symmetric_difference(all_numbers)) == 0:
-            if self.max_ref < number_of_sources < self.min_ref:
+            if not self.min_ref <= number_of_sources <= self.max_ref:
                 return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть от {self.min_ref} до {self.max_ref}.')
             else:
                 return answer(True, f"Пройдена!")
