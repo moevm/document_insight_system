@@ -2,7 +2,7 @@ import hashlib
 import logging
 
 from db.db_methods import add_user, get_user, get_client, edit_user, save_criteria_pack
-from main.check_packs.pack_config import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO, DEFAULT_PRES_TYPE_INFO
+from main.check_packs.pack_config import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO
 from pymongo.errors import ConnectionFailure
 from server import ALLOWED_EXTENSIONS
 
