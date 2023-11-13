@@ -16,7 +16,7 @@ class PresVerifyGitLinkCheck(BasePresCriterion):
     description = "Проверка действительности ссылки на github"
     id = 'verify_git_link'
 
-    def __init__(self, file_info, deep_check=False):
+    def __init__(self, file_info, deep_check=True):
         super().__init__(file_info)
         self.deep_check = deep_check
         self.wrong_repo_ref = []
@@ -63,15 +63,11 @@ class PresVerifyGitLinkCheck(BasePresCriterion):
                             self.deep_check_repo(i, link)
                 except (requests.exceptions.SSLError, requests.exceptions.ConnectionError):
                     self.wrong_repo_ref.append(i[0])
-        if self.wrong_repo_ref and not self.empty_repo_ref:
+        if self.wrong_repo_ref:
             string_result += f" <br> Найдены несуществующие или закрытые репозитории: {', '.join([repr(repo) for repo in self.wrong_repo_ref])}"
             check_result = False
-        elif self.empty_repo_ref and not self.wrong_repo_ref:
+        if self.empty_repo_ref:
             string_result += f" <br> Найдены пустые репозитории: {', '.join([repr(repo) for repo in self.empty_repo_ref])}"
-            check_result = False
-        elif self.empty_repo_ref and self.wrong_repo_ref:
-            string_result += f" <br> Найдены пустые репозитории: {', '.join([repr(repo) for repo in self.empty_repo_ref])}" \
-                             f" <br> Также найдены несуществующие или закрытые репозитории: {', '.join([repr(repo) for repo in self.wrong_repo_ref])}"
             check_result = False
         else:
             string_result = 'Пройдена!'

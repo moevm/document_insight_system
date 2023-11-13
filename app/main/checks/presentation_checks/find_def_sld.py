@@ -17,12 +17,10 @@ class FindDefSld(BasePresCriterion):
                 found_slides.append(self.file.get_text_from_slides()[i - 1])
                 self.found_idxs.append(i)
         if len(found_slides) == 0:
+            self.file.found_index[str(self.type_of_slide)] = None
             return answer(False, 'Слайд не найден')
         else:
-            if self.type_of_slide == 'Апробация':
-                self.file.found_index['Апробация'] = ''.join(str(item) for item in self.found_idxs)
-            else:
-                self.file.found_index['Апробация'] = None
+            self.file.found_index[str(self.type_of_slide)] = ''.join(str(item) for item in self.found_idxs)
             found_idxs_link = self.format_page_link(self.found_idxs)
             return answer(True, 'Найден под номером: {}'.format(', '.join(map(str, found_idxs_link))))
 
