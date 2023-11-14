@@ -540,8 +540,10 @@ def get_zip():
         original_name = db_methods.get_check(check['_id']).filename #get a filename from every check
         if db_file is not None:
             final_name = original_name if (original_name and original_names) else db_file.filename
-            with open(f"{dirpath.name}/{final_name}", 'wb') as os_file:
-                os_file.write(db_file.read())
+            # to avoid overwriting files with one name and different content: now we save only last version of pres (from last check)
+            if not os.path.exists(f'{dirpath.name}/{final_name}'):
+                with open(f"{dirpath.name}/{final_name}", 'wb') as os_file:
+                    os_file.write(db_file.read())
 
     # add csv
     response = get_stats()
