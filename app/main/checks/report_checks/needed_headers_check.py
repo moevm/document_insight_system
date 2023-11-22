@@ -12,7 +12,12 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
         self.headers_page = 1
         self.headers = []
         self.main_heading_style = main_heading_style
-        self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
+        if self.file_type['report_type'] == 'VKR':
+            self.config = 'VKR_HEADERS'
+        if self.file_type['report_type'] == 'NIR':
+            self.config = 'NIR_HEADERS'
+        else:        
+            self.config = 'LR_HEADERS'
         self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
 
     def late_init(self):

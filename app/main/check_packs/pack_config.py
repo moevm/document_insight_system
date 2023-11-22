@@ -43,8 +43,8 @@ BASE_REPORT_CRITERION = [
 ]
 
 DEFAULT_TYPE = 'pres'
-REPORT_TYPES = ('LR', 'VKR')
-DEFAULT_REPORT_TYPE_INFO = {'type': 'report', 'report_type': REPORT_TYPES[1]}
+REPORT_TYPES = ('LR', 'VKR', 'NIR')
+DEFAULT_REPORT_TYPE_INFO = {'type': 'report', 'report_type': REPORT_TYPES[2]}
 DEFAULT_PRES_TYPE_INFO = {'type': 'pres'}
 DEFAULT_TYPE_INFO = DEFAULT_PRES_TYPE_INFO
 
