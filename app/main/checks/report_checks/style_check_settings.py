@@ -128,7 +128,7 @@ class StyleCheckSettings:
         {
             "style": HEADER_1_NUM_STYLE,
             "docx_style": ["heading 2", "heading 3", "heading 4"],
-            "headers": [],
+            "headers": ["ПЛАН", "РЕЗУЛЬТАТЫ"],
             "unify_regex": None,
             "regex": HEADER_NUM_REGEX
         }
