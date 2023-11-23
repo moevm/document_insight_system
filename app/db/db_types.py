@@ -104,6 +104,7 @@ class Check(PackableWithId):
         self.is_failed = dictionary.get('is_failed', None)
         self.is_ended = dictionary.get('is_ended', True)
         self.is_passed = dictionary.get('is_passed', int(self.score) == 1)
+        self.parsed_chapters = dictionary.get('parsed_chapters', [])
 
     def calc_score(self):
         # check after implementation criterion pack
