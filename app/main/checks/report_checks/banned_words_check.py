@@ -7,9 +7,12 @@ class ReportBannedWordsCheck(BaseReportCriterion):
     description = "Проверка наличия запретных слов в тексте отчёта"
     id = 'banned_words_check'
 
-    def __init__(self, file_info, words=["мы", "wikipedia"], min_count=3, max_count=6):
+    def __init__(self, file_info, words=[["мы"], ["wikipedia"]], min_count=3, max_count=6):
         super().__init__(file_info)
-        self.words = [morph.normal_forms(word)[1] if self.file_type['report_type'] == 'NIR' else morph.normal_forms(word)[0] for word in words]
+        if self.file_type['report_type'] == 'NIR':
+            self.words = [morph.normal_forms(word)[0] for word in words[1]]
+        else:
+            self.words = [morph.normal_forms(word)[0] for word in words[0]]
         self.min_count = min_count
         self.max_count = max_count
 
