@@ -32,8 +32,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 number_of_sources = self.count_sources()
             else:
                 return answer(False, f'Нет списка литературы.')
-        elif self.file_type['report_type'] == 'VKR':
-            self.late_init_vkr()
+        elif self.file_type['report_type'] == 'VKR' or self.file_type['report_type'] == 'NIR':
+            self.late_init_vkr_and_nir()
             header = self.literature_header
             if not header:
                 return answer(False,

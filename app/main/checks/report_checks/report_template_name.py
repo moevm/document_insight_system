@@ -1,11 +1,11 @@
 import re
 
-from ..base_check import BasePresCriterion, answer
+from ..base_check import BaseReportCriterion, answer
 
 
-class TemplateNameCheck(BaseReportCriterion):
+class ReportTemplateNameCheck(BaseReportCriterion):
     description = "Проверка соответствия названия файла шаблону"
-    id = 'template_name_report'
+    id = 'report_template_name'
         # Шаблон: НОМЕР_ГРУППЫ_Фамилия_ИНИЦИАЛЫ_NIR2
 
     def __init__(self, file_info, regex="^\d+_[А-Яа-я]+\_[А-Я]{2}_NIR2$"):

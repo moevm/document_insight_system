@@ -7,8 +7,9 @@ class ImageReferences(BaseReportCriterion):
     description = "Проверка наличия ссылок на все рисунки"
     id = 'image_references'
 
-    def __init__(self, file_info, image_style="ВКР_Подпись для рисунков"):
+    def __init__(self, file_info):
         super().__init__(file_info)
+        image_style = "ВКР_Подпись для рисунков" if self.file_type['report_type'] == 'VKR' else "НИР2_Подпись для рисунков"
         self.headers = []
         self.last_child_number = 0
         self.image_style = image_style
@@ -20,7 +21,7 @@ class ImageReferences(BaseReportCriterion):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         result_str = ''
-        if self.file_type['report_type'] == 'VKR':
+        if self.file_type['report_type'] == 'VKR' or self.file_type['report_type'] == 'NIR':
             self.late_init_vkr()
             if not len(self.headers):
                 return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")

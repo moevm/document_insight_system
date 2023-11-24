@@ -45,9 +45,7 @@ class DocxUploader(DocumentUploader):
         tmp_paragraphs = []
         for i in range(len(paragraphs)):
             if len(paragraphs[i].text.strip()):
-                tmp_paragraphs.append(Paragraph(paragraphs[i]))
-        print(666666666666666666666)
-        print(tmp_paragraphs)        
+                tmp_paragraphs.append(Paragraph(paragraphs[i]))       
         return tmp_paragraphs
 
     def make_chapters(self, work_type):
@@ -77,7 +75,7 @@ class DocxUploader(DocumentUploader):
 
     def make_headers(self, work_type):
         if not self.headers:
-            if work_type == 'VKR' or work_type == 'NIR':
+            if work_type == 'VKR' or 'NIR':
                 # find first pages
                 headers = [
                     {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный",
