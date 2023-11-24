@@ -210,7 +210,7 @@ class MdUpload(DocumentUploader):
                 count_table_line +=1
         return round(count_table_line/count_paragraph, 4)
     
-    def find_literature_vkr(self, work_type):
+    def find_literature_vkr_and_nir(self, work_type):
         if not self.literature_header:
             for header in self.make_chapters(work_type):
                 header_text = header["text"].lower()
@@ -228,7 +228,7 @@ class MdUpload(DocumentUploader):
         self.get_tables_size()
         self.make_chapters(work_type="VKR")
         self.find_images()
-        self.find_literature_vkr(work_type="VKR")
+        self.find_literature_vkr_and_nir(work_type="VKR")
         return f"Заголовки:\n{self.headers_main}\n\nГлавы\n{self.chapters}\n\nИзображения:\n\n{self.inline_shapes}"
 
 

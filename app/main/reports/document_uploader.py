@@ -31,5 +31,5 @@ class DocumentUploader(ABC):
         pass
 
     @abstractmethod
-    def find_literature_vkr(self, work_type):
+    def find_literature_vkr_and_nir(self, work_type):
         pass

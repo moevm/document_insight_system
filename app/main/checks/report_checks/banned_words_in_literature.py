@@ -16,7 +16,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
         self.md_name_pattern = r'<h2>список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)</h2>'
 
     def late_init_vkr(self):
-        self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
+        self.literature_header = self.file.find_literature_vkr_and_nir(self.file_type['report_type'])
         self.headers_page = self.file.find_header_page(self.file_type['report_type'])
 
     def check(self):

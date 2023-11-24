@@ -46,12 +46,14 @@ class DocxUploader(DocumentUploader):
         for i in range(len(paragraphs)):
             if len(paragraphs[i].text.strip()):
                 tmp_paragraphs.append(Paragraph(paragraphs[i]))
+        print(666666666666666666666)
+        print(tmp_paragraphs)        
         return tmp_paragraphs
 
     def make_chapters(self, work_type):
         if not self.chapters:
             tmp_chapters = []
-            if work_type == 'VKR':
+            if work_type == 'VKR' or work_type == 'NIR':
                 # find headers
                 header_ind = -1
                 par_num = 0
@@ -75,7 +77,7 @@ class DocxUploader(DocumentUploader):
 
     def make_headers(self, work_type):
         if not self.headers:
-            if work_type == 'VKR':
+            if work_type == 'VKR' or work_type == 'NIR':
                 # find first pages
                 headers = [
                     {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный",
@@ -112,7 +114,7 @@ class DocxUploader(DocumentUploader):
 
     def find_header_page(self, work_type):
         if not self.headers_page:
-            if work_type != 'VKR':
+            if work_type != 'VKR' and work_type != 'NIR':
                 self.headers_page = 1
                 return self.headers_page
             for header in self.make_headers(work_type):
@@ -124,11 +126,12 @@ class DocxUploader(DocumentUploader):
                     break
         return self.headers_page
 
-    def find_literature_vkr(self, work_type):
+    def find_literature_vkr_and_nir(self, work_type):
         if not self.literature_header:
             for header in self.make_chapters(work_type):
                 header_text = header["text"].lower()
-                if header_text.find('список использованных источников') >= 0:
+                requirement_header = 'список использованных источников' if work_type == 'VKR' else 'список литературы'
+                if header_text.find(requirement_header) >= 0:
                     self.literature_header = header
         return self.literature_header
 
@@ -148,9 +151,10 @@ class DocxUploader(DocumentUploader):
             tagged_indices.extend(list(map(lambda index: {"index": index, "level": j + 1,
                                                           "styled_text": self.styled_paragraphs[index],
                                                           "style": self.paragraphs[index].paragraph_style_name.lower()},
-                                           indices[j])))
+                                           indices[j])))  
         tagged_indices.sort(key=lambda dct: dct["index"])
         return tagged_indices
+
 
     # Parses styles once; subsequent calls have no effect, since the file itself shouldn't change
     def parse_effective_styles(self):

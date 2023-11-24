@@ -16,9 +16,9 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         self.min_ref = min_ref
         self.max_ref = max_ref
 
-    def late_init_vkr(self):
+    def late_init_vkr_and_nir(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
-        self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
+        self.literature_header = self.file.find_literature_vkr_and_nir(self.file_type['report_type'])
 
     def check(self):
         if self.file.page_counter() < 4:
