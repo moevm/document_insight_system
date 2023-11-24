@@ -21,5 +21,4 @@ from .headers_at_page_top_check import ReportHeadersAtPageTopCheck
 from .sections_check import LRReportSectionCheck
 from .style_check import ReportStyleCheck
 from .spelling_check import SpellingCheck
-from .report_template_name import ReportTemplateNameCheck
 

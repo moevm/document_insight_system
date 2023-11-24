@@ -118,19 +118,19 @@ class StyleCheckSettings:
 
     NIR_CONFIG = [
         {
-            "style": HEADER_1_NUM_STYLE,
-            "docx_style": ["heading 2", "heading 3", "heading 4"],
-            "headers": [],
-            "unify_regex": None,
-            "regex": HEADER_NUM_REGEX   
-        },
-        {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": ["ПОСТАНОВКА ЗАДАЧИ", "РЕЗУЛЬТАТЫ РАБОТЫ В ВЕСЕННЕМ СЕМЕСТРЕ", "ОПИСАНИЕ ПРЕДПОЛОГАЕМОГО МЕТОДА РЕШЕНИЯ",
                         "ПЛАН НА ОСЕННИЙ СЕМЕСТР", "СПИСОК ЛИТЕРАТУРЫ"],
             "unify_regex": None,
             "regex": HEADER_REGEX
+        },
+        {
+            "style": HEADER_1_NUM_STYLE,
+            "docx_style": ["heading 2", "heading 3", "heading 4"],
+            "headers": ["ПЛАН", "РЕЗУЛЬТАТЫ"],
+            "unify_regex": None,
+            "regex": HEADER_NUM_REGEX
         }
     ]
 

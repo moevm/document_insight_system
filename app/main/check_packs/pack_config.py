@@ -29,6 +29,7 @@ BASE_REPORT_CRITERION = [
     ["short_sections_check"],
     ["banned_words_check"],
     ["right_words_check"],
+    ["banned_words_in_literature"],
     ["literature_references"],
     ["image_references"],
     ["table_references"],
@@ -38,8 +39,7 @@ BASE_REPORT_CRITERION = [
     ["header_check"],
     ["report_section_component"],
     ["main_text_check"],
-    # ["spelling_check"],
-    ['report_template_name'],
+    ["spelling_check"]
 ]
 
 DEFAULT_TYPE = 'pres'
