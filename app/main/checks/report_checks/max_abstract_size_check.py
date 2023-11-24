@@ -1,4 +1,4 @@
-from app.main.checks.base_check import BaseReportCriterion
+from ..base_check import BaseReportCriterion, answer
 
 
 class ReportMaxSizeOfAbstractCheck(BaseReportCriterion):
@@ -9,4 +9,4 @@ class ReportMaxSizeOfAbstractCheck(BaseReportCriterion):
         super().__init__(file_info)
 
     def check(self):
-        return "123123"
+        return answer(True, "123123")
