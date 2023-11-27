@@ -68,7 +68,6 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
         if not len(self.headers):
             return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
         header_ind = -1
-        print(self.headers)
         for header in self.headers:
             header_text = header["text"].lower()
             header_ind += 1

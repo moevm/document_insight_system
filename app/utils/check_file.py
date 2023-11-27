@@ -1,6 +1,6 @@
 import filetype
 
-def check_file(file, file_extension, allowed_extensions, check_mime):
+def check_file(file, file_extension, allowed_extensions, check_mime=True):
     if not file_extension in allowed_extensions:
         return "not_allowed_extension"
 
