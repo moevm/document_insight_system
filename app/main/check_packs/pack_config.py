@@ -40,7 +40,8 @@ BASE_REPORT_CRITERION = [
     ["report_section_component"],
     ["main_text_check"],
     ['report_template_name'],
-    ["spelling_check"]
+    # ["spelling_check"],
+    ["table_share_check"]
 ]
 
 DEFAULT_TYPE = 'pres'

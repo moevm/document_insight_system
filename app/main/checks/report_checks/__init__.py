@@ -22,3 +22,4 @@ from .sections_check import LRReportSectionCheck
 from .style_check import ReportStyleCheck
 from .spelling_check import SpellingCheck
 from .report_template_name import ReportTemplateNameCheck
+from .table_share_check import ReportTableShareCheck

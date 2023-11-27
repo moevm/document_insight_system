@@ -39,5 +39,6 @@ AVAILABLE_CHECKS = {
         ReportMainTextCheck.id: ReportMainTextCheck,
         SpellingCheck.id: SpellingCheck,
         ReportTemplateNameCheck.id: ReportTemplateNameCheck,
+        ReportTableShareCheck.id: ReportTableShareCheck,
     }
 }

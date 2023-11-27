@@ -62,6 +62,7 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         self.late_init()
         result_string = ''
+        result_string_second_lvl = ''
         patterns = []
         for pattern in self.patterns:
             patterns.append({"pattern": pattern, "marker": 0})
