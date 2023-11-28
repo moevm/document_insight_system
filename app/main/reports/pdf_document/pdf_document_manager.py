@@ -1,56 +1,31 @@
-import pdfplumber
+# import pdfplumber
+import fitz
+
+# Version of PyMuPDF is important for find_tables() method (now it's PyMuPDF==1.23.6)
 
 from app.utils import convert_to
-
 
 class PdfDocumentManager:
     def __init__(self, path_to_file, pdf_filepath=''):
         if not pdf_filepath:
-            self.pdf_file = pdfplumber.open(convert_to(path_to_file, target_format='pdf'))
-        else:
-            self.pdf_file = pdfplumber.open(pdf_filepath)
-        self.pages = self.pdf_file.pages
-        self.page_count = len(self.pages)
-        self.text_on_page = self.get_text_on_page()
-        # self.bboxes = []
-        # self.only_text_on_page = {}
-
-    def get_text_on_page(self):
-        return {page + 1: self.pages[page].extract_text() for page in range(self.page_count)}
-    
-
-    class PdfDocumentManager:
-    def __init__(self, path_to_file, pdf_filepath=''):
-        if not pdf_filepath:
-            # self.pdf_file = pdfplumber.open(convert_to(path_to_file, target_format='pdf'))
             self.pdf_file = fitz.open(convert_to(path_to_file, target_format='pdf'))
         else:
-            # self.pdf_file = pdfplumber.open(pdf_filepath)
             self.pdf_file = fitz.open(pdf_filepath)
         self.pages = [self.pdf_file.load_page(page_num) for page_num in range(self.pdf_file.page_count)]
-        self.page_count_all = self.pdf_file.page_count
-        # self.page_count = len(self.pages)
-        # self.pages = self.pdf_file.pages
+        self.page_count = self.pdf_file.page_count
         self.text_on_page = self.get_text_on_page()
-        # self.bboxes = []
-        # self.only_text_on_page = {}
 
     def get_text_on_page(self):
         return {page_num + 1: page.get_text() for page_num, page in enumerate(self.pages)}
 
-    # def get_text_on_page(self):
-    #     return {page + 1: self.pages[page].extract_text() for page in range(self.page_count_all)}
-
     def page_table(self, page_without_pril):
         total_height = 0
         for page_num in range(1, page_without_pril):
-            page = self.pdf_file[page_num]
-            tables = self.pdf_file.find_tables(page)
+            page = self.pages[page_num]
+            tables = page.find_tables()
             for table in tables:
                 table_coord = table.bbox
                 total_height += (table_coord[3] - table_coord[1])
-        print(total_height)        
-
         return total_height
 
     def page_height(self, page_without_pril):
@@ -59,8 +34,6 @@ class PdfDocumentManager:
         height, top_margin = page_rect.height, page_rect.y0
         bottom_margin = height - page_rect.y1
         available_space = (height - top_margin - bottom_margin)*page_without_pril
-        print(available_space)
-
         return available_space
 
     # def get_only_text_on_page(self):
