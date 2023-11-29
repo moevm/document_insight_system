@@ -7,15 +7,15 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
     id = 'needed_headers_check'
     priority = True
 
-    def __init__(self, file_info, main_heading_style="heading 2"):
+    def __init__(self, file_info, main_heading_style="heading 2", name_of_type = ('ВКР', 'НИР')):
         super().__init__(file_info)
         self.headers_page = 1
         self.headers = []
         self.main_heading_style = main_heading_style
         if self.file_type['report_type'] == 'VKR':
-            self.config = 'VKR_HEADERS'
+            self.config, self.name_of_type = 'VKR_HEADERS', name_of_type[0]
         if self.file_type['report_type'] == 'NIR':
-            self.config = 'NIR_HEADERS'
+            self.config, self.name_of_type = 'NIR_HEADERS', name_of_type[1]
         else:        
             self.config = 'LR_HEADERS'
         self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
@@ -93,14 +93,11 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
             return answer(True, result_str)
         else:
             result_str = f'Не найдены следующие обязательные заголовки: <ul>{result_string}\n{result_string_second_lvl}</ul>'
-            result_str += '''
-                        Если не найден существующий раздел, попробуйте сделать следующее:
-                        <ul>
-                            <li>Убедитесь в отсутствии опечаток и лишних пробельных символов в названии раздела;</li>
-                            <li>Убедитесь в соответствии стиля заголовка требованиям к отчету по ВКР;</li>
-                            <li>Убедитесь, что заголовок состоит из одного абзаца.</li>
-                        </ul>
-                        '''
+            result_str += f'Если не найден существующий раздел, попробуйте сделать следующее:<ul>' \
+                            f'<li>Убедитесь в отсутствии опечаток и лишних пробельных символов в названии раздела;</li>' \
+                            f'<li>Убедитесь в соответствии стиля заголовка требованиям к отчету по {self.name_of_type};</li>'\
+                            f'<li>Убедитесь, что заголовок состоит из одного абзаца.</li></ul>'
+
             result_str += f'<br><br><b>&nbsp;&nbsp;&nbsp;&nbsp;Ниже представлена иерархия обработанных заголовков, ' \
                           f'сравните с Содержанием {self.format_page_link([self.headers_page])}:</b>'
             result_str += self.show_chapters()
