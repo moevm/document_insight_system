@@ -7,17 +7,21 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     description = "Проверка наличия ссылок на все источники"
     id = 'literature_references'
 
-    def __init__(self, file_info, min_ref=1, max_ref=1000):
+    def __init__(self, file_info, min_ref=1, max_ref=1000, headers_map=None):
         super().__init__(file_info)
         self.headers = []
         self.literature_header = []
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
         self.min_ref = min_ref
         self.max_ref = max_ref
+        if headers_map:
+            self.requirement_header = headers_map
+        else:
+            self.requirement_header ='список использованных источников'    
 
-    def late_init_vkr_and_nir(self):
+    def late_init_vkr(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
-        self.literature_header = self.file.find_literature_vkr_and_nir(self.file_type['report_type'])
+        self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'], self.requirement_header)
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -31,8 +35,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 number_of_sources = self.count_sources()
             else:
                 return answer(False, f'Нет списка литературы.')
-        elif self.file_type['report_type'] == 'VKR' or self.file_type['report_type'] == 'NIR':
-            self.late_init_vkr_and_nir()
+        elif self.file_type['report_type'] == 'VKR':
+            self.late_init_vkr()
             header = self.literature_header
             if not header:
                 return answer(False,

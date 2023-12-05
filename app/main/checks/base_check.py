@@ -39,4 +39,4 @@ class BasePresCriterion(BaseCriterion):
 
 
 class BaseReportCriterion(BaseCriterion):
-    file_type = {'type': 'report', 'report_type': 'NIR'}
+    file_type = {'type': 'report', 'report_type': 'VKR'}

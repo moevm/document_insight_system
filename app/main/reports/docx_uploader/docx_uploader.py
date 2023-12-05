@@ -50,7 +50,7 @@ class DocxUploader:
     def make_chapters(self, work_type):
         if not self.chapters:
             tmp_chapters = []
-            if work_type == 'VKR' or work_type == 'NIR':
+            if work_type == 'VKR':
                 # find headers
                 header_ind = -1
                 par_num = 0
@@ -74,7 +74,7 @@ class DocxUploader:
 
     def make_headers(self, work_type):
         if not self.headers:
-            if work_type == 'VKR' or 'NIR':
+            if work_type == 'VKR':
                 # find first pages
                 headers = [
                     {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный",
@@ -111,7 +111,7 @@ class DocxUploader:
 
     def find_header_page(self, work_type):
         if not self.headers_page:
-            if work_type != 'VKR' and work_type != 'NIR':
+            if work_type != 'VKR':
                 self.headers_page = 1
                 return self.headers_page
             for header in self.make_headers(work_type):
@@ -123,11 +123,11 @@ class DocxUploader:
                     break
         return self.headers_page
 
-    def find_literature_vkr_and_nir(self, work_type):
+    def find_literature_vkr(self, work_type, requirement_header):
         if not self.literature_header:
             for header in self.make_chapters(work_type):
                 header_text = header["text"].lower()
-                requirement_header = 'список использованных источников' if work_type == 'VKR' else 'список литературы'
+                # requirement_header = requirement_header
                 if header_text.find(requirement_header) >= 0:
                     self.literature_header = header
         return self.literature_header

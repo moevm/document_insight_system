@@ -153,25 +153,6 @@ class StyleCheckSettings:
         }
     ]
 
-    NIR_MAIN_TEXT_CONFIG = [
-        {
-            "name": "body text",
-            "style": MAIN_TEXT_STYLE
-        },
-        {
-            "name": "листинг",
-            "style": LISTING_STYLE
-        },
-        {
-            "name": "нир2_подпись для рисунков",
-            "style": IMAGE_CAPTION_STYLE
-        },
-        {
-            "name": "нир2_подпись таблицы",
-            "style": TABLE_CAPTION_STYLE_VKR
-        }
-    ]
-
     VKR_MAIN_TEXT_CONFIG = [
         {
             "name": "body text",
@@ -192,7 +173,6 @@ class StyleCheckSettings:
     ]
 
     CONFIGS = {
-        'NIR_MAIN_TEXT': NIR_MAIN_TEXT_CONFIG,
         'LR_HEADERS': LR_CONFIG,
         'LR_MAIN_TEXT': LR_MAIN_TEXT_CONFIG,
         'VKR_HEADERS': VKR_CONFIG,
