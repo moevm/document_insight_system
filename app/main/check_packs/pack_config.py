@@ -56,3 +56,88 @@ BASE_PACKS = {
     'report': BaseCriterionPack(BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, min_score=1.0,
                                 name="BaseReportCriterionPack")
 }
+
+#For NIR checking: use this pack (added "header_map"), based on currant VKR-setting:
+# [
+# [
+# "simple_check"
+# ],
+# [
+# "banned_words_in_literature"
+# ],
+# [
+# "page_counter"
+# ],
+# [
+# "image_share_check"
+# ],
+# [
+# "headers_at_page_top_check"
+# ],
+# [
+# "lr_sections_check"
+# ],
+# [
+# "style_check"
+# ],
+# [
+# "short_sections_check"
+# ],
+# [
+# "banned_words_check",
+# {
+# "headers_map": "wikipedia"
+# }
+# ],
+# [
+# "right_words_check"
+# ],
+# [
+# "banned_words_in_literature",
+# {
+# "headers_map": "список литературы"
+# }
+# ],
+# [
+# "literature_references",
+# {
+# "headers_map": "список литературы"
+# }
+# ],
+# [
+# "image_references"
+# ],
+# [
+# "table_references"
+# ],
+# [
+# "first_pages_check"
+# ],
+# [
+# "main_character_check"
+# ],
+# [
+# "needed_headers_check",
+# {
+# "headers_map": "NIR_HEADERS"
+# }
+# ],
+# [
+# "header_check"
+# ],
+# [
+# "report_section_component"
+# ],
+# [
+# "main_text_check"
+# ],
+# [
+# "report_template_name",
+# {
+# "headers_map": "NIR2"
+# }
+# ],
+# [
+# "table_share_check"
+# ]
+# ]
