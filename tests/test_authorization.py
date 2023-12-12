@@ -1,36 +1,35 @@
-import unittest
-import time
+import os
 from basic_selenium_test import BasicSeleniumTest
 from selenium.webdriver.common.by import By
 
-# AUTH_URL = 'https://slides-checker.moevm.info/login'
-
 class AuthTestSelenium(BasicSeleniumTest):
+
+    def check_auth(self, login_param, password_param):
+        URL = self.getUrl('/login')
+        self.getDriver().get(URL)
+        self.getDriver().implicitly_wait(30)
+        login = self.getDriver().find_element(By.ID, "login_text_field")
+        login.clear()
+        login.send_keys(login_param)
+        password = self.getDriver().find_element(By.ID, "password_text_field")
+        password.clear()
+        password.send_keys(password_param)
+        login_button = self.getDriver().find_element(By.ID, "login_button")
+        login_button.click()
 
     def test_loading(self):
         URL = self.getUrl('/login')
         self.getDriver().get(URL)
         self.getDriver().implicitly_wait(30)
         obj = self.getDriver().find_element(By.CLASS_NAME, "form-group")
-        self.assertNotEquals(obj, None)
-        return True
+        self.assertNotEquals(obj, None)    
 
-
-    def failed_auth(self):
-        URL = self.getUrl('/login')
-        self.getDriver().get(URL)
-        self.getDriver().implicitly_wait(30)
-
-        login = self.getDriver().find_element(By.ID, "login_text_field")
-        login.clear()
-        login.send_keys('wrong_login')
-
-        password = self.getDriver().find_element(By.ID, "password_text_field")
-        password.clear()
-        password.send_keys('wrong_password')
-
-        login_button = self.getDriver().find_element(By.ID, "login_button")
-        login_button.click()
-        obj = self.getDriver().find_element(By.CLASS_NAME, "invalid-feedback ins")
+    def test_failed_auth(self):
+        self.check_auth('wrong_login', 'wrong_password')
+        obj = self.getDriver().find_element(By.ID, "login_button")
         self.assertNotEquals(obj, None)
 
+    def test_complete_auth(self):
+        self.check_auth(os.environ['ADMIN_PASSWORD'], os.environ['ADMIN_PASSWORD'])
+        upload_url = self.getUrl('/upload')
+        self.assertIn(upload_url, self.getDriver().current_url)

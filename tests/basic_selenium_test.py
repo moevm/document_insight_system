@@ -1,17 +1,11 @@
 import unittest
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service as FirefoxService
-from webdriver_manager.firefox import GeckoDriverManager
-from selenium.webdriver.firefox.options import Options
+from webdriver_manager.firefox import GeckoDriverManager #pip install webdriver-manager
 
 class BasicSeleniumTest(unittest.TestCase):
-    
-    # options = Options()
-    # options.binary_location = r'~/home/snap/bin/firefox'
-    # driver = webdriver.Firefox(options=options)
 
-    driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
-
+    driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install())) #you should have Firefox, installed not from snap
     def __init__(self, methodName='runTest', param=None):
         super(BasicSeleniumTest, self).__init__(methodName)
         self.param = param
@@ -34,11 +28,3 @@ class BasicSeleniumTest(unittest.TestCase):
     @classmethod
     def closeDriver(cls):
         cls.driver.close()
-
-
-
-#    def setUp(self):
-#        self.driver = webdriver.Firefox()  # Chrome()
-
-#    def tearDown(self):
-#        self.driver.close()

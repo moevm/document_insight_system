@@ -18,7 +18,6 @@ def main(host):
     BasicSeleniumTest.closeDriver()
     sys.exit(returnCode)
 
-
 if __name__ == '__main__':
-    host_arg = 'https://slides-checker.moevm.info'
+    host_arg = 'http://127.0.0.1:8080'
     main(host_arg)
