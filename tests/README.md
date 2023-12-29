@@ -14,6 +14,8 @@ Tests check: if page "/login" opens, if it doesn't take wrong login/password and
 
 ## Run run_tests
 
+use login and password from .env
+
 ```bash
-$ python main.py
+$ python tests/main.py --host host --login login --password password
 ```

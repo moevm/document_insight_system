@@ -25,11 +25,13 @@ class AuthTestSelenium(BasicSeleniumTest):
         self.assertNotEquals(obj, None)    
 
     def test_failed_auth(self):
+        host, login, password = self.param
         self.check_auth('wrong_login', 'wrong_password')
         obj = self.getDriver().find_element(By.ID, "login_button")
         self.assertNotEquals(obj, None)
 
     def test_complete_auth(self):
-        self.check_auth(os.environ['ADMIN_PASSWORD'], os.environ['ADMIN_PASSWORD'])
+        host, login, password = self.param
+        self.check_auth(login, password)
         upload_url = self.getUrl('/upload')
         self.assertIn(upload_url, self.getDriver().current_url)
