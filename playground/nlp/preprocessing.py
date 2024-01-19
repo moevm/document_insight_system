@@ -1,21 +1,25 @@
 import nltk
 from nltk import word_tokenize
+from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 from nltk.util import ngrams
 import string
 
 
-class NLPPreprocessor:
+class NLPProcessor:
     def __init__(self, language='russian'):
         nltk.download('punkt')
+        nltk.download('stopwords')
+        self.stop_words = set(stopwords.words(language))
         self.stemmer = SnowballStemmer(language)
 
     def preprocessing(self, text):
         text = text.translate(str.maketrans('', '', string.punctuation))
-        return text
-
-    def stemming(self, text):
         tokens = word_tokenize(text)
+        tokens = [word for word in tokens if word.lower() not in self.stop_words]
+        return tokens
+
+    def stemming(self, tokens):
         stemmed_words = [self.stemmer.stem(word) for word in tokens]
         return stemmed_words
 
@@ -26,12 +30,16 @@ class NLPPreprocessor:
             result.extend([' '.join(grams) for grams in n_grams])
         return result
 
-    def tokenization(self, stemmed_words):
-        token_count = {}
-        for word in stemmed_words:
-            if word in token_count:
-                token_count[word] += 1
-            else:
-                token_count[word] = 1
-        return token_count
 
+# # Пример использования
+# nlp_processor = NLPProcessor()
+#
+# text = "Пример текста для стемминга и токенизации. Текст содержит повторяющиеся слова для создания n-грамм."
+# tokens = nlp_processor.preprocessing(text)
+# stemmed_words = nlp_processor.stemming(tokens)
+# n_grams = nlp_processor.get_ngrams(stemmed_words)
+#
+# print("Текст:", text)
+# print("Стеммированные слова:", stemmed_words)
+# print("N-граммы:", n_grams)
+# print("Матрица n-грамм:")
