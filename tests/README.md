@@ -7,10 +7,10 @@ pip install selenium
 pip install webdriver-manager (to avoid problem with binary. And you should have Firefox installed not in 'snap')
 webdriver-manager==4.0.1
 
-## Test for autorization:
-class AuthTestSelenium(BasicSeleniumTest) with 3 tests
+## Test for open statistic:
+class StatisticTestSelenium(BasicSeleniumTest) with 1 test
 
-Tests check: if page "/login" opens, if it doesn't take wrong login/password and takes correct.
+Test check: if page "/check_list" opens
 
 ## Run run_tests
 
