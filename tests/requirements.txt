@@ -1,0 +1,2 @@
+selenium==4.16.0 #in this version you don't need to download geckodriver
+webdriver-manager==4.0.1 #to avoid problem with binary
