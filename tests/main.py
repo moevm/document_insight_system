@@ -2,7 +2,7 @@ import unittest
 import sys
 import argparse
 from basic_selenium_test import BasicSeleniumTest
-from test_debug import DebugTestSelenium
+from test_version import VersionTestSelenium
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run Selenium tests with specified host, login, and password.')
@@ -15,7 +15,7 @@ def main():
     args = parse_arguments()
 
     suite = unittest.TestSuite()
-    suite.addTest(BasicSeleniumTest.parametrize(DebugTestSelenium, param=(args.host, args.login, args.password)))    
+    suite.addTest(BasicSeleniumTest.parametrize(VersionTestSelenium, param=(args.host, args.login, args.password)))    
 
     returnCode = not unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful()
 

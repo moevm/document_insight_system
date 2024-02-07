@@ -8,9 +8,9 @@ pip install webdriver-manager (to avoid problem with binary. And you should have
 webdriver-manager==4.0.1
 
 ## Test for open page debug:
-class DebugTestSelenium(BasicSeleniumTest) with 1 test
+class VersionTestSelenium(BasicSeleniumTest) with 1 test
 
-Test check: if page "/debug" opens
+Test check: if page "/version" opens and contains info from "VERSION.json"
 
 ## Run run_tests
 
