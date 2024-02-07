@@ -12,7 +12,7 @@ $ pip install -r tests/requirements.txt
 ## Test for open page /version:
 class SingleCheckTestSelenium(BasicSeleniumTest) with 1 test
 
-Test check: if page with random single check opens (from "/statistic")
+Test check: if page with random single check opens (from "/check_list")
 
 ## Run run_tests
 
