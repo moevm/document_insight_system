@@ -1,13 +1,15 @@
 ## For beginning:
 
-Install:
-pip install selenium
-(selenium==4.16.0 (in this version you don't need to download geckodriver))
+You should have Firefox, installed not in 'snap'.
 
-pip install webdriver-manager (to avoid problem with binary. And you should have Firefox installed not in 'snap')
-webdriver-manager==4.0.1
+Install requirements.txt:
 
-## Test for open statistic:
+```bash
+$ pip install -r tests/requirements.txt
+```
+
+
+## Test for open page /version:
 class StatisticTestSelenium(BasicSeleniumTest) with 1 test
 
 Test check: if page "/check_list" opens
