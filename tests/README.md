@@ -9,7 +9,7 @@ $ pip install -r tests/requirements.txt
 ```
 
 
-## Test for open page /version:
+## Test for open single check card:
 class SingleCheckTestSelenium(BasicSeleniumTest) with 1 test
 
 Test check: if page with random single check opens (from "/check_list")
