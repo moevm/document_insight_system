@@ -9,7 +9,7 @@ class BasicSeleniumTest(unittest.TestCase):
     driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install())) #you should have Firefox, installed not from snap
 
     def authorization(self):
-        host, login_param, password_param = self.param
+        host, login_param, password_param = self.param[:3]
         URL = self.getUrl('/login')
         self.getDriver().get(URL)
         self.getDriver().implicitly_wait(30)
