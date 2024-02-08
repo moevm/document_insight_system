@@ -17,7 +17,8 @@ Test check: if the presentation loads correctly
 ## Run run_tests
 
 use login and password from .env
+use path to "example_of_pres.pptx" from "/tests" or your own example
 
 ```bash
-$ python tests/main.py --host host --login login --password password
+$ python tests/main.py --host host --login login --password password --pres your press
 ```
