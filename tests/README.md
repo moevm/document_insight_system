@@ -1,6 +1,7 @@
 ## For beginning:
 
 You should have Firefox, installed not in 'snap'.
+There should be setting for "DEFAULT_PRES_TYPE_INFO" in pre_luncher.py
 
 Install requirements.txt:
 
