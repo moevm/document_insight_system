@@ -10,3 +10,19 @@ h5 {
 #upload_title {
     margin-bottom: 1rem !important;
 }
+
+.hidden-table {
+            display: none;
+        }
+
+#table_info {
+  width: 300%;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: blue;
+  }
