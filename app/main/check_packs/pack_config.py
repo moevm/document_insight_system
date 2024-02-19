@@ -16,6 +16,8 @@ BASE_PRES_CRITERION = [
     ['future_dev'],
     ['pres_banned_words_check'],
     ['pres_empty_slide'],
+    ['pres_banned_words_check'],
+    ['verify_git_link'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
