@@ -61,13 +61,14 @@
                     </div>
                     <div>
                         <br>
-                            <button id="btn_table_info" class="btn btn-text" style="margin-left: 2em;font-size:20px">Подробнее о наборе критериев:</button>
-                        <br>
+                        <div class="text-center">
+                            <button id="btn_table_info" class="btn btn-text" style="font-size:20px">Подробнее о наборе критериев</button>
+                        </div>
                         <div class="table_info col-12 col-sm-4 col-md-7 col-lg-8">
                             <table id="table_info" class="hidden-table">
                                 <tr>
                                     <td class="text-left" style="color:grey;font-size:15px;"><i>Максимальный балл для каждого критерия: <b>1</b>
-                                        <br> Итоговый балл считается как среднее арифметическое.</i>
+                                        <br>Итоговый балл считается как сумма полученных баллов / общее количество баллов.</i>
                                         <p>
                                     </td>
                                 </tr>
@@ -78,7 +79,7 @@
                                     <tr data-toggle="collapse" data-target="#verd{{ loop.index }}" class="accordion-toggle">
                                         <td scope="row" class="ins"> <b> <li> {{ criterion_name }} </b>
                                             <p> {% if criterion_descrpt %}
-                                                  ({{ criterion_descrpt }})
+                                                  {{ criterion_descrpt }}
                                                 {% endif %}
                                         </td>
                                 {% endfor %}
