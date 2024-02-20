@@ -27,5 +27,5 @@ pdfplumber==0.6.1
 pytest~=7.1.2
 filetype==1.2.0
 language-tool-python==2.7.1
-md2pdf
+md2pdf==1.0.1
 markdown==3.4.4
