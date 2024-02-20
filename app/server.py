@@ -577,6 +577,8 @@ def get_zip():
     if not current_user.is_admin:
         abort(403)
 
+    original_names = request.args.get('original_names', False) == 'true'    
+
     # create tmp folder
     dirpath = tempfile.TemporaryDirectory()
 
@@ -584,9 +586,13 @@ def get_zip():
     checks_list, _ = db_methods.get_checks(**get_query(request))
     for check in checks_list:
         db_file = db_methods.find_pdf_by_file_id(check['_id'])
+        original_name = db_methods.get_check(check['_id']).filename #get a filename from every check
         if db_file is not None:
-            with open(f"{dirpath.name}/{db_file.filename}", 'wb') as os_file:
-                os_file.write(db_file.read())
+            final_name = original_name if (original_name and original_names) else db_file.filename
+            # to avoid overwriting files with one name and different content: now we save only last version of pres (from last check)
+            if not os.path.exists(f'{dirpath.name}/{final_name}'):
+                with open(f"{dirpath.name}/{final_name}", 'wb') as os_file:
+                    os_file.write(db_file.read())
 
     # add csv
     response = get_stats()
