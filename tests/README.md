@@ -8,11 +8,16 @@ Install requirements.txt:
 $ pip install -r tests/requirements.txt
 ```
 
+## Test for autorization:
+class AuthTestSelenium(BasicSeleniumTest) with 3 tests
 
-## Test for open page /version:
+Tests check: if page "/login" opens, if it doesn't take wrong login/password and takes correct.
+
+## Test for open page /check_list:
 class StatisticTestSelenium(BasicSeleniumTest) with 1 test
 
 Test check: if page "/check_list" opens
+
 
 ## Run run_tests
 

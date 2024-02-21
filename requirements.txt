@@ -1,7 +1,7 @@
 werkzeug==2.0.0
 Flask==2.0.3
 jinja2==3.0.0
-requests==2.24.0
+requests==2.25.0
 python-pptx==0.6.18
 odfpy==1.4.1
 pymongo==3.11.1
@@ -28,3 +28,5 @@ pytest~=7.1.2
 filetype==1.2.0
 language-tool-python==2.7.1
 markdown==3.4.4
+selenium==4.16.0
+webdriver-manager==4.0.1
