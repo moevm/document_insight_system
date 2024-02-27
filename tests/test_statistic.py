@@ -1,4 +1,4 @@
-import unittest
+import time
 from basic_selenium_test import BasicSeleniumTest
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
@@ -7,6 +7,7 @@ class StatisticTestSelenium(BasicSeleniumTest):
 
     def test_open_statistic(self):
         self.authorization()
+        time.sleep(10)
         URL = self.getUrl('/check_list')
         self.getDriver().get(URL)
         self.getDriver().implicitly_wait(30)

@@ -1,11 +1,14 @@
-## For beginning:
 
-You should have Firefox, installed not in 'snap'.
+## Docker:
 
-Install requirements.txt:
+Tests included in docker-compose.yml
+
+You can run tests with dockerfile_selenium independently, using special flag:
 
 ```bash
-$ pip install -r tests/requirements.txt
+$ docker build -t your_image_name -f Dockerfile_selenium .
+$ docker run -e LOGIN=your_login -e PASSWORD=your password --network="host" your_image_name
+
 ```
 
 ## Test for autorization:

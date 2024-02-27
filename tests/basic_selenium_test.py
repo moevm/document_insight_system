@@ -8,17 +8,15 @@ class BasicSeleniumTest(unittest.TestCase):
 
     chrome_options = Options()
     service = Service(executable_path='/usr/bin/chromedriver')
-    chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument("--no-sandbox")
     
     driver = webdriver.Chrome(options=chrome_options, service=service)
 
     def authorization(self):
         host, login_param, password_param = self.param
         URL = self.getUrl('/login')
-        print(111111111111111)
-        print(URL)
         self.getDriver().get(URL)
         self.getDriver().implicitly_wait(30)
         login = self.getDriver().find_element(By.ID, "login_text_field")

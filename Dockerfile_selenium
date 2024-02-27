@@ -10,4 +10,7 @@ RUN apt-get update && \
 COPY tests ./tests
 RUN pip install -r tests/requirements.txt
 
-CMD ["python3", "tests/main.py", "--login", "admin", "--password", "admin"]
+ENV LOGIN=""
+ENV PASSWORD=""
+
+ENTRYPOINT python3 tests/main.py --login ${LOGIN} --password ${PASSWORD}

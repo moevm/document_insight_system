@@ -1,4 +1,5 @@
 import os
+import time
 from basic_selenium_test import BasicSeleniumTest
 from selenium.webdriver.common.by import By
 
@@ -32,6 +33,8 @@ class AuthTestSelenium(BasicSeleniumTest):
 
     def test_complete_auth(self):
         host, login, password = self.param
+        time.sleep(10)
         self.check_auth(login, password)
+        time.sleep(10)
         upload_url = self.getUrl('/upload')
         self.assertIn(upload_url, self.getDriver().current_url)
