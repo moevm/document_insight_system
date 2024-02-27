@@ -1,4 +1,5 @@
 import unittest
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -7,12 +8,20 @@ from selenium.webdriver.chrome.service import Service
 class BasicSeleniumTest(unittest.TestCase):
 
     chrome_options = Options()
-    service = Service(executable_path='/usr/bin/chromedriver')
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--no-sandbox")
-    
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
+    '''
+    If you want to run tests just from Dockerfile_selenium, you can use:
+
+    service = Service(executable_path='/usr/bin/chromedriver')
     driver = webdriver.Chrome(options=chrome_options, service=service)
+    instead of 
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
+    '''
 
     def authorization(self):
         host, login_param, password_param = self.param

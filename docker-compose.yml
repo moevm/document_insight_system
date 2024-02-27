@@ -68,16 +68,16 @@ services:
     volumes:
       - ../slides_checker_mongo_data:/data/db
 
-  selenium-tests:
-    build:
-      context: .
-      dockerfile: Dockerfile_selenium
-    environment:
-      - LOGIN=${ADMIN_PASSWORD}
-      - PASSWORD=${ADMIN_PASSWORD}  
-    depends_on:
-      - web
-    network_mode: host
+  # selenium-tests:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile_selenium
+  #   environment:
+  #     - LOGIN=${ADMIN_PASSWORD}
+  #     - PASSWORD=${ADMIN_PASSWORD}  
+  #   depends_on:
+  #     - web
+  #   network_mode: host
 
 volumes:
   presentation_files:
