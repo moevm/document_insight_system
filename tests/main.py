@@ -1,3 +1,4 @@
+import os
 import unittest
 import sys
 import argparse
@@ -11,7 +12,9 @@ def parse_arguments():
     parser.add_argument('--host', type=str, default='http://127.0.0.1:8080', help='Host address for testing')
     parser.add_argument('--login', type=str, required=True, help='insert Username')
     parser.add_argument('--password', type=str, required=True, help='insert Password')
-    parser.add_argument('--pres', type=str, required=True, help='your path to press for testing')
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    parser.add_argument('--pres', type=str, default=os.path.join(script_dir, 'example_of_pres.pptx'), help='your path to press for testing')
+  
     return parser.parse_args()
 
 def main():
