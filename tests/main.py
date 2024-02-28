@@ -8,6 +8,7 @@ from test_authorization import AuthTestSelenium
 from test_pres_load import PresLoadTestSelenium
 from test_single_card_check import SingleCheckTestSelenium
 from test_version import VersionTestSelenium
+from test_report_load import ReportLoadTestSelenium
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run Selenium tests with specified host, login, and password.')
@@ -16,6 +17,7 @@ def parse_arguments():
     parser.add_argument('--password', type=str, required=True, help='insert Password')
     script_dir = os.path.dirname(os.path.abspath(__file__))
     parser.add_argument('--pres', type=str, default=os.path.join(script_dir, 'example_of_pres.pptx'), help='your path to press for testing')
+    parser.add_argument('--report', type=str, default=os.path.join(script_dir, 'example_of_report.docx'), help='your path to report for testing')
   
     return parser.parse_args()
 
@@ -23,11 +25,12 @@ def main():
     args = parse_arguments()
 
     suite = unittest.TestSuite()
-    suite.addTest(BasicSeleniumTest.parametrize(AuthTestSelenium, param=(args.host, args.login, args.password)))
-    suite.addTest(BasicSeleniumTest.parametrize(StatisticTestSelenium, param=(args.host, args.login, args.password)))
-    suite.addTest(BasicSeleniumTest.parametrize(PresLoadTestSelenium, param=(args.host, args.login, args.password, args.pres)))    
-    suite.addTest(BasicSeleniumTest.parametrize(SingleCheckTestSelenium, param=(args.host, args.login, args.password)))    
-    suite.addTest(BasicSeleniumTest.parametrize(VersionTestSelenium, param=(args.host, args.login, args.password)))    
+    # suite.addTest(BasicSeleniumTest.parametrize(AuthTestSelenium, param=(args.host, args.login, args.password)))
+    # suite.addTest(BasicSeleniumTest.parametrize(StatisticTestSelenium, param=(args.host, args.login, args.password)))
+    # suite.addTest(BasicSeleniumTest.parametrize(PresLoadTestSelenium, param=(args.host, args.login, args.password, args.pres)))
+    suite.addTest(BasicSeleniumTest.parametrize(ReportLoadTestSelenium, param=(args.host, args.login, args.password)))
+    # suite.addTest(BasicSeleniumTest.parametrize(SingleCheckTestSelenium, param=(args.host, args.login, args.password)))    
+    # suite.addTest(BasicSeleniumTest.parametrize(VersionTestSelenium, param=(args.host, args.login, args.password)))
 
     returnCode = not unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful()
 
