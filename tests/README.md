@@ -50,3 +50,11 @@ Test check: if page with random single check opens (from "/check_list")
 
 class VersionTestSelenium(BasicSeleniumTest) with 1 test
 Test check: if page "/version" opens and contains info from "VERSION.json"
+
+### Test for loading report:
+
+class ReportLoadTestSelenium(BasicSeleniumTest) with 3 tests
+Test check: if reports wit different extensions loads correctly
+use default documents from "/tests" or your own example
+
+

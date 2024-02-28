@@ -27,5 +27,5 @@ class PresLoadTestSelenium(BasicSeleniumTest):
             else:
                 self.fail("file didn't upload")
         else:
-            self.fail("Check criteria pack")
+            self.skipTest("Current criteria pack is not for pres")
     

@@ -4,9 +4,9 @@ from selenium.webdriver.common.by import By
 
 class ReportLoadTestSelenium(BasicSeleniumTest):
 
-    def test_pres_load(self):
+    def upload_report(self, report_ext):
         self.authorization()
-        report = self.param[4]
+        report = report_ext
         URL = self.getUrl('/upload')
         self.getDriver().get(URL)
         self.getDriver().implicitly_wait(30)
@@ -18,7 +18,7 @@ class ReportLoadTestSelenium(BasicSeleniumTest):
             load_button.click()
             obj = self.getDriver().find_element(By.XPATH, '/html/body/div/div[2]/h4/i')
             if obj.text == 'Производится проверка файла. Примерное время: 229999.1 секунд (перезагрузите страницу)':
-                time.sleep(10)
+                time.sleep(60) #loading need much time because of language.tool
                 self.getDriver().refresh()
                 self.getDriver().implicitly_wait(30)
                 obj = self.getDriver().find_element(By.ID, 'results_table')
@@ -26,4 +26,11 @@ class ReportLoadTestSelenium(BasicSeleniumTest):
             else:
                 self.fail("file didn't upload")
         else:
-            self.fail("Check criteria pack")
+            self.skipTest("Current criteria pack is not for report")
+
+
+    def test_report_load_docx(self):
+        self.upload_report(self.param[3])
+
+    def test_report_load_doc(self):
+        self.upload_report(self.param[4])    
