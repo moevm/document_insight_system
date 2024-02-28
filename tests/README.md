@@ -10,7 +10,7 @@ $ pip install -r tests/requirements.txt
 use login and password from .env
 
 ```bash
-$ python tests/main.py --host host --login login --password password
+$ python tests/main.py --host host --login login --password password --pres your press
 ```
 
 ## Docker:
@@ -25,13 +25,18 @@ $ docker run -e LOGIN=your_login -e PASSWORD=your password --network="host" your
 ## List of tests:
 
 ### Test for autorization:
-class AuthTestSelenium(BasicSeleniumTest) with 3 tests
 
+class AuthTestSelenium(BasicSeleniumTest) with 3 tests
 Tests check: if page "/login" opens, if it doesn't take wrong login/password and takes correct.
 
 ### Test for open page /check_list:
-class StatisticTestSelenium(BasicSeleniumTest) with 1 test
 
+class StatisticTestSelenium(BasicSeleniumTest) with 1 test
 Test check: if page "/check_list" opens
 
 
+## Test for loading presentation:
+
+class PresLoadTestSelenium(BasicSeleniumTest) with 1 test
+Test check: if the presentation loads correctly
+use path to "example_of_pres.pptx" from "/tests" (default) or your own example
