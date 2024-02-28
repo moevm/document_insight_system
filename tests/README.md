@@ -10,7 +10,7 @@ $ pip install -r tests/requirements.txt
 use login and password from .env
 
 ```bash
-$ python tests/main.py --host host --login login --password password --pres your press
+$ python3 tests/main.py --host host --login login --password password --pres your press
 ```
 
 ## Docker:
@@ -45,3 +45,8 @@ use path to "example_of_pres.pptx" from "/tests" (default) or your own example
 
 class SingleCheckTestSelenium(BasicSeleniumTest) with 1 test
 Test check: if page with random single check opens (from "/check_list")
+
+### Test for open page /version:
+
+class VersionTestSelenium(BasicSeleniumTest) with 1 test
+Test check: if page "/version" opens and contains info from "VERSION.json"
