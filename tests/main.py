@@ -6,6 +6,7 @@ from basic_selenium_test import BasicSeleniumTest
 from test_statistic import StatisticTestSelenium
 from test_authorization import AuthTestSelenium
 from test_pres_load import PresLoadTestSelenium
+from test_single_card_check import SingleCheckTestSelenium
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run Selenium tests with specified host, login, and password.')
@@ -24,6 +25,7 @@ def main():
     suite.addTest(BasicSeleniumTest.parametrize(AuthTestSelenium, param=(args.host, args.login, args.password)))
     suite.addTest(BasicSeleniumTest.parametrize(StatisticTestSelenium, param=(args.host, args.login, args.password)))
     suite.addTest(BasicSeleniumTest.parametrize(PresLoadTestSelenium, param=(args.host, args.login, args.password, args.pres)))    
+    suite.addTest(BasicSeleniumTest.parametrize(SingleCheckTestSelenium, param=(args.host, args.login, args.password)))    
 
     returnCode = not unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful()
 
