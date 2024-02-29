@@ -1,0 +1,22 @@
+name: Selenium_tests
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build system images (non-pulling)
+        run: |
+          # build base image
+          docker build -f Dockerfile_base -t osll/slides-base:20230202 .
+      - name: Build docker-compose-tests
+        run: |
+          cp .env_example .env
+          docker-compose -f docker-compose-tests.yml build
+      - name: Run docker-compose-tests
+        run: |
+          docker-compose -f docker-compose-tests.yml up -d
