@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   web:
     build: .
@@ -51,10 +53,11 @@ services:
     depends_on:
       - worker
       - redis
+
   redis:
     extends:
       file: docker-compose.yml
-      service: redis
+      service: redis 
 
   mongodb:
     extends:
@@ -72,9 +75,10 @@ services:
       - PASSWORD=${ADMIN_PASSWORD}  
     depends_on:
       - web
-    network_mode: host
+    network_mode: service:web
 
 volumes:
   presentation_files:
   redis_data:
   flower_data:
+
