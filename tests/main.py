@@ -27,12 +27,12 @@ def main():
     args = parse_arguments()
 
     suite = unittest.TestSuite()
-    # suite.addTest(BasicSeleniumTest.parametrize(AuthTestSelenium, param=(args.host, args.login, args.password)))
-    # suite.addTest(BasicSeleniumTest.parametrize(StatisticTestSelenium, param=(args.host, args.login, args.password)))
+    suite.addTest(BasicSeleniumTest.parametrize(AuthTestSelenium, param=(args.host, args.login, args.password)))
+    suite.addTest(BasicSeleniumTest.parametrize(StatisticTestSelenium, param=(args.host, args.login, args.password)))
     suite.addTest(BasicSeleniumTest.parametrize(ReportLoadTestSelenium, param=(args.host, args.login, args.password, args.report, args.report_doc)))
     suite.addTest(BasicSeleniumTest.parametrize(PresLoadTestSelenium, param=(args.host, args.login, args.password, args.pres)))
-    # suite.addTest(BasicSeleniumTest.parametrize(SingleCheckTestSelenium, param=(args.host, args.login, args.password)))    
-    # suite.addTest(BasicSeleniumTest.parametrize(VersionTestSelenium, param=(args.host, args.login, args.password)))
+    suite.addTest(BasicSeleniumTest.parametrize(SingleCheckTestSelenium, param=(args.host, args.login, args.password)))    
+    suite.addTest(BasicSeleniumTest.parametrize(VersionTestSelenium, param=(args.host, args.login, args.password)))
 
     returnCode = not unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful()
 
