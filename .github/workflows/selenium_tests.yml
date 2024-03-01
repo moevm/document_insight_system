@@ -21,7 +21,13 @@ jobs:
         run: |
           docker-compose -f docker-compose-tests.yml up -d
           sleep 120
-      - name: Check tests
+      - name: Tests results
         run: |
-          [ $(docker-compose -f docker-compose-tests.yml logs selenium-tests | grep -c "OK") -eq 1 ] && echo true || echo false
+          if [ $(docker-compose -f docker-compose-tests.yml logs selenium-tests | grep -c "OK") -eq 1 ]; then
+              echo true
+              exit 0
+          else
+              echo false
+              exit 1
+          fi
 
