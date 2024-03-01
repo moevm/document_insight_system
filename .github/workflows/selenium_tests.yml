@@ -20,7 +20,7 @@ jobs:
       - name: Run docker-compose-tests
         run: |
           docker-compose -f docker-compose-tests.yml up
-          until docker-compose -f docker-compose-tests.yml logs selenium-tests | grep -q "Run"; do
+          until docker-compose -f docker-compose-tests.yml logs selenium-tests | grep -q "Ran"; do
             sleep 60
           done
       - name: Tests results

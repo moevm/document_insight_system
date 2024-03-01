@@ -18,7 +18,7 @@ class ReportLoadTestSelenium(BasicSeleniumTest):
             load_button.click()
             obj = self.getDriver().find_element(By.XPATH, '/html/body/div/div[2]/h4/i')
             if obj.text == 'Производится проверка файла. Примерное время: 229999.1 секунд (перезагрузите страницу)':
-                time.sleep(60) #loading need much time because of language.tool
+                time.sleep(120) #loading need much time because of language.tool
                 self.getDriver().refresh()
                 self.getDriver().implicitly_wait(30)
                 obj = self.getDriver().find_element(By.ID, 'results_table')

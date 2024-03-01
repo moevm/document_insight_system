@@ -7,7 +7,7 @@ class VersionTestSelenium(BasicSeleniumTest):
 
     def test_version(self):
         self.authorization()
-        time.sleep(10)
+        time.sleep(30)
         URL = self.getUrl('/version')
         self.getDriver().get(URL)
         self.getDriver().implicitly_wait(30)
