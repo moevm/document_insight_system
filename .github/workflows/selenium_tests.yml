@@ -19,11 +19,8 @@ jobs:
           docker-compose -f docker-compose-tests.yml build
       - name: Run docker-compose-tests
         run: |
-          docker-compose -f docker-compose-tests.yml up -d
-          sleep 10
-      - name: Time for testing
-        run: |
-          while [ $(docker ps | grep selenium_tests) ]; do
+          docker-compose -f docker-compose-tests.yml up
+          until docker-compose -f docker-compose-tests.yml logs selenium-tests | grep -q "Run"; do
             sleep 60
           done
       - name: Tests results
