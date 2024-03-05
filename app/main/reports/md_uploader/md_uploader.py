@@ -150,14 +150,22 @@ class MdUpload(DocumentUploader):
                 paragraph = {"text": par, "runs": []}
                 if '<h2>' in paragraph["text"]:
                     paragraph["runs"].append({"text": par, "style": "heading 2"})
+                elif '<h3>' in paragraph["text"]:
+                    paragraph["runs"].append({"text": par, "style": "heading 3"})
+                elif '<h4>' in paragraph["text"]:
+                    paragraph["runs"].append({"text": par, "style": "heading 4"})       
                 elif 'Таблица' in paragraph["text"]:
                     if '|' in self.paragraphs[self.paragraphs.index(par)+1]:
                         paragraph['runs'].append({"text": par, "style": "вкр_подпись таблицы"})
+                    else:
+                        paragraph["runs"].append({"text": par, "style": 'body text'})
                 elif '<img alt=' in paragraph['text']:
                     paragraph["runs"].append({"text": par, "style": "рисунок"})
                 elif 'Рисунок' in paragraph["text"]:
                     if '<img alt=' in self.paragraphs[self.paragraphs.index(par)-1]:
                         paragraph['runs'].append({"text": par, "style": "вкр_подпись для рисунков"})
+                    else:
+                        paragraph["runs"].append({"text": par, "style": 'body text'})    
                 else:
                     paragraph["runs"].append({"text": par, "style": 'body text'})           
                 self.styled_paragraphs.append(paragraph)
@@ -174,7 +182,10 @@ class MdUpload(DocumentUploader):
                 for par_ind in range(len(self.styled_paragraphs)):
                     
                     head_par_ind += 1
-                    style_name = self.styled_paragraphs[par_ind]['runs'][0]['style']  
+
+                    style_name = self.styled_paragraphs[par_ind]['runs'][0]['style']
+                    print(par_ind)
+                    print(style_name)
                     if "heading" in style_name:
                         header_ind += 1
                         par_num = 0
