@@ -19,10 +19,6 @@ class DocumentUploader(ABC):
         pass
 
     @abstractmethod
-    def make_headers(self, work_type):
-        pass
-
-    @abstractmethod
     def make_chapters(self, work_type):
         pass
 

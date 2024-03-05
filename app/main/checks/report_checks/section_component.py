@@ -2,10 +2,10 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportSectionComponent(BaseReportCriterion):
-    description = "Проверка наличия необходимых компонент указанного раздела"
+    description = "Проверка наличия необходимых компонентов указанного раздела"
     id = 'report_section_component'
 
-    def __init__(self, file_info, chapter='Введение', patterns=('цель', 'задачи', 'объект', 'предмет')):
+    def __init__(self, file_info, chapter='Введение', patterns=('цель', 'задач', 'объект', 'предмет')):
         super().__init__(file_info)
         self.intro = {}
         self.chapter = chapter

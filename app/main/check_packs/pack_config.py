@@ -20,26 +20,25 @@ BASE_PRES_CRITERION = [
 BASE_REPORT_CRITERION = [
     ["simple_check"],
     ["banned_words_in_literature"],
-    ["page_counter"],
-    ["image_share_check"],
+    # ["page_counter"],
+    # ["image_share_check"],
     # ["headers_at_page_top_check", {"headers": ["Приложение А Исходный код программы"]}],
-    ["headers_at_page_top_check"],
-    ["lr_sections_check"],
-    ["style_check"],
+    # ["headers_at_page_top_check"],
+    # ["lr_sections_check"],
+    # ["style_check"],
     ["short_sections_check"],
     ["banned_words_check"],
     ["right_words_check"],
-    ["banned_words_in_literature"],
     ["literature_references"],
     ["image_references"],
     ["table_references"],
-    ["first_pages_check"],
-    ["main_character_check"],
+    # ["first_pages_check"],
+    # ["main_character_check"],
     ["needed_headers_check"],
-    ["header_check"],
+    # ["header_check"],
     ["report_section_component"],
-    ["main_text_check"],
-    ["spelling_check"]
+    # ["main_text_check"],
+    # ["spelling_check"]
 ]
 
 DEFAULT_TYPE = 'pres'
