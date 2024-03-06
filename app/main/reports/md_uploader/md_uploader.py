@@ -57,6 +57,7 @@ class MdUpload(DocumentUploader):
         self.tables = []
         self.literature_header = []
         self.headers_page = 1
+        self.literature_page = 0
         self.styled_paragraphs = []
         self.first_lines = []
 
@@ -91,8 +92,9 @@ class MdUpload(DocumentUploader):
                         line += " "
                     line += lines[i].strip()
                 self.first_lines.append(line.lower())
-                if self.count < 5:
-                    self.count = 5      
+        self.literature_page = self.count #for link to page with literature
+        if self.count < 5:
+            self.count = 5 
         return self.count
 
     def get_main_headers(self):
@@ -114,13 +116,8 @@ class MdUpload(DocumentUploader):
                         paragraph['runs'].append({"text": par, "style": "вкр_подпись таблицы"})
                     else:
                         paragraph["runs"].append({"text": par, "style": 'body text'})
-                elif '<img alt=' in paragraph['text']:
-                    paragraph["runs"].append({"text": par, "style": "рисунок"})
-                elif 'Рисунок' in paragraph["text"]:
-                    if '<img alt=' in self.paragraphs[self.paragraphs.index(par)-1]:
-                        paragraph['runs'].append({"text": par, "style": "вкр_подпись для рисунков"})
-                    else:
-                        paragraph["runs"].append({"text": par, "style": 'body text'})    
+                elif '<img alt=' in paragraph['text'] and 'Рисунок' in paragraph['text']:
+                    paragraph["runs"].append({"text": par, "style": "вкр_подпись для рисунков"})
                 else:
                     paragraph["runs"].append({"text": par, "style": 'body text'})           
                 self.styled_paragraphs.append(paragraph)
@@ -170,13 +167,16 @@ class MdUpload(DocumentUploader):
     
     def find_header_page(self, work_type):
         return self.headers_page
+    
+    def find_literature_page(self, work_type):
+        return self.literature_page
 
     def parse_md_file(self):
         md_text = self.upload()
         self.parse(md_text)
         self.make_chapters(work_type="VKR")
         self.find_literature_vkr(work_type="VKR")
-        return f"Заголовки:\n{self.headers_main}\n\nГлавы\n{self.chapters}\n\nАбзацы:\n\n{self.paragraphs}"
+        return f"Заголовки:\n{self.headers_main}\n\nГлавы\n{self.chapters}\n\nСписок литературы:\n\n{self.literature_header}"
 
 
 def main(args):

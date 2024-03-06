@@ -28,6 +28,7 @@ class DocxUploader(DocumentUploader):
         self.first_lines = []
         self.literature_header = []
         self.headers_page = 0
+        self.literature_page = 0
 
     def upload(self, file, pdf_filepath=''):
         self.file = docx.Document(file)
@@ -123,6 +124,16 @@ class DocxUploader(DocumentUploader):
                         self.headers_page = header["page"]
                     break
         return self.headers_page
+    
+    def find_literature_page(self, work_type):
+        if not self.literature_page:
+            for k, v in self.pdf_file.text_on_page.items():
+                line = v[:40] if len(v) > 21 else v
+                if re.search('СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ', line.strip()):
+                    break
+                self.literature_page += 1
+        self.literature_page += 1
+        return self.literature_page
 
     def find_literature_vkr(self, work_type):
         if not self.literature_header:

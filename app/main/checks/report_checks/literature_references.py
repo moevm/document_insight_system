@@ -90,7 +90,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                             for k in range(int(start), int(end) + 1):
                                 array_of_references.add(k)
                         elif one_part != '':
-                            array_of_references.add(int(one_part))
+                            array_of_references.add(int(one_part))               
         return array_of_references
 
     def find_start_paragraph(self):
