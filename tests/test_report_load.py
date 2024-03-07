@@ -9,13 +9,14 @@ class ReportLoadTestSelenium(BasicSeleniumTest):
         report = report_ext
         URL = self.getUrl('/upload')
         self.getDriver().get(URL)
-        self.getDriver().implicitly_wait(480)
+        self.getDriver().implicitly_wait(240)
         obj = self.getDriver().find_element(By.XPATH, "/html/body/div/div[2]/div/p/b")
         if obj.text == 'BaseReportCriterionPack':
             form_for_load = self.getDriver().find_element(By.CSS_SELECTOR, 'input[type=file]')
             form_for_load.send_keys(report)
             load_button = self.getDriver().find_element(By.XPATH, '//*[@id="upload_upload_button"]')
             load_button.click()
+            time.sleep(10)
             obj = self.getDriver().find_element(By.XPATH, '/html/body/div/div[2]/h4/i')
             if obj.text == 'Производится проверка файла. Примерное время: 229999.1 секунд (перезагрузите страницу)':
                 start_time = time.time()
