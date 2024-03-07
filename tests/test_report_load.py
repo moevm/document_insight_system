@@ -9,7 +9,7 @@ class ReportLoadTestSelenium(BasicSeleniumTest):
         report = report_ext
         URL = self.getUrl('/upload')
         self.getDriver().get(URL)
-        self.getDriver().implicitly_wait(240)
+        self.getDriver().implicitly_wait(480)
         obj = self.getDriver().find_element(By.XPATH, "/html/body/div/div[2]/div/p/b")
         if obj.text == 'BaseReportCriterionPack':
             form_for_load = self.getDriver().find_element(By.CSS_SELECTOR, 'input[type=file]')
@@ -18,11 +18,14 @@ class ReportLoadTestSelenium(BasicSeleniumTest):
             load_button.click()
             obj = self.getDriver().find_element(By.XPATH, '/html/body/div/div[2]/h4/i')
             if obj.text == 'Производится проверка файла. Примерное время: 229999.1 секунд (перезагрузите страницу)':
-                # while 
-                time.sleep(120) #loading need much time because of language.tool
-                self.getDriver().refresh()
-                # self.getDriver().implicitly_wait(30)
-                obj = self.getDriver().find_element(By.ID, 'results_table')
+                start_time = time.time()
+                max_time = 240
+                while time.time() - start_time < max_time:
+                    time.sleep(10)
+                    self.getDriver().refresh()
+                    obj = self.getDriver().find_element(By.ID, 'results_table')
+                    if obj is not None:
+                        break
                 self.assertNotEquals(obj, None)
             else:
                 self.fail("file didn't upload")
