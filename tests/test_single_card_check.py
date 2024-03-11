@@ -7,7 +7,6 @@ class SingleCheckTestSelenium(BasicSeleniumTest):
 
     def test_open_check_card(self):
         self.authorization()
-        time.sleep(10)
         URL = self.getUrl('/check_list')
         self.getDriver().get(URL)
         self.getDriver().implicitly_wait(240)

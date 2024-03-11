@@ -54,12 +54,6 @@ class StatisticTestSelenium(BasicSeleniumTest) with 1 test
 Test check: if page "/check_list" opens
 
 
-### Test for loading presentation:
-
-class PresLoadTestSelenium(BasicSeleniumTest) with 1 test
-Test check: if the presentation loads correctly
-use path to "example_of_pres.pptx" from "/tests" (default) or your own example
-
 ### Test for open single check card:
 
 class SingleCheckTestSelenium(BasicSeleniumTest) with 1 test
@@ -70,9 +64,9 @@ Test check: if page with random single check opens (from "/check_list")
 class VersionTestSelenium(BasicSeleniumTest) with 1 test
 Test check: if page "/version" opens and contains info from "VERSION.json"
 
-### Test for loading report:
+### Test for loading report and pres:
 
-class ReportLoadTestSelenium(BasicSeleniumTest) with 2 tests
+class FileLoadTestSelenium(BasicSeleniumTest) with 3 tests
 Test check: if reports wit different extensions loads correctly
 use default documents from "/tests" or your own example
 

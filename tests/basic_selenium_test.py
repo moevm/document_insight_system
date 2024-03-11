@@ -4,6 +4,8 @@ from selenium.webdriver.common.by import By
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 class BasicSeleniumTest(unittest.TestCase):
 
@@ -36,6 +38,7 @@ class BasicSeleniumTest(unittest.TestCase):
         password.send_keys(password_param)
         login_button = self.getDriver().find_element(By.ID, "login_button")
         login_button.click()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "upload_upload_button")))
 
 
     def __init__(self, methodName='runTest', param=None):
