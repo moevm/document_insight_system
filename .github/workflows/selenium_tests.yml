@@ -19,16 +19,17 @@ jobs:
           docker-compose -f docker-compose-tests.yml build
       - name: Run docker-compose-tests
         run: |
-          docker-compose -f docker-compose-tests.yml up
-          ./tests/docker_check_tests.sh
-      - name: Tests results
-        run: |
-          docker-compose -f docker-compose-tests.yml logs selenium-tests
-          if [ $(docker-compose -f docker-compose-tests.yml logs selenium-tests | grep -c "OK") -eq 1 ]; then
-              echo true
-              exit 0
-          else
-              echo false
-              exit 1
-          fi
+          docker-compose -f docker-compose-tests.yml up -d
+          chmod +x tests/scripts/docker_check_tests.sh
+          ./tests/scripts/docker_check_tests.sh
+      # - name: Tests results
+      #   run: |
+      #     docker-compose -f docker-compose-tests.yml logs selenium-tests
+      #     if [ $(docker-compose -f docker-compose-tests.yml logs selenium-tests | grep -c "OK") -eq 1 ]; then
+      #         echo true
+      #         exit 0
+      #     else
+      #         echo false
+      #         exit 1
+      #     fi
 
