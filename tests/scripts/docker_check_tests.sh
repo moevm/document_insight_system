@@ -1,6 +1,7 @@
 # !/bin/bash
 
-container_name="mse_auto_checking_slides_vaganov-selenium-tests-1"
+container_name="mse_auto_checking_slides_vaganov_selenium-tests_1"
+
 
 while true; do
 
