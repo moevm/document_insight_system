@@ -12,7 +12,6 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         self.headers = []
         self.literature_header = []
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
-        self.md_name_pattern = r"<h2>(Список использованных источников|Список использованной литературы)<\/h2>"
         self.min_ref = min_ref
         self.max_ref = max_ref
 
@@ -80,8 +79,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         for i in range(0, start_par):
             if isinstance(self.file.paragraphs[i], str):
                 detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i])
-            else:    
-                detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i].to_string().split('\n')[1])
+            else:
+                detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i].paragraph_text)
             if detected_references:
                 for reference in detected_references:
                     for one_part in re.split(r'[\[\],]', reference):
@@ -90,22 +89,16 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                             for k in range(int(start), int(end) + 1):
                                 array_of_references.add(k)
                         elif one_part != '':
-                            array_of_references.add(int(one_part))               
+                            array_of_references.add(int(one_part))
         return array_of_references
 
     def find_start_paragraph(self):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
-            if isinstance(self.file.paragraphs[i], str):
-                text_string = self.file.paragraphs[i].lower()
-                if re.fullmatch(self.md_name_pattern, text_string):
-                    start_index = i
-                    break
-            else:    
-                text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
-                if re.fullmatch(self.name_pattern, text_string):
-                    start_index = i
-                    break
+            text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
+            if re.fullmatch(f'{self.name_pattern}', text_string):    
+                start_index = i
+                break
         return start_index
 
     def count_sources_vkr(self, header):

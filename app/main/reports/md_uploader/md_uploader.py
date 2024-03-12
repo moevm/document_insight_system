@@ -38,14 +38,14 @@ pack "BaseReportCriterionPackMd"
 ]
 '''
 
-import markdown #installation: pip install markdown
-from md2pdf.core import md2pdf #installation: pip install md2pdf
+import markdown
+from md2pdf.core import md2pdf
 import re
 from ..document_uploader import DocumentUploader
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
 
 
-class MdUpload(DocumentUploader):
+class MdUploader(DocumentUploader):
     def __init__(self, path_to_md_file):
         self.pdf_file = None
         self.path_to_md_file = path_to_md_file
@@ -53,7 +53,7 @@ class MdUpload(DocumentUploader):
         self.headers_main = []
         self.chapters = []
         self.html_text = ''
-        self.count = 0
+        self.page_count = 0
         self.tables = []
         self.literature_header = []
         self.headers_page = 1
@@ -79,10 +79,10 @@ class MdUpload(DocumentUploader):
         return self.paragraphs
 
     def page_counter(self):
-        if not self.count:
+        if not self.page_count:
             for k, v in self.pdf_file.text_on_page.items():
                 line = v[:20] if len(v) > 21 else v
-                self.count += 1
+                self.page_count += 1
                 line = ''
                 lines = v.split("\n")
                 for i in range(len(lines)):
@@ -92,10 +92,10 @@ class MdUpload(DocumentUploader):
                         line += " "
                     line += lines[i].strip()
                 self.first_lines.append(line.lower())
-        self.literature_page = self.count #for link to page with literature
-        if self.count < 5:
-            self.count = 5 
-        return self.count
+        self.literature_page = self.page_count #for link to page with literature
+        if self.page_count < 5:
+            self.page_count = 5 
+        return self.page_count
 
     def get_main_headers(self):
         header_main_regex = "<h1>(.*?)<\/h1>"
@@ -180,7 +180,7 @@ class MdUpload(DocumentUploader):
 
 
 def main(args):
-    md_file = MdUpload(args.mdfile)
+    md_file = MdUploader(args.mdfile)
     print(md_file.parse_md_file())
 
 

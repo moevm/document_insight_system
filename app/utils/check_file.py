@@ -12,4 +12,4 @@ def check_file(file, file_extension, allowed_extensions, check_mime=True):
             if file_extension != filetype.guess_extension(file):
                 return "mime_type_does_not_match_extension"
 
-    return "ok"
+    return ""

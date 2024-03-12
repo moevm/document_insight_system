@@ -129,7 +129,7 @@ class DocxUploader(DocumentUploader):
         if not self.literature_page:
             for k, v in self.pdf_file.text_on_page.items():
                 line = v[:40] if len(v) > 21 else v
-                if re.search('СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ', line.strip()):
+                if re.search('список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)', line.strip().lower()):
                     break
                 self.literature_page += 1
         self.literature_page += 1

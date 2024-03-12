@@ -5,7 +5,7 @@ import tempfile
 
 from main.presentations import PresentationPPTX
 from main.reports.docx_uploader import DocxUploader
-from main.reports.md_uploader import MdUpload
+from main.reports.md_uploader import MdUploader
 from utils import convert_to
 
 logger = logging.getLogger('root_logger')
@@ -33,7 +33,7 @@ def parse(filepath, pdf_filepath):
 
         elif tmp_filepath.endswith('.md' ):
             new_filepath = filepath
-            doc = MdUpload(new_filepath)
+            doc = MdUploader(new_filepath)
             md_text = doc.upload()
             doc.parse(md_text)
             file_object = doc
