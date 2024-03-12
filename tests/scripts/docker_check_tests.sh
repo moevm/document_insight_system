@@ -1,14 +1,16 @@
 # !/bin/bash
 
-container_name="mse_auto_checking_slides_vaganov_selenium-tests_1"
+service="selenium-tests"
+container_id=$(docker-compose -f docker-compose-tests.yml ps -q $service)
 
 
 while true; do
 
-    if docker ps -a --format '{{.Names}}' | grep -q "^${container_name}$"; then
-        if docker inspect --format='{{.State.Running}}' "$container_name" | grep -q "false"; then
+    if docker ps -a -q --no-trunc| grep -q "^${container_id}$"; then
+        if docker inspect --format='{{.State.Running}}' "$container_id" | grep -q "false"; then
             echo "tests are finished"
-            EXIT_CODE=$(docker inspect "$container_name" --format='{{.State.ExitCode}}')
+            EXIT_CODE=$(docker inspect "$container_id" --format='{{.State.ExitCode}}')
+            docker-compose -f docker-compose-tests.yml logs selenium-tests
             if [ "$EXIT_CODE" -eq 0 ]; then
                 echo "tests finished with code $EXIT_CODE (OK)"
                 exit 0
@@ -21,7 +23,7 @@ while true; do
             sleep 30
         fi
     else
-        echo "Контейнер $container_name не найден."
+        echo "Контейнер сервиса $service не найден."
         exit 1
     fi
 
