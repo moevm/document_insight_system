@@ -9,6 +9,7 @@ while true; do
         if docker inspect --format='{{.State.Running}}' "$container_name" | grep -q "false"; then
             echo "tests are finished"
             EXIT_CODE=$(docker inspect "$container_name" --format='{{.State.ExitCode}}')
+            docker-compose -f docker-compose-tests.yml logs selenium-tests
             if [ "$EXIT_CODE" -eq 0 ]; then
                 echo "tests finished with code $EXIT_CODE (OK)"
                 exit 0
