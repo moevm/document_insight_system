@@ -6,7 +6,7 @@ container_id=$(docker-compose -f docker-compose-tests.yml ps -q $service)
 
 while true; do
 
-    if docker ps -a -q | grep -q "^${container_id}$"; then
+    if docker ps -a -q --no-trunc| grep -q "^${container_id}$"; then
         if docker inspect --format='{{.State.Running}}' "$container_id" | grep -q "false"; then
             echo "tests are finished"
             EXIT_CODE=$(docker inspect "$container_id" --format='{{.State.ExitCode}}')
