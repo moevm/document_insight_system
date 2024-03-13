@@ -47,19 +47,11 @@ from ..pdf_document.pdf_document_manager import PdfDocumentManager
 
 class MdUploader(DocumentUploader):
     def __init__(self, path_to_md_file):
-        self.pdf_file = None
+        super().__init__()
         self.path_to_md_file = path_to_md_file
-        self.paragraphs = []
         self.headers_main = []
-        self.chapters = []
         self.html_text = ''
-        self.page_count = 0
-        self.tables = []
-        self.literature_header = []
         self.headers_page = 1
-        self.literature_page = 0
-        self.styled_paragraphs = []
-        self.first_lines = []
 
     def upload(self):
         with open(self.path_to_md_file, "r", encoding="utf-8") as f:

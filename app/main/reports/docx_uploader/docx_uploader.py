@@ -14,21 +14,13 @@ from ..document_uploader import DocumentUploader
 
 class DocxUploader(DocumentUploader):
     def __init__(self):
+        super().__init__()
         self.inline_shapes = []
         self.core_properties = None
         self.headers = []
-        self.chapters = []
-        self.paragraphs = []
-        self.tables = []
         self.file = None
-        self.styled_paragraphs = None
         self.special_paragraph_indices = {}
-        self.pdf_file = None
-        self.count = 0
-        self.first_lines = []
-        self.literature_header = []
         self.headers_page = 0
-        self.literature_page = 0
 
     def upload(self, file, pdf_filepath=''):
         self.file = docx.Document(file)
@@ -88,7 +80,7 @@ class DocxUploader(DocumentUploader):
                     {"name": "Реферат", "marker": False, "key": "реферат", "main_character": False,  "page": 0},
                     {"name": "Abstract", "marker": False, "key": "abstract", "main_character": False, "page": 0},
                     {"name": "Cодержание", "marker": False, "key": "содержание", "main_character": False, "page": 0}]
-                for page in range(1, self.count if self.page_counter() < 2 * len(headers) else 2 * len(headers)):
+                for page in range(1, self.page_count if self.page_counter() < 2 * len(headers) else 2 * len(headers)):
                     page_text = (self.pdf_file.get_text_on_page()[page].split("\n")[0]).lower()
                     for i in range(len(headers)):
                         if not headers[i]["marker"]:
@@ -165,9 +157,8 @@ class DocxUploader(DocumentUploader):
 
     # Parses styles once; subsequent calls have no effect, since the file itself shouldn't change
     def parse_effective_styles(self):
-        if self.styled_paragraphs is not None:
+        if self.styled_paragraphs:
             return
-        self.styled_paragraphs = []
         for par in filter(lambda p: len(p.text.strip()) > 0, self.file.paragraphs):
             paragraph = {"text": par.text, "runs": []}
             for run in filter(lambda r: len(r.text.strip()) > 0, par.runs):
@@ -205,12 +196,12 @@ class DocxUploader(DocumentUploader):
         return result
 
     def page_counter(self):
-        if not self.count:
+        if not self.page_count:
             for k, v in self.pdf_file.text_on_page.items():
                 line = v[:20] if len(v) > 21 else v
                 if re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip()):
                     break
-                self.count += 1
+                self.page_count += 1
                 line = ''
                 lines = v.split("\n")
                 for i in range(len(lines)):
@@ -220,7 +211,7 @@ class DocxUploader(DocumentUploader):
                         line += " "
                     line += lines[i].strip()
                 self.first_lines.append(line.lower())
-        return self.count
+        return self.page_count
 
     def upload_from_cli(self, file):
         self.upload(file=file)
