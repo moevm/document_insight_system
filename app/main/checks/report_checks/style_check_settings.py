@@ -116,6 +116,28 @@ class StyleCheckSettings:
         }
     ]
 
+    MD_CONFIG = [
+        {
+            "style": HEADER_1_STYLE,
+            "docx_style": ["heading 2"],
+            "headers": ["Поставленная цель и задачи",
+                        "Тематика статьи",
+                        "Методы обоснования",
+                        "Характеристика используемых данных",
+                        "Характеристика выводов",
+                        ],
+            "unify_regex": None,
+            "regex": HEADER_REGEX
+        },
+        {
+            "style": HEADER_1_NUM_STYLE,
+            "docx_style": ["heading 2", "heading 3", "heading 4"],
+            "headers": [],
+            "unify_regex": None,
+            "regex": HEADER_NUM_REGEX
+        }
+    ]
+
     LR_MAIN_TEXT_CONFIG = [
         {
             "name": "Основной текст",
@@ -158,5 +180,6 @@ class StyleCheckSettings:
         'LR_HEADERS': LR_CONFIG,
         'LR_MAIN_TEXT': LR_MAIN_TEXT_CONFIG,
         'VKR_HEADERS': VKR_CONFIG,
-        'VKR_MAIN_TEXT': VKR_MAIN_TEXT_CONFIG
+        'VKR_MAIN_TEXT': VKR_MAIN_TEXT_CONFIG,
+        'MD_HEADERS' : MD_CONFIG
     }

@@ -1,14 +1,18 @@
 from ..base_check import BaseReportCriterion, answer
+from .style_check_settings import StyleCheckSettings
 
 
 class ReportSectionComponent(BaseReportCriterion):
     description = "Проверка наличия необходимых компонентов указанного раздела"
     id = 'report_section_component'
 
-    def __init__(self, file_info, chapter='Введение', patterns=('цель', 'задач', 'объект', 'предмет')):
+    def __init__(self, file_info, chapter='Введение', patterns=('цель', 'задач', 'объект', 'предмет'), headers_map = None):
         super().__init__(file_info)
         self.intro = {}
-        self.chapter = chapter
+        if headers_map:
+            self.chapter = StyleCheckSettings.CONFIGS.get(headers_map)[0]["headers"][0]
+        else:
+            self.chapter = chapter
         self.chapters = []
         self.patterns = []
         for pattern in patterns:

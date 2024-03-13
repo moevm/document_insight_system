@@ -7,12 +7,15 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
     id = 'needed_headers_check'
     priority = True
 
-    def __init__(self, file_info, main_heading_style="heading 2"):
+    def __init__(self, file_info, main_heading_style="heading 2", headers_map = None):
         super().__init__(file_info)
         self.headers_page = 1
         self.headers = []
         self.main_heading_style = main_heading_style
-        self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
+        if headers_map:
+            self.config = headers_map
+        else:
+            self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
         self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
 
     def late_init(self):

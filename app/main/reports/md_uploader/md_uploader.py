@@ -27,10 +27,16 @@ pack "BaseReportCriterionPackMd"
         "table_references"
     ],
     [
-        "needed_headers_check"
+        "needed_headers_check",
+        {
+            "headers_map" : "MD_HEADERS"
+        }
     ],
     [
-        "report_section_component"
+        "report_section_component",
+        {
+            "headers_map" : "MD_HEADERS"
+        }
     ],
     [
         "spelling_check"
