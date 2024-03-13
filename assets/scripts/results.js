@@ -63,6 +63,10 @@ const showNextPage = () => {
     queueRenderPage(pageNum);
 };
 
+const toggleAllVerdicts = () => {
+    $('.accordian-body').collapse('toggle');
+};
+
 if ($("#pdf_download").length !== 0) {
     var href = $("#pdf_download").attr('href');
     pdfDoc = null;
@@ -94,3 +98,5 @@ if ($("#pdf_download").length !== 0) {
     $('#prev-page').click(showPrevPage);
     $('#next-page').click(showNextPage);
 }
+
+$('#showAllVerdicts').click(toggleAllVerdicts);
