@@ -21,6 +21,10 @@ file_formats = file_formats[file_formats.length - 1];
 file_formats = file_formats.replaceAll(" ", "");
 file_formats = file_formats.split(",");
 
+$("#btn_table_info").click(function(){
+  toggleTable('table_info');
+});
+
 const showSizeExceedMessage = () => {
     alert(
         "Объем загружаемых вами файлов превышает максимально разрешенный объем " + (file_upload_limit / 1024 / 1024) + " МБ." +
@@ -190,3 +194,12 @@ upload_button.click(async () => {
         await upload();
     }
 });
+
+function toggleTable(tableId) {
+    var table = document.getElementById(tableId);
+    if (table.classList.contains("hidden-table")) {
+        table.classList.remove("hidden-table");
+    } else {
+        table.classList.add("hidden-table");
+    }
+}

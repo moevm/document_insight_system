@@ -24,7 +24,7 @@ from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
 from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, \
-    init_criterions
+    init_criterions, BASE_PRES_CRITERION, BASE_REPORT_CRITERION
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
@@ -158,10 +158,13 @@ def upload():
         else:
             abort(401)
     elif request.method == "GET":
+        pack = db_methods.get_criteria_pack(current_user.criteria)
+        list_of_check = pack['raw_criterions']
+        check_labels_and_discrpt = {CRITERIA_LABELS[check[0]]: CRITERIA_DESCRIPTION[check[0]] for check in list_of_check}
         formats = set(current_user.formats)
         file_type = current_user.file_type['type']
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
-        return render_template("./upload.html", navi_upload=False, formats=sorted(formats))
+        return render_template("./upload.html", navi_upload=False, formats=sorted(formats), list_of_check=check_labels_and_discrpt)
 
 
 @app.route("/tasks", methods=["POST"])
@@ -271,11 +274,14 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
                    'slides_headers': 'Заголовки слайдов присутствуют и занимают не более двух строк',
                    'goals_slide': 'Слайд "Цель и задачи"', 'probe_slide': 'Слайд "Апробация работы"',
                    'actual_slide': 'Слайд с описанием актуальности работы', 'conclusion_slide': 'Слайд с заключением',
+                   'find_slides': 'Поиск ключевого слова в заголовках',
                    'slide_every_task': 'Наличие слайдов, посвященных задачам',
+                   'find_on_slide': 'Поиск ключевого слова в тексте слайда',
                    'pres_right_words': 'Проверка наличия определенных (правильных) слов в презентации',
                    'pres_image_share': 'Проверка доли объема презентации, приходящейся на изображения',
                    'pres_banned_words_check': 'Проверка наличия запретных слов в презентации',
                    'conclusion_actual': 'Соответствие заключения задачам',
+                   'verify_git_link': 'Проверка действительности ссылки на github',
                    'conclusion_along': 'Наличие направлений дальнейшего развития',
                    'simple_check': 'Простейшая проверка отчёта',
                    'banned_words_in_literature': 'Наличие запрещенных слов в списке литературы',
@@ -290,8 +296,14 @@ CRITERIA_LABELS = {'template_name': 'Соответствие названия �
                    'literature_references': 'Проверка наличия ссылок на все источники',
                    'image_references': 'Проверка наличия ссылок на все рисунки',
                    'table_references': 'Проверка наличия ссылок на все таблицы',
-                   'report_section_component': 'Проверка наличия необходимых компонентов указанного раздела',
-                   'main_text_check': 'Проверка оформления основного текста отчета'
+                   'report_section_component': 'Проверка наличия необходимых компонент указанного раздела',
+                   'main_text_check': 'Проверка оформления основного текста отчета',
+                   'headers_at_page_top_check': 'Проверка расположения разделов первого уровня с новой страницы',
+                   'lr_sections_check': 'Проверка соответствия заголовков разделов требуемым стилям',
+                   'style_check': 'Проверка корректности форматирования текста',
+                   'short_sections_check': "Поиск коротких разделов в отчёте",
+                   'spelling_check': "Проверка наличия орфографических ошибок в тексте",
+                   'future_dev': 'Наличие направлений дальнейшего развития',
                    }
 
 CRITERIA_DESCRIPTION = {'template_name': 'Шаблон названия: "Презентация_ВКР_Иванов", "ПРЕЗЕНТАЦИЯ_НИР_ИВАНОВ"',
@@ -566,6 +578,8 @@ def get_zip():
     if not current_user.is_admin:
         abort(403)
 
+    original_names = request.args.get('original_names', False) == 'true'    
+
     # create tmp folder
     dirpath = tempfile.TemporaryDirectory()
 
@@ -573,9 +587,13 @@ def get_zip():
     checks_list, _ = db_methods.get_checks(**get_query(request))
     for check in checks_list:
         db_file = db_methods.find_pdf_by_file_id(check['_id'])
+        original_name = db_methods.get_check(check['_id']).filename #get a filename from every check
         if db_file is not None:
-            with open(f"{dirpath.name}/{db_file.filename}", 'wb') as os_file:
-                os_file.write(db_file.read())
+            final_name = original_name if (original_name and original_names) else db_file.filename
+            # to avoid overwriting files with one name and different content: now we save only last version of pres (from last check)
+            if not os.path.exists(f'{dirpath.name}/{final_name}'):
+                with open(f"{dirpath.name}/{final_name}", 'wb') as os_file:
+                    os_file.write(db_file.read())
 
     # add csv
     response = get_stats()
