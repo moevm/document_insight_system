@@ -32,7 +32,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
             self.late_init_vkr()
             header = self.literature_header
             if not header:
-                return answer(False, f"Нет списка использованных источников!")
+                return answer(True, f"Нет списка использованных источников!<br><br>Если в вашей работе есть список литературы, убедитесь в правильности формата заголовка ")
             if not header["child"]:
                 return answer(False, "Не найдено ни одного источника.")
             header_number = header["number"]
