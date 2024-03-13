@@ -14,7 +14,7 @@ scripts/version.sh > app/$VERSION_FILE_NAME
 mkdir -p ../slides_checker_mongo_data
 
 docker-compose stop
-docker-compose --project-name wst_test_build build --no-cache
+docker-compose --project-name dis_test_build build --no-cache
 docker-compose build
 
 docker-compose up -d --remove-orphans
