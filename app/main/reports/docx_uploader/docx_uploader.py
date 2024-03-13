@@ -233,6 +233,15 @@ class DocxUploader(DocumentUploader):
     def __str__(self):
         return self.core_properties.to_string() + '\n' + '\n'.join(
             [self.paragraphs[i].to_string() for i in range(len(self.paragraphs))])
+    
+    def show_chapters(self, work_type):
+        chapters_str = "<br>"
+        for header in self.make_chapters(work_type):
+            if header["style"] == 'heading 2':
+                chapters_str += header["text"] + "<br>"
+            else:
+                chapters_str += "&nbsp;&nbsp;&nbsp;&nbsp;" + header["text"] + "<br>"
+        return chapters_str
 
 
 def main(args):

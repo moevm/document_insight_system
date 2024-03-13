@@ -178,6 +178,20 @@ class MdUploader(DocumentUploader):
         self.find_literature_vkr(work_type="VKR")
         return f"Заголовки:\n{self.headers_main}\n\nГлавы\n{self.chapters}\n\nСписок литературы:\n\n{self.literature_header}"
 
+    def show_chapters(self, work_type):
+        chapters_str = ""
+        for header in self.make_chapters(work_type):
+            if header["style"] == 'heading 2':
+                modified_header = re.sub(r'<h2>(.*?)</h2>', r'<h6><b>\1</b></h6>', header["text"])
+                chapters_str += modified_header
+            elif header["style"] == 'heading 3':
+                modified_header = re.sub(r'<h3>(.*?)</h3>', r'<h6>\1</h6>', header["text"])
+                chapters_str += modified_header
+            elif header["style"] == 'heading 4':
+                modified_header = re.sub(r'<h4>(.*?)</h4>', r'<h6>\1</h6>', header["text"])
+                chapters_str += modified_header
+        return chapters_str
+
 
 def main(args):
     md_file = MdUploader(args.mdfile)

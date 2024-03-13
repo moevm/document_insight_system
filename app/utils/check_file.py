@@ -6,7 +6,7 @@ def check_file(file, file_extension, allowed_extensions, check_mime=True):
 
     if check_mime:
         if file_extension == 'md':
-            if file.mimetype != 'text/markdown':
+            if file.mimetype not in ('text/markdown', 'text/plain'):
                 return "mime_type_does_not_match_extension"
         else:
             if file_extension != filetype.guess_extension(file):
