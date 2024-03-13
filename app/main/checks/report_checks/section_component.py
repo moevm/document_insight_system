@@ -11,6 +11,7 @@ class ReportSectionComponent(BaseReportCriterion):
         self.intro = {}
         if headers_map:
             self.chapter = StyleCheckSettings.CONFIGS.get(headers_map)[0]["headers"][0]
+            patterns = ('цель', 'задач')
         else:
             self.chapter = chapter
         self.chapters = []
@@ -39,14 +40,14 @@ class ReportSectionComponent(BaseReportCriterion):
                     if par.find(self.patterns[i]["text"]) >= 0:
                         self.patterns[i]["marker"] = 1
         else:
-            return answer(0, f"Раздел {self.chapter} не обнаружен!")
+            return answer(0, f'Раздел "{self.chapter}" не обнаружен!')
 
         for pattern in self.patterns:
             if not pattern["marker"]:
                 result_str += '<li>' + pattern["name"] + '</li>'
 
         if not result_str:
-            return answer(True, f"Все необходимые компоненты раздела {self.chapter} обнаружены!")
+            return answer(True, f'Все необходимые компоненты раздела "{self.chapter}" обнаружены!')
         else:
             return answer(False,
                           f'Не найдены следующие компоненты раздела {self.chapter}: <ul>{result_str}</ul>')

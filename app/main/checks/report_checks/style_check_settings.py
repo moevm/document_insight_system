@@ -123,8 +123,17 @@ class StyleCheckSettings:
             "headers": ["Поставленная цель и задачи",
                         "Тематика статьи",
                         "Методы обоснования",
-                        "Характеристика используемых данных",
+                        "Статья",
+                        ],
+            "unify_regex": None,
+            "regex": HEADER_REGEX
+        },
+        {
+            "style": HEADER_1_STYLE,
+            "docx_style": ["heading 2"],
+            "headers": ["Характеристика используемых данных",
                         "Характеристика выводов",
+                        "Статья",
                         ],
             "unify_regex": None,
             "regex": HEADER_REGEX
@@ -133,6 +142,13 @@ class StyleCheckSettings:
             "style": HEADER_1_NUM_STYLE,
             "docx_style": ["heading 2", "heading 3", "heading 4"],
             "headers": [],
+            "unify_regex": None,
+            "regex": HEADER_NUM_REGEX
+        },
+        {
+            "style": "Main_header",
+            "docx_style": ["heading 1"],
+            "headers": ["Задание"],
             "unify_regex": None,
             "regex": HEADER_NUM_REGEX
         }

@@ -7,21 +7,29 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
     id = 'needed_headers_check'
     priority = True
 
-    def __init__(self, file_info, main_heading_style="heading 2", headers_map = None):
+    def __init__(self, file_info, main_heading_style="heading 2", headers_map=None):
         super().__init__(file_info)
         self.headers_page = 1
         self.headers = []
         self.main_heading_style = main_heading_style
+        self.patterns = []
         if headers_map:
             self.config = headers_map
         else:
             self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
-        self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
+            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
 
     def late_init(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
         self.headers_page = self.file.find_header_page(self.file_type['report_type'])
         self.chapters_str = self.file.show_chapters(self.file_type['report_type'])
+        self.headers_main = self.file.get_main_headers()
+        print(11111111111111111111111)
+        print(self.headers_main)
+        if self.headers_main == "Задание 1":
+            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
+        elif self.headers_main == "Задание 2":
+            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[1]["headers"]
 
     def check(self):
         if self.file.page_counter() < 4:

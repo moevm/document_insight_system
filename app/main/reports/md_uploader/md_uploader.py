@@ -55,7 +55,7 @@ class MdUploader(DocumentUploader):
     def __init__(self, filepath):
         super().__init__()
         self.filepath = filepath
-        self.headers_main = []
+        self.headers_main = ''
         self.html_text = ''
         self.headers_page = 1
 
@@ -76,7 +76,7 @@ class MdUploader(DocumentUploader):
         self.paragraphs = html_text.split('\n')
         return self.paragraphs
 
-    def page_counter(self):
+    def page_counter(self): # we need this just to find a last page and make link to the literature in banned_words_in_literature 
         if not self.page_count:
             for k, v in self.pdf_file.text_on_page.items():
                 line = v[:20] if len(v) > 21 else v
@@ -96,8 +96,10 @@ class MdUploader(DocumentUploader):
         return self.page_count
 
     def get_main_headers(self):
-        header_main_regex = "<h1>(.*?)<\/h1>"
-        self.headers_main = re.findall(header_main_regex, self.html_text)
+        if not self.headers_main:
+            header_main_regex = "<h1>(.*?)<\/h1>"
+            self.headers_main = re.findall(header_main_regex, self.html_text)[0]
+        return self.headers_main
 
     def parse_effective_styles(self):
         for par in self.paragraphs:
@@ -172,6 +174,7 @@ class MdUploader(DocumentUploader):
     def parse_md_file(self):
         md_text = self.upload()
         self.parse(md_text)
+        self.get_main_headers()
         self.make_chapters(work_type="VKR")
         self.find_literature_vkr(work_type="VKR")
         return f"Заголовки:\n{self.headers_main}\n\nГлавы\n{self.chapters}\n\nСписок литературы:\n\n{self.literature_header}"
