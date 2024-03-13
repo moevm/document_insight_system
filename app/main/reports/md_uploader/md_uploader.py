@@ -46,15 +46,15 @@ from ..pdf_document.pdf_document_manager import PdfDocumentManager
 
 
 class MdUploader(DocumentUploader):
-    def __init__(self, path_to_md_file):
+    def __init__(self, filepath):
         super().__init__()
-        self.path_to_md_file = path_to_md_file
+        self.filepath = filepath
         self.headers_main = []
         self.html_text = ''
         self.headers_page = 1
 
     def upload(self):
-        with open(self.path_to_md_file, "r", encoding="utf-8") as f:
+        with open(self.filepath, "r", encoding="utf-8") as f:
             md_text = f.read()
             return md_text
 
@@ -62,8 +62,8 @@ class MdUploader(DocumentUploader):
         self.html_text = markdown.markdown(md_text)
         self.paragraphs = self.make_paragraphs(self.html_text)
         self.parse_effective_styles()
-        self.pdf_filepath = self.path_to_md_file.split('.')[0]+'.pdf'
-        self.pdf_file = PdfDocumentManager(self.path_to_md_file, md2pdf(self.pdf_filepath, md_file_path=self.path_to_md_file))
+        self.pdf_filepath = self.filepath.split('.')[0]+'.pdf'
+        self.pdf_file = PdfDocumentManager(self.filepath, md2pdf(self.pdf_filepath, md_file_path=self.filepath))
     
     def make_paragraphs(self, html_text):
         html_text = html_text.replace("<li>", "").replace("</li>", "").replace("</ol>", "").replace("<ol>", "")
