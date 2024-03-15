@@ -26,15 +26,14 @@ def main():
     args = parse_arguments()
 
     suite = unittest.TestSuite()
-    suite.addTest(BasicSeleniumTest.parametrize(AuthTestSelenium, param=(args.host, args.login, args.password)))
-    suite.addTest(BasicSeleniumTest.parametrize(StatisticTestSelenium, param=(args.host, args.login, args.password)))
-    suite.addTest(BasicSeleniumTest.parametrize(FileLoadTestSelenium, param=(args.host, args.login, args.password, args.report, args.report_doc, args.pres)))
-    suite.addTest(BasicSeleniumTest.parametrize(SingleCheckTestSelenium, param=(args.host, args.login, args.password)))    
-    suite.addTest(BasicSeleniumTest.parametrize(VersionTestSelenium, param=(args.host, args.login, args.password)))
+    tests = (AuthTestSelenium, StatisticTestSelenium, FileLoadTestSelenium, SingleCheckTestSelenium, VersionTestSelenium)
+    param = (args.host, args.login, args.password, args.report, args.report_doc, args.pres)
+    for test in tests:
+        suite.addTest(BasicSeleniumTest.parametrize(test, param=param))
 
     returnCode = not unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful()
 
-    BasicSeleniumTest.closeDriver()
+    BasicSeleniumTest.close_driver()
     sys.exit(returnCode)
 
 if __name__ == '__main__':

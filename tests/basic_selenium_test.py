@@ -1,3 +1,4 @@
+import os
 import unittest
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
@@ -27,16 +28,17 @@ class BasicSeleniumTest(unittest.TestCase):
 
     def authorization(self):
         host, login_param, password_param = self.param[:3]
-        URL = self.getUrl('/login')
-        self.getDriver().get(URL)
-        self.getDriver().implicitly_wait(30)
-        login = self.getDriver().find_element(By.ID, "login_text_field")
+        # login_param, password_param = os.environ.get('ADMIN_PASSWORD'), os.environ.get('ADMIN_PASSWORD')
+        URL = self.get_url('/login')
+        self.get_driver().get(URL)
+        self.get_driver().implicitly_wait(30)
+        login = self.get_driver().find_element(By.ID, "login_text_field")
         login.clear()
         login.send_keys(login_param)
-        password = self.getDriver().find_element(By.ID, "password_text_field")
+        password = self.get_driver().find_element(By.ID, "password_text_field")
         password.clear()
         password.send_keys(password_param)
-        login_button = self.getDriver().find_element(By.ID, "login_button")
+        login_button = self.get_driver().find_element(By.ID, "login_button")
         login_button.click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "upload_upload_button")))
 
@@ -54,12 +56,12 @@ class BasicSeleniumTest(unittest.TestCase):
             suite.addTest(testcase_class(name, param=param))
         return suite
 
-    def getUrl(self, relativePath):
+    def get_url(self, relativePath):
         return self.param[0] + relativePath
 
-    def getDriver(_):
+    def get_driver(_):
         return BasicSeleniumTest.driver
 
     @classmethod
-    def closeDriver(cls):
+    def close_driver(cls):
         cls.driver.close()

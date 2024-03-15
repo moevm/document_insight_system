@@ -7,13 +7,13 @@ class SingleCheckTestSelenium(BasicSeleniumTest):
 
     def test_open_check_card(self):
         self.authorization()
-        URL = self.getUrl('/check_list')
-        self.getDriver().get(URL)
-        self.getDriver().implicitly_wait(240)
-        single_check = self.getDriver().find_element(By.XPATH, "//table[@id='check-list-table']//tr/td/a")
+        URL = self.get_url('/check_list')
+        self.get_driver().get(URL)
+        self.get_driver().implicitly_wait(240)
+        single_check = self.get_driver().find_element(By.XPATH, "//table[@id='check-list-table']//tr/td/a")
         id_check_button = single_check.get_attribute("href").split("/")[-1]
-        URL = self.getUrl(f'/results/{id_check_button}')
-        self.getDriver().get(URL)
-        obj = self.getDriver().find_element(By.ID, 'results_holder')
+        URL = self.get_url(f'/results/{id_check_button}')
+        self.get_driver().get(URL)
+        obj = self.get_driver().find_element(By.ID, 'results_holder')
         self.assertNotEquals(obj, None)
     
