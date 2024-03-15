@@ -77,4 +77,6 @@ docs = [n_grams1, n_grams2]
 bag_of_ngrams = nlp_processor.get_bag_of_n_gramms(docs)
 vector1 = nlp_processor.get_vector_by_BOW(bag_of_ngrams, n_grams1)
 vector2 = nlp_processor.get_vector_by_BOW(bag_of_ngrams, n_grams2)
-print(f"Согласно косиносному сходству, веторы похожи на {nlp_processor.cosine_similarity(vector1, vector2)}")
+print(f"Согласно косиносному сходству, векторы похожи на {nlp_processor.cosine_similarity(vector1, vector2)}")
+
+# Согласно косиносному сходству, векторы похожи на 0.23636363636363636 (для данного примера)
