@@ -1,10 +1,11 @@
-import configparser
+from configparser import ConfigParser
 import os
 from os.path import join, exists
 
 from celery import Celery
+from celery.signals import worker_ready
 
-import passback_grades
+from passback_grades import run_passback
 from db import db_methods
 from db.db_types import Check
 from main.checker import check
@@ -12,7 +13,7 @@ from main.parser import parse
 from main.check_packs import BASE_PACKS
 from root_logger import get_root_logger
 
-config = configparser.ConfigParser()
+config = ConfigParser()
 config.read('app/config.ini')
 
 TASK_RETRY_COUNTDOWN = 60  # default = 3 * 60
@@ -31,6 +32,16 @@ celery.conf.beat_schedule = {
     },
 }
 celery.conf.timezone = 'Europe/Moscow'  # todo: get from env
+
+
+@worker_ready.connect
+def at_start(sender, **k):
+    from nltk import download
+    download('stopwords')
+    download('punkt')
+    
+    from language_tool_python.download_lt import download_lt
+    download_lt()
 
 
 @celery.task(name="create_task", queue='check-solution', bind=True)
@@ -67,12 +78,11 @@ def create_task(self, check_info):
         self.retry(countdown=TASK_RETRY_COUNTDOWN)  # Retry the task, adding it to the back of the queue.
 
 
+@celery.task(name="passback-task", queue='passback-grade')
+def passback_task():
+    return run_passback()
+
+
 def remove_files(filepaths):
     for filepath in filepaths:
         if exists(filepath): os.remove(filepath)
-
-
-@celery.task(name="passback-task", queue='passback-grade')
-def passback_task():
-    print('Run passback')
-    return passback_grades.run_passback()
