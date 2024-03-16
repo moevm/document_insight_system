@@ -16,13 +16,17 @@ class FileLoadTestSelenium(BasicSeleniumTest):
         if obj.text.startswith('Производится проверка файла'):
             start_time = time.time()
             max_time = 240
-            while time.time() - start_time < max_time:
+            while (time.time() - start_time) < max_time:
                 time.sleep(10)
                 self.get_driver().refresh()
-                obj = self.get_driver().find_element(By.ID, 'results_table')
-                if obj is not None:
-                    break
-            self.assertNotEquals(obj, None)
+                try:
+                    obj = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'results_table')))
+                    if obj is not None:
+                        self.assertNotEquals(obj, None)
+                        return
+                except:
+                    continue
+            self.fail('element is not found')
         else:
             self.fail("file didn't upload")
 

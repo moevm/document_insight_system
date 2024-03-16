@@ -1,7 +1,7 @@
 # !/bin/bash
 
 service="selenium-tests"
-container_id=$(docker-compose -f docker-compose-tests.yml ps -q $service)
+container_id=$(docker-compose -f docker-compose.yml -f docker-compose-selenium.yml ps -q $service)
 
 
 while true; do
@@ -10,7 +10,7 @@ while true; do
         if docker inspect --format='{{.State.Running}}' "$container_id" | grep -q "false"; then
             echo "tests are finished"
             EXIT_CODE=$(docker inspect "$container_id" --format='{{.State.ExitCode}}')
-            docker-compose -f docker-compose-tests.yml logs selenium-tests
+            docker-compose -f docker-compose.yml -f docker-compose-selenium.yml logs selenium-tests
             if [ "$EXIT_CODE" -eq 0 ]; then
                 echo "tests finished with code $EXIT_CODE (OK)"
                 exit 0

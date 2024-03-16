@@ -31,10 +31,10 @@ def main():
     for test in tests:
         suite.addTest(BasicSeleniumTest.parametrize(test, param=param))
 
-    returnCode = not unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful()
+    returncode = not unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful()
 
     BasicSeleniumTest.close_driver()
-    sys.exit(returnCode)
+    sys.exit(returncode)
 
 if __name__ == '__main__':
     main()

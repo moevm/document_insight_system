@@ -28,7 +28,6 @@ class BasicSeleniumTest(unittest.TestCase):
 
     def authorization(self):
         host, login_param, password_param = self.param[:3]
-        # login_param, password_param = os.environ.get('ADMIN_PASSWORD'), os.environ.get('ADMIN_PASSWORD')
         URL = self.get_url('/login')
         self.get_driver().get(URL)
         self.get_driver().implicitly_wait(30)

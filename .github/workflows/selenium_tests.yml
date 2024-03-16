@@ -2,10 +2,6 @@ name: Selenium_tests
 
 on: [push]
 
-name: Selenium_tests
-
-on: [push]
-
 jobs:
   check_tests:
     runs-on: ubuntu-20.04
