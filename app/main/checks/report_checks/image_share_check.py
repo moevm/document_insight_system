@@ -19,7 +19,7 @@ class ReportImageShareCheck(BaseReportCriterion):
             available_space = self.file.file.sections[0].page_height.cm - self.file.file.sections[0].bottom_margin.cm - \
                               self.file.file.sections[0].top_margin.cm
             images_pages = images_height / available_space
-            share = images_pages / self.file.count
+            share = images_pages / self.file.page_count
             if share > self.limit:
                 result_str = f'Проверка не пройдена! Изображения в работе занимают около {round(share, 2)} объема ' \
                              f'документа без учета приложения, ограничение - {round(self.limit, 2)}'

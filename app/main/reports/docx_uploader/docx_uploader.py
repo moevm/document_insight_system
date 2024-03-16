@@ -9,23 +9,17 @@ from .paragraph import Paragraph
 from .style import Style
 from .table import Table, Cell
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
+from ..document_uploader import DocumentUploader
 
 
-class DocxUploader:
+class DocxUploader(DocumentUploader):
     def __init__(self):
+        super().__init__()
         self.inline_shapes = []
         self.core_properties = None
         self.headers = []
-        self.chapters = []
-        self.paragraphs = []
-        self.tables = []
         self.file = None
-        self.styled_paragraphs = None
         self.special_paragraph_indices = {}
-        self.pdf_file = None
-        self.count = 0
-        self.first_lines = []
-        self.literature_header = []
         self.headers_page = 0
 
     def upload(self, file, pdf_filepath=''):
@@ -86,7 +80,7 @@ class DocxUploader:
                     {"name": "Реферат", "marker": False, "key": "реферат", "main_character": False,  "page": 0},
                     {"name": "Abstract", "marker": False, "key": "abstract", "main_character": False, "page": 0},
                     {"name": "Cодержание", "marker": False, "key": "содержание", "main_character": False, "page": 0}]
-                for page in range(1, self.count if self.page_counter() < 2 * len(headers) else 2 * len(headers)):
+                for page in range(1, self.page_count if self.page_counter() < 2 * len(headers) else 2 * len(headers)):
                     page_text = (self.pdf_file.get_text_on_page()[page].split("\n")[0]).lower()
                     for i in range(len(headers)):
                         if not headers[i]["marker"]:
@@ -122,6 +116,16 @@ class DocxUploader:
                         self.headers_page = header["page"]
                     break
         return self.headers_page
+    
+    def find_literature_page(self, work_type):
+        if not self.literature_page:
+            for k, v in self.pdf_file.text_on_page.items():
+                line = v[:40] if len(v) > 21 else v
+                if re.search('список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)', line.strip().lower()):
+                    break
+                self.literature_page += 1
+        self.literature_page += 1
+        return self.literature_page
 
     def find_literature_vkr(self, work_type):
         if not self.literature_header:
@@ -153,9 +157,8 @@ class DocxUploader:
 
     # Parses styles once; subsequent calls have no effect, since the file itself shouldn't change
     def parse_effective_styles(self):
-        if self.styled_paragraphs is not None:
+        if self.styled_paragraphs:
             return
-        self.styled_paragraphs = []
         for par in filter(lambda p: len(p.text.strip()) > 0, self.file.paragraphs):
             paragraph = {"text": par.text, "runs": []}
             for run in filter(lambda r: len(r.text.strip()) > 0, par.runs):
@@ -193,12 +196,12 @@ class DocxUploader:
         return result
 
     def page_counter(self):
-        if not self.count:
+        if not self.page_count:
             for k, v in self.pdf_file.text_on_page.items():
                 line = v[:20] if len(v) > 21 else v
                 if re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip()):
                     break
-                self.count += 1
+                self.page_count += 1
                 line = ''
                 lines = v.split("\n")
                 for i in range(len(lines)):
@@ -208,7 +211,7 @@ class DocxUploader:
                         line += " "
                     line += lines[i].strip()
                 self.first_lines.append(line.lower())
-        return self.count
+        return self.page_count
 
     def upload_from_cli(self, file):
         self.upload(file=file)
@@ -221,6 +224,15 @@ class DocxUploader:
     def __str__(self):
         return self.core_properties.to_string() + '\n' + '\n'.join(
             [self.paragraphs[i].to_string() for i in range(len(self.paragraphs))])
+    
+    def show_chapters(self, work_type):
+        chapters_str = "<br>"
+        for header in self.make_chapters(work_type):
+            if header["style"] == 'heading 2':
+                chapters_str += header["text"] + "<br>"
+            else:
+                chapters_str += "&nbsp;&nbsp;&nbsp;&nbsp;" + header["text"] + "<br>"
+        return chapters_str
 
 
 def main(args):
