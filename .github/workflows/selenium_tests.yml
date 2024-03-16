@@ -16,6 +16,7 @@ jobs:
       - name: Build docker-compose with docker-compose-selenium (tests)
         run: |
           cp .env_example .env
+          cp app/VERSION_example.json app/VERSION.json
           docker-compose -f docker-compose.yml -f docker-compose-selenium.yml build
       - name: Run docker-compose with docker-compose-selenium (tests)
         run: |
