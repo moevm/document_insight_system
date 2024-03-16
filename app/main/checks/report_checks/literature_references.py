@@ -35,8 +35,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             self.late_init_vkr()
             header = self.literature_header
             if not header:
-                return answer(False,
-                              f'Не найден Список использованных источников.<br><br>Проверьте корректность использования стилей.')
+                return answer(True,
+                              f'Не найден Список использованных источников.<br><br>Если в вашей работе есть список источников, проверьте корректность использования стилей.')
             start_literature_par = header["number"]
             number_of_sources = self.count_sources_vkr(header)
         else:
@@ -77,7 +77,10 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def search_references(self, start_par):
         array_of_references = set()
         for i in range(0, start_par):
-            detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i].to_string().split('\n')[1])
+            if isinstance(self.file.paragraphs[i], str):
+                detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i])
+            else:
+                detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i].paragraph_text)
             if detected_references:
                 for reference in detected_references:
                     for one_part in re.split(r'[\[\],]', reference):
@@ -93,7 +96,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
             text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
-            if re.fullmatch(self.name_pattern, text_string):
+            if re.fullmatch(f'{self.name_pattern}', text_string):    
                 start_index = i
                 break
         return start_index

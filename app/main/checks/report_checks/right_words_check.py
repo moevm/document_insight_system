@@ -7,7 +7,7 @@ class ReportRightWordsCheck(BaseReportCriterion):
     description = "Проверка наличия определенных (правильных) слов в тексте отчёта"
     id = 'right_words_check'
 
-    def __init__(self, file_info, patterns=["цель"]):
+    def __init__(self, file_info, patterns=["цел[ьией]"]):
         super().__init__(file_info)
         self.patterns = dict.fromkeys(patterns, False)
 
