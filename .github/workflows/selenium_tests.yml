@@ -9,15 +9,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build system images (non-pulling)
-        run: |
-          # build base image
-          docker build -f Dockerfile_base -t osll/slides-base:20230202 .
       - name: Build docker-compose with docker-compose-selenium (tests)
         run: |
           cp .env_example .env
           cp app/VERSION_example.json app/VERSION.json
           docker-compose -f docker-compose.yml -f docker-compose-selenium.yml build
+      
       - name: Run docker-compose with docker-compose-selenium (tests)
         run: |
           docker-compose -f docker-compose.yml -f docker-compose-selenium.yml up -d
