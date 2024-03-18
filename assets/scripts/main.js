@@ -14,7 +14,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import 'bootstrap-datepicker';
 import 'bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css'
 
-import * as CryptoJS from "crypto-js";
+import * as md5 from "md5";
 
 import '../styles/main.css';
 
@@ -33,7 +33,7 @@ import '../styles/404.css';
 
 
 export function hash(password) {
-    return CryptoJS.MD5(password).toString()
+    return md5(password)
 }
 
 export function collect_values_if_possible(...ids) {

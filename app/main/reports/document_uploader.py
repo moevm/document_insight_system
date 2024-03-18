@@ -48,3 +48,6 @@ class DocumentUploader(ABC):
     @abstractmethod
     def show_chapters(self, work_type):
         pass
+
+    def get_main_headers(self):
+        pass
