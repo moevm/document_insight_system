@@ -3,42 +3,30 @@
 service="selenium-tests"
 container_id=$(docker-compose -f docker-compose.yml -f docker-compose-selenium.yml ps -q $service)
 
+if [ -z "$container_id" ]; then
+    echo "Контейнер сервиса $service не найден."
+    exit 1
+fi
 
-while true; do
-
-    if docker ps -a -q --no-trunc| grep -q "^${container_id}$"; then
-        if docker inspect --format='{{.State.Running}}' "$container_id" | grep -q "false"; then
-            echo "tests are finished"
-            EXIT_CODE=$(docker inspect "$container_id" --format='{{.State.ExitCode}}')
-            docker-compose -f docker-compose.yml -f docker-compose-selenium.yml logs selenium-tests
-            if [ "$EXIT_CODE" -eq 0 ]; then
-                echo "tests finished with code $EXIT_CODE (OK)"
-                exit 0
-            else
-                echo "tests are failed, code $EXIT_CODE"
-                exit 1
-            fi
-        else
-            echo "tests in progress"
-            sleep 30
-        fi
-    else
-        echo "Контейнер сервиса $service не найден."
-        exit 1
-    fi
-
+while [ "$(docker inspect --format='{{.State.Running}}' "$container_id")" == "true" ]; do
+    echo "tests in progress"
+    sleep 30
 done
 
+echo "tests are finished"
 
-# in case of return logs:
-# while true; do
-#     test_end=$(docker-compose -f docker-compose-tests.yml logs selenium-tests | grep -q "Ran"; echo $?)
+EXIT_CODE=$(docker inspect "$container_id" --format='{{.State.ExitCode}}')
+echo "tests logs:"
+docker-compose -f docker-compose.yml -f docker-compose-selenium.yml logs selenium-tests
+echo "web logs:"
+docker-compose logs web
+echo "worker logs:"
+docker-compose logs worker
 
-#     if [ "$test_end" -eq 0 ]; then
-#         echo "tests are finished"
-#         exit 0
-#     else
-#         sleep 60
-#         echo "in progress"
-#     fi
-# done
+if [ "$EXIT_CODE" -eq 0 ]; then
+    echo "tests finished with code $EXIT_CODE (OK)"
+    exit 0
+else
+    echo "tests are failed, code $EXIT_CODE"
+    exit 1
+fi
