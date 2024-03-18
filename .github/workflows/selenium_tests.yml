@@ -1,0 +1,45 @@
+name: Selenium_tests
+
+on: [push]
+
+jobs:
+  check_tests:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build docker-compose with docker-compose-selenium (tests)
+        run: |
+          cp .env_example .env
+          cp app/VERSION_example.json app/VERSION.json
+          docker-compose -f docker-compose.yml -f docker-compose-selenium.yml build
+      
+      - name: Run docker-compose with docker-compose-selenium (tests)
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose-selenium.yml up -d
+          chmod +x tests/scripts/docker_check_tests.sh
+          ./tests/scripts/docker_check_tests.sh
+
+
+# jobs:
+#   check_tests:
+#     runs-on: ubuntu-20.04
+
+#     steps:
+#       - uses: actions/checkout@v2
+
+#       - name: Simplify docker-compose file name
+#         run: mv docker-compose-tests.yml docker-compose.yml
+
+#       - name: Build system images (non-pulling)
+#         run: |
+#           # build base image
+#           docker build -f Dockerfile_base -t osll/slides-base:20230202 .
+
+#       - name: Run docker-compose tests
+#         run: |
+#           cp .env_example .env
+#           docker-compose up -d
+#           chmod +x tests/scripts/docker_check_tests.sh
+#           ./tests/scripts/docker_check_tests.sh

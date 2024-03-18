@@ -23,8 +23,8 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
         self.headers_page = self.file.find_header_page(self.file_type['report_type'])
         self.chapters_str = self.file.show_chapters(self.file_type['report_type'])
-        self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
         # TODO: change
+        self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
         if self.headers_main == "Задание 1":
             self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
         elif self.headers_main == "Задание 2":
