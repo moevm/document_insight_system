@@ -28,12 +28,14 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
         if self.headers_main == "Задание 1":
             self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
         elif self.headers_main == "Задание 2":
-            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[1]["headers"]
+            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[1]["headers"] 
 
     def check(self):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         self.late_init()
+        if self.headers_main == 'Заголовок не определен':
+            return answer(False, "Название работы не определено. Убедитесь в правильности оформления заголовка")
         result_string = ''
         patterns = []
         for pattern in self.patterns:

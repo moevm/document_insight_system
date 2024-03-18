@@ -97,8 +97,12 @@ class MdUploader(DocumentUploader):
 
     def get_main_headers(self, work_type):
         if not self.headers_main:
-            header_main_regex = "<h1>(.*?)<\/h1>"
-            self.headers_main = re.findall(header_main_regex, self.html_text)[0]
+            header_main_regex = r'<h1>(.*?)<\/h1>|Задание\s+\d+'
+            match = re.search(header_main_regex, self.html_text)
+            if match:
+                self.headers_main = match.group(1) if match.group(1) else match.group(0)
+            else:
+                self.headers_main = 'Заголовок не определен'
         return self.headers_main
 
     def parse_effective_styles(self):
@@ -174,10 +178,10 @@ class MdUploader(DocumentUploader):
     def parse_md_file(self):
         md_text = self.upload()
         self.parse(md_text)
-        self.get_main_headers()
+        self.get_main_headers(work_type='VKR')
         self.make_chapters(work_type="VKR")
         self.find_literature_vkr(work_type="VKR")
-        return f"Заголовки:\n{self.headers_main}\n\nГлавы\n{self.chapters}\n\nСписок литературы:\n\n{self.literature_header}"
+        return f"Заголовки:\n{self.headers_main}\n\nГлавы\n{self.chapters}\n\nСписок литературы:\n\n{self.html_text}"
 
     def show_chapters(self, work_type):
         chapters_str = ""

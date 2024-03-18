@@ -98,6 +98,17 @@ class DocxUploader(DocumentUploader):
                 self.headers_main = self.make_headers(work_type)[1]['name']
         return self.headers_main
 
+    # in case of different type of work, depends on marker in headers:
+    # def get_main_headers(self, work_type):
+    #     if not self.headers_main: 
+    #         if work_type == 'VKR':
+    #             check_headers_main = self.make_headers(work_type)[1]['marker']
+    #             if check_headers_main:
+    #                 self.headers_main = self.make_headers(work_type)[1]['name']
+    #             else:
+    #                 self.headers_main = 'Заголовок не определен'
+    #     return self.headers_main
+
     def __make_table(self, tables):
         for i in range(len(tables)):
             table = []
