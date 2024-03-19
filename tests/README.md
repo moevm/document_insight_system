@@ -33,11 +33,11 @@ $ docker run -e LOGIN=your_login -e PASSWORD=your password --network="host" your
 ```
 
 ### Docker-compose
-You can run app with docker-compose-tests:
+You can run docker-compose-selenium with docker-compose:
 
 ```bash
-$ docker-compose -f docker-compose-tests.yml build
-$ docker-compose -f docker-compose-tests.yml up
+$ docker-compose -f docker-compose.yml -f docker-compose-selenium.yml build
+$ docker-compose -f docker-compose.yml -f docker-compose-selenium.yml up
 
 ```
 
