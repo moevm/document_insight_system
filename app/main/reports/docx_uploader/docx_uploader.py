@@ -18,6 +18,7 @@ class DocxUploader(DocumentUploader):
         self.inline_shapes = []
         self.core_properties = None
         self.headers = []
+        self.headers_main = ''
         self.file = None
         self.special_paragraph_indices = {}
         self.headers_page = 0
@@ -90,6 +91,12 @@ class DocxUploader(DocumentUploader):
                                 break
                 self.headers = headers
         return self.headers
+    
+    def get_main_headers(self, work_type): #this method helps to avoid mistake in "needed_headers_check" (because of structure checks for md)
+        if not self.headers_main:
+            if work_type == 'VKR':
+                self.headers_main = self.make_headers(work_type)[1]['name']
+        return self.headers_main
 
     def __make_table(self, tables):
         for i in range(len(tables)):

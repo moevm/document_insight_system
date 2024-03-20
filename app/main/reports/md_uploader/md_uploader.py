@@ -95,7 +95,7 @@ class MdUploader(DocumentUploader):
             self.page_count = 5 
         return self.page_count
 
-    def get_main_headers(self):
+    def get_main_headers(self, work_type):
         if not self.headers_main:
             header_main_regex = "<h1>(.*?)<\/h1>"
             self.headers_main = re.findall(header_main_regex, self.html_text)[0]
