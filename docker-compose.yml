@@ -35,6 +35,7 @@ services:
       - mongodb
     volumes:
       - presentation_files:/usr/src/project/files/
+      - language_tool_cache:/root/.cache/language_tool_python/
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     cpuset: ${CONTAINER_CPU:-0-1}
@@ -75,6 +76,7 @@ services:
     cpuset: ${CONTAINER_CPU:-0-1}
 
 volumes:
+  flower_data:
+  language_tool_cache:
   presentation_files:
   redis_data:
-  flower_data:
