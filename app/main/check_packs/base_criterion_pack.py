@@ -27,7 +27,7 @@ class BaseCriterionPack:
                 criterion_check_result = criterion.check()
             except Exception as e:
                 logger.error(f'{criterion.id}: oшибка во время проверки: {e}')
-                criterion_check_result = {'score': 0, 'verdict': ('Во время проверки произошла ошибка, попробуйте чуть позже',)}
+                criterion_check_result = {'score': 0, 'verdict': ('Во время проверки произошла ошибка, попробуйте чуть позже.')}
             if criterion.priority and not criterion_check_result['score']:
                 failed_priority_check = True
                 criterion_check_result['verdict'] = [PRIORITY_CHECK_FAILED_MSG] + list(criterion_check_result['verdict'])
