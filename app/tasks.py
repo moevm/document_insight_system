@@ -40,8 +40,8 @@ def at_start(sender, **k):
     download('stopwords')
     download('punkt')
     
-    from language_tool_python.download_lt import download_lt
-    download_lt()
+    from language_tool_python import LanguageTool
+    LanguageTool('ru-RU').close()
 
 
 @celery.task(name="create_task", queue='check-solution', bind=True)
