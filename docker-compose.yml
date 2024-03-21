@@ -21,6 +21,7 @@ services:
       - presentation_files:/usr/src/project/files/
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
+    cpuset: ${CONTAINER_CPU:-0-1}
 
   worker:
     image: slides_checker_base_image
@@ -36,6 +37,8 @@ services:
       - presentation_files:/usr/src/project/files/
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
+    cpuset: ${CONTAINER_CPU:-0-1}
+    mem_limit: ${WORKER_MEMORY:-1G}
 
   worker-dashboard:
     image: slides_checker_base_image
@@ -53,12 +56,14 @@ services:
     depends_on:
       - worker
       - redis
+    cpuset: ${CONTAINER_CPU:-0-1}
 
   redis:
     image: redis:6-alpine
     restart: always
     volumes:
       - redis_data:/data
+    cpuset: ${CONTAINER_CPU:-0-1}
 
   mongodb:
     image: mongo:4.0.17-xenial
@@ -67,6 +72,7 @@ services:
       - '--wiredTigerCacheSizeGB=${MONGODB_CACHE_SIZE:-1}'
     volumes:
       - ../slides_checker_mongo_data:/data/db
+    cpuset: ${CONTAINER_CPU:-0-1}
 
 volumes:
   presentation_files:
