@@ -61,19 +61,30 @@ const resetFileUpload = () => {
 };
 
 const changeUploadButton = () => {
-    if (pdf_uploaded || file_uploaded) {
-        const pdf_size = pdf_file_input.prop("files")[0]?.size || 0;
+    if (two_files_info) {
+        if (pdf_uploaded || file_uploaded) {
+            const pdf_size = pdf_file_input.prop("files")[0]?.size || 0;
+            const file_size = file_input.prop("files")[0]?.size || 0;
+            if (pdf_size + file_size <= file_upload_limit) {
+                if (file_uploaded)
+                    upload_button.prop("disabled", false);
+            } else {
+                showSizeExceedMessage();
+                resetFileUpload();
+                upload_button.prop("disabled", true);
+            }
+        } else {
+            upload_button.prop("disabled", true);
+        }
+    } else {
         const file_size = file_input.prop("files")[0]?.size || 0;
-        if (pdf_size + file_size <= file_upload_limit) {
-            if (file_uploaded)
-                upload_button.prop("disabled", false);
+        if (file_size <= file_upload_limit) {
+            upload_button.prop("disabled", false);
         } else {
             showSizeExceedMessage();
             resetFileUpload();
             upload_button.prop("disabled", true);
         }
-    } else {
-        upload_button.prop("disabled", true);
     }
 };
 
