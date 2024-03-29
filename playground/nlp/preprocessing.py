@@ -52,7 +52,7 @@ class NLPProcessor:
             for item in docs:
                 if word in item:
                     word_in_docs += 1
-            return np.log10((len(docs) + 1) / (word_in_docs + 1))
+            return np.log10(len(docs) / (word_in_docs + 1))
 
         def tf_idf(word, doc, docs):
             return tf(word, doc) * idf(word, docs)
@@ -101,7 +101,10 @@ class NLPProcessor:
         for i, text_vector in enumerate(text_vectors):
             result = self.cosine_similarity(goal_vector, text_vector)
             results.append(result)
+        max_result = max(results)
         for index, value in enumerate(results):
+            if max_result != 0.0:
+                results[index] = value / max_result
             print(f"Абзац {index + 1} схож с целью на {results[index]}")
         print(f"В среднем: {sum(results) / len(results)}")
 
