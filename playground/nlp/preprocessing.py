@@ -1,4 +1,4 @@
-from collections import Counter, defaultdict
+from collections import defaultdict
 
 import nltk
 import numpy as np
@@ -22,10 +22,10 @@ class NLPProcessor:
         tokens = [word for word in tokens if word.lower() not in self.stop_words]
         return [self.stemmer.stem(token) for token in tokens]
 
-    def get_ngrams(self, tokens, n=2):
+    def get_ngrams(self, tokens, n=1):
         result = []
         for i in range(n):
-            n_grams = ngrams(tokens, i+1)
+            n_grams = ngrams(tokens, i + 1)
             result.extend([' '.join(grams) for grams in n_grams])
         return result
 
@@ -43,40 +43,79 @@ class NLPProcessor:
             i += 1
         return index_word
 
-    def get_vector_by_BOW(self, bag_of_ngramms, doc):
+    def get_vector_by_BOW(self, bag_of_ngramms, doc, docs):
+        def tf(word, doc):
+            return doc.count(word) / len(doc)
+
+        def idf(word, docs):
+            word_in_docs = 0
+            for item in docs:
+                if word in item:
+                    word_in_docs += 1
+            return np.log10((len(docs) + 1) / (word_in_docs + 1))
+
+        def tf_idf(word, doc, docs):
+            return tf(word, doc) * idf(word, docs)
+
         count_dict = defaultdict(int)
         vec = np.zeros(len(bag_of_ngramms))
-        for item in doc:
-            count_dict[item] += 1
+        for word in doc:
+            count_dict[word] += tf_idf(word, doc, docs)
+
         for key, item in count_dict.items():
             vec[bag_of_ngramms[key]] = item
         return vec
 
     def cosine_similarity(self, vector1, vector2):
-            text1_norm = float(len(vector1)) ** 0.5
-            text2_norm = float(len(vector2)) ** 0.5
-            dot_product = sum(gram_a * gram_b for gram_a, gram_b in zip(vector1, vector2))
-            cosine_sim = dot_product / (text1_norm * text2_norm)
 
-            return cosine_sim
+        norm1 = np.linalg.norm(vector1)
+        norm2 = np.linalg.norm(vector2)
+        dot_product = np.dot(vector1, vector2)
+        cosine_sim = dot_product / (norm1 * norm2)
+        return cosine_sim
+
+    def example(self, goal, text):
+        corpus = []
+        goal_n_grams = []
+        for paragraph in goal:
+            if paragraph:
+                tokens1 = self.preprocessing(paragraph)
+                n_grams1 = self.get_ngrams(tokens1)
+                goal_n_grams.append(n_grams1)
+
+        text_n_grams = []
+        for paragraph in text:
+            if paragraph:
+                tokens2 = self.preprocessing(paragraph)
+                n_grams2 = self.get_ngrams(tokens2)
+                text_n_grams.append(n_grams2)
+
+        corpus.extend(goal_n_grams)
+        corpus.extend(text_n_grams)
+        bag_of_n_grams = self.get_bag_of_n_gramms(corpus)
+        goal_vector = self.get_vector_by_BOW(bag_of_n_grams, goal_n_grams[0], corpus)
+        text_vectors = []
+        for paragraph in text_n_grams:
+            text_vectors.append(self.get_vector_by_BOW(bag_of_n_grams, paragraph, corpus))
+        results = []
+        for i, text_vector in enumerate(text_vectors):
+            result = self.cosine_similarity(goal_vector, text_vector)
+            results.append(result)
+        for index, value in enumerate(results):
+            print(f"Абзац {index + 1} схож с целью на {results[index]}")
+        print(f"В среднем: {sum(results) / len(results)}")
+
+        print('\n')
 
 
-# Пример использования
-nlp_processor = NLPProcessor()
+if __name__ == '__main__':
+    nlp_processor = NLPProcessor()
 
-text1 = "Реализация алгоритма поиска и отслеживания точек интереса для измерения пульса по видео"
-text2 = "Проанализировать существующие решения для определения видимых областей лица человека и для определения перекрытий объектов, На основе анализа существующих решений сформулировать требования к реализации алгоритма, Реализовать алгоритм поиска и отслеживания точек интереса, Исследовать свойства реализованного алгоритма"
-
-tokens1 = nlp_processor.preprocessing(text1)
-n_grams1 = nlp_processor.get_ngrams(tokens1)
-
-tokens2 = nlp_processor.preprocessing(text2)
-n_grams2 = nlp_processor.get_ngrams(tokens2)
-
-docs = [n_grams1, n_grams2]
-bag_of_ngrams = nlp_processor.get_bag_of_n_gramms(docs)
-vector1 = nlp_processor.get_vector_by_BOW(bag_of_ngrams, n_grams1)
-vector2 = nlp_processor.get_vector_by_BOW(bag_of_ngrams, n_grams2)
-print(f"Согласно косиносному сходству, векторы похожи на {nlp_processor.cosine_similarity(vector1, vector2)}")
-
-# Согласно косиносному сходству, векторы похожи на 0.23636363636363636 (для данного примера)
+    text1 = open("text_1").read().split('\n')
+    text2 = open("text_2").read().split('\n')
+    goal1 = open("goal_1").read().split('\n')
+    goal2 = open("goal_2").read().split('\n')
+    nlp_processor.example(goal1, text1)
+    nlp_processor.example(goal1, text2)
+    nlp_processor.example(goal2, text1)
+    nlp_processor.example(goal2, text2)
