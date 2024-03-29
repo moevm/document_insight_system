@@ -765,10 +765,12 @@ def catch_all(path):
     logger.info("Страница /" + path + " не найдена!")
     return render_template("./404.html")
 
-
 @app.route("/")
 def default():
-    return redirect(url_for("upload"))
+    if current_user.is_authenticated:
+        return redirect(url_for("upload"))
+    else:
+        return render_template("intro_page.html")
 
 
 # Disable caching:
