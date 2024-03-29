@@ -22,7 +22,7 @@ class NLPProcessor:
         tokens = [word for word in tokens if word.lower() not in self.stop_words]
         return [self.stemmer.stem(token) for token in tokens]
 
-    def get_ngrams(self, tokens, n=1):
+    def get_ngrams(self, tokens, n=2):
         result = []
         for i in range(n):
             n_grams = ngrams(tokens, i + 1)
@@ -103,7 +103,7 @@ class NLPProcessor:
             results.append(result)
         max_result = max(results)
         for index, value in enumerate(results):
-            if max_result != 0.0:
+            if results.count(0) / len(results) <= 0.6 and max_result != 0.0:
                 results[index] = value / max_result
             print(f"Абзац {index + 1} схож с целью на {results[index]}")
         print(f"В среднем: {sum(results) / len(results)}")
