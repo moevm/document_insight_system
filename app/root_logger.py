@@ -9,7 +9,7 @@ class MongoDBLoggingHandler(logging.StreamHandler):
     def __init__(self, service_name):
         super().__init__()
         self.setLevel(logging.DEBUG)
-        self.setLevel(logging.ERROR)
+        # self.setLevel(logging.ERROR)
         self.service_name = service_name
 
     def emit(self, record):
