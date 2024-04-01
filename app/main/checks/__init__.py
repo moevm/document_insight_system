@@ -12,9 +12,17 @@ classes_report = filter(
     inspect.getmembers(report_checks)
     )
 
-AVAILABLE_CHECKS = {
-    'pres': {cls.id: cls for _, cls in classes_pres},
-    'report': {cls.id: cls for _, cls in classes_report}
+CLASSES_INFO = {
+    'pres': {cls.id: (cls, cls.description) for _, cls in classes_pres},
+    'report': {cls.id: (cls, cls.description) for _, cls in classes_report}
 }
 
-print(AVAILABLE_CHECKS)
+AVAILABLE_CHECKS = {
+    'pres': {cls_id: cls for cls_id, (cls, _) in CLASSES_INFO['pres'].items()},
+    'report': {cls_id: cls for cls_id, (cls, _) in CLASSES_INFO['report'].items()}
+}
+
+CRITERIA_LABELS = {
+    **{cls_id: cls_desc for cls_id, (_, cls_desc) in CLASSES_INFO['pres'].items()},
+    **{cls_id: cls_desc for cls_id, (_, cls_desc) in CLASSES_INFO['report'].items()}
+}
