@@ -3,7 +3,7 @@ version: '2'
 services:
   web:
     build: .
-    image: slides_checker_base_image
+    image: document_insight_system_image
     restart: always
     ports:
       - "${WEB_PORT:-8080}:8080"
@@ -21,9 +21,10 @@ services:
       - presentation_files:/usr/src/project/files/
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
+    cpuset: ${CONTAINER_CPU:-0-1}
 
   worker:
-    image: slides_checker_base_image
+    image: document_insight_system_image
     restart: always
     command: celery --app=app.tasks.celery worker -n celery@worker --beat -Q ${CELERY_QUERIES} --loglevel=info
     environment:
@@ -34,11 +35,14 @@ services:
       - mongodb
     volumes:
       - presentation_files:/usr/src/project/files/
+      - language_tool_cache:/root/.cache/language_tool_python/
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
+    cpuset: ${CONTAINER_CPU:-0-1}
+    mem_limit: ${WORKER_MEMORY:-1G}
 
   worker-dashboard:
-    image: slides_checker_base_image
+    image: document_insight_system_image
     command: celery --broker=${REDIS_URL} flower --port=${FLOWER_PORT} --url_prefix=${FLOWER_PREFIX} --basic_auth=${FLOWER_AUTH} --persistent=True
     ports:
       - "${FLOWER_PORT}:5555"
@@ -53,12 +57,14 @@ services:
     depends_on:
       - worker
       - redis
+    cpuset: ${CONTAINER_CPU:-0-1}
 
   redis:
     image: redis:6-alpine
     restart: always
     volumes:
       - redis_data:/data
+    cpuset: ${CONTAINER_CPU:-0-1}
 
   mongodb:
     image: mongo:4.0.17-xenial
@@ -67,8 +73,10 @@ services:
       - '--wiredTigerCacheSizeGB=${MONGODB_CACHE_SIZE:-1}'
     volumes:
       - ../slides_checker_mongo_data:/data/db
+    cpuset: ${CONTAINER_CPU:-0-1}
 
 volumes:
+  flower_data:
+  language_tool_cache:
   presentation_files:
   redis_data:
-  flower_data:

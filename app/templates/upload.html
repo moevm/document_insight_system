@@ -12,6 +12,7 @@
         <script>
             const file_upload_limit = {{ config.MAX_CONTENT_LENGTH | tojson }};
             const file_type = "{{file_type}}";
+            const two_files_info = {{ current_user.two_files | tojson }};
         </script>
         <div class="col-11 col-sm-8 col-md-5 col-lg-4 my-auto">
             <h3 class="text-center ins" id="upload_title">{{ upload_title }}</h3>
