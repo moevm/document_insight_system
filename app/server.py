@@ -18,6 +18,7 @@ from flask_login import (LoginManager, current_user, login_required,
 from flask_recaptcha import ReCaptcha
 
 import servants.user as user
+from app.main.reports.docx_uploader import DocxUploader
 from app.utils import format_check_for_table, check_file
 from db import db_methods
 from db.db_types import Check
@@ -29,6 +30,7 @@ from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
 from utils import checklist_filter, decorator_assertion, get_file_len, format_check
+from main.reports.parse_file.parse_file import parse_chapters, parse_headers_and_pages
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
@@ -217,6 +219,15 @@ def run_task():
         converted_id = db_methods.add_file_to_db(filenamepdf, filepathpdf)
     else:
         converted_id = db_methods.write_pdf(filename, filepath)
+
+    parsed_file = DocxUploader()
+    parsed_file.upload(filepath)
+    parsed_file.parse()
+    parsed_file.make_chapters("VKR")
+    parsed_file.make_headers("VKR")
+    chapters = parse_chapters(parsed_file)
+    chapters_with_headers = parse_headers_and_pages(chapters, parsed_file)
+
     check = Check({
         '_id': file_id,
         'conv_pdf_fs_id': converted_id,
@@ -229,7 +240,8 @@ def run_task():
         'score': -1,  # score=-1 -> checking in progress
         'is_ended': False,
         'is_failed': False,
-        'params_for_passback': current_user.params_for_passback
+        'params_for_passback': current_user.params_for_passback,
+        'parsed_chapters': chapters_with_headers
     })
     db_methods.add_check(file_id, check)  # add check for parsed_file to db
     task = create_task.delay(check.pack(to_str=True))  # add check to queue
