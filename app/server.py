@@ -30,6 +30,7 @@ from servants import pre_luncher
 from tasks import create_task
 from utils import checklist_filter, decorator_assertion, get_file_len, format_check
 from app.main.checks import CRITERIA_LABELS
+from routes.admin import admin
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
@@ -49,6 +50,9 @@ app.recaptcha = ReCaptcha(app=app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['CELERY_RESULT_BACKEND'] = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
 app.config['CELERY_BROKER_URL'] = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
+
+app.register_blueprint(admin, url_prefix='/admin')
+
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
