@@ -4,7 +4,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class TableReferences(BaseReportCriterion):
-    description = "Проверка наличия ссылок на все таблицы"
+    label = "Проверка наличия ссылок на все таблицы"
+    description = ""
     id = 'table_references'
 
     def __init__(self, file_info, table_style="ВКР_Подпись таблицы"):

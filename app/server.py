@@ -29,7 +29,7 @@ from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
 from utils import checklist_filter, decorator_assertion, get_file_len, format_check
-from app.main.checks import CRITERIA_LABELS
+from app.main.checks import CRITERIA_INFO
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
@@ -161,7 +161,8 @@ def upload():
     elif request.method == "GET":
         pack = db_methods.get_criteria_pack(current_user.criteria)
         list_of_check = pack['raw_criterions']
-        check_labels_and_discrpt = {CRITERIA_LABELS[check[0]]: CRITERIA_DESCRIPTION[check[0]] for check in list_of_check}
+        # check_labels_and_discrpt = {CRITERIA_LABELS[check[0]]: CRITERIA_DESCRIPTION[check[0]] for check in list_of_check}
+        check_labels_and_discrpt = {CRITERIA_INFO[check[0]]['label']: CRITERIA_INFO[check[0]]['description'] for check in list_of_check}
         formats = set(current_user.formats)
         file_type = current_user.file_type['type']
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
@@ -307,43 +308,43 @@ def get_status(task_id):
 #                    'future_dev': 'Наличие направлений дальнейшего развития',
 #                    }
 
-CRITERIA_DESCRIPTION = {'template_name': 'Шаблон названия: "Презентация_ВКР_Иванов", "ПРЕЗЕНТАЦИЯ_НИР_ИВАНОВ"',
-                       'slides_number': 'Подсчет основных и запасных слайдов',
-                       'slides_enum': 'Проверка наличия и корректности номеров слайдов',
-                       'slides_headers': 'Проверка наличия и корректности заголовков',
-                       'goals_slide': 'Проверка наличия слайда',
-                       'probe_slide': 'Проверка наличия слайда',
-                       'conclusion_slide': 'Проверка наличия слайда',
-                       'find_slides': 'Ключевые слова: "Апробация", "Цели и задачи", "Заключение"',
-                       'find_on_slide': 'Ключевое слово: "Актуальность"',
-                       'slide_every_task': 'Проверка на наличие слайдов',
-                       'pres_right_words': '',
-                       'pres_image_share': 'Доля изображений не должна превышать 0,9',
-                       'pres_banned_words_check': '',
-                       'conclusion_actual': 'Проверка соответствия заключения поставленным задачам (в процентах)',
-                       'conclusion_along': 'Проверка слайда "Заключение"',
-                       'simple_check': 'Проверка отчёта на пустоту страниц',
-                       'banned_words_in_literature': 'Запрещено упоминание слова "wikipedia"',
-                       'banned_words_check': 'Запрещено упоминание слова "мы"',
-                       'page_counter': 'Количество страниц должно быть больше 50ти, не считая "Приложения"',
-                       'image_share_check': 'Доля изображений (не включая "Приложение") не должна превышать 0,9',
-                       'right_words_check': 'Определенное слово: "цель"',
-                       'first_pages_check': 'Обязательные страницы: Титульный лист, Задание на выпускную квалификационную работу, Календарный план, Реферат, Abstract, Cодержание',
-                       'main_character_check': 'И.о. зав. кафедрой: А.А. Лисс',
-                       'needed_headers_check': '',
-                       'header_check': '(Шрифты, отступы и т.д.)',
-                       'literature_references': '',
-                       'image_references': '',
-                       'table_references': '',
-                       'report_section_component': 'Раздел "Введение", компоненты: "цель", "задачи", "объект", "предмет"',
-                       'main_text_check': 'Перечень доспустимых стилей: "Основной текст; ВКР_Основной текст", "ВКР_Подпись таблицы", "ВКР_Подпись для рисунков, схем", "ВКР_Содержимое таблицы"',
-                       'headers_at_page_top_check': '',
-                       'lr_sections_check': '',
-                       'style_check': 'Соответствие допустимым стилям',
-                       'short_sections_check': "Минимальное количество абзацев в разделе: 5, минимальное количество слов в абзаце: 20",
-                       'spelling_check': "",
-                       'future_dev': 'Поиск направления развития в разделе "Заключение"',
-                       }
+# CRITERIA_DESCRIPTION = {'template_name': 'Шаблон названия: "Презентация_ВКР_Иванов", "ПРЕЗЕНТАЦИЯ_НИР_ИВАНОВ"',
+#                        'slides_number': 'Подсчет основных и запасных слайдов',
+#                        'slides_enum': 'Проверка наличия и корректности номеров слайдов',
+#                        'slides_headers': 'Проверка наличия и корректности заголовков',
+#                        'goals_slide': 'Проверка наличия слайда',
+#                        'probe_slide': 'Проверка наличия слайда',
+#                        'conclusion_slide': 'Проверка наличия слайда',
+#                        'find_slides': 'Ключевые слова: "Апробация", "Цели и задачи", "Заключение"',
+#                        'find_on_slide': 'Ключевое слово: "Актуальность"',
+#                        'slide_every_task': 'Проверка на наличие слайдов',
+#                        'pres_right_words': '',
+#                        'pres_image_share': 'Доля изображений не должна превышать 0,9',
+#                        'pres_banned_words_check': '',
+#                        'conclusion_actual': 'Проверка соответствия заключения поставленным задачам (в процентах)',
+#                        'conclusion_along': 'Проверка слайда "Заключение"',
+#                        'simple_check': 'Проверка отчёта на пустоту страниц',
+#                        'banned_words_in_literature': 'Запрещено упоминание слова "wikipedia"',
+#                        'banned_words_check': 'Запрещено упоминание слова "мы"',
+#                        'page_counter': 'Количество страниц должно быть больше 50ти, не считая "Приложения"',
+#                        'image_share_check': 'Доля изображений (не включая "Приложение") не должна превышать 0,9',
+#                        'right_words_check': 'Определенное слово: "цель"',
+#                        'first_pages_check': 'Обязательные страницы: Титульный лист, Задание на выпускную квалификационную работу, Календарный план, Реферат, Abstract, Cодержание',
+#                        'main_character_check': 'И.о. зав. кафедрой: А.А. Лисс',
+#                        'needed_headers_check': '',
+#                        'header_check': '(Шрифты, отступы и т.д.)',
+#                        'literature_references': '',
+#                        'image_references': '',
+#                        'table_references': '',
+#                        'report_section_component': 'Раздел "Введение", компоненты: "цель", "задачи", "объект", "предмет"',
+#                        'main_text_check': 'Перечень доспустимых стилей: "Основной текст; ВКР_Основной текст", "ВКР_Подпись таблицы", "ВКР_Подпись для рисунков, схем", "ВКР_Содержимое таблицы"',
+#                        'headers_at_page_top_check': '',
+#                        'lr_sections_check': '',
+#                        'style_check': 'Соответствие допустимым стилям',
+#                        'short_sections_check': "Минимальное количество абзацев в разделе: 5, минимальное количество слов в абзаце: 20",
+#                        'spelling_check': "",
+#                        'future_dev': 'Поиск направления развития в разделе "Заключение"',
+#                        }
 
 @app.route("/results/<string:_id>", methods=["GET"])
 def results(_id):

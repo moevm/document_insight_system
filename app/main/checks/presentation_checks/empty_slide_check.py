@@ -5,7 +5,8 @@ from ..base_check import BasePresCriterion, answer
 
 
 class PresEmptySlideCheck(BasePresCriterion):
-    description = "Проверка наличия пустых слайдов в презентации"
+    label = "Проверка наличия пустых слайдов в презентации"
+    description = ""
     id = 'pres_empty_slide'
 
     def __init__(self, file_info, status=False):

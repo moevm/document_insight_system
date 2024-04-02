@@ -5,7 +5,8 @@ from ..base_check import BasePresCriterion, answer
 
 
 class FindTasks(BasePresCriterion):
-    description = "Наличие слайдов, посвященных задачам"
+    label = "Наличие слайдов, посвященных задачам"
+    description = 'Проверка на наличие слайдов'
     id = 'slide_every_task'
 
     def __init__(self, file_info, min_percent=50, keyword='Цель и задачи'):

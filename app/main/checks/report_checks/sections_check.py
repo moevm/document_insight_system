@@ -8,7 +8,8 @@ from ..base_check import BaseReportCriterion, answer
 
 class LRReportSectionCheck(BaseReportCriterion):
     # TODO: DEPRECATED
-    description = "Проверка соответствия заголовков разделов требуемым стилям"
+    label = "Проверка соответствия заголовков разделов требуемым стилям"
+    description = ''
     id = "lr_sections_check"
 
     def __init__(self, file_info, presets: str = 'LR_HEADERS',

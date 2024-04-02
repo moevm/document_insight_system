@@ -2,7 +2,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportPageCounter(BaseReportCriterion):
-    description = "Проверка количества страниц в файле"
+    label = "Проверка количества страниц в файле"
+    description = 'Количество страниц должно быть больше 50ти, не считая "Приложения"'
     id = 'page_counter'
     priority = True
 

@@ -13,16 +13,22 @@ classes_report = filter(
     )
 
 CLASSES_INFO = {
-    'pres': {cls.id: (cls, cls.description) for _, cls in classes_pres},
-    'report': {cls.id: (cls, cls.description) for _, cls in classes_report}
+    'pres': {cls.id: (cls, cls.label, cls.description) for _, cls in classes_pres},
+    'report': {cls.id: (cls, cls.label, cls.description) for _, cls in classes_report}
 }
 
 AVAILABLE_CHECKS = {
-    'pres': {cls_id: cls for cls_id, (cls, _) in CLASSES_INFO['pres'].items()},
-    'report': {cls_id: cls for cls_id, (cls, _) in CLASSES_INFO['report'].items()}
+    'pres': {cls_id: cls for cls_id, (cls, _, _) in CLASSES_INFO['pres'].items()},
+    'report': {cls_id: cls for cls_id, (cls, _, _) in CLASSES_INFO['report'].items()}
 }
 
-CRITERIA_LABELS = {
-    **{cls_id: cls_desc for cls_id, (_, cls_desc) in CLASSES_INFO['pres'].items()},
-    **{cls_id: cls_desc for cls_id, (_, cls_desc) in CLASSES_INFO['report'].items()}
-}
+CRITERIA_INFO = {
+        **{cls_id: {'label': cls_lbl, 'description': cls_desc} for cls_id, (_, cls_lbl, cls_desc) in CLASSES_INFO['pres'].items()},
+        **{cls_id: {'label': cls_lbl, 'description': cls_desc} for cls_id, (_, cls_lbl, cls_desc) in CLASSES_INFO['report'].items()}
+        }
+
+print(CRITERIA_INFO)
+# CRITERIA_LABELS = {
+#     **{cls_id: cls_desc for cls_id, (_, cls_desc) in CLASSES_INFO['pres'].items()},
+#     **{cls_id: cls_desc for cls_id, (_, cls_desc) in CLASSES_INFO['report'].items()}
+# }
