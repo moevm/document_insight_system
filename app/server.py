@@ -165,9 +165,9 @@ def upload():
     elif request.method == "GET":
         pack = db_methods.get_criteria_pack(current_user.criteria)
         list_of_check = pack['raw_criterions']
-        check_labels_and_discrpt = {CRITERIA_INFO[check[0]]['label']: CRITERIA_INFO[check[0]]['description'] for check in list_of_check}
-        formats = set(current_user.formats)
         file_type = current_user.file_type['type']
+        check_labels_and_discrpt = {CRITERIA_INFO[file_type][check[0]]['label']: CRITERIA_INFO[file_type][check[0]]['description'] for check in list_of_check}
+        formats = set(current_user.formats)
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
         return render_template("./upload.html", navi_upload=False, formats=sorted(formats), list_of_check=check_labels_and_discrpt)
 

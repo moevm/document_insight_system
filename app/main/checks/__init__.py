@@ -12,17 +12,12 @@ classes_report = filter(
     inspect.getmembers(report_checks)
     )
 
-CLASSES_INFO = {
-    'pres': {cls.id: (cls, cls.label, cls.description) for _, cls in classes_pres},
-    'report': {cls.id: (cls, cls.label, cls.description) for _, cls in classes_report}
+CRITERIA_INFO = {
+    'pres': {cls.id: {'class': cls, 'name': name, 'label': cls.label, 'description': cls.description} for name, cls in classes_pres},
+    'report': {cls.id: {'class': cls, 'name': name, 'label': cls.label, 'description': cls.description} for name, cls in classes_report}
 }
 
 AVAILABLE_CHECKS = {
-    'pres': {cls_id: cls for cls_id, (cls, _, _) in CLASSES_INFO['pres'].items()},
-    'report': {cls_id: cls for cls_id, (cls, _, _) in CLASSES_INFO['report'].items()}
+    'pres': {cls_id: CRITERIA_INFO['pres'][cls_id]['class'] for cls_id in CRITERIA_INFO['pres']},
+    'report': {cls_id: CRITERIA_INFO['report'][cls_id]['class'] for cls_id in CRITERIA_INFO['report']}
 }
-
-CRITERIA_INFO = {
-        **{cls_id: {'label': cls_lbl, 'description': cls_desc} for cls_id, (_, cls_lbl, cls_desc) in CLASSES_INFO['pres'].items()},
-        **{cls_id: {'label': cls_lbl, 'description': cls_desc} for cls_id, (_, cls_lbl, cls_desc) in CLASSES_INFO['report'].items()}
-        }
