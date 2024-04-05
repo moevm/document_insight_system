@@ -24,24 +24,27 @@
             </tr>
         </thead>
         <tbody>
-            {% for criterion_id, criterion_info in table_criteria.items() %}
-            <tr data-toggle="collapse" data-target="#verd{{ criterion_id }}" class="accordion-toggle">
-                <td>
-                    <button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button>
-                </td>
-                <th scope="row" class="ins">{{ criterion_id }}</th>
-                <td class="ins">{{ criterion_info['label'] }}</td>
-                <td class="ins">{{ criterion_info['name'] }}</td>
-                <td class="ins">{{ file_type }}</td>
-            </tr>
-            <tr>
-                <td colspan="5" class="hiddenRow">
-                    <div id="verd{{ criterion_id }}" class="accordian-body collapse" style="margin-left: 2em;">
-                        {{ criterion_info['description'] }}
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
+            {% for type, criterion_info in table_criteria.items() %}
+    {% for criterion_id, info in criterion_info.items() %}
+        <tr data-toggle="collapse" data-target="#verd{{ criterion_id }}" class="accordion-toggle">
+            <td>
+                <button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button>
+            </td>
+            <th scope="row" class="ins">{{ criterion_id }}</th>
+            <td class="ins">{{ info['label'] }}</td>
+            <td class="ins">{{ info['name'] }}</td>
+            <td class="ins">{{ type }}</td>
+        </tr>
+        <tr>
+            <td colspan="5" class="hiddenRow">
+                <div id="verd{{ criterion_id }}" class="accordian-body collapse" style="margin-left: 2em;">
+                    {{ info['description'] }}
+                </div>
+            </td>
+        </tr>
+    {% endfor %}
+{% endfor %}
+
         </tbody>
     </table>
 
