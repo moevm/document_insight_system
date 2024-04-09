@@ -3,7 +3,8 @@ from .style_check_settings import StyleCheckSettings
 
 
 class ReportSectionComponent(BaseReportCriterion):
-    description = "Проверка наличия необходимых компонентов указанного раздела"
+    label = "Проверка наличия необходимых компонентов указанного раздела"
+    description = 'Раздел "Введение", компоненты: "цель", "задачи", "объект", "предмет"'
     id = 'report_section_component'
 
     def __init__(self, file_info, chapter='Введение', patterns=('цель', 'задач', 'объект', 'предмет'), headers_map = None):

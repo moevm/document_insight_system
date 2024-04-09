@@ -12,6 +12,7 @@ def answer(mod, *args):
 
 class BaseCriterion:
     description = None
+    label = None
     file_type = None
     id = None
     priority = False  # if priority criterion is failed -> check is failed
@@ -31,7 +32,7 @@ class BaseCriterion:
 
     @property
     def name(self):
-        return self.description
+        return self.label
 
 
 class BasePresCriterion(BaseCriterion):

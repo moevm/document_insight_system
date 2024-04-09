@@ -5,7 +5,8 @@ from ..base_check import BasePresCriterion, answer
 
 
 class SldSimilarity(BasePresCriterion):
-    description = "Соответствие заключения задачам"
+    label = "Соответствие заключения задачам"
+    description = 'Проверка соответствия заключения поставленным задачам (в процентах)'
     id = 'conclusion_actual'
 
     def __init__(self, file_info, goals='Цель и задачи', conclusion='Заключение', min_percent=50):

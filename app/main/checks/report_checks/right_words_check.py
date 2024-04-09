@@ -4,7 +4,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportRightWordsCheck(BaseReportCriterion):
-    description = "Проверка наличия определенных (правильных) слов в тексте отчёта"
+    label = "Проверка наличия определенных (правильных) слов в тексте отчёта"
+    description = 'Определенное слово: "цель"'
     id = 'right_words_check'
 
     def __init__(self, file_info, patterns=["цел[ьией]"]):

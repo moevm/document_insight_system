@@ -4,7 +4,8 @@ from ..base_check import BaseReportCriterion, answer, morph
 
 
 class BannedWordsInLiteratureCheck(BaseReportCriterion):
-    description = "Проверка наличия запрещенных слов в списке литературы"
+    label = "Проверка наличия запрещенных слов в списке литературы"
+    description = 'Запрещено упоминание слова "wikipedia"'
     id = 'banned_words_in_literature'
 
     def __init__(self, file_info, banned_words=["wikipedia"]):

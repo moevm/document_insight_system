@@ -6,7 +6,8 @@ from ...reports.docx_uploader.style import Style
 
 
 class ReportChapters(BaseReportCriterion):
-    description = "Проверка оформления заголовков отчета"
+    label = "Проверка оформления заголовков отчета"
+    description = '(Шрифты, отступы и т.д.)'
     id = 'header_check'
 
     def __init__(self, file_info):

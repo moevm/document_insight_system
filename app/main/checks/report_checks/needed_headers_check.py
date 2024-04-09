@@ -3,7 +3,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportNeededHeadersCheck(BaseReportCriterion):
-    description = "Проверка наличия обязательных заголовков в отчете"
+    label = "Проверка наличия обязательных заголовков в отчете"
+    description = ''
     id = 'needed_headers_check'
     priority = True
 

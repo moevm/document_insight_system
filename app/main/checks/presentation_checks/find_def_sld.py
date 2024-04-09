@@ -2,7 +2,8 @@ from ..base_check import answer, BasePresCriterion
 
 
 class FindDefSld(BasePresCriterion):
-    description = "Поиск ключевого слова в заголовках"
+    label = "Поиск ключевого слова в заголовках"
+    description = 'Ключевые слова: "Апробация", "Цели и задачи", "Заключение"'
     id = 'find_slides'
 
     def __init__(self, file_info, key_slide):

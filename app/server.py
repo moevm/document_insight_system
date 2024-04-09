@@ -29,6 +29,8 @@ from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
 from utils import checklist_filter, decorator_assertion, get_file_len, format_check
+from app.main.checks import CRITERIA_INFO
+from routes.admin import admin
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
@@ -48,6 +50,9 @@ app.recaptcha = ReCaptcha(app=app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['CELERY_RESULT_BACKEND'] = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
 app.config['CELERY_BROKER_URL'] = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
+
+app.register_blueprint(admin, url_prefix='/admin')
+
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -160,9 +165,9 @@ def upload():
     elif request.method == "GET":
         pack = db_methods.get_criteria_pack(current_user.criteria)
         list_of_check = pack['raw_criterions']
-        check_labels_and_discrpt = {CRITERIA_LABELS[check[0]]: CRITERIA_DESCRIPTION[check[0]] for check in list_of_check}
-        formats = set(current_user.formats)
         file_type = current_user.file_type['type']
+        check_labels_and_discrpt = {CRITERIA_INFO[file_type][check[0]]['label']: CRITERIA_INFO[file_type][check[0]]['description'] for check in list_of_check}
+        formats = set(current_user.formats)
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
         return render_template("./upload.html", navi_upload=False, formats=sorted(formats), list_of_check=check_labels_and_discrpt)
 
@@ -266,83 +271,6 @@ def get_status(task_id):
         "task_result": task_result.result
     }
     return jsonify(result), 200
-
-
-CRITERIA_LABELS = {'template_name': 'Соответствие названия файла шаблону',
-                   'slides_number': 'Количество основных слайдов',
-                   'slides_enum': 'Нумерация слайдов',
-                   'slides_headers': 'Заголовки слайдов присутствуют и занимают не более двух строк',
-                   'goals_slide': 'Слайд "Цель и задачи"', 'probe_slide': 'Слайд "Апробация работы"',
-                   'actual_slide': 'Слайд с описанием актуальности работы', 'conclusion_slide': 'Слайд с заключением',
-                   'find_slides': 'Поиск ключевого слова в заголовках',
-                   'slide_every_task': 'Наличие слайдов, посвященных задачам',
-                   'find_on_slide': 'Поиск ключевого слова в тексте слайда',
-                   'pres_right_words': 'Проверка наличия определенных (правильных) слов в презентации',
-                   'pres_image_share': 'Проверка доли объема презентации, приходящейся на изображения',
-                   'pres_banned_words_check': 'Проверка наличия запретных слов в презентации',
-                   'conclusion_actual': 'Соответствие заключения задачам',
-                   'verify_git_link': 'Проверка действительности ссылки на github',
-                   'conclusion_along': 'Наличие направлений дальнейшего развития',
-                   'simple_check': 'Простейшая проверка отчёта',
-                   'banned_words_in_literature': 'Наличие запрещенных слов в списке литературы',
-                   'banned_words_check': 'Проверка наличия запретных слов в тексте отчёта',
-                   'page_counter': 'Проверка количества страниц',
-                   'image_share_check': 'Проверка доли объема отчёта, приходящейся на изображения',
-                   'right_words_check': 'Проверка наличия определенных (правильных) слов в тексте отчёта',
-                   'first_pages_check': 'Проверка наличия обязательных страниц в отчете',
-                   'main_character_check': 'Проверка фамилии и должности заведующего кафедрой',
-                   'needed_headers_check': 'Проверка наличия обязательных заголовков в отчете',
-                   'header_check': 'Проверка оформления заголовков отчета',
-                   'literature_references': 'Проверка наличия ссылок на все источники',
-                   'image_references': 'Проверка наличия ссылок на все рисунки',
-                   'table_references': 'Проверка наличия ссылок на все таблицы',
-                   'report_section_component': 'Проверка наличия необходимых компонент указанного раздела',
-                   'main_text_check': 'Проверка оформления основного текста отчета',
-                   'headers_at_page_top_check': 'Проверка расположения разделов первого уровня с новой страницы',
-                   'lr_sections_check': 'Проверка соответствия заголовков разделов требуемым стилям',
-                   'style_check': 'Проверка корректности форматирования текста',
-                   'short_sections_check': "Поиск коротких разделов в отчёте",
-                   'spelling_check': "Проверка наличия орфографических ошибок в тексте",
-                   'future_dev': 'Наличие направлений дальнейшего развития',
-                   }
-
-CRITERIA_DESCRIPTION = {'template_name': 'Шаблон названия: "Презентация_ВКР_Иванов", "ПРЕЗЕНТАЦИЯ_НИР_ИВАНОВ"',
-                       'slides_number': 'Подсчет основных и запасных слайдов',
-                       'slides_enum': 'Проверка наличия и корректности номеров слайдов',
-                       'slides_headers': 'Проверка наличия и корректности заголовков',
-                       'goals_slide': 'Проверка наличия слайда',
-                       'probe_slide': 'Проверка наличия слайда',
-                       'conclusion_slide': 'Проверка наличия слайда',
-                       'find_slides': 'Ключевые слова: "Апробация", "Цели и задачи", "Заключение"',
-                       'find_on_slide': 'Ключевое слово: "Актуальность"',
-                       'slide_every_task': 'Проверка на наличие слайдов',
-                       'pres_right_words': '',
-                       'pres_image_share': 'Доля изображений не должна превышать 0,9',
-                       'pres_banned_words_check': '',
-                       'conclusion_actual': 'Проверка соответствия заключения поставленным задачам (в процентах)',
-                       'conclusion_along': 'Проверка слайда "Заключение"',
-                       'simple_check': 'Проверка отчёта на пустоту страниц',
-                       'banned_words_in_literature': 'Запрещено упоминание слова "wikipedia"',
-                       'banned_words_check': 'Запрещено упоминание слова "мы"',
-                       'page_counter': 'Количество страниц должно быть больше 50ти, не считая "Приложения"',
-                       'image_share_check': 'Доля изображений (не включая "Приложение") не должна превышать 0,9',
-                       'right_words_check': 'Определенное слово: "цель"',
-                       'first_pages_check': 'Обязательные страницы: Титульный лист, Задание на выпускную квалификационную работу, Календарный план, Реферат, Abstract, Cодержание',
-                       'main_character_check': 'И.о. зав. кафедрой: А.А. Лисс',
-                       'needed_headers_check': '',
-                       'header_check': '(Шрифты, отступы и т.д.)',
-                       'literature_references': '',
-                       'image_references': '',
-                       'table_references': '',
-                       'report_section_component': 'Раздел "Введение", компоненты: "цель", "задачи", "объект", "предмет"',
-                       'main_text_check': 'Перечень доспустимых стилей: "Основной текст; ВКР_Основной текст", "ВКР_Подпись таблицы", "ВКР_Подпись для рисунков, схем", "ВКР_Содержимое таблицы"',
-                       'headers_at_page_top_check': '',
-                       'lr_sections_check': '',
-                       'style_check': 'Соответствие допустимым стилям',
-                       'short_sections_check': "Минимальное количество абзацев в разделе: 5, минимальное количество слов в абзаце: 20",
-                       'spelling_check': "",
-                       'future_dev': 'Поиск направления развития в разделе "Заключение"',
-                       }
 
 @app.route("/results/<string:_id>", methods=["GET"])
 def results(_id):
