@@ -1,16 +1,35 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User List</title>
-</head>
-<body>
-    <h1>Список пользователей</h1>
-    <ul>
-        {% for name, username in usernames %}
-            <p><a href="{{ url_for('users.user_info', username=username) }}">{{ name }}</a></p>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+{# Accepts: header dependicies, results, id, filename #}
+
+
+{% extends "root.html" %}
+
+{% block title %}Информация о пользователях{% endblock %}
+
+{% block main %}
+
+<div class="header row">{% include "header.html" %}</div>
+<div class="holder row">
+    <div class="container-fluid table-responsive-xl">
+    <h3 id="results_title" class="texteous ins">
+        Список пользователей:
+    </h3>
+    <table id="check-list-table" class="table bg-white">
+        <thead>
+            <tr>
+                <th scope="col">Username</th>
+                <th scope="col">Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% for name, username in usernames %}
+                <td class="ins"><a href="{{ url_for('users.user_info', username=username) }}">{{ name }}</td>
+                <td class="ins"><a href="{{ url_for('users.user_info', username=username) }}">{{ username }}</td>
+                {% endfor %}
+            </tr>    
+        </tbody>
+    </table>
+</div>
+</div>
+
+{% endblock %}
