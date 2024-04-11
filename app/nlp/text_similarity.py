@@ -75,39 +75,6 @@ class NLPProcessor:
         cosine_sim = dot_product / (norm1 * norm2)
         return cosine_sim
 
-    def example(self, goal, text):
-        corpus = []
-        goal_n_grams = []
-        for paragraph in goal:
-            if paragraph:
-                tokens1 = self.preprocessing(paragraph)
-                n_grams1 = self.get_ngrams(tokens1)
-                goal_n_grams.append(n_grams1)
-
-        text_n_grams = []
-        for paragraph in text:
-            if paragraph:
-                tokens2 = self.preprocessing(paragraph)
-                n_grams2 = self.get_ngrams(tokens2)
-                text_n_grams.append(n_grams2)
-
-        corpus.extend(goal_n_grams)
-        corpus.extend(text_n_grams)
-        bag_of_n_grams = self.get_bag_of_n_gramms(corpus)
-        goal_vector = self.get_vector_by_BOW(bag_of_n_grams, goal_n_grams[0], corpus)
-        text_vectors = []
-        for paragraph in text_n_grams:
-            text_vectors.append(self.get_vector_by_BOW(bag_of_n_grams, paragraph, corpus))
-        results = []
-        for i, text_vector in enumerate(text_vectors):
-            result = self.cosine_similarity(goal_vector, text_vector)
-            results.append(result)
-        max_result = max(results)
-        for index, value in enumerate(results):
-            results[index] = value / max_result
-            print(f"Абзац {index + 1} схож с целью на {results[index]}")
-        print(f"В среднем: {sum(results) / len(results)}")
-
     def calculate_cosine_similarity(self, goal, texts: dict):
         if not (goal or texts):
             return
