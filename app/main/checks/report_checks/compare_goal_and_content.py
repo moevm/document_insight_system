@@ -1,6 +1,4 @@
-import re
-
-from ..base_check import BaseReportCriterion, answer, morph
+from ..base_check import BaseReportCriterion, answer
 
 
 class CompareGoalAndContentCheck(BaseReportCriterion):
@@ -11,7 +9,7 @@ class CompareGoalAndContentCheck(BaseReportCriterion):
         super().__init__(file_info)
         self.headers = []
         self.goal = ""
-        self.problems = []
+        self.tasks = []
         self.main_text = []
 
     def late_init(self):
@@ -21,8 +19,23 @@ class CompareGoalAndContentCheck(BaseReportCriterion):
         self.late_init()
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
-        result = []
-        for header in self.headers:
-            result.append(header["text"][0:10])
-
-        return answer(True, " ".join(result))
+        result = ""
+        for text_on_page in self.file.pdf_file.get_text_on_page().values():
+            if text_on_page.split()[0].lower() != "введение":
+                continue
+            goal_index = text_on_page.find("Цель")
+            tasks_index = text_on_page.find("Задачи")
+            if goal_index != -1 and tasks_index != -1:
+                goal_start = goal_index + len("Цель") + 1
+                goal_end = tasks_index
+                self.goal = text_on_page[goal_start:goal_end].strip()
+                tasks_start = tasks_index + len("Задачи") + 1
+                tasks_end = text_on_page.find(".", tasks_start)
+                self.tasks = text_on_page[tasks_start:tasks_end].split('\n')
+                result = f"tasks equal {text_on_page[tasks_start:tasks_end]} {tasks_start} {tasks_end}"
+            elif goal_index == -1:
+                return answer(False, "В введении не написана цель работы")
+            elif tasks_index == -1:
+                return answer(False, "В введении не написаны задачи")
+        result = f"Цель: {self.goal}, задачи: {self.tasks}"
+        return answer(True, result)
