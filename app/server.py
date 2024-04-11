@@ -31,6 +31,7 @@ from tasks import create_task
 from utils import checklist_filter, decorator_assertion, get_file_len, format_check
 from app.main.checks import CRITERIA_INFO
 from routes.admin import admin
+from routes.users import users
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
@@ -52,6 +53,7 @@ app.config['CELERY_RESULT_BACKEND'] = os.environ.get("CELERY_RESULT_BACKEND", "r
 app.config['CELERY_BROKER_URL'] = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
 
 app.register_blueprint(admin, url_prefix='/admin')
+app.register_blueprint(users, url_prefix='/users')
 
 
 app.logger.addHandler(get_logging_stdout_handler())

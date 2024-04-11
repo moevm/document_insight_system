@@ -59,6 +59,8 @@ def get_user(username):
     else:
         return None
 
+def get_all_users():
+    return users_collection.find()
 
 # Returns True if user was found and updated and false if not (username can not be changed!)
 def edit_user(user):
