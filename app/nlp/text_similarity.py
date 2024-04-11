@@ -67,10 +67,11 @@ class NLPProcessor:
         return vec
 
     def cosine_similarity(self, vector1, vector2):
-
         norm1 = np.linalg.norm(vector1)
         norm2 = np.linalg.norm(vector2)
         dot_product = np.dot(vector1, vector2)
+        if norm1 == 0.0 or norm2 == 0.0:
+            return 0
         cosine_sim = dot_product / (norm1 * norm2)
         return cosine_sim
 
@@ -103,22 +104,30 @@ class NLPProcessor:
             results.append(result)
         max_result = max(results)
         for index, value in enumerate(results):
-            if results.count(0) / len(results) <= 0.6 and max_result != 0.0:
-                results[index] = value / max_result
+            results[index] = value / max_result
             print(f"Абзац {index + 1} схож с целью на {results[index]}")
         print(f"В среднем: {sum(results) / len(results)}")
 
-        print('\n')
-
-
-if __name__ == '__main__':
-    nlp_processor = NLPProcessor()
-
-    text1 = open("text_1").read().split('\n')
-    text2 = open("text_2").read().split('\n')
-    goal1 = open("goal_1").read().split('\n')
-    goal2 = open("goal_2").read().split('\n')
-    nlp_processor.example(goal1, text1)
-    nlp_processor.example(goal1, text2)
-    nlp_processor.example(goal2, text1)
-    nlp_processor.example(goal2, text2)
+    def calculate_cosine_similarity(self, goal, texts: dict):
+        if not (goal or texts):
+            return
+        corpus = []
+        text1_n_grams = self.get_ngrams(self.preprocessing(goal))
+        text2_n_grams = {}
+        for chapter in texts.keys():
+            text2_n_grams[chapter] = self.get_ngrams(self.preprocessing(texts[chapter]))
+        corpus.append(text1_n_grams)
+        corpus.extend(text2_n_grams.values())
+        bag_of_n_grams = self.get_bag_of_n_gramms(corpus)
+        goal_vector = self.get_vector_by_BOW(bag_of_n_grams, text1_n_grams, corpus)
+        text_vectors = {}
+        for chapter, text in text2_n_grams.items():
+            text_vectors[chapter] = self.get_vector_by_BOW(bag_of_n_grams, text, corpus)
+        result = {}
+        for chapter in text_vectors.keys():
+            text_vector = text_vectors[chapter]
+            result[chapter] = self.cosine_similarity(goal_vector, text_vector)
+        max_result = max(result.values())
+        for key, value in result.items():
+            result[key] = value / max_result
+        return result
