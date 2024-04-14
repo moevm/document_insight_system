@@ -73,7 +73,7 @@ class NLPProcessor:
         if norm1 == 0.0 or norm2 == 0.0:
             return 0
         cosine_sim = dot_product / (norm1 * norm2)
-        return cosine_sim
+        return round(cosine_sim, 3)
 
     def calculate_cosine_similarity(self, goal, texts: dict):
         if not (goal or texts):

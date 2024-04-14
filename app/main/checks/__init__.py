@@ -39,5 +39,6 @@ AVAILABLE_CHECKS = {
         ReportMainTextCheck.id: ReportMainTextCheck,
         SpellingCheck.id: SpellingCheck,
         CompareGoalAndContentCheck.id: CompareGoalAndContentCheck,
+        CompareTasksAndContentCheck.id: CompareTasksAndContentCheck
     }
 }

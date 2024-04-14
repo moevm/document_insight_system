@@ -22,3 +22,4 @@ from .sections_check import LRReportSectionCheck
 from .style_check import ReportStyleCheck
 from .spelling_check import SpellingCheck
 from .compare_goal_and_content import CompareGoalAndContentCheck
+from .compare_tasks_and_content import CompareTasksAndContentCheck
