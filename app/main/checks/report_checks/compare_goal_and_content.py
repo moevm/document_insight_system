@@ -4,7 +4,7 @@ import app.nlp.text_similarity as ts
 
 
 class CompareGoalAndContentCheck(BaseReportCriterion):
-    description = "Проверка соответствия цели, задач и содержания"
+    description = "Проверка соответствия цели и содержания"
     id = 'compare_goal_and_content_check'
 
     def __init__(self, file_info):
@@ -22,14 +22,14 @@ class CompareGoalAndContentCheck(BaseReportCriterion):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
         self.weights = {
             "ВВЕДЕНИЕ": 1,
-            "1": 1,
+            "1": 2,
             "2": 2,
             "3": 5,
-            "4": 3,
+            "4": 2,
             "5": 1,
             "ЗАКЛЮЧЕНИЕ": 1
         }
-        self.to_pass = 0.2
+        self.to_pass = 0.15
         self.to_ignore = ["СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"]
 
     def check(self):
@@ -63,15 +63,26 @@ class CompareGoalAndContentCheck(BaseReportCriterion):
         self.chapters = {k: v for k, v in self.chapters.items() if v and v.strip()}
         NLPProcessor = ts.NLPProcessor()
         calculate_result = NLPProcessor.calculate_cosine_similarity(self.goal, self.chapters)
+        max_result = max(calculate_result.values())
         for k, v in calculate_result.items():
             for chapter, weight in self.weights.items():
                 if 0 <= k.find(chapter) < 1:
                     calculate_result[k] = v * weight
                     break
+            calculate_result[k] = calculate_result[k] / max_result
         avg = sum(calculate_result.values()) / len(calculate_result.values())
         result += f"<br>Средняя схожесть текста с темой: {avg}<br>"
-        for key, value in calculate_result.items():
-            result += f"<br>Для главы \"{key}\" значение схожести с целью составило {value}<br>"
+        sorted_chapters = dict(sorted(calculate_result.items(), key=lambda item: item[1], reverse=True))
+        result += f"<br>7 глав, наиболее раскрывающих тему:<br>"
+        for i, key in enumerate(sorted_chapters.keys()):
+            if i >= 7:
+                break
+            result += f"<br>Для главы \"{key}\" схожесть составила {sorted_chapters[key]}<br>"
+        result += f"<br>7 глав, наименее раскрывающих тему:<br>"
+        for i, key in enumerate(sorted_chapters.keys()):
+            if i < len(sorted_chapters) - 7:
+                continue
+            result += f"<br>Для главы \"{key}\" схожесть составила {sorted_chapters[key]}<br>"
         if avg < self.to_pass:
             return answer(False, f"Цель недостаточно раскрыта в содержании (нужно {self.to_pass}, набрано {avg})")
         return answer(True, result)

@@ -94,7 +94,4 @@ class NLPProcessor:
         for chapter in text_vectors.keys():
             text_vector = text_vectors[chapter]
             result[chapter] = self.cosine_similarity(goal_vector, text_vector)
-        max_result = max(result.values())
-        for key, value in result.items():
-            result[key] = value / max_result
         return result
