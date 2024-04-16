@@ -13,19 +13,22 @@ document.querySelectorAll('.toggle').forEach(item => {
     });
 });
 
-document.getElementById('toggleButton').addEventListener('click', () => {
-    const button = document.getElementById('toggleButton');
-    if (button.innerHTML.trim() === '<i class="bi bi-chevron-double-down"></i>') {
-        button.innerHTML = '<i class="bi bi-chevron-double-up"></i>';
-        document.querySelectorAll('.hidden').forEach(row => {
-            row.classList.remove('hidden');
-            row.classList.add('visible');
-        });
-    } else {
-        button.innerHTML = '<i class="bi bi-chevron-double-down"></i>';
-        document.querySelectorAll('.visible').forEach(row => {
-            row.classList.remove('visible');
-            row.classList.add('hidden');
-        });
-    }
-});
+const toggleButton = document.getElementById('toggleButton');
+if (toggleButton) {
+    toggleButton.addEventListener('click', () => {
+        const button = document.getElementById('toggleButton');
+        if (button.innerHTML.trim() === '<i class="bi bi-chevron-double-down"></i>') {
+            button.innerHTML = '<i class="bi bi-chevron-double-up"></i>';
+            document.querySelectorAll('.hidden').forEach(row => {
+                row.classList.remove('hidden');
+                row.classList.add('visible');
+            });
+        } else {
+            button.innerHTML = '<i class="bi bi-chevron-double-down"></i>';
+            document.querySelectorAll('.visible').forEach(row => {
+                row.classList.remove('visible');
+                row.classList.add('hidden');
+            });
+        }
+    });
+}
