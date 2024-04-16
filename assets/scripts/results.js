@@ -17,7 +17,7 @@ const renderPage = num => {
     pageIsRendering = true;
 
     pdfDoc.getPage(num).then(page => {
-        const viewport = page.getViewport({scale});
+        const viewport = page.getViewport({ scale });
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
@@ -89,14 +89,48 @@ if ($("#pdf_download").length !== 0) {
     pdfjsLib
         .getDocument(href)
         .promise.then(pdfDoc_ => {
-        pdfDoc = pdfDoc_;
+            pdfDoc = pdfDoc_;
 
-        $('#page-count')[0].textContent = pdfDoc.numPages;
-        renderPage(pageNum);
-    });
+            $('#page-count')[0].textContent = pdfDoc.numPages;
+            renderPage(pageNum);
+        });
 
     $('#prev-page').click(showPrevPage);
     $('#next-page').click(showNextPage);
 }
+
+document.querySelectorAll('.toggle').forEach(item => {
+    item.addEventListener('click', event => {
+        const nextRow = item.parentNode.nextElementSibling;
+        if (nextRow.classList.contains('hidden')) {
+            nextRow.classList.remove('hidden');
+            nextRow.classList.add('visible');
+        } else {
+            nextRow.classList.add('hidden');
+            nextRow.classList.remove('visible');
+        }
+    });
+});
+
+const toggleButton = document.getElementById('toggleButton');
+if (toggleButton) {
+    toggleButton.addEventListener('click', () => {
+        const button = document.getElementById('toggleButton');
+        if (button.innerHTML.trim() === '<i class="bi bi-chevron-double-down"></i>') {
+            button.innerHTML = '<i class="bi bi-chevron-double-up"></i>';
+            document.querySelectorAll('.hidden').forEach(row => {
+                row.classList.remove('hidden');
+                row.classList.add('visible');
+            });
+        } else {
+            button.innerHTML = '<i class="bi bi-chevron-double-down"></i>';
+            document.querySelectorAll('.visible').forEach(row => {
+                row.classList.remove('visible');
+                row.classList.add('hidden');
+            });
+        }
+    });
+}
+
 
 $('#showAllVerdicts').click(toggleAllVerdicts);
