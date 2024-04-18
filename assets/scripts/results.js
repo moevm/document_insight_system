@@ -17,7 +17,7 @@ const renderPage = num => {
     pageIsRendering = true;
 
     pdfDoc.getPage(num).then(page => {
-        const viewport = page.getViewport({scale});
+        const viewport = page.getViewport({ scale });
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
@@ -89,14 +89,46 @@ if ($("#pdf_download").length !== 0) {
     pdfjsLib
         .getDocument(href)
         .promise.then(pdfDoc_ => {
-        pdfDoc = pdfDoc_;
+            pdfDoc = pdfDoc_;
 
-        $('#page-count')[0].textContent = pdfDoc.numPages;
-        renderPage(pageNum);
-    });
+            $('#page-count')[0].textContent = pdfDoc.numPages;
+            renderPage(pageNum);
+        });
 
     $('#prev-page').click(showPrevPage);
     $('#next-page').click(showNextPage);
 }
 
 $('#showAllVerdicts').click(toggleAllVerdicts);
+
+
+// function for automatic reload page after checking:
+var reloaded = true
+
+function checkStatus() {
+    const intervalId = setInterval(() => {
+        var request = new XMLHttpRequest();
+        request.open('GET', '/tasks/' + task_id, true);
+        request.onreadystatechange = function () {
+            if (request.readyState === XMLHttpRequest.DONE) {
+                if (request.status === 200) {
+                    var response = JSON.parse(request.responseText);
+                    if (response.complete_task && reloaded) {
+                        clearInterval(intervalId);
+                        return;
+                    } else {
+                        reloaded = false
+                        if (response.complete_task) {
+                            window.location.href = '/results/' + task_id;
+                        }
+                    }
+                } else {
+                    console.error('Request failed:', request.status);
+                }
+            }
+        };
+        request.send();
+    }, 5000);
+}
+
+checkStatus();

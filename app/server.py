@@ -265,10 +265,14 @@ def recheck(check_id):
 @login_required
 def get_status(task_id):
     task_result = AsyncResult(task_id)
+    task = ObjectId(task_id)
+    check = db_methods.get_check(task)
+    complete_task = check.is_ended
     result = {
         "task_id": task_id,
         "task_status": task_result.status,
-        "task_result": task_result.result
+        "task_result": task_result.result,
+        "complete_task": complete_task
     }
     return jsonify(result), 200
 
@@ -285,7 +289,7 @@ def results(_id):
         avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
         return render_template("./results.html", navi_upload=True, results=check,
                                columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
-                               stats=format_check(check.pack()))
+                               stats=format_check(check.pack()), task_id = _id)
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
