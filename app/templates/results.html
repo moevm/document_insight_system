@@ -57,9 +57,9 @@
                    class="col text-center link">Скачать файл в PDF-формате</a>
             {% endif %}
             <!-- links for lists of sent presentation -->
-            <a href="{{ url_for('check_list', filter_user=current_user.username) }}"
+            <a href="{{ url_for('check_list', filter_user=stats[1]) }}"
                 class="col text-center link">Список всех загрузок пользователя</a>
-            <a href="{{ url_for('check_list', filter_user=current_user.username, filter_criteria=current_user.criteria) }}"
+            <a href="{{ url_for('check_list', filter_user=stats[1], filter_criteria=current_user.criteria) }}"
                 class="col text-center link">Cписок загрузок пользователя по критерию "{{current_user.criteria}}"</a>
         {% endif %}
         <!-- Checks table -->
