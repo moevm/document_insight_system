@@ -4,7 +4,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReferencesToLiteratureCheck(BaseReportCriterion):
-    description = "Проверка наличия ссылок на все источники"
+    label = "Проверка наличия ссылок на все источники"
+    description = ''
     id = 'literature_references'
 
     def __init__(self, file_info, min_ref=1, max_ref=1000):

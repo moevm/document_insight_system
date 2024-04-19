@@ -4,7 +4,8 @@ from ..base_check import BasePresCriterion, answer
 
 
 class SearchKeyWord(BasePresCriterion):
-    description = "Поиск ключевого слова в тексте слайда"
+    label = "Поиск ключевого слова в тексте слайда"
+    description = 'Ключевое слово: "Актуальность"'
     id = 'find_on_slide'
 
     def __init__(self, file_info, key_slide):

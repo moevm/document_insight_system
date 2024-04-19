@@ -4,7 +4,8 @@ from ..base_check import BasePresCriterion, answer
 
 
 class TemplateNameCheck(BasePresCriterion):
-    description = "Проверка соответствия названия файла шаблону"
+    label = "Проверка соответствия названия файла шаблону"
+    description = 'Шаблон названия: "Презентация_ВКР_Иванов", "ПРЕЗЕНТАЦИЯ_НИР_ИВАНОВ"'
     id = 'template_name'
 
     def __init__(self, file_info, regex="(Презентация|ПРЕЗЕНТАЦИЯ)_(ВКР|НИР)_(([А-ЯЁ][а-яё]+)|([А-ЯЁ]*))"):

@@ -2,7 +2,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportSimpleCheck(BaseReportCriterion):
-    description = "Простая проверка на пустоту файла"
+    label = "Простая проверка на пустоту файла"
+    description = 'Проверка отчёта на пустоту страниц'
     id = 'simple_check'
 
     def __init__(self, file_info):
