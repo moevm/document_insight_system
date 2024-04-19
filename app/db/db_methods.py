@@ -407,11 +407,10 @@ def mark_celery_task_as_finished(celery_task_id, finished_time=None):
         '$set': {'finished_at': finished_time,
                  'processing_time': (finished_time - celery_task['started_at']).total_seconds()}})
 
-def get_average_processing_time(min_time=5.0, limit=100000):
+def get_average_processing_time(min_time=5.0):
     # use only success check (failed checks processing time is more bigger than normal)
     result = list(celery_check_collection.aggregate([
-        {'$sample': {'size': limit}},
-        {'$match': {'processing_time': {'$lt': 200}}},
+        {'$match': {'processing_time': {'$lt': 170}}},
         {'$group': {'_id': None, 'avg_processing_time': {'$avg': "$processing_time"}}}
     ]))
     if result and result[0]['avg_processing_time']:
