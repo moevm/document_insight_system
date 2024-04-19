@@ -18,6 +18,7 @@ files_info_collection = db['presentations']  # actually, collection for all file
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
+parsed_texts_collection = db['parsed_texts']
 logs_collection = db.create_collection(
     'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
@@ -144,6 +145,12 @@ def update_check(check):
     return bool(checks_collection.find_one_and_replace({'_id': check._id}, check.pack()))
 
 
+def add_parsed_text(check_id, parsed_text):
+    checks_id = parsed_texts_collection.insert_one(parsed_text.pack()).inserted_id
+    files_info_collection.update_one({'_id': check_id}, {"$push": {'parsed_texts': checks_id}})
+    return checks_id
+
+
 def write_pdf(filename, filepath):
     converted_filepath = convert_to(filepath, target_format='pdf')
     return add_file_to_db(filename, converted_filepath)
@@ -228,7 +235,7 @@ def set_passbacked_flag(checks_id, flag):
 def get_latest_users_check(filter=None):
     local_filter = filter
     user = local_filter.get('user')
-    username_filter = {'username': user} if user else {} 
+    username_filter = {'username': user} if user else {}
     all_users = [user['username'] for user in users_collection.find(username_filter, {'username': 1})]
     latest_checks = []
     for user in all_users:
