@@ -38,7 +38,7 @@ class CompareGoalAndContentCheck(BaseReportCriterion):
         result = ""
         intro_text = ""
         for header in self.headers:
-            if header["text"] == "ВВЕДЕНИЕ":
+            if header["text"].find("ВВЕДЕНИЕ") >= 0:
                 for child in header["child"]:
                     intro_text += child["text"]
         goal_index = intro_text.find("Цель")

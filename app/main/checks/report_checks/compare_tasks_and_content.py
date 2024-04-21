@@ -17,6 +17,7 @@ class CompareTasksAndContentCheck(BaseReportCriterion):
         self.all_to_pass = 0
         self.specific_to_pass = 0
         self.to_ignore = []
+        self.minimum_tasks = 0
 
     def late_init(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
@@ -32,6 +33,7 @@ class CompareTasksAndContentCheck(BaseReportCriterion):
         self.all_to_pass = 0.15
         self.specific_to_pass = 0.05
         self.to_ignore = ["СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ", "ПРИЛОЖЕНИЕ"]
+        self.minimum_tasks = 3
 
     def check(self):
         self.late_init()
@@ -40,7 +42,7 @@ class CompareTasksAndContentCheck(BaseReportCriterion):
         result = ""
         possible_tasks = []
         for header in self.headers:
-            if header["text"] == "ВВЕДЕНИЕ":
+            if header["text"].find("ВВЕДЕНИЕ") >= 0:
                 for i, child in enumerate(header["child"]):
                     if child["text"].lower().find("задачи") >= 0:
                         possible_tasks.append(i)
@@ -48,6 +50,12 @@ class CompareTasksAndContentCheck(BaseReportCriterion):
                         if not possible_tasks:
                             return answer(False, "В введении не найдены задачи работы")
                         tasks = header["child"][max(possible_tasks) + 1:i]
+                        while len(tasks <= self.minimum_tasks):
+                            try:
+                                possible_tasks.remove(max(possible_tasks))
+                                tasks = header["child"][max(possible_tasks) + 1:i]
+                            except:
+                                return answer(False, f"В введении меньше {self.minimum_tasks} задач, что меньше необходимого минимума")
                         self.tasks = [task["text"] for task in tasks]
                         break
             if any(ignore_phrase in header["text"] for ignore_phrase in self.to_ignore):
@@ -94,7 +102,7 @@ class CompareTasksAndContentCheck(BaseReportCriterion):
         for i, key in enumerate(all_tasks_result.keys()):
             if i < len(all_tasks_result.keys()) - 5:
                 continue
-            result += f"<br>{key}: {round(all_tasks_result[key], 3) * 100}%<br>"
+            result += f"<br>{key}: {round(all_tasks_result[key] * 100, 3)}%<br>"
         return answer(True, result)
 
     def __output(self, value, summ):
