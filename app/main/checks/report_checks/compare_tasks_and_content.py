@@ -42,7 +42,7 @@ class CompareTasksAndContentCheck(BaseReportCriterion):
         result = ""
         possible_tasks = []
         for header in self.headers:
-            if header["text"].find("ВВЕДЕНИЕ") >= 0:
+            if header["text"].lower().find("введение") >= 0:
                 for i, child in enumerate(header["child"]):
                     if child["text"].lower().find("задачи") >= 0:
                         possible_tasks.append(i)
