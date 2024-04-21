@@ -4,7 +4,8 @@ import app.nlp.text_similarity as ts
 
 
 class CompareTasksAndContentCheck(BaseReportCriterion):
-    description = "Проверка соответствия задач и содержания"
+    label = "Проверка соответствия задач и содержания"
+    description = "Степень раскрытия задач в содержании"
     id = 'compare_tasks_and_content_check'
 
     def __init__(self, file_info):

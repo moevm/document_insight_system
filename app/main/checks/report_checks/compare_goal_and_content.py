@@ -4,7 +4,8 @@ import app.nlp.text_similarity as ts
 
 
 class CompareGoalAndContentCheck(BaseReportCriterion):
-    description = "Проверка соответствия цели и содержания"
+    label = "Проверка соответствия цели и содержания"
+    description = "Степень раскрытия цели в содержании"
     id = 'compare_goal_and_content_check'
 
     def __init__(self, file_info):
