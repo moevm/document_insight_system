@@ -1,1 +1,1 @@
-from .md_uploader import MdUpload
+from .md_uploader import MdUploader

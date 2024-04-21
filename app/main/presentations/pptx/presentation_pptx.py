@@ -9,6 +9,7 @@ class PresentationPPTX(PresentationBasic):
         PresentationBasic.__init__(self, presentation_name)
         self.prs = Presentation(presentation_name)
         self.add_slides()
+        self.found_index = {}
 
     def add_slides(self):
         for index, slide in enumerate(self.prs.slides, 1):
