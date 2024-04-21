@@ -50,7 +50,7 @@ class CompareTasksAndContentCheck(BaseReportCriterion):
                         if not possible_tasks:
                             return answer(False, "В введении не найдены задачи работы")
                         tasks = header["child"][max(possible_tasks) + 1:i]
-                        while len(tasks <= self.minimum_tasks):
+                        while len(tasks) <= self.minimum_tasks:
                             try:
                                 possible_tasks.remove(max(possible_tasks))
                                 tasks = header["child"][max(possible_tasks) + 1:i]
