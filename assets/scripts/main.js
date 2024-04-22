@@ -27,6 +27,7 @@ import './upload';
 import './version';
 import './check_list';
 import './logs';
+import './admin_criterions';
 
 import '../favicon.ico';
 import '../styles/404.css';
