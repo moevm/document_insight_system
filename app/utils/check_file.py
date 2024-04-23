@@ -4,8 +4,12 @@ def check_file(file, file_extension, allowed_extensions, check_mime=True):
     if not file_extension in allowed_extensions:
         return "not_allowed_extension"
 
-    # Проверяем MIME тип (библиотека автоматически умеет переводить MIME в реальное расширение файла).
-    if check_mime and file_extension != filetype.guess_extension(file):
-        return "mime_type_does_not_match_extension"
-    
-    return "ok"
+    if check_mime:
+        if file_extension == 'md':
+            if file.mimetype not in ('text/markdown', 'text/plain', 'application/octet-stream'):
+                return "mime_type_does_not_match_extension"
+        else:
+            if file_extension != filetype.guess_extension(file):
+                return "mime_type_does_not_match_extension"
+
+    return ""

@@ -4,7 +4,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ImageReferences(BaseReportCriterion):
-    description = "Проверка наличия ссылок на все рисунки"
+    label = "Проверка наличия ссылок на все рисунки"
+    description = ''
     id = 'image_references'
 
     def __init__(self, file_info, image_style="ВКР_Подпись для рисунков"):
@@ -26,8 +27,8 @@ class ImageReferences(BaseReportCriterion):
                 return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             number_of_images, all_numbers = self.count_images_vkr()
             if not number_of_images:
-                return answer(False, f'Не найдено ни одного рисунка.<br><br>Убедитесь, что для подписи рисунка был '
-                                     f'использован стиль {self.image_style}, а рисунок подписан '
+                return answer(True, f'Не найдено ни одного рисунка.<br><br> Если в вашей работе присутствуют рисунки, убедитесь, что для их подписи был '
+                                     f'использован стиль {self.image_style}, и формат: '
                                      f'"Рисунок <Номер рисунка> -- <Название рисунка>".')
         else:
             return answer(False, 'Во время обработки произошла критическая ошибка')

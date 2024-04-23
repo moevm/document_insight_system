@@ -116,19 +116,53 @@ class StyleCheckSettings:
         }
     ]
 
+<<<<<<< HEAD
     NIR_CONFIG = [
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": ["ПОСТАНОВКА ЗАДАЧИ", "РЕЗУЛЬТАТЫ РАБОТЫ В ВЕСЕННЕМ СЕМЕСТРЕ", "ОПИСАНИЕ ПРЕДПОЛОГАЕМОГО МЕТОДА РЕШЕНИЯ",
                         "ПЛАН НА ОСЕННИЙ СЕМЕСТР", "СПИСОК ЛИТЕРАТУРЫ"],
+=======
+    MD_CONFIG = [
+        {
+            "style": HEADER_1_STYLE,
+            "docx_style": ["heading 2"],
+            "headers": ["Поставленная цель и задачи",
+                        "Тематика статьи",
+                        "Методы обоснования",
+                        "Статья",
+                        ],
+            "unify_regex": None,
+            "regex": HEADER_REGEX
+        },
+        {
+            "style": HEADER_1_STYLE,
+            "docx_style": ["heading 2"],
+            "headers": ["Характеристика используемых данных",
+                        "Характеристика выводов",
+                        "Статья",
+                        ],
+>>>>>>> master
             "unify_regex": None,
             "regex": HEADER_REGEX
         },
         {
             "style": HEADER_1_NUM_STYLE,
+<<<<<<< HEAD
             "docx_style": ["heading 3", "heading 4"],
             "headers": ["ПЛАН", "РЕЗУЛЬТАТЫ"],
+=======
+            "docx_style": ["heading 2", "heading 3", "heading 4"],
+            "headers": [],
+            "unify_regex": None,
+            "regex": HEADER_NUM_REGEX
+        },
+        {
+            "style": "Main_header",
+            "docx_style": ["heading 1"],
+            "headers": ["Задание"],
+>>>>>>> master
             "unify_regex": None,
             "regex": HEADER_NUM_REGEX
         }
@@ -176,6 +210,11 @@ class StyleCheckSettings:
         'LR_HEADERS': LR_CONFIG,
         'LR_MAIN_TEXT': LR_MAIN_TEXT_CONFIG,
         'VKR_HEADERS': VKR_CONFIG,
+<<<<<<< HEAD
         'NIR_HEADERS': NIR_CONFIG,
         'VKR_MAIN_TEXT': VKR_MAIN_TEXT_CONFIG
+=======
+        'VKR_MAIN_TEXT': VKR_MAIN_TEXT_CONFIG,
+        'MD_HEADERS' : MD_CONFIG
+>>>>>>> master
     }

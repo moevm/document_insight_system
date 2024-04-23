@@ -1,3 +1,4 @@
+
 {% extends "root.html" %}
 
 {% set title = {'report': "Загрузка отчётов", 'pres': "Загрузка презентаций"}[current_user.file_type['type']] %}
@@ -11,11 +12,12 @@
         <script>
             const file_upload_limit = {{ config.MAX_CONTENT_LENGTH | tojson }};
             const file_type = "{{file_type}}";
+            const two_files_info = {{ current_user.two_files | tojson }};
         </script>
         <div class="col-11 col-sm-8 col-md-5 col-lg-4 my-auto">
             <h3 class="text-center ins" id="upload_title">{{ upload_title }}</h3>
-            <p class="text-center" id="criteria_pack_name">Для проверки используется набор
-                критериев<br><b>{{ current_user.criteria }}</b></p>
+            <p class="text-center" id="criteria_pack_name_text">Для проверки используется набор
+                критериев<br><b id="criteria_pack_name">{{ current_user.criteria }}</b></p>
             <div class="row justify-content-center" id="uploading_body">
                 <div class="col my-auto">
                     <form>
@@ -57,6 +59,34 @@
                     <p class="text-center" style="color:grey;font-size:15px;"><i>Общий объем загружаемых файлов не должен превышать {{ config.MAX_CONTENT_LENGTH//1024//1024 }} Mб.</i></p>
                     <div class="text-center">
                         <button type="button" class="btn btn-block btn-secondary" id="upload_upload_button">Загрузить</button>
+                    </div>
+                    <div>
+                        <br>
+                        <div class="text-center">
+                            <button id="btn_table_info" class="btn btn-text" style="font-size:20px">Подробнее о наборе критериев</button>
+                        </div>
+                        <div class="table_info col-12 col-sm-4 col-md-7 col-lg-8">
+                            <table id="table_info" class="hidden-table">
+                                <tr>
+                                    <td class="text-left" style="color:grey;font-size:15px;"><i>Максимальный балл для каждого критерия: <b>1</b>
+                                        <br>Итоговый балл считается как сумма полученных баллов / общее количество баллов.</i>
+                                        <p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th  scope="col">Критерии:</th>
+                                </tr>
+                                {% for criterion_name, criterion_descrpt in list_of_check.items()  %}
+                                    <tr data-toggle="collapse" data-target="#verd{{ loop.index }}" class="accordion-toggle">
+                                        <td scope="row" class="ins"> <b> <li> {{ criterion_name }} </b>
+                                            <p> {% if criterion_descrpt %}
+                                                  {{ criterion_descrpt }}
+                                                {% endif %}
+                                        </td>
+                                {% endfor %}
+                                </tr>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

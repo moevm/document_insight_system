@@ -21,6 +21,10 @@ file_formats = file_formats[file_formats.length - 1];
 file_formats = file_formats.replaceAll(" ", "");
 file_formats = file_formats.split(",");
 
+$("#btn_table_info").click(function(){
+  toggleTable('table_info');
+});
+
 const showSizeExceedMessage = () => {
     alert(
         "Объем загружаемых вами файлов превышает максимально разрешенный объем " + (file_upload_limit / 1024 / 1024) + " МБ." +
@@ -57,19 +61,30 @@ const resetFileUpload = () => {
 };
 
 const changeUploadButton = () => {
-    if (pdf_uploaded || file_uploaded) {
-        const pdf_size = pdf_file_input.prop("files")[0]?.size || 0;
+    if (two_files_info) {
+        if (pdf_uploaded || file_uploaded) {
+            const pdf_size = pdf_file_input.prop("files")[0]?.size || 0;
+            const file_size = file_input.prop("files")[0]?.size || 0;
+            if (pdf_size + file_size <= file_upload_limit) {
+                if (file_uploaded)
+                    upload_button.prop("disabled", false);
+            } else {
+                showSizeExceedMessage();
+                resetFileUpload();
+                upload_button.prop("disabled", true);
+            }
+        } else {
+            upload_button.prop("disabled", true);
+        }
+    } else {
         const file_size = file_input.prop("files")[0]?.size || 0;
-        if (pdf_size + file_size <= file_upload_limit) {
-            if (file_uploaded)
-                upload_button.prop("disabled", false);
+        if (file_size <= file_upload_limit) {
+            upload_button.prop("disabled", false);
         } else {
             showSizeExceedMessage();
             resetFileUpload();
             upload_button.prop("disabled", true);
         }
-    } else {
-        upload_button.prop("disabled", true);
     }
 };
 
@@ -190,3 +205,12 @@ upload_button.click(async () => {
         await upload();
     }
 });
+
+function toggleTable(tableId) {
+    var table = document.getElementById(tableId);
+    if (table.classList.contains("hidden-table")) {
+        table.classList.remove("hidden-table");
+    } else {
+        table.classList.add("hidden-table");
+    }
+}

@@ -3,7 +3,8 @@ from ..base_check import BasePresCriterion, answer, morph
 
 
 class PresBannedWordsCheck(BasePresCriterion):
-    description = "Проверка наличия запретных слов в презентации"
+    description = ''
+    label = "Проверка наличия запретных слов в презентации"
     id = 'pres_banned_words_check'
 
     def __init__(self, file_info, words=[], min_count=3, max_count=6):
