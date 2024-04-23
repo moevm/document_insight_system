@@ -14,13 +14,13 @@ class ReportTableShareCheck(BaseReportCriterion):
     def check(self):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
-        images_height = self.file.pdf_file.page_table(page_without_pril=self.file.count)
-        available_space = self.file.pdf_file.page_height(page_without_pril=self.file.count)
+        table_height = self.file.pdf_file.page_table(page_without_pril=self.file.page_count)
+        available_space = self.file.pdf_file.page_height(page_without_pril=self.file.page_count)
 
-        images_value = images_height/available_space
+        table_value = table_height/available_space
 
         if images_value > self.limit:
-            result_str = f'Проверка не пройдена! Изображения в работе занимают около {round(images_value, 2)} объема ' \
+            result_str = f'Проверка не пройдена! Изображения в работе занимают около {round(table_value, 2)} объема ' \
                          f'документа без учета приложения, ограничение - {round(self.limit, 2)}'
             result_str += '''
                         Если доля отчета, приходящаяся на изображения, больше нормы, попробуйте сделать следующее:

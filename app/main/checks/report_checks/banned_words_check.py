@@ -5,15 +5,14 @@ from ..base_check import BaseReportCriterion, answer, morph
 
 class ReportBannedWordsCheck(BaseReportCriterion):
     label = "Проверка наличия запретных слов в тексте отчёта"
-    description = 'Запрещено упоминание слова "мы"'
+    description = 'Запрещено упоминание слова "мы" (если не указано другое)'
     id = 'banned_words_check'
 
     def __init__(self, file_info, words=["мы"], min_count=3, max_count=6, headers_map=None):
         super().__init__(file_info)
+        self.words = [morph.normal_forms(word)[0] for word in words]
         if headers_map:
-            self.words = morph.normal_forms(headers_map)
-        else:    
-            self.words = [morph.normal_forms(word)[0] for word in words]
+            self.words += morph.normal_forms(headers_map)
         self.min_count = min_count
         self.max_count = max_count
 

@@ -157,7 +157,7 @@ class MdUploader(DocumentUploader):
                 count_table_line +=1
         return round(count_table_line/count_paragraph, 4)
     
-    def find_literature_vkr(self, work_type):
+    def find_literature_vkr(self, work_type, requirement_header):
         if not self.literature_header:
             for header in self.make_chapters(work_type):
                 header_text = header["text"].lower()
