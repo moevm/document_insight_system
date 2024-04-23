@@ -136,7 +136,7 @@ $(function(){
         function recheckStatus() {
             const intervalId = setInterval(() => {
                 checkStatus(() => {clearInterval(intervalId)});
-            }, 5000);
+            }, 10000);
         }
         
         checkStatus(() => {});
