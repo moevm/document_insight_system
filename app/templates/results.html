@@ -65,7 +65,7 @@
     <table class="table table-striped table-hover" id="results_table">
         <thead>
             <tr>
-                <th><button id="toggleButton" class="flat-button"><i class="bi bi-chevron-double-down"></button></th>
+                <th><button id="toggleButtonResult" class="flat-button"><i class="bi bi-chevron-double-down"></button></th>
                 <th class="results_table_index ins" scope="col">#</th>
                 <th class="results_table_test ins" scope="col">Тест</th>
                 <th class="results_table_result ins" scope="col">Результат</th>
@@ -74,7 +74,7 @@
         <tbody>
             {% for criterion_info in results.enabled_checks %}
             <tr>
-                <td class="toggle raw-button"><i class="bi bi-chevron-double-down"></td>
+                <td class="toggleresult raw-button"><i class="bi bi-chevron-double-down"></td>
                 <th scope="row" class="ins">{{ loop.index }}</th>
                 <td class="ins">{{ criterion_info['name'] }}</td>
                 {% set colors = {0.0: 'table-danger', 1.0: 'table-success'} %}

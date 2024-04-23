@@ -99,7 +99,7 @@ if ($("#pdf_download").length !== 0) {
     $('#next-page').click(showNextPage);
 }
 
-document.querySelectorAll('.toggle').forEach(item => {
+document.querySelectorAll('.toggleresult').forEach(item => {
     item.addEventListener('click', event => {
         const nextRow = item.parentNode.nextElementSibling;
         if (nextRow.classList.contains('hidden')) {
@@ -112,10 +112,10 @@ document.querySelectorAll('.toggle').forEach(item => {
     });
 });
 
-const toggleButton = document.getElementById('toggleButton');
-if (toggleButton) {
-    toggleButton.addEventListener('click', () => {
-        const button = document.getElementById('toggleButton');
+const toggleButtonResult = document.getElementById('toggleButtonResult');
+if (toggleButtonResult) {
+    toggleButtonResult.addEventListener('click', () => {
+        const button = document.getElementById('toggleButtonResult');
         if (button.innerHTML.trim() === '<i class="bi bi-chevron-double-down"></i>') {
             button.innerHTML = '<i class="bi bi-chevron-double-up"></i>';
             document.querySelectorAll('.hidden').forEach(row => {
