@@ -106,9 +106,8 @@ $(function(){
         // function for automatic reload page after checking:
         let reloaded = true
         
-        function checkStatus() {
-            const intervalId = setInterval(() => {
-                let request = new XMLHttpRequest();
+        function checkStatus(end_check_function){
+            let request = new XMLHttpRequest();
                 const check_id = window.location.pathname.substr(window.location.pathname.lastIndexOf('/') + 1);
                 request.open('GET', '/api/results/ready/' + check_id, true);
                 request.onreadystatechange = function () {
@@ -117,7 +116,7 @@ $(function(){
                             let response = JSON.parse(request.responseText);
                             console.log(response.is_ended)
                             if (response.is_ended && reloaded) {
-                                clearInterval(intervalId);
+                                end_check_function();
                                 return;
                             } else {
                                 reloaded = false
@@ -127,14 +126,20 @@ $(function(){
                             }
                         } else {
                             console.error('Request failed:', request.status);
-                            clearInterval(intervalId);
+                            end_check_function();
                         }
                     }
                 };
                 request.send();
+        }
+
+        function recheckStatus() {
+            const intervalId = setInterval(() => {
+                checkStatus(() => {clearInterval(intervalId)});
             }, 5000);
         }
         
-        checkStatus();
+        checkStatus(() => {});
+        recheckStatus()
     }
 });
