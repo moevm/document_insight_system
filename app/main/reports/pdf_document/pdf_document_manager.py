@@ -4,7 +4,7 @@ from app.utils import convert_to
 
 
 class PdfDocumentManager:
-    def __init__(self, path_to_file, pdf_filepath=''):
+    def __init__(self, path_to_file, pdf_filepath):
         if not pdf_filepath:
             self.pdf_file = pdfplumber.open(convert_to(path_to_file, target_format='pdf'))
         else:

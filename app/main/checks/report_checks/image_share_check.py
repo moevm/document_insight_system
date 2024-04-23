@@ -2,7 +2,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportImageShareCheck(BaseReportCriterion):
-    description = "Проверка доли объема отчёта, приходящейся на изображения"
+    label = "Проверка доли объема отчёта, приходящейся на изображения"
+    description = 'Доля изображений (не включая "Приложение") не должна превышать 0,9'
     id = 'image_share_check'
 
     def __init__(self, file_info, limit=0.3):
@@ -19,7 +20,7 @@ class ReportImageShareCheck(BaseReportCriterion):
             available_space = self.file.file.sections[0].page_height.cm - self.file.file.sections[0].bottom_margin.cm - \
                               self.file.file.sections[0].top_margin.cm
             images_pages = images_height / available_space
-            share = images_pages / self.file.count
+            share = images_pages / self.file.page_count
             if share > self.limit:
                 result_str = f'Проверка не пройдена! Изображения в работе занимают около {round(share, 2)} объема ' \
                              f'документа без учета приложения, ограничение - {round(self.limit, 2)}'

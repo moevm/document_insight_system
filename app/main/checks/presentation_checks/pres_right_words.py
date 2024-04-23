@@ -4,7 +4,8 @@ from ..base_check import BasePresCriterion, answer
 
 
 class PresRightWordsCheck(BasePresCriterion):
-    description = "Проверка наличия определенных (правильных) слов в презентации"
+    label = "Проверка наличия определенных (правильных) слов в презентации"
+    description = ""
     id = 'pres_right_words'
 
     def __init__(self, file_info, patterns=[]):

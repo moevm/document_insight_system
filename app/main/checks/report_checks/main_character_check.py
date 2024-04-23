@@ -2,7 +2,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportMainCharacterCheck(BaseReportCriterion):
-    description = "Проверка фамилии и должности заведующего кафедрой"
+    label = "Проверка фамилии и должности заведующего кафедрой"
+    description = 'И.о. зав. кафедрой: А.А. Лисс'
     id = 'main_character_check'
     priority = True
 

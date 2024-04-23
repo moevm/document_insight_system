@@ -6,34 +6,42 @@
 {% block title %}Авторизация{% endblock %}
 
 {% block main %}
-    <div class="header row">{% include "header.html" %}</div>
-    <div class="holder row justify-content-center">
-        <div class="col-11 col-sm-8 col-md-5 col-lg-4 col-xl-3 my-auto">
-            <h2 class="text-center ins" id="login_title">Вход</h2>
+<div class="header row">{% include "header.html" %}</div>
+<div class="holder row justify-content-center">
+    <div class="col-11 col-sm-8 col-md-5 col-lg-4 col-xl-3 my-auto">
+        <p class="text-center">Данная форма авторизации доступна только для администраторов.
+            <br>
+        </p>
+        <h2 class="text-center ins" id="login_title">Вход</h2>
 
-            <form>
-                <div class="form-group">
-                    <label id="texteous login_label" for="login_text_field">Логин</label>
-                    <input class="inputous form-control" id="login_text_field" type="text" placeholder="Логин"
-                           aria-label="Логин" required>
-                    <div class="invalid-feedback ins">Невозможный логин!</div>
-                </div>
-                <div class="form-group">
-                    <label id="texteous password_label" for="password_text_field">Пароль</label>
-                    <input class="inputous form-control" id="password_text_field" type="password" placeholder="Пароль"
-                           aria-label="Пароль" required>
-                    <div class="invalid-feedback ins">Пароль не может быть пустым!</div>
-                </div>
-            </form>
+        <form>
+            <div class="form-group">
+                <label id="texteous login_label" for="login_text_field">Логин</label>
+                <input class="inputous form-control" id="login_text_field" type="text" placeholder="Логин"
+                    aria-label="Логин" required>
+                <div class="invalid-feedback ins">Невозможный логин!</div>
+            </div>
+            <div class="form-group">
+                <label id="texteous password_label" for="password_text_field">Пароль</label>
+                <input class="inputous form-control" id="password_text_field" type="password" placeholder="Пароль"
+                    aria-label="Пароль" required>
+                <div class="invalid-feedback ins">Пароль не может быть пустым!</div>
+            </div>
+        </form>
 
-            <div class="row justify-content-center">
-                <div class="col-8 v-box">
-                    <button type="button" class="btn btn-block blue_button" id="login_button">Войти</button>
-                    {% if config.SIGNUP_PAGE_ENABLED %}
-                        <a class="linked text-right" href="/signup" id="signup_link">Регистрация</a>
-                    {% endif %}
-                </div>
+        <div class="row justify-content-center">
+            <div class="col-8 v-box">
+                <button type="button" class="btn btn-block blue_button" id="login_button">Войти</button>
+                {% if config.SIGNUP_PAGE_ENABLED %}
+                <a class="linked text-right" href="/signup" id="signup_link">Регистрация</a>
+                {% endif %}
             </div>
         </div>
+        <div class="text-center">
+            <p>Для входа в систему используйте
+                <br><b><a href="https://e.moevm.info">https://e.moevm.info/</a> </br>
+            </p>
+        </div>
     </div>
+</div>
 {% endblock %}

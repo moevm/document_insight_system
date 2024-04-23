@@ -4,7 +4,8 @@ from ..base_check import BaseReportCriterion, answer, morph
 
 
 class ReportBannedWordsCheck(BaseReportCriterion):
-    description = "Проверка наличия запретных слов в тексте отчёта"
+    label = "Проверка наличия запретных слов в тексте отчёта"
+    description = 'Запрещено упоминание слова "мы"'
     id = 'banned_words_check'
 
     def __init__(self, file_info, words=["мы"], min_count=3, max_count=6):
