@@ -53,11 +53,14 @@ class FindThemeInReport(BaseReportCriterion):
         intersection = lemma_theme.intersection(self.full_text)
         value_intersection = round(len(intersection)*100//len(lemma_theme))
         if value_intersection == 0:
-            return answer(False, f"Не пройдена! В отчете не упоминаются слова, завяленные в теме отчета.")
-        elif 1 < value_intersection < self.limit:
-            return answer(False, f"Не пройдена! Процент упоминания темы в вашем отчете ({value_intersection} %) ниже требуемого ({self.limit} %).")
+            return answer(False, "Не пройдена! В отчете не упоминаются слова, заявленные в теме отчета.")
+        elif value_intersection < self.limit:
+            return answer(
+                          round(value_intersection/self.limit, 1),
+                          f"Частично пройдена! Процент упоминания темы в вашем отчете ({value_intersection} %) ниже требуемого ({self.limit} %)."
+            )
         else:
-            return answer (True, f'Пройдена! Процент упоминания темы в ответе: {value_intersection} %.')
+            return answer (True, f'Пройдена! Процент упоминания темы в отчете: {value_intersection} %.')
 
     def find_theme(self):
         stop_words = set(stopwords.words("russian"))
