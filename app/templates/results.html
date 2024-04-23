@@ -6,10 +6,6 @@
 {% block title %}Результаты проверки{% endblock %}
 
 {% block main %}
-<script>
-    const task_id = "{{ task_id }}";
-</script>
-
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row" id="results_holder">
         {% if results.is_ended %}
