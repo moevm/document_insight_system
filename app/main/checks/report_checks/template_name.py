@@ -22,4 +22,4 @@ class ReportTemplateNameCheck(BasePresCriterion):
             return answer(True, "Пройдена!")
         else:
             return answer(False,
-                          f'Название файла презентации "<i>{self.filename}</i>" не соответствует шаблону: {self.reg}')
+                          f'Название файла презентации "<i>{self.filename}</i>" не соответствует шаблону (Пример: {CUR_YEAR}030301ИВАНОВ)')
