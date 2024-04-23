@@ -41,6 +41,7 @@ BASE_REPORT_CRITERION = [
     ["report_section_component"],
     ["main_text_check"],
     ["spelling_check"],
+    ["max_abstract_size_check"],
     ["theme_in_report_check"],
 ]
 
