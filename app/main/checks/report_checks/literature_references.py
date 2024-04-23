@@ -82,14 +82,10 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def search_references(self, start_par):
         array_of_references = set()
         for i in range(0, start_par):
-<<<<<<< HEAD
-            detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i].to_string().split('\n')[1])
-=======
             if isinstance(self.file.paragraphs[i], str):
                 detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i])
             else:
                 detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i].paragraph_text)
->>>>>>> master
             if detected_references:
                 for reference in detected_references:
                     for one_part in re.split(r'[\[\],]', reference):
@@ -105,11 +101,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
             text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
-<<<<<<< HEAD
-            if re.fullmatch(self.name_pattern, text_string):
-=======
             if re.fullmatch(f'{self.name_pattern}', text_string):    
->>>>>>> master
                 start_index = i
                 break
         return start_index

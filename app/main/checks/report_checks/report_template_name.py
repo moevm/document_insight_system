@@ -4,7 +4,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportTemplateNameCheck(BaseReportCriterion):
-    description = "Проверка соответствия названия файла шаблону"
+    label = "Проверка соответствия названия файла шаблону"
+    description = "Формат названия файла: 1111_Иванов_ИИ_NIR2"
     id = 'report_template_name'
 
     def __init__(self, file_info, regex="^\d+_[А-Яа-я]+\_[А-Я]{2}_", headers_map=None):

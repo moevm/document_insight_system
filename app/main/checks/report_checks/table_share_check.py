@@ -2,7 +2,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportTableShareCheck(BaseReportCriterion):
-    description = "Проверка доли объема отчёта, приходящейся на таблицы"
+    label = "Проверка доли объема отчёта, приходящейся на таблицы"
+    description = "Доля таблиц не должна превышать limit=0.3"
     id = 'table_share_check'
 
     def __init__(self, file_info, limit=0.3):
