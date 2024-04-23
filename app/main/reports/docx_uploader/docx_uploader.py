@@ -22,6 +22,7 @@ class DocxUploader(DocumentUploader):
         self.file = None
         self.special_paragraph_indices = {}
         self.headers_page = 0
+        self.page_count = 0
 
     def upload(self, file, pdf_filepath=''):
         self.file = docx.Document(file)
