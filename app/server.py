@@ -268,7 +268,7 @@ def get_status(task_id):
     result = {
         "task_id": task_id,
         "task_status": task_result.status,
-        "task_result": task_result.result
+        "task_result": task_result.result,
     }
     return jsonify(result), 200
 
@@ -289,6 +289,18 @@ def results(_id):
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
+
+    
+@app.route("/api/results/ready/<string:_id>", methods=["GET"])
+def ready_result(_id):
+    try:
+        oid = ObjectId(_id)
+    except bson.errors.InvalidId:
+        logger.error('_id exception:', exc_info=True)
+        return {}
+    check = db_methods.get_check(oid)
+    if check is not None:
+        return {"is_ended": check.is_ended}
 
 
 @app.route("/checks/<string:_id>", methods=["GET"])
