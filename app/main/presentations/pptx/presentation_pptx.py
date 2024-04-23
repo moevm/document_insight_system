@@ -11,7 +11,6 @@ class PresentationPPTX(PresentationBasic):
         self.add_slides()
         self.found_index = {}
 
-
     def add_slides(self):
         for index, slide in enumerate(self.prs.slides, 1):
             self.slides.append(SlidePPTX(slide, self.prs.slide_width, self.prs.slide_height, index))

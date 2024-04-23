@@ -9,31 +9,34 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 from pymorphy2 import MorphAnalyzer
 
-nltk.download('stopwords')
+
 MORPH_ANALYZER = MorphAnalyzer()
 
 
 class FindThemeInPres(BasePresCriterion):
-
-    description = "Проверка упоминания темы в презентации"
+    label = "Проверка упоминания темы в заголовках презентации"
+    description = """Проверка упоминания темы в заголовках презентации, не включая титульный слайд, слайды "Цели и задачи", "Заключение" """
     id = 'theme_in_pres_check'
 
-    def __init__(self, file_info, limit = 60):
+    def __init__(self, file_info, skip_slides_nums=(1,), skip_slides_titles=("Заключение",), limit=60):
         super().__init__(file_info)
-        # self.check_conclusion = FindDefSld(file_info=file_info, key_slide="Заключение")
+        self.skip_slides_title = skip_slides_titles
+        slides = []
+        for title in self.skip_slides_title:
+            find_sld = FindDefSld(file_info=file_info, key_slide=title)
+            find_sld.check()
+            slides.extend(find_sld.found_idxs)
+        self.skip_slides = [
+            *skip_slides_nums,
+            *slides
+        ]        
         self.limit = limit
 
     def check(self):
-
         stop_words = set(stopwords.words("russian"))
-        if self.file.found_index['Заключение'] is not None:
-            page_conclusion = self.file.found_index['Заключение']
 
-        # self.check_conclusion.check()
-        # page_conclusion = ''.join((str(item) for item in self.check_conclusion.__getattribute__("found_idxs")))
-
-            text_from_title = [slide for page, slide in enumerate(self.file.get_titles(), 1) if str(page) != page_conclusion]
-            theme = ''.join(word for word in text_from_title[0])
+        text_from_title = [slide for page, slide in enumerate(self.file.get_titles(), 1) if page not in self.skip_slides]
+        theme = ''.join(word for word in text_from_title[0])
 
         translator = str.maketrans('', '', string.punctuation)
         theme_without_punct = theme.translate(translator)
@@ -51,9 +54,11 @@ class FindThemeInPres(BasePresCriterion):
         value_intersection = round(len(lemma_theme.intersection(lemma_text))*100//len(lemma_theme))
 
         if value_intersection == 0:
-            return answer(False, f"Не пройдена! В презентации не упоминаются слова, завяленные в теме.")
-        elif 1 < value_intersection < self.limit:
-            return answer(False,
-                          f"Не пройдена! Процент упоминания темы в вашей презентации ({value_intersection} %) ниже требуемого ({self.limit} %).")
+            return answer(False, "Не пройдена! В презентации не упоминаются слова, завяленные в теме.")
+        elif value_intersection < self.limit:
+            return answer(
+                round(value_intersection / self.limit, 1),
+                f"Частично пройдена! Процент упоминания темы в вашей презентации ({value_intersection} %) ниже требуемого ({self.limit} %)."
+            )
         else:
             return answer(True, f'Пройдена! Процент упоминания темы в презентации: {value_intersection} %')

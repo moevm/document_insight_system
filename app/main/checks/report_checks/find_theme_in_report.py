@@ -4,12 +4,11 @@ import string
 from ..base_check import BaseReportCriterion, answer
 
 import  string
-import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 from pymorphy2 import MorphAnalyzer
 
-nltk.download('stopwords')
+
 MORPH_ANALYZER = MorphAnalyzer()
 
 

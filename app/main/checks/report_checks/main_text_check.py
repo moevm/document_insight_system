@@ -4,7 +4,8 @@ from ...reports.docx_uploader.style import Style
 
 
 class ReportMainTextCheck(BaseReportCriterion):
-    description = "Проверка оформления основного текста отчета"
+    label = "Проверка оформления основного текста отчета"
+    description = 'Перечень доспустимых стилей: "Основной текст; ВКР_Основной текст", "ВКР_Подпись таблицы", "ВКР_Подпись для рисунков, схем", "ВКР_Содержимое таблицы"'
     id = 'main_text_check'
 
     def __init__(self, file_info,

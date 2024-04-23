@@ -5,7 +5,8 @@ from ...reports.docx_uploader.style import Style
 
 class ReportStyleCheck(BaseReportCriterion):
     # TODO: DEPRECATED
-    description = "Проверка корректности форматирования текста"
+    label = "Проверка корректности форматирования текста"
+    description = 'Соответствие допустимым стилям'
     id = "style_check"
 
     default_key_properties = ("font_name", "alignment")

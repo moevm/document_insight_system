@@ -4,7 +4,8 @@ from ..base_check import BasePresCriterion, answer
 
 
 class SldEnumCheck(BasePresCriterion):
-    description = "Нумерация слайдов"
+    label = "Нумерация слайдов"
+    description = 'Проверка наличия и корректности номеров слайдов'
     id = 'slides_enum'
 
     def __init__(self, file_info):
