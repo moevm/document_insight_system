@@ -2,19 +2,19 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportMaxSizeOfAbstractCheck(BaseReportCriterion):
-    description = "Максимальный размер раздела Реферат в ВКР"
+    label = "Максимальный размер раздела Реферат в ВКР"
+    description = "Максимальный размер раздела Реферат в ВКР (1 стр.)"
     id = "max_abstract_size_check"
 
-    def __init__(self, file_info):
+    def __init__(self, file_info, max_size=1):
         super().__init__(file_info)
         self.headers = []
         self.referat_size = 0
         self.abstract_size = 0
-        self.max_size = 0
+        self.max_size = max_size
 
     def late_init(self):
         self.headers = self.file.make_headers(self.file_type['report_type'])
-        self.max_size = 1
         referat_page = 0
         abstract_page = 0
         main_page = 0
