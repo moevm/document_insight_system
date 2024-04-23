@@ -1,7 +1,8 @@
 from ..base_check import BaseReportCriterion, answer
 
 class ReportImageShareCheck(BaseReportCriterion):
-    description = "Проверка доли объема отчёта, приходящейся на изображения"
+    label = "Проверка доли объема отчёта, приходящейся на изображения"
+    description = 'Доля изображений (не включая "Приложение") не должна превышать 0,9'
     id = 'image_share_check'
 
     def __init__(self, file_info, limit=0.3):
@@ -30,6 +31,4 @@ class ReportImageShareCheck(BaseReportCriterion):
                         '''
             return answer(False, result_str)
         else:
-            return answer(True, f'Пройдена!')
-
-        # return answer(False, f'Во время обработки произошла критическая ошибка')
+            return answer(True, 'Пройдена!')

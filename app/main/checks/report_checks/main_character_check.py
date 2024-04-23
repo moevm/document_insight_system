@@ -2,12 +2,13 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportMainCharacterCheck(BaseReportCriterion):
-    description = "Проверка фамилии и должности заведующего кафедрой"
+    label = "Проверка фамилии и должности заведующего кафедрой"
+    description = 'Зав. кафедрой: А.А. Лисс'
     id = 'main_character_check'
     priority = True
 
     def __init__(self, file_info, main_character_name_right="А.А. Лисс", main_character_name_wrong="К.В. Кринкин",
-                 main_character_job_right="И.о. зав. кафедрой", main_character_job_wrong="Зав. кафедрой"):
+                 main_character_job_right="Зав. кафедрой", main_character_job_wrong="И.о. зав. кафедрой"):
         super().__init__(file_info)
         self.headers = []
         self.main_character_name_right = main_character_name_right
@@ -30,10 +31,10 @@ class ReportMainCharacterCheck(BaseReportCriterion):
                 if text_on_page.find(self.main_character_name_wrong) >= 0 and not text_on_page.find(
                         self.main_character_name_right) >= 0:
                     result_str += f"На странице {self.format_page_link([page])} указана неверная фамилия заведующего " \
-                                  f"кафедрой. Убедитесь, что И.о. зав. кафедрой {self.main_character_name_right}.<br>"
+                                  f"кафедрой. Убедитесь, что {self.main_character_job_right} {self.main_character_name_right}.<br>"
                 elif not text_on_page.find(self.main_character_name_right) >= 0:
                     result_str += f"На странице {self.format_page_link([page])} не указано ФИО заведующего кафедрой, в " \
-                                  f"графе И.о. зав. кафедрой должно быть указано {self.main_character_name_right}.<br>"
+                                  f"графе {self.main_character_job_right} должно быть указано {self.main_character_name_right}.<br>"
                 if text_on_page.find(self.main_character_job_wrong) >= 0 and not text_on_page.find(
                         self.main_character_job_right) >= 0:
                     result_str += f'На странице {self.format_page_link([page])} указана неверная должность ' \

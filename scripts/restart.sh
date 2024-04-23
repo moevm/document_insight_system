@@ -3,8 +3,6 @@
 set -e
 
 VERSION_FILE_NAME="VERSION.json" # project directory
-new_image="slides_checker_base_image"
-old_image="slides_checker_base_image:old"
 
 apache_config_filename=${1}
 apache_ssl_mod=${2:-''}
@@ -13,16 +11,10 @@ apache_ssl_mod=${2:-''}
 # generate version file
 scripts/version.sh > app/$VERSION_FILE_NAME
 
-# up docker
 mkdir -p ../slides_checker_mongo_data
 
-result=$( docker images --filter=reference="$new_image" -q )
+docker-compose stop
+docker-compose --project-name dis_test_build build --no-cache
+docker-compose build
 
-# if docker images exits
-if [[ -n "$result" ]]; then
-    docker-compose down
-    docker tag $new_image $old_image
-fi
-docker-compose build --no-cache 
-docker rmi -f $old_image
 docker-compose up -d --remove-orphans

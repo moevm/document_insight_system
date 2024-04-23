@@ -3,30 +3,33 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportNeededHeadersCheck(BaseReportCriterion):
-    description = "Проверка наличия обязательных заголовков в отчете"
+    label = "Проверка наличия обязательных заголовков в отчете"
+    description = ''
     id = 'needed_headers_check'
     priority = True
 
-    def __init__(self, file_info, main_heading_style="heading 2"):
+    def __init__(self, file_info, main_heading_style="heading 2", headers_map=None):
         super().__init__(file_info)
         self.headers_page = 1
         self.headers = []
         self.main_heading_style = main_heading_style
-        self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
-        self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
+        self.patterns = []
+        if headers_map:
+            self.config = headers_map
+        else:
+            self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
+            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
 
     def late_init(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
         self.headers_page = self.file.find_header_page(self.file_type['report_type'])
-
-    def show_chapters(self):
-        chapters_str = "<br>"
-        for header in self.headers:
-            if header["style"] == self.main_heading_style:
-                chapters_str += header["text"] + "<br>"
-            else:
-                chapters_str += "&nbsp;&nbsp;&nbsp;&nbsp;" + header["text"] + "<br>"
-        return chapters_str
+        self.chapters_str = self.file.show_chapters(self.file_type['report_type'])
+        # TODO: change
+        self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
+        if self.headers_main == "Задание 1":
+            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
+        elif self.headers_main == "Задание 2":
+            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[1]["headers"]
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -51,9 +54,9 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
 
         if not result_string:
             result_str = f'Все необходимые заголовки обнаружены!'
-            result_str += f'<br><br><b>&nbsp;&nbsp;&nbsp;&nbsp;Ниже представлена иерархия обработанных заголовков, ' \
+            result_str += f'<br><br><b>Ниже представлена иерархия обработанных заголовков, ' \
                           f'сравните с Содержанием {self.format_page_link([self.headers_page])}:</b>'
-            result_str += self.show_chapters()
+            result_str += self.chapters_str
             result_str += '<br>Если список не точный, убедитесь, что для каждого заголовка указан верный стиль.'
             return answer(True, result_str)
         else:
@@ -66,8 +69,8 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
                             <li>Убедитесь, что заголовок состоит из одного абзаца.</li>
                         </ul>
                         '''
-            result_str += f'<br><br><b>&nbsp;&nbsp;&nbsp;&nbsp;Ниже представлена иерархия обработанных заголовков, ' \
+            result_str += f'<br><br><b>Ниже представлена иерархия обработанных заголовков, ' \
                           f'сравните с Содержанием {self.format_page_link([self.headers_page])}:</b>'
-            result_str += self.show_chapters()
+            result_str += self.chapters_str
             result_str += '<br>Если список не точный, убедитесь, что для каждого заголовка указан верный стиль.'
             return answer(False, result_str)
