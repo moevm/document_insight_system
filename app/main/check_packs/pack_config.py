@@ -55,5 +55,5 @@ BASE_PACKS = {
     'pres': BaseCriterionPack(BASE_PRES_CRITERION, DEFAULT_PRES_TYPE_INFO, min_score=1.0,
                               name="BasePresentationCriterionPack"),
     'report': BaseCriterionPack(BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, min_score=1.0,
-                                name="NIR_2")
+                                name="BaseReportCriterionPack")
 }
