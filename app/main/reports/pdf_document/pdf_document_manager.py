@@ -29,11 +29,13 @@ class PdfDocumentManager:
     def page_table(self, page_without_pril):
         total_height = 0
         for page_num in range(1, page_without_pril):
+            # page = self.pdf_file.load_page(page_num)
             page = self.pages[page_num]
             tables = page.find_tables()
             for table in tables:
                 table_coord = table.bbox
                 total_height += (table_coord[3] - table_coord[1])
+        return total_height        
 
     def page_images(self, page_without_pril):
         total_height = 0

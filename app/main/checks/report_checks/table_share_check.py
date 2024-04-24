@@ -1,6 +1,5 @@
 from ..base_check import BaseReportCriterion, answer
 
-
 class ReportTableShareCheck(BaseReportCriterion):
     label = "Проверка доли объема отчёта, приходящейся на таблицы"
     description = "Доля таблиц не должна превышать limit=0.3"
@@ -10,7 +9,6 @@ class ReportTableShareCheck(BaseReportCriterion):
         super().__init__(file_info)
         self.limit = limit
 
-
     def check(self):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
@@ -19,7 +17,7 @@ class ReportTableShareCheck(BaseReportCriterion):
 
         table_value = table_height/available_space
 
-        if images_value > self.limit:
+        if table_value > self.limit:
             result_str = f'Проверка не пройдена! Изображения в работе занимают около {round(table_value, 2)} объема ' \
                          f'документа без учета приложения, ограничение - {round(self.limit, 2)}'
             result_str += '''
