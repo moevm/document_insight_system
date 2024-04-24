@@ -254,13 +254,21 @@ def recheck(check_id):
 
     if not check:
         abort(404)
+    
+    # write files (original and pdf) to filestorage
     filepath = join(UPLOAD_FOLDER, f"{check_id}.{check.filename.rsplit('.', 1)[-1]}")
+    pdf_filepath = join(UPLOAD_FOLDER, f"{check_id}.pdf")
+    db_methods.write_file_from_db_file(oid, filepath)
+    db_methods.write_file_from_db_file(ObjectId(check.conv_pdf_fs_id), pdf_filepath)
+    
     check.is_ended = False
     db_methods.update_check(check)
-    db_methods.write_file_from_db_file(oid, filepath)
     task = create_task.delay(check.pack(to_str=True))  # add check to queue
     db_methods.add_celery_task(task.id, check_id)  # mapping celery_task to check (check_id = file_id)
-    return {'task_id': task.id, 'check_id': check_id}
+    if request.args.get('api'):
+        return {'task_id': task.id, 'check_id': check_id}
+    else:
+        return redirect(url_for('results', _id=check_id))
 
 
 @app.route("/tasks/<task_id>", methods=["GET"])
@@ -270,7 +278,7 @@ def get_status(task_id):
     result = {
         "task_id": task_id,
         "task_status": task_result.status,
-        "task_result": task_result.result
+        "task_result": task_result.result,
     }
     return jsonify(result), 200
 
@@ -291,6 +299,18 @@ def results(_id):
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
+
+    
+@app.route("/api/results/ready/<string:_id>", methods=["GET"])
+def ready_result(_id):
+    try:
+        oid = ObjectId(_id)
+    except bson.errors.InvalidId:
+        logger.error('_id exception:', exc_info=True)
+        return {}
+    check = db_methods.get_check(oid)
+    if check is not None:
+        return {"is_ended": check.is_ended}
 
 
 @app.route("/checks/<string:_id>", methods=["GET"])

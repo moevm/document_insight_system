@@ -26,7 +26,7 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
         if self.file_type["report_type"] == 'LR':
             for header in self.headers:
                 found = False
-                for page_num in range(1, self.pdf.page_count):
+                for page_num in range(1, self.pdf.page_count_all):
                     lines = self.pdf.text_on_page[page_num + 1].split("\n")
                     last_header_line = 0
                     collected_text = ""
