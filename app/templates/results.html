@@ -6,7 +6,6 @@
 {% block title %}Результаты проверки{% endblock %}
 
 {% block main %}
-
     <div class="header row">{% include "header.html" %}</div>
     <div class="holder row" id="results_holder">
         {% if results.is_ended %}
@@ -21,8 +20,7 @@
             {% endif %}
         {% else %}
             <h4 id="results_title" class="texteous ins">
-                <i>Производится проверка файла. Примерное время: {{ avg_process_time }} секунд (перезагрузите
-                    страницу)</i>
+                <i>Производится проверка файла, страница перезагрузится автоматически. Примерное время: {{ avg_process_time }} сек.</i>
             </h4>
         {% endif %}
         <!-- Stat table -->

@@ -8,16 +8,23 @@ from app.utils import convert_to
 class PdfDocumentManager:
     def __init__(self, path_to_file, pdf_filepath=''):
         if not pdf_filepath:
+            # self.pdf_file = pdfplumber.open(convert_to(path_to_file, target_format='pdf'))
             self.pdf_file = fitz.open(convert_to(path_to_file, target_format='pdf'))
         else:
+            # self.pdf_file = pdfplumber.open(pdf_filepath)
             self.pdf_file = fitz.open(pdf_filepath)
         self.pages = [self.pdf_file.load_page(page_num) for page_num in range(self.pdf_file.page_count)]
-        self.page_count = self.pdf_file.page_count
+        self.page_count_all = self.pdf_file.page_count
+        # self.page_count = len(self.pages)
+        # self.pages = self.pdf_file.pages
         self.text_on_page = self.get_text_on_page()
 
     def get_text_on_page(self):
         return {page_num + 1: page.get_text() for page_num, page in enumerate(self.pages)}
         # return {page + 1: self.pages[page].extract_text() for page in range(self.page_count)}
+    
+    # def get_text_on_page(self):
+    #     return {page + 1: self.pages[page].extract_text() for page in range(self.page_count_all)}
 
     def page_table(self, page_without_pril):
         total_height = 0
@@ -27,6 +34,16 @@ class PdfDocumentManager:
             for table in tables:
                 table_coord = table.bbox
                 total_height += (table_coord[3] - table_coord[1])
+
+    def page_images(self, page_without_pril):
+        total_height = 0
+        for page_num in range(page_without_pril):
+            page = self.pdf_file[page_num]
+            images = self.pdf_file.get_page_images(page)
+            for image in images:
+                image_coord = page.get_image_bbox(image[7], transform=0)
+                total_height += (image_coord[3] - image_coord[1])
+
         return total_height
 
     def page_height(self, page_without_pril):
@@ -35,15 +52,8 @@ class PdfDocumentManager:
         height, top_margin = page_rect.height, page_rect.y0
         bottom_margin = height - page_rect.y1
         available_space = (height - top_margin - bottom_margin)*page_without_pril
-        return available_space
 
-    # def page_height(self, page_without_pril):
-    #     page = self.pdf_file[0]   # get first page as a sample
-    #     page_rect = page.rect
-    #     height, top_margin = page_rect.height, page_rect.y0
-    #     bottom_margin = height - page_rect.y1
-    #     available_space = (height - top_margin - bottom_margin)*page_without_pril
-    #     return available_space
+        return available_space
 
     # def get_only_text_on_page(self):
     #     if not self.only_text_on_page:
