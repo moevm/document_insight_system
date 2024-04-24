@@ -17,7 +17,7 @@ class PresVerifyGitLinkCheck(BasePresCriterion):
     description = ''
     id = 'verify_git_link'
 
-    def __init__(self, file_info, deep_check=True):
+    def __init__(self, file_info, deep_check=False):
         super().__init__(file_info)
         self.deep_check = deep_check
         self.wrong_repo_ref = []
@@ -59,9 +59,8 @@ class PresVerifyGitLinkCheck(BasePresCriterion):
                     link = requests.get(i[0])
                     if link.status_code != 200:
                         raise requests.exceptions.ConnectionError
-                    else:
-                        if self.deep_check:
-                            self.deep_check_repo(i, link)
+                    if self.deep_check:
+                        self.deep_check_repo(i, link)
                 except (requests.exceptions.SSLError, requests.exceptions.ConnectionError):
                     self.wrong_repo_ref.append(i[0])
         if self.wrong_repo_ref:
@@ -78,7 +77,7 @@ class PresVerifyGitLinkCheck(BasePresCriterion):
     def deep_check_repo(self, repo, link):
         if re.findall(r'github', repo[0]):
             tree = html.fromstring(link.content)
-            if not tree.xpath("//a[@class ='js-navigation-open Link--primary']"):
+            if not tree.xpath("//a[@class ='Link--primary']"):
                 self.empty_repo_ref.append(repo[0])
 
         # if re.findall(r'gitlab', i[0]):

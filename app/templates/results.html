@@ -6,28 +6,26 @@
 {% block title %}Результаты проверки{% endblock %}
 
 {% block main %}
-
-<div class="header row">{% include "header.html" %}</div>
-<div class="holder row" id="results_holder">
-    {% if results.is_ended %}
-    {% if results.is_failed %}
-    <h3 id="results_title" class="texteous ins">
-        Проверка завершилась с ошибкой, попробуйте загрузить файл заново
-    </h3>
-    {% else %}
-    <h3 id="results_title" class="texteous ins">
-        Результат проверки: {{ "" if results.correct() else "не" }} пройдена! <!-- threshold? -->
-    </h3>
-    {% endif %}
-    {% else %}
-    <h4 id="results_title" class="texteous ins">
-        <i>Производится проверка файла. Примерное время: {{ avg_process_time }} секунд (перезагрузите
-            страницу)</i>
-    </h4>
-    {% endif %}
-    <!-- Stat table -->
-    <table class="dataframe" id="stats_table" width="100%">
-        <thead>
+    <div class="header row">{% include "header.html" %}</div>
+    <div class="holder row" id="results_holder">
+        {% if results.is_ended %}
+            {% if results.is_failed %}
+                <h3 id="results_title" class="texteous ins">
+                    Проверка завершилась с ошибкой, попробуйте загрузить файл заново
+                </h3>
+            {% else %}
+                <h3 id="results_title" class="texteous ins">
+                    Результат проверки: {{ "" if results.correct() else "не" }} пройдена! <!-- threshold? -->
+                </h3>
+            {% endif %}
+        {% else %}
+            <h4 id="results_title" class="texteous ins">
+                <i>Производится проверка файла, страница перезагрузится автоматически. Примерное время: {{ avg_process_time }} сек.</i>
+            </h4>
+        {% endif %}
+        <!-- Stat table -->
+        <table class="dataframe" id="stats_table" width="100%">
+            <thead>
             <tr style="text-align: left;">
             <tr>
                 {% for item in columns %}
