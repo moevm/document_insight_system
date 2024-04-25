@@ -26,4 +26,4 @@ def index():
 @admin_required
 def user_info(username):
     user_info = get_user(username)
-    return render_template('one_user_info.html', user_info=user_info)
+    return render_template('one_user_info.html', user_info=user_info, check_counts = len(user_info.presentations))

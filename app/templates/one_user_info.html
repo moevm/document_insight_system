@@ -20,6 +20,7 @@
                 <th scope="col">Name</th>
                 <th scope="col">Formats</th>
                 <th scope="col">criteria</th>
+                <th scope="'col">count of check</th>
             </tr>
         </thead>
         <tbody>
@@ -31,9 +32,10 @@
                 <td class="ins">{{ user_info.name }}</td>
                 <td class="ins">{{ user_info.criteria }}</td>
                 <td class="ins">{{ user_info.formats }}</td>
+                <td class="ins">{{ check_counts}}</td>
             </tr>
             <tr>
-                <td colspan="5" class="hiddenRow">
+                <td colspan="6" class="hiddenRow">
                     <div id="verd{{ user_info.username }}" class="accordian-body collapse" style="margin-left: 2em;">
                         <a href="{{ url_for('check_list', filter_user=user_info.username) }}"
                             class="col text-center link">Список всех загрузок пользователя</a>
