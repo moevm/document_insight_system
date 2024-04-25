@@ -3,11 +3,11 @@ from ..base_check import BaseReportCriterion, answer
 
 class ReportPageCounter(BaseReportCriterion):
     label = "Проверка количества страниц в файле"
-    description = 'Количество страниц должно быть больше 50ти, не считая "Приложения"'
+    description = 'Количество страниц должно быть в допустимых рамках, не считая "Приложения"'
     id = 'page_counter'
     priority = True
 
-    def __init__(self, file_info, min_number=50, max_number=None):
+    def __init__(self, file_info, min_number=50, max_number=150):
         super().__init__(file_info)
         self.number = [min_number, max_number]
 
