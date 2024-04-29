@@ -1,6 +1,7 @@
 from nlp.similarity_of_texts import check_similarity
-from utils import get_text_from_slides, tasks_conclusions_feedback
 
+from utils import get_text_from_slides, tasks_conclusions_feedback
+from app.nlp.stemming import Stemming
 from ..base_check import BasePresCriterion, answer
 
 
@@ -21,6 +22,13 @@ class SldSimilarity(BasePresCriterion):
         if goals == "" or conclusions == "":
             return answer(False, 'Задач или заключения не существует')
 
-        results = check_similarity(goals, conclusions)
+        stemming = Stemming()
+        stemming.parse_text(conclusions, False)
+        try:
+            dev_index = conclusions.index(stemming.further_dev_sentence)
+        except ValueError:
+            dev_index = len(conclusions)
+
+        results = check_similarity(goals, conclusions[:dev_index])
 
         return answer(results[0] >= self.actual_number, *tasks_conclusions_feedback(results))
