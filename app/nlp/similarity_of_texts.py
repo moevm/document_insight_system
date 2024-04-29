@@ -10,7 +10,7 @@ def check_similarity(string1, string2):
     base_conclusions = stemming.get_sentences(string2, False)
     ignore = re.compile('[0-9]+[.]?|Заключение|‹#›')
     clear_conclusions = [ch for ch in base_conclusions if not re.fullmatch(ignore, ch)]
-    recognized_conclusions = "\n".join(s for s in clear_conclusions if s != further_dev.get('dev_sentence'))
+    recognized_conclusions = [s for s in clear_conclusions if s != further_dev.get('dev_sentence')]
 
     percentage_of_similarity = int(compare_sentences(string1, recognized_conclusions) * 100)
 
