@@ -16,7 +16,7 @@ BASE_PRES_CRITERION = [
     ['future_dev'],
     ['pres_banned_words_check'],
     ['pres_empty_slide'],
-    ['pres_banned_words_check'],
+    ['theme_in_pres_check'],
     ['verify_git_link'],
 ]
 BASE_REPORT_CRITERION = [
@@ -41,8 +41,10 @@ BASE_REPORT_CRITERION = [
     ["report_section_component"],
     ["main_text_check"],
     ["spelling_check"],
+    ["max_abstract_size_check"],
+    ["theme_in_report_check"],
     ["compare_goal_and_content_check"],
-    ["compare_tasks_and_content_check"]
+    ["compare_tasks_and_content_check"],
 ]
 
 DEFAULT_TYPE = 'pres'

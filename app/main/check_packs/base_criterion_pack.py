@@ -26,8 +26,9 @@ class BaseCriterionPack:
             try:
                 criterion_check_result = criterion.check()
             except Exception as e:
-                logger.error(f'{criterion.id}: oшибка во время проверки: {e}')
-                criterion_check_result = {'score': 0, 'verdict': [UNEXPECTED_CHECK_FAIL_MSG]}
+                err_msg = f'{criterion.id}: oшибка во время проверки: {e}'
+                logger.error(err_msg)
+                criterion_check_result = {'score': 0, 'verdict': [UNEXPECTED_CHECK_FAIL_MSG, f"Информация об ошибке для администратора: {err_msg}"]}
             if criterion.priority and not criterion_check_result['score']:
                 failed_priority_check = True
                 criterion_check_result['verdict'] = [PRIORITY_CHECK_FAILED_MSG] + list(criterion_check_result['verdict'])
