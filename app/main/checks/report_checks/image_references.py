@@ -26,7 +26,7 @@ class ImageReferences(BaseReportCriterion):
             if not len(self.headers):
                 return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             number_of_images, all_numbers = self.count_images_vkr()
-            count_file_image_object = self.file.pdf_file.get_image_num
+            count_file_image_object = self.file.pdf_file.get_image_num()
             if not count_file_image_object and not number_of_images:
                 return answer(False, f'В отчёте найдено {count_file_image_object} рисунков (), но не найдено ни одной подписи рисунка.<br><br> Если в вашей работе присутствуют рисунки, убедитесь, что для их подписи был '
                                      f'использован стиль {self.image_style}, и формат: '
