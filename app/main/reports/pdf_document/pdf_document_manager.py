@@ -30,7 +30,7 @@ class PdfDocumentManager:
     def get_image_num(self, page_without_pril=None):
         if not page_without_pril: 
             page_without_pril = self.pdf_file.page_count
-        return sum(map(lambda page: len(self.pdf_file.get_page_images(page)), self.pdf_file[:page_without_pril]))
+        return sum(map(lambda page: len(self.pdf_file.get_page_images(page)), self.pages[:page_without_pril]))
 
     def page_images(self, page_without_pril):
         total_height = 0
