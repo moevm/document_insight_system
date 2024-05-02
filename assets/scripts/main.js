@@ -28,6 +28,7 @@ import './version';
 import './check_list';
 import './logs';
 import './admin_criterions';
+import './user_list';
 
 import '../favicon.ico';
 import '../styles/404.css';

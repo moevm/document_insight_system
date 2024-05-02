@@ -1,7 +1,7 @@
 import { debounce, isFloat, resetTable, ajaxRequest, onPopState } from "./utils"
 
 let $table;
-const AJAX_URL = "/check_list/data";
+const AJAX_URL = "/users/data";
 const filter_prefix = 'filter_';
 let is_latest = false;
 let debounceInterval = 500;
@@ -66,7 +66,7 @@ function extract_filters(params){
 
 
 function initTable() {
-    $table = $("#check-list-table");
+    $table = $("#user-list-table");
 
     // get query string
     const queryString = window.location.search;
@@ -237,7 +237,7 @@ function buttons() {
                 if (is_latest === true){
                     query = { query: { latest: is_latest } }
                 }
-                $("#check-list-table").bootstrapTable('refresh', query);
+                $("#user-list-table").bootstrapTable('refresh', query);
             }
         };
     }
