@@ -27,6 +27,7 @@ class Stemming:
         return self.sentences
 
     def parse_text(self, string, flag):
+        # flag = True -> find tasks, else -> find future dev ??
         # morph = MorphAnalyzer()
         FURTHER_DEVELOPMENT = MORPH_ANALYZER.parse('дальнейшие'.lower())[0].normal_form
         FURTHER_IMPROVEMENTS = MORPH_ANALYZER.parse('улучшения'.lower())[0].normal_form

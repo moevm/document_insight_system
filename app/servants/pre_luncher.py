@@ -36,9 +36,9 @@ def init(app, debug):
         user.is_admin = True
         edit_user(user)
 
-    user.file_type = DEFAULT_REPORT_TYPE_INFO
-    file_type = DEFAULT_REPORT_TYPE_INFO['type']
-    user.criteria = BASE_PACKS[file_type].name
+    user.file_type = {'type': 'pres'}
+    file_type = user.file_type['type']
+    user.criteria ="MscPresentationPack"
     user.formats = list(ALLOWED_EXTENSIONS.get(file_type))
     user.two_files = True
 
