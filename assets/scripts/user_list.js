@@ -1,9 +1,7 @@
 import { debounce, isFloat, resetTable, ajaxRequest, onPopState } from "./utils"
 
 let $table;
-const AJAX_URL = "/users/data";
-const filter_prefix = 'filter_';
-let is_latest = false;
+const AJAX_URL = "/users/data"
 let debounceInterval = 500;
 
 
@@ -53,29 +51,14 @@ $(() => {
 })
 
 
-function extract_filters(params){
-    var filters = {}
-    for (const [key, value] of Object.entries(params)) {
-        const index = key.indexOf(filter_prefix) !== -1
-        if (index !== -1) {
-            filters[key.substring(filter_prefix.length)] = value
-        }
-    }
-    return filters
-}
-
-
 function initTable() {
     $table = $("#user-list-table");
 
     // get query string
     const queryString = window.location.search;
-    console.log(queryString)
+
     // parse query search to js object
-    const params = Object.fromEntries(new URLSearchParams(decodeURIComponent(queryString)).entries())
-    // configure filter
-    params.filter = extract_filters(params)
-    console.log(params)
+    const params = Object.fromEntries(new URLSearchParams(queryString).entries())
 
     // check correct order query
     if (params.order !== "asc" && params.order !== "desc" && params.order !== "") {
@@ -107,7 +90,7 @@ function initTable() {
     // Fill filters
     $table.on("created-controls.bs.table", function () {
         if (params.filter) {
-            console.log(params.filter)
+            params.filter = JSON.parse(decodeURI(params.filter))
             for (const [key, value] of Object.entries(params.filter)) {
                 const $input = $(`.bootstrap-table-filter-control-${key}`)
                 $input.val(value)
@@ -122,17 +105,24 @@ function initTable() {
         sortName: params.sort,
         sortOrder: params.order,
         buttons: buttons,
+        detailView: true,
+        detailViewIcon: false,
+        detailViewByClick: true,
+        detailFormatter: detailFormatter,
 
         queryParams: queryParams,
         ajax: debouncedAjaxRequest,
 
         columns: [{
-            field: "_id",
-            formatter: idFormatter
+            field: "username",
+            formatter: usernameFormatter
         }]
     })
 }
-
+   
+function usernameFormatter(value, row, index, field) {
+    return `<a href="/users/${value}">${value}</a>`
+}
 
 // debounced ajax calls.
 const debouncedAjaxRequest = debounce(function(params) {ajaxRequest(AJAX_URL, params)}, debounceInterval);
@@ -153,104 +143,34 @@ function queryParams(params) {
         offset: params.offset,
         sort: params.sort,
         order: params.order,
-        latest: params.latest
     }
 
     if (!$.isEmptyObject(filters)) {
-        for (const [key, value] of Object.entries(filters)){
-            query[`${filter_prefix}${key}`] = value
-        }
+        query.filter = JSON.stringify(filters)
     }
 
     return query
 }
 
 
-function idFormatter(value, row, index, field) {
-    return `<a href="/results/${value}">${value.slice(0, 5)}-${value.slice(-5)}</a>`
-}
-
-
-function timeStamp() {
-    var now = new Date();
-    var date = [now.getMonth() + 1, now.getDate(), now.getFullYear()];
-    var time = [now.getHours(), now.getMinutes(), now.getSeconds()];
-    var suffix = (time[0] < 12) ? "AM" : "PM";
-
-    time[0] = (time[0] < 12) ? time[0] : time[0] - 12;
-    time[0] = time[0] || 12;
-    for (var i = 1; i < 3; i++) {
-        if (time[i] < 10) {
-            time[i] = "0" + time[i];
-        }
-    }
-    return '[' + date.join(".") + "_" + time.join(".") + suffix + ']';
-}
-
-
 function buttons() {
-    let buttonsObj = {};
+    let buttonsObj = {}
 
     buttonsObj["ResetTable"] = {
         text: 'Reset',
         event: function() { resetTable($table, queryParams) }
-    };
-
-    if (is_admin) {
-        buttonsObj["FetchCSV"] = {
-            text: 'CSV',
-            event: function () {
-                //const queryString = window.location.search
-                const params = window.location.search
-                $("[name=FetchCSV]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Exporting..."
-                fetch('get_csv' + '?' + params)
-                    .then(response => response.blob())
-                    .then(blob => {
-                        $("[name=FetchCSV]")[0].textContent = "CSV"
-                        downdloadBlob(blob, `Статистика.csv`)
-                    });
-            }
-        };
-
-        buttonsObj["FetchZip"] = {
-            text: 'Скачать архив',
-            event: function () {
-                const params = window.location.search
-                $("[name=FetchZip]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Архивирование..."
-                fetch('get_zip' + '?' + params)
-                    .then(response => response.ok ? response.blob() : false)
-                    .then(blob => {
-                        $("[name=FetchZip]")[0].textContent = "Скачать архив"
-                        if (blob)
-                            downdloadBlob(blob, `Статистика_и_файлы.zip`)
-                        else
-                            alert("Error during file download")
-                    });
-            }
-        };
-
-        buttonsObj["LatestChecks"] = {
-            text: 'Latest',
-            event: function () {
-                is_latest = !is_latest;
-                let query = {}
-                if (is_latest === true){
-                    query = { query: { latest: is_latest } }
-                }
-                $("#user-list-table").bootstrapTable('refresh', query);
-            }
-        };
     }
-    return buttonsObj;
+
+    return buttonsObj
 }
 
 
-function downdloadBlob(blob, filename) {
-    var url = window.URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+function detailFormatter(index, row) {
+    var html = []
+    $.each(row, function (key, value) {
+        if (key === 'message' || key === 'pathname') {
+            html.push('<p><b>' + key + ':</b> ' + row[key] + '</p>')
+        }
+    })
+    return html.join('')
 }

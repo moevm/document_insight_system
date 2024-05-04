@@ -1,3 +1,4 @@
+import json
 from flask import abort, Blueprint, render_template, request, jsonify
 from flask_login import current_user
 from functools import wraps
@@ -20,39 +21,44 @@ def admin_required(route_func):
 
 @users.route("/data")
 @admin_required
-def user_list_data():
-    data = request.args.copy()
-    filter_query = checklist_filter(data)
-    # parse and validate rest query
-    limit = data.get("limit", '')
-    limit = int(limit) if limit.isdigit() else 10
+def users_data():
+    filters = request.args.get("filter", "{}")
+    try:
+        filters = json.loads(filters)
+        filters = filters if filters else {}
+    except Exception as e:
+        # logger.warning("Can't parse filters")
+        # logger.warning(repr(e))
+        filters = {}
+    filter_query = {}
+    if f_username := filters.get("username", None):
+        filter_query["username"] = {"$regex": f_username}
 
-    offset = data.get("offset", '')
-    offset = int(offset) if offset.isdigit() else 0
+    if f_name := filters.get("name", None):
+        filter_query["name"] = {"$regex": f_name}
 
-    sort = data.get("sort")
-    sort = 'upload-date' if not sort else sort
+    
+    limit = request.args.get("limit", "")
+    limit = int(limit) if limit.isnumeric() else 10
 
-    order = data.get("order")
-    order = 'desc' if not order else order
+    offset = request.args.get("offset", "")
+    offset = int(offset) if offset.isnumeric() else 0
 
-    sort = "_id" if sort == "upload-date" else sort
+    sort = request.args.get("sort", "")
+    sort = 'username' if not sort else sort
 
-    query = dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+    order = request.args.get("order", "")
+    order = 'username' if not order else order
 
-    if data.get("latest"):
-        rows, count = db_methods.get_latest_check_cursor(**query)
-    else:
-        # get data and records count
-        rows, count = db_methods.get_checks_cursor(**query)
+    rows, count = db_methods.get_user_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
 
-    # construct response
     response = {
         "total": count,
-        "rows": [format_check_for_table(item) for item in rows]
+        "rows": [{
+            "username": item["username"],
+            "name": item["name"],
+        } for item in rows]
     }
-
-    # return json data
     return jsonify(response)
 
 
