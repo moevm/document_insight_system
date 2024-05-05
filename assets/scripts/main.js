@@ -29,6 +29,7 @@ import './check_list';
 import './logs';
 import './admin_criterions';
 import './user_list';
+import './one_user_info'
 
 import '../favicon.ico';
 import '../styles/404.css';

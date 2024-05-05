@@ -17,8 +17,6 @@ def admin_required(route_func):
         abort(403)
     return my_wrapper
 
-
-
 @users.route("/data")
 @admin_required
 def users_data():
@@ -37,7 +35,22 @@ def users_data():
     if f_name := filters.get("name", None):
         filter_query["name"] = {"$regex": f_name}
 
-    
+    if f_formats := filters.get("all_formats", None):
+        filter_query["formats"] = {"$regex": f_formats}
+
+    if f_criteria := filters.get("all_criteria", None):
+        filter_query["criteria"] = {"$regex": f_criteria}
+
+    if f_check_counts := filters.get("check_counts", None):
+        try:
+            f_check_counts_value, f_check_counts_cond = int(f_check_counts.split()[1]), f_check_counts.split()[0]
+            if f_check_counts_cond == '>':
+                filter_query["$expr"] = {"$gte": [{"$size": "$presentations"}, f_check_counts_value]}
+            elif f_check_counts_cond == "<":
+                filter_query["$expr"] = {"$lte": [{"$size": "$presentations"}, f_check_counts_value]}
+        except ValueError:
+            pass
+
     limit = request.args.get("limit", "")
     limit = int(limit) if limit.isnumeric() else 10
 
@@ -57,6 +70,10 @@ def users_data():
         "rows": [{
             "username": item["username"],
             "name": item["name"],
+            "all_formats": item["formats"],
+            "all_criteria": item["criteria"],
+            "check_counts": len(item["presentations"]),
+
         } for item in rows]
     }
     return jsonify(response)
@@ -65,12 +82,10 @@ def users_data():
 @users.route('/', methods=["GET"])
 @admin_required
 def index():
-    users = list(get_all_users())
-    usernames = [(user['name'], user['username']) for user in users]
-    return render_template('user_list.html', usernames=usernames)
+    return render_template('user_list.html')
 
 @users.route('/<username>', methods=["GET"])
 @admin_required
 def user_info(username):
     user_info = get_user(username)
-    return render_template('one_user_info.html', user_info=user_info, check_counts = len(user_info.presentations))
+    return render_template('one_user_info.html', user_info=user_info)
