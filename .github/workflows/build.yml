@@ -12,7 +12,7 @@ jobs:
       - name: Build system images (non-pulling)
         run: |
           # build base image
-          docker build -f Dockerfile_base -t osll/slides-base:20230202 .
+          docker build -f Dockerfile_base -t dvivanov/dis-base:v0.3 .
       - name: Build docker-compose
         run: |
           cp .env_example .env

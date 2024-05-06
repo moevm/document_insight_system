@@ -2,7 +2,8 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportHeadersAtPageTopCheck(BaseReportCriterion):
-    description = "Проверка расположения разделов первого уровня с новой страницы"
+    label = "Проверка расположения разделов первого уровня с новой страницы"
+    description = ''
     id = "headers_at_page_top_check"
 
     def __init__(self, file_info, headers=[]):
@@ -25,7 +26,7 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
         if self.file_type["report_type"] == 'LR':
             for header in self.headers:
                 found = False
-                for page_num in range(1, self.pdf.page_count):
+                for page_num in range(1, self.pdf.page_count_all):
                     lines = self.pdf.text_on_page[page_num + 1].split("\n")
                     last_header_line = 0
                     collected_text = ""

@@ -4,14 +4,17 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReferencesToLiteratureCheck(BaseReportCriterion):
-    description = "Проверка наличия ссылок на все источники"
+    label = "Проверка наличия ссылок на все источники"
+    description = ''
     id = 'literature_references'
 
-    def __init__(self, file_info):
+    def __init__(self, file_info, min_ref=1, max_ref=1000):
         super().__init__(file_info)
         self.headers = []
         self.literature_header = []
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
+        self.min_ref = min_ref
+        self.max_ref = max_ref
 
     def late_init_vkr(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
@@ -33,8 +36,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             self.late_init_vkr()
             header = self.literature_header
             if not header:
-                return answer(False,
-                              f'Не найден Список использованных источников.<br><br>Проверьте корректность использования стилей.')
+                return answer(True,
+                              f'Не найден Список использованных источников.<br><br>Если в вашей работе есть список источников, проверьте корректность использования стилей.')
             start_literature_par = header["number"]
             number_of_sources = self.count_sources_vkr(header)
         else:
@@ -47,7 +50,10 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         for i in range(1, number_of_sources + 1):
             all_numbers.add(i)
         if len(references.symmetric_difference(all_numbers)) == 0:
-            return answer(True, f"Пройдена!")
+            if not self.min_ref <= number_of_sources <= self.max_ref:
+                return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть от {self.min_ref} до {self.max_ref}.')
+            else:
+                return answer(True, f"Пройдена!")
         elif len(references.difference(all_numbers)):
             if len(all_numbers.difference(references)) == 0:
                 references -= all_numbers
@@ -72,7 +78,10 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def search_references(self, start_par):
         array_of_references = set()
         for i in range(0, start_par):
-            detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i].to_string().split('\n')[1])
+            if isinstance(self.file.paragraphs[i], str):
+                detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i])
+            else:
+                detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i].paragraph_text)
             if detected_references:
                 for reference in detected_references:
                     for one_part in re.split(r'[\[\],]', reference):
@@ -88,7 +97,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
             text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
-            if re.fullmatch(self.name_pattern, text_string):
+            if re.fullmatch(f'{self.name_pattern}', text_string):    
                 start_index = i
                 break
         return start_index
@@ -129,7 +138,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
 
     def search_literature_start_pdf(self):
         start_page = 0
-        end_page = self.file.pdf_file.page_count
+        end_page = self.file.pdf_file.page_count_all
         for i in self.file.pdf_file.text_on_page.keys():
             lowercase_str = self.file.pdf_file.text_on_page[i].lower()
             if re.search(self.name_pattern, lowercase_str):

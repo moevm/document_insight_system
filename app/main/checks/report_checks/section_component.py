@@ -1,14 +1,20 @@
 from ..base_check import BaseReportCriterion, answer
+from .style_check_settings import StyleCheckSettings
 
 
 class ReportSectionComponent(BaseReportCriterion):
-    description = "Проверка наличия необходимых компонент указанного раздела"
+    label = "Проверка наличия необходимых компонентов указанного раздела"
+    description = 'Раздел "Введение", компоненты: "цель", "задачи", "объект", "предмет"'
     id = 'report_section_component'
 
-    def __init__(self, file_info, chapter='Введение', patterns=('цель', 'задачи', 'объект', 'предмет')):
+    def __init__(self, file_info, chapter='Введение', patterns=('цель', 'задач', 'объект', 'предмет'), headers_map = None):
         super().__init__(file_info)
         self.intro = {}
-        self.chapter = chapter
+        if headers_map:
+            self.chapter = StyleCheckSettings.CONFIGS.get(headers_map)[0]["headers"][0]
+            patterns = ('цель', 'задач')
+        else:
+            self.chapter = chapter
         self.chapters = []
         self.patterns = []
         for pattern in patterns:
@@ -35,14 +41,14 @@ class ReportSectionComponent(BaseReportCriterion):
                     if par.find(self.patterns[i]["text"]) >= 0:
                         self.patterns[i]["marker"] = 1
         else:
-            return answer(0, f"Раздел {self.chapter} не обнаружен!")
+            return answer(0, f'Раздел "{self.chapter}" не обнаружен!')
 
         for pattern in self.patterns:
             if not pattern["marker"]:
                 result_str += '<li>' + pattern["name"] + '</li>'
 
         if not result_str:
-            return answer(True, f"Все необходимые компоненты раздела {self.chapter} обнаружены!")
+            return answer(True, f'Все необходимые компоненты раздела "{self.chapter}" обнаружены!')
         else:
             return answer(False,
                           f'Не найдены следующие компоненты раздела {self.chapter}: <ul>{result_str}</ul>')

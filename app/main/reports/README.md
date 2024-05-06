@@ -65,7 +65,6 @@ Proof-of-concept парсинг файлов `.docx` с выводом стру�
 ```bash
 $ python3 -m app.main.mse22.pdf_document text_from_pages --filename path_to_file
 ```
-
 ## `MD`
 
 Парсинг файлов `.md` с выводом структуры файла в текстовом виде в stdout.
@@ -73,4 +72,3 @@ $ python3 -m app.main.mse22.pdf_document text_from_pages --filename path_to_file
 ```bash
 $ python3 -m app.main.reports.md_uploader md_parser --mdfile path_to_md_file
 ```
-

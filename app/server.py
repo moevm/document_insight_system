@@ -24,18 +24,21 @@ from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
 from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, \
-    init_criterions
+    init_criterions, BASE_PRES_CRITERION, BASE_REPORT_CRITERION
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
 from tasks import create_task
 from utils import checklist_filter, decorator_assertion, get_file_len, format_check
+from app.main.checks import CRITERIA_INFO
+from routes.admin import admin
 
 logger = get_root_logger('web')
 UPLOAD_FOLDER = '/usr/src/project/files'
 ALLOWED_EXTENSIONS = {
     'pres': {'ppt', 'pptx', 'odp'},
-    'report': {'doc', 'odt', 'docx'}
+    'report': {'doc', 'odt', 'docx', 'md'}
 }
+
 DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
 TABLE_COLUMNS = ['Solution', 'User', 'File', 'Criteria', 'Check added', 'LMS date', 'Score']
 URL_DOMEN = os.environ.get('URL_DOMEN', f"http://localhost:{os.environ.get('WEB_PORT', 8080)}")
@@ -47,6 +50,9 @@ app.recaptcha = ReCaptcha(app=app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['CELERY_RESULT_BACKEND'] = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
 app.config['CELERY_BROKER_URL'] = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
+
+app.register_blueprint(admin, url_prefix='/admin')
+
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -157,10 +163,13 @@ def upload():
         else:
             abort(401)
     elif request.method == "GET":
-        formats = set(current_user.formats)
+        pack = db_methods.get_criteria_pack(current_user.criteria)
+        list_of_check = pack['raw_criterions']
         file_type = current_user.file_type['type']
+        check_labels_and_discrpt = {CRITERIA_INFO[file_type][check[0]]['label']: CRITERIA_INFO[file_type][check[0]]['description'] for check in list_of_check}
+        formats = set(current_user.formats)
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
-        return render_template("./upload.html", navi_upload=False, formats=sorted(formats))
+        return render_template("./upload.html", navi_upload=False, formats=sorted(formats), list_of_check=check_labels_and_discrpt)
 
 
 @app.route("/tasks", methods=["POST"])
@@ -179,13 +188,13 @@ def run_task():
         logger.critical('Storage overload has occured')
         return 'storage_overload'
     file_check_response = check_file(file, extension, ALLOWED_EXTENSIONS[file_ext_type], check_mime=True)
-    if file_check_response != "ok":
+    if file_check_response != "":
         logger.info('Пользователь загрузил файл с ошибочным расширением: ' + file_check_response)
         return file_check_response
 
     if pdf_file:
         pdf_file_check_response = check_file(pdf_file, pdf_file.filename.rsplit('.', 1)[1], "pdf", check_mime=True)
-        if pdf_file_check_response != "ok":
+        if pdf_file_check_response != "":
             logger.info('Пользователь загрузил файл с ошибочным расширением: pdf_' + pdf_file_check_response)
             return "pdf_" + pdf_file_check_response
     
@@ -243,13 +252,21 @@ def recheck(check_id):
 
     if not check:
         abort(404)
+    
+    # write files (original and pdf) to filestorage
     filepath = join(UPLOAD_FOLDER, f"{check_id}.{check.filename.rsplit('.', 1)[-1]}")
+    pdf_filepath = join(UPLOAD_FOLDER, f"{check_id}.pdf")
+    db_methods.write_file_from_db_file(oid, filepath)
+    db_methods.write_file_from_db_file(ObjectId(check.conv_pdf_fs_id), pdf_filepath)
+    
     check.is_ended = False
     db_methods.update_check(check)
-    db_methods.write_file_from_db_file(oid, filepath)
     task = create_task.delay(check.pack(to_str=True))  # add check to queue
     db_methods.add_celery_task(task.id, check_id)  # mapping celery_task to check (check_id = file_id)
-    return {'task_id': task.id, 'check_id': check_id}
+    if request.args.get('api'):
+        return {'task_id': task.id, 'check_id': check_id}
+    else:
+        return redirect(url_for('results', _id=check_id))
 
 
 @app.route("/tasks/<task_id>", methods=["GET"])
@@ -259,40 +276,9 @@ def get_status(task_id):
     result = {
         "task_id": task_id,
         "task_status": task_result.status,
-        "task_result": task_result.result
+        "task_result": task_result.result,
     }
     return jsonify(result), 200
-
-
-CRITERIA_LABELS = {'template_name': 'Соответствие названия файла шаблону',
-                   'slides_number': 'Количество основных слайдов',
-                   'slides_enum': 'Нумерация слайдов',
-                   'slides_headers': 'Заголовки слайдов присутствуют и занимают не более двух строк',
-                   'goals_slide': 'Слайд "Цель и задачи"', 'probe_slide': 'Слайд "Апробация работы"',
-                   'actual_slide': 'Слайд с описанием актуальности работы', 'conclusion_slide': 'Слайд с заключением',
-                   'slide_every_task': 'Наличие слайдов, посвященных задачам',
-                   'pres_right_words': 'Проверка наличия определенных (правильных) слов в презентации',
-                   'pres_image_share': 'Проверка доли объема презентации, приходящейся на изображения',
-                   'pres_banned_words_check': 'Проверка наличия запретных слов в презентации',
-                   'conclusion_actual': 'Соответствие заключения задачам',
-                   'conclusion_along': 'Наличие направлений дальнейшего развития',
-                   'simple_check': 'Простейшая проверка отчёта',
-                   'banned_words_in_literature': 'Наличие запрещенных слов в списке литературы',
-                   'banned_words_check': 'Проверка наличия запретных слов в тексте отчёта',
-                   'page_counter': 'Проверка количества страниц',
-                   'image_share_check': 'Проверка доли объема отчёта, приходящейся на изображения',
-                   'right_words_check': 'Проверка наличия определенных (правильных) слов в тексте отчёта',
-                   'first_pages_check': 'Проверка наличия обязательных страниц в отчете',
-                   'main_character_check': 'Проверка фамилии и должности заведующего кафедрой',
-                   'needed_headers_check': 'Проверка наличия обязательных заголовков в отчете',
-                   'header_check': 'Проверка оформления заголовков отчета',
-                   'literature_references': 'Проверка наличия ссылок на все источники',
-                   'image_references': 'Проверка наличия ссылок на все рисунки',
-                   'table_references': 'Проверка наличия ссылок на все таблицы',
-                   'report_section_component': 'Проверка наличия необходимых компонент указанного раздела',
-                   'main_text_check': 'Проверка оформления основного текста отчета'
-                   }
-
 
 @app.route("/results/<string:_id>", methods=["GET"])
 def results(_id):
@@ -311,6 +297,18 @@ def results(_id):
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
+
+    
+@app.route("/api/results/ready/<string:_id>", methods=["GET"])
+def ready_result(_id):
+    try:
+        oid = ObjectId(_id)
+    except bson.errors.InvalidId:
+        logger.error('_id exception:', exc_info=True)
+        return {}
+    check = db_methods.get_check(oid)
+    if check is not None:
+        return {"is_ended": check.is_ended}
 
 
 @app.route("/checks/<string:_id>", methods=["GET"])
@@ -532,6 +530,8 @@ def get_zip():
     if not current_user.is_admin:
         abort(403)
 
+    original_names = request.args.get('original_names', False) == 'true'    
+
     # create tmp folder
     dirpath = tempfile.TemporaryDirectory()
 
@@ -539,9 +539,13 @@ def get_zip():
     checks_list, _ = db_methods.get_checks(**get_query(request))
     for check in checks_list:
         db_file = db_methods.find_pdf_by_file_id(check['_id'])
+        original_name = db_methods.get_check(check['_id']).filename #get a filename from every check
         if db_file is not None:
-            with open(f"{dirpath.name}/{db_file.filename}", 'wb') as os_file:
-                os_file.write(db_file.read())
+            final_name = original_name if (original_name and original_names) else db_file.filename
+            # to avoid overwriting files with one name and different content: now we save only last version of pres (from last check)
+            if not os.path.exists(f'{dirpath.name}/{final_name}'):
+                with open(f"{dirpath.name}/{final_name}", 'wb') as os_file:
+                    os_file.write(db_file.read())
 
     # add csv
     response = get_stats()
@@ -713,10 +717,12 @@ def catch_all(path):
     logger.info("Страница /" + path + " не найдена!")
     return render_template("./404.html")
 
-
 @app.route("/")
 def default():
-    return redirect(url_for("upload"))
+    if current_user.is_authenticated:
+        return redirect(url_for("upload"))
+    else:
+        return render_template("intro_page.html")
 
 
 # Disable caching:

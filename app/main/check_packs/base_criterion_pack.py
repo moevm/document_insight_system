@@ -1,7 +1,10 @@
+import logging
 from .utils import init_criterions
 
-PRIORITY_CHECK_FAILED_MSG = "<b>Данный критерий является обязательным для прохождения.<br>Результат всей проверки обнулен, но вы можете ознакомиться с результатами каждого критерия.</b><br>"
+logger = logging.getLogger('root_logger')
 
+PRIORITY_CHECK_FAILED_MSG = "<b>Данный критерий является обязательным для прохождения.<br>Результат всей проверки обнулен, но вы можете ознакомиться с результатами каждого критерия.</b><br>"
+UNEXPECTED_CHECK_FAIL_MSG = "<b>Во время проверки произошла ошибка, попробуйте позже или обратитесь к администратору системы.<b>"
 
 class BaseCriterionPack:
 
@@ -21,7 +24,11 @@ class BaseCriterionPack:
         result = []
         failed_priority_check = False
         for criterion in self.criterions:
-            criterion_check_result = criterion.check()
+            try:
+                criterion_check_result = criterion.check()
+            except Exception as e:
+                logger.error(f'{criterion.id}: oшибка во время проверки: {e}')
+                criterion_check_result = {'score': 0, 'verdict': [UNEXPECTED_CHECK_FAIL_MSG]}
             if criterion.priority and not criterion_check_result['score']:
                 failed_priority_check = True
                 criterion_check_result['verdict'] = [PRIORITY_CHECK_FAILED_MSG] + list(criterion_check_result['verdict'])

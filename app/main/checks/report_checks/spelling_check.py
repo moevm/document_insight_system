@@ -4,12 +4,12 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class SpellingCheck(BaseReportCriterion):
-    description = "Проверка наличия орфографических ошибок в тексте."
+    label = "Проверка наличия орфографических ошибок в тексте."
+    description = ''
     id = 'spelling_check'
 
     def __init__(self, file_info, min_errors_count=200, max_errors_count=400):
         super().__init__(file_info)
-        self.spell_checker = LanguageTool('ru-RU')
         self.min_errors_count = min_errors_count
         self.max_errors_count = max_errors_count
 
@@ -17,8 +17,9 @@ class SpellingCheck(BaseReportCriterion):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         possible_errors_list = []
+        spell_checker = LanguageTool('ru-RU')
         for page_num, text_on_page in enumerate(self.file.pdf_file.get_text_on_page().values()):
-            possible_errors = self.spell_checker.check(text_on_page)
+            possible_errors = spell_checker.check(text_on_page)
             for possible_error in possible_errors:
                 if possible_error.ruleId == "MORFOLOGIK_RULE_RU_RU":
                     # Сохраняем только 2 предложения по замене.
@@ -30,7 +31,7 @@ class SpellingCheck(BaseReportCriterion):
                         f"Контекст ошибки: {context}" +
                         f"Возможные исправления: {replacements}"
                     )
-
+        spell_checker.close()
         if len(possible_errors_list) <= self.min_errors_count:
             grade = 1
             return answer(1, "Пройдена!")
