@@ -36,9 +36,10 @@ class PdfDocumentManager:
             page = self.pdf_file[page_num]
             images = self.pdf_file.get_page_images(page)
             for image in images:
-                image_coord = page.get_image_bbox(image[7], transform=0)
-                total_height += (image_coord[3] - image_coord[1])
-
+                image_coord = page.get_image_bbox(image[7], transform=0)    # might be [1.0, 1.0, -1.0, -1.0]
+                image_height = image_coord[3] - image_coord[1]
+                if image_height > 0:
+                    total_height += image_height
         return total_height
 
     def page_height(self, page_without_pril):
