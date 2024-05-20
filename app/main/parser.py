@@ -20,7 +20,7 @@ def parse(filepath, pdf_filepath):
                 logger.info(f"Презентация {filepath} старого формата. Временно преобразована в pptx для обработки.")
                 new_filepath = convert_to(filepath, target_format='pptx')
             file_object = PresentationPPTX(new_filepath)
-        elif tmp_filepath.endswith(('.doc', '.odt', '.docx', )):
+        elif tmp_filepath.endswith(('.doc', '.odt', '.docx')):
             new_filepath = filepath
             if tmp_filepath.endswith(('.doc', '.odt')):
                 logger.info(f"Отчёт {filepath} старого формата. Временно преобразован в docx для обработки.")

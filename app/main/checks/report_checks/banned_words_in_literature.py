@@ -8,17 +8,21 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
     description = 'Запрещено упоминание слова "wikipedia"'
     id = 'banned_words_in_literature'
 
-    def __init__(self, file_info, banned_words=["wikipedia"]):
+    def __init__(self, file_info, banned_words=["wikipedia"], headers_map=None):
         super().__init__(file_info)
         self.headers_page = 1
         self.literature_header = []
         self.banned_words = [morph.normal_forms(word)[0] for word in banned_words]
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
+        if headers_map:
+            self.requirement_header = headers_map
+        else:
+            self.requirement_header ='список использованных источников'
 
     def late_init_vkr(self):
-        self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
-        # self.headers_page = self.file.find_header_page(self.file_type['report_type'])
-        self.lit_page = self.file.find_literature_page(self.file_type['report_type'])
+        self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'], self.requirement_header)
+        self.headers_page = self.file.find_header_page(self.file_type['report_type'])
+        self.lit_page = self.file.find_literature_page(self.file_type['report_type'])        
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -85,6 +89,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
             text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
+            # if re.fullmatch(self.name_pattern, text_string):
             if re.fullmatch(f'{self.name_pattern}', text_string):    
                 start_index = i
         return start_index

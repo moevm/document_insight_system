@@ -40,7 +40,7 @@ class DocxUploader(DocumentUploader):
         tmp_paragraphs = []
         for i in range(len(paragraphs)):
             if len(paragraphs[i].text.strip()):
-                tmp_paragraphs.append(Paragraph(paragraphs[i]))
+                tmp_paragraphs.append(Paragraph(paragraphs[i]))       
         return tmp_paragraphs
 
     def make_chapters(self, work_type):
@@ -135,11 +135,12 @@ class DocxUploader(DocumentUploader):
         self.literature_page += 1
         return self.literature_page
 
-    def find_literature_vkr(self, work_type):
+    def find_literature_vkr(self, work_type, requirement_header):
         if not self.literature_header:
             for header in self.make_chapters(work_type):
                 header_text = header["text"].lower()
-                if header_text.find('список использованных источников') >= 0:
+                # requirement_header = requirement_header
+                if header_text.find(requirement_header) >= 0:
                     self.literature_header = header
         return self.literature_header
 
@@ -159,9 +160,10 @@ class DocxUploader(DocumentUploader):
             tagged_indices.extend(list(map(lambda index: {"index": index, "level": j + 1,
                                                           "styled_text": self.styled_paragraphs[index],
                                                           "style": self.paragraphs[index].paragraph_style_name.lower()},
-                                           indices[j])))
+                                           indices[j])))  
         tagged_indices.sort(key=lambda dct: dct["index"])
         return tagged_indices
+
 
     # Parses styles once; subsequent calls have no effect, since the file itself shouldn't change
     def parse_effective_styles(self):

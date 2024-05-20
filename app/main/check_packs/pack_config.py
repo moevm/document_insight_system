@@ -43,6 +43,8 @@ BASE_REPORT_CRITERION = [
     ["spelling_check"],
     ["max_abstract_size_check"],
     ["theme_in_report_check"],
+    ['report_template_name'],
+    ["table_share_check"],
 ]
 
 DEFAULT_TYPE = 'pres'
