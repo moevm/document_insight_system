@@ -1,6 +1,6 @@
 from bson import ObjectId
 from flask_login import UserMixin
-
+from main.checks.antiplagiarism.TextPreprocessing import TextProcessing
 from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_TYPE_INFO, DEFAULT_REPORT_TYPE_INFO
 
 
@@ -155,3 +155,17 @@ class ParsedText(PackableWithId):
         dictionary = dictionary or {}
         self.filename = dictionary.get('filename', '')
         self.parsed_chapters = []
+
+
+class HashedText(PackableWithId):
+    def __init__(self, dictionary=None):
+        super().__init__(dictionary)
+        dictionary = dictionary or {}
+        self.filename = dictionary.get('filename', '')
+        self.hashed_chapters = ""
+
+    def get_hashed_texts(self, parsed_text):
+        text = ""
+        for element in parsed_text:
+            text += element["text"]
+        self.hashed_chapters = TextProcessing(text).processText()

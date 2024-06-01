@@ -11,6 +11,7 @@ from .table_references import TableReferences
 from .main_text_check import ReportMainTextCheck
 from .needed_headers_check import ReportNeededHeadersCheck
 from .page_counter import ReportPageCounter
+from .plagiarism_detection_check import PlagiarismCheck
 from .right_words_check import ReportRightWordsCheck
 from .section_component import ReportSectionComponent
 from .sections_check import LRReportSectionCheck

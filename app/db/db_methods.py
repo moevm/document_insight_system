@@ -19,6 +19,7 @@ checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
 parsed_texts_collection = db['parsed_texts']
+hashed_texts_collection = db['hashed_texts']
 logs_collection = db.create_collection(
     'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
@@ -145,9 +146,13 @@ def update_check(check):
     return bool(checks_collection.find_one_and_replace({'_id': check._id}, check.pack()))
 
 
-def add_parsed_text(check_id, parsed_text):
+def add_parsed_and_hashed_text(check_id, parsed_text, hashed_text):
     checks_id = parsed_texts_collection.insert_one(parsed_text.pack()).inserted_id
     files_info_collection.update_one({'_id': check_id}, {"$push": {'parsed_texts': checks_id}})
+
+    checks_id = hashed_texts_collection.insert_one(hashed_text.pack()).inserted_id
+    files_info_collection.update_one({'_id': check_id}, {"$push": {'hashed_texts': checks_id}})
+
     return checks_id
 
 
@@ -413,6 +418,7 @@ def mark_celery_task_as_finished(celery_task_id, finished_time=None):
     return celery_check_collection.update_one({'celery_task_id': celery_task_id}, {
         '$set': {'finished_at': finished_time,
                  'processing_time': (finished_time - celery_task['started_at']).total_seconds()}})
+
 
 def get_average_processing_time(min_time=5.0):
     # use only success check (failed checks processing time is more bigger than normal)

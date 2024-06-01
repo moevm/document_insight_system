@@ -1,19 +1,19 @@
-from configparser import ConfigParser
+import configparser
 import os
 from os.path import join, exists
 
 from celery import Celery
-from celery.signals import worker_ready
 
-from passback_grades import run_passback
+import passback_grades
+from app.main.reports.parse_file.parse_file import parse_headers_and_pages, parse_chapters
 from db import db_methods
-from db.db_types import Check
+from db.db_types import Check, ParsedText, HashedText
 from main.checker import check
 from main.parser import parse
 from main.check_packs import BASE_PACKS
 from root_logger import get_root_logger
 
-config = ConfigParser()
+config = configparser.ConfigParser()
 config.read('app/config.ini')
 
 TASK_RETRY_COUNTDOWN = 60  # default = 3 * 60
@@ -34,16 +34,6 @@ celery.conf.beat_schedule = {
 celery.conf.timezone = 'Europe/Moscow'  # todo: get from env
 
 
-@worker_ready.connect
-def at_start(sender, **k):
-    from nltk import download
-    download('stopwords')
-    download('punkt')
-
-    from language_tool_python import LanguageTool
-    LanguageTool('ru-RU').close()
-
-
 @celery.task(name="create_task", queue='check-solution', bind=True)
 def create_task(self, check_info):
     check_obj = Check(check_info)
@@ -52,10 +42,27 @@ def create_task(self, check_info):
     original_filepath = join(FILES_FOLDER, f"{check_id}.{check_obj.filename.rsplit('.', 1)[-1]}")
     pdf_filepath = join(FILES_FOLDER, f"{check_id}.pdf")
     try:
-        updated_check = check(parse(original_filepath, pdf_filepath), check_obj)
+        parsed_file_object = parse(original_filepath, pdf_filepath)
+        parsed_file_object.make_chapters(check_obj.file_type['report_type'])
+        parsed_file_object.make_headers(check_obj.file_type['report_type'])
+        chapters = parse_chapters(parsed_file_object)
+
+        updated_check = check(parsed_file_object, check_obj)
         updated_check.is_ended = True
         updated_check.is_failed = False
+        updated_check.parsed_chapters = parse_headers_and_pages(chapters, parsed_file_object)
+
+        parsed_text = ParsedText(check_info)
+        parsed_text.parsed_chapters = parse_headers_and_pages(chapters, parsed_file_object)
+
+        hashed_text = HashedText(check_info)
+        hashed_text.get_hashed_texts(parsed_text.parsed_chapters)
+
         db_methods.update_check(updated_check)  # save to db
+        db_methods.add_parsed_and_hashed_text(check_id,
+                                              parsed_text=parsed_text,
+                                              hashed_text=hashed_text)
+
         db_methods.mark_celery_task_as_finished(self.request.id)
 
         # remove files from FILES_FOLDER after checking
@@ -78,11 +85,12 @@ def create_task(self, check_info):
         self.retry(countdown=TASK_RETRY_COUNTDOWN)  # Retry the task, adding it to the back of the queue.
 
 
-@celery.task(name="passback-task", queue='passback-grade')
-def passback_task():
-    return run_passback()
-
-
 def remove_files(filepaths):
     for filepath in filepaths:
         if exists(filepath): os.remove(filepath)
+
+
+@celery.task(name="passback-task", queue='passback-grade')
+def passback_task():
+    print('Run passback')
+    return passback_grades.run_passback()
