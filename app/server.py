@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from os.path import join
 from sys import argv
 from io import StringIO
-
 import bson
 import pandas as pd
 from bson import ObjectId
@@ -222,6 +221,7 @@ def run_task():
         converted_id = db_methods.add_file_to_db(filenamepdf, filepathpdf)
     else:
         converted_id = db_methods.write_pdf(filename, filepath)
+
     check = Check({
         '_id': file_id,
         'conv_pdf_fs_id': converted_id,
@@ -234,7 +234,8 @@ def run_task():
         'score': -1,  # score=-1 -> checking in progress
         'is_ended': False,
         'is_failed': False,
-        'params_for_passback': current_user.params_for_passback
+        'params_for_passback': current_user.params_for_passback,
+        'parsed_chapters': []
     })
     db_methods.add_check(file_id, check)  # add check for parsed_file to db
     task = create_task.delay(check.pack(to_str=True))  # add check to queue

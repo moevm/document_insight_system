@@ -39,7 +39,7 @@ def at_start(sender, **k):
     from nltk import download
     download('stopwords')
     download('punkt')
-    
+
     from language_tool_python import LanguageTool
     LanguageTool('ru-RU').close()
 
