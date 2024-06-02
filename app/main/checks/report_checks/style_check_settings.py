@@ -87,6 +87,7 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 1"],
             "headers": ["Исходный код программы"],
+            "headers_for_lit_count": [],
             "unify_regex": APPENDIX_UNIFY_REGEX,
             "regex": APPENDIX_REGEX,
         },
@@ -94,6 +95,7 @@ class StyleCheckSettings:
             "style": HEADER_2_STYLE,
             "docx_style": ["heading 2"],
             "headers": ["Цель работы", "Выполнение работы", "Выводы"],
+            "headers_for_lit_count": [],
             "unify_regex": None,
             "regex": HEADER_1_REGEX
         }
@@ -104,8 +106,9 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": ["ВВЕДЕНИЕ", "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
+            "headers_for_lit_count": [],
             "unify_regex": None,
-            "regex": HEADER_REGEX
+            "regex": HEADER_REGEX,
         },
         {
             "style": HEADER_1_NUM_STYLE,
@@ -125,6 +128,7 @@ class StyleCheckSettings:
                         "Методы обоснования",
                         "Статья",
                         ],
+            "headers_for_lit_count": [],
             "unify_regex": None,
             "regex": HEADER_REGEX
         },
@@ -135,6 +139,7 @@ class StyleCheckSettings:
                         "Характеристика выводов",
                         "Статья",
                         ],
+            "headers_for_lit_count": [],
             "unify_regex": None,
             "regex": HEADER_REGEX
         },
