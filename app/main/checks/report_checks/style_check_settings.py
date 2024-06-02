@@ -99,6 +99,7 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 1"],
             "headers": ["Исходный код программы"],
+            "headers_for_lit_count": [],
             "unify_regex": APPENDIX_UNIFY_REGEX,
             "regex": APPENDIX_REGEX,
             "banned_words": STD_BANNED_WORDS,
@@ -113,6 +114,7 @@ class StyleCheckSettings:
             "style": HEADER_2_STYLE,
             "docx_style": ["heading 2"],
             "headers": ["Цель работы", "Выполнение работы", "Выводы"],
+            "headers_for_lit_count": [],
             "unify_regex": None,
             "regex": HEADER_1_REGEX,
         }
@@ -124,6 +126,7 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": ["ВВЕДЕНИЕ", "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
+            "headers_for_lit_count": [],
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
@@ -170,7 +173,7 @@ class StyleCheckSettings:
             "warned_words": STD_WARNED_WORDS
         },
     }
-    
+
     NIR3_CONFIG = {
         'any_header':
         {
@@ -196,6 +199,7 @@ class StyleCheckSettings:
                         "Статья",
                         ],
             "header_for_report_section_component": "Поставленная цель и задачи",
+            "headers_for_lit_count": [],
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
@@ -212,6 +216,7 @@ class StyleCheckSettings:
                         "Статья",
                         ],
             "header_for_report_section_component": "",
+            "headers_for_lit_count": [],
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
