@@ -53,7 +53,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             if not self.min_ref <= number_of_sources <= self.max_ref:
                 return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть от {self.min_ref} до {self.max_ref}.')
             elif ref_sequence:
-                result_str += f"Источники должны нумероваться в порядке упоминания в тексте. Неправильная последовательность: [{'], ['.join(num for num in ref_sequence)}]"
+                result_str += f"Источники должны нумероваться в порядке упоминания в тексте. Неправильные последовательности: {'; '.join(num for num in ref_sequence)}"
                 return answer(False, result_str)    
             else:
                 return answer(True, f"Пройдена!")
@@ -95,14 +95,15 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                             for k in range(int(start), int(end) + 1):
                                 array_of_references.add(k)
                                 if int(k) - prev_ref != 1:
-                                    ref_sequence.append(str(k))
+                                    ref_sequence.append(f'[{prev_ref}], [{k}]')
                                 prev_ref = int(k)
                         elif one_part != '':
                             array_of_references.add(int(one_part))
                             if int(one_part) - prev_ref != 1:
-                                ref_sequence.append(str(one_part))
+                                ref_sequence.append(f'[{prev_ref}], [{one_part}]')
                             prev_ref = int(one_part)
-        print(array_of_references, ref_sequence)                            
+        if ref_sequence[0][1] == '0':
+            ref_sequence[0] = ref_sequence[0].replace('[0],', '')                   
         return array_of_references, ref_sequence
 
     def find_start_paragraph(self):
