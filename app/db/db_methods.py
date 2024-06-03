@@ -149,11 +149,13 @@ def update_check(check):
 def add_parsed_and_hashed_text(check_id, parsed_text, hashed_text):
     checks_id = parsed_texts_collection.insert_one(parsed_text.pack()).inserted_id
     files_info_collection.update_one({'_id': check_id}, {"$push": {'parsed_texts': checks_id}})
-
-    checks_id = hashed_texts_collection.insert_one(hashed_text.pack()).inserted_id
+    hashed_texts_collection.insert_one(hashed_text.pack())
     files_info_collection.update_one({'_id': check_id}, {"$push": {'hashed_texts': checks_id}})
-
     return checks_id
+
+
+def get_all_hashed_texts():
+    return hashed_texts_collection.find()
 
 
 def write_pdf(filename, filepath):

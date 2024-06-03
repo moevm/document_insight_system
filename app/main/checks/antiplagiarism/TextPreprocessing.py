@@ -26,6 +26,7 @@ class TextProcessing:
 
         self._text = text
         self.processedText = None
+        self.hashedText = []
 
     def deleteDigits(self):
         self._text = re.sub(r"\d-[а-я]*", ' ', self._text)
@@ -43,12 +44,10 @@ class TextProcessing:
 
     def divideTextIntoShingles(self):
         shingleSize = 5
-        hashedText = []
         shingles = [self.processedText[i:i + shingleSize] for i in range(len(self.processedText))][:-shingleSize]
         for shingle in shingles:
             hash_obj = hashlib.sha1(' '.join(shingle).encode()).hexdigest()
-            hashedText.append(hash_obj)
-        return hashedText
+            self.hashedText.append(hash_obj)
 
     def processText(self):
         setOfStopWords = stopwords.words('russian')
@@ -72,4 +71,4 @@ class TextProcessing:
                 it += 1
         self.lemmatization()
         self.divideTextIntoShingles()
-        return self.processedText
+        return self.hashedText

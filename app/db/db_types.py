@@ -162,10 +162,9 @@ class HashedText(PackableWithId):
         super().__init__(dictionary)
         dictionary = dictionary or {}
         self.filename = dictionary.get('filename', '')
-        self.hashed_chapters = ""
+        self.hashed_text = []
 
     def get_hashed_texts(self, parsed_text):
-        text = ""
-        for element in parsed_text:
-            text += element["text"]
-        self.hashed_chapters = TextProcessing(text).processText()
+        for i in range(len(parsed_text)):
+            hashed_text = TextProcessing(parsed_text[i]["text"]).processText()
+            self.hashed_text.extend(hashed_text)
