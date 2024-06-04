@@ -93,17 +93,26 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                         if re.match(r'\d+[ \-]+\d+', one_part):
                             start, end = re.split(r'[ -]+', one_part)
                             for k in range(int(start), int(end) + 1):
+                                if k not in array_of_references:
+                                    if int(k) - prev_ref != 1:
+                                        ref_sequence.append(f'[{prev_ref}], [{k}]')
+                                    prev_ref = int(k)
+                                else:
+                                    if int(k) - prev_ref == 1:
+                                        prev_ref = int(k)
                                 array_of_references.add(k)
-                                if int(k) - prev_ref != 1:
-                                    ref_sequence.append(f'[{prev_ref}], [{k}]')
-                                prev_ref = int(k)
                         elif one_part != '':
+                            if int(one_part) not in array_of_references:
+                                if int(one_part) - prev_ref != 1:
+                                    ref_sequence.append(f'[{prev_ref}], [{one_part}]')
+                                prev_ref = int(one_part)
+                            else:
+                                if int(one_part) - prev_ref == 1:
+                                    prev_ref = int(one_part)
                             array_of_references.add(int(one_part))
-                            if int(one_part) - prev_ref != 1:
-                                ref_sequence.append(f'[{prev_ref}], [{one_part}]')
-                            prev_ref = int(one_part)
-        if ref_sequence[0][1] == '0':
-            ref_sequence[0] = ref_sequence[0].replace('[0],', '')                   
+        if ref_sequence:
+            if ref_sequence[0][1] == '0':
+                ref_sequence[0] = ref_sequence[0].replace('[0],', '')
         return array_of_references, ref_sequence
 
     def find_start_paragraph(self):
