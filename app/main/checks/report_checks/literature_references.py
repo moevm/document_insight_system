@@ -93,27 +93,24 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                         if re.match(r'\d+[ \-]+\d+', one_part):
                             start, end = re.split(r'[ -]+', one_part)
                             for k in range(int(start), int(end) + 1):
-                                if k not in array_of_references:
-                                    if int(k) - prev_ref != 1:
-                                        ref_sequence.append(f'[{prev_ref}], [{k}]')
-                                    prev_ref = int(k)
-                                else:
-                                    if int(k) - prev_ref == 1:
-                                        prev_ref = int(k)
-                                array_of_references.add(k)
+                                prev_ref = self.add_references(k, prev_ref, array_of_references, ref_sequence)
                         elif one_part != '':
-                            if int(one_part) not in array_of_references:
-                                if int(one_part) - prev_ref != 1:
-                                    ref_sequence.append(f'[{prev_ref}], [{one_part}]')
-                                prev_ref = int(one_part)
-                            else:
-                                if int(one_part) - prev_ref == 1:
-                                    prev_ref = int(one_part)
-                            array_of_references.add(int(one_part))
+                            prev_ref = self.add_references(int(one_part), prev_ref, array_of_references, ref_sequence)
         if ref_sequence:
             if ref_sequence[0][1] == '0':
                 ref_sequence[0] = ref_sequence[0].replace('[0],', '')
         return array_of_references, ref_sequence
+
+    def add_references(self, k, prev_ref, array_of_references, ref_sequence):
+        if k not in array_of_references:
+            if k - prev_ref != 1:
+                ref_sequence.append(f'[{prev_ref}], [{k}]')
+            prev_ref = k
+        else:
+            if k - prev_ref == 1:
+                prev_ref = k
+        array_of_references.add(k)
+        return prev_ref
 
     def find_start_paragraph(self):
         start_index = 0
