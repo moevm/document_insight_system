@@ -45,13 +45,16 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         if not number_of_sources:
             return answer(False,
                           f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
-        references = self.search_references(start_literature_par)
+        references, ref_sequence = self.search_references(start_literature_par)
         all_numbers = set()
         for i in range(1, number_of_sources + 1):
             all_numbers.add(i)
         if len(references.symmetric_difference(all_numbers)) == 0:
             if not self.min_ref <= number_of_sources <= self.max_ref:
                 return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть от {self.min_ref} до {self.max_ref}.')
+            elif ref_sequence:
+                result_str += f"Источники должны нумероваться в порядке упоминания в тексте. Неправильные последовательности: {'; '.join(num for num in ref_sequence)}"
+                return answer(False, result_str)    
             else:
                 return answer(True, f"Пройдена!")
         elif len(references.difference(all_numbers)):
@@ -76,6 +79,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         return answer(False, result_str)
 
     def search_references(self, start_par):
+        prev_ref = 0
+        ref_sequence = []
         array_of_references = set()
         for i in range(0, start_par):
             if isinstance(self.file.paragraphs[i], str):
@@ -88,10 +93,24 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                         if re.match(r'\d+[ \-]+\d+', one_part):
                             start, end = re.split(r'[ -]+', one_part)
                             for k in range(int(start), int(end) + 1):
-                                array_of_references.add(k)
+                                prev_ref = self.add_references(k, prev_ref, array_of_references, ref_sequence)
                         elif one_part != '':
-                            array_of_references.add(int(one_part))
-        return array_of_references
+                            prev_ref = self.add_references(int(one_part), prev_ref, array_of_references, ref_sequence)
+        if ref_sequence:
+            if ref_sequence[0][1] == '0':
+                ref_sequence[0] = ref_sequence[0].replace('[0],', '')
+        return array_of_references, ref_sequence
+
+    def add_references(self, k, prev_ref, array_of_references, ref_sequence):
+        if k not in array_of_references:
+            if k - prev_ref != 1:
+                ref_sequence.append(f'[{prev_ref}], [{k}]')
+            prev_ref = k
+        else:
+            if k - prev_ref == 1:
+                prev_ref = k
+        array_of_references.add(k)
+        return prev_ref
 
     def find_start_paragraph(self):
         start_index = 0
