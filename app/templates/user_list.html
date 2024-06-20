@@ -1,0 +1,65 @@
+{# Accepts: header dependicies, results, id, filename #}
+
+
+{% extends "root.html" %}
+
+{% block title %}Информация о пользователях{% endblock %}
+
+{% block main %}
+<style>
+    .fht-cell {
+        margin: 0 0.2rem 0.2rem;
+    }
+
+    /* .user-list-table th td { border: #54585d; } */
+
+    #user-list-table {
+        table-layout: fixed;
+        word-wrap: break-word;
+    }
+
+    #user-list-table.table-bordered,
+    #user-list-table.table-bordered > thead > tr > th,
+    #user-list-table.table-bordered > tbody > tr > td {
+        border: 1px solid #a1a1a1;
+    }
+</style>
+
+<div class="header row">{% include "header.html" %}</div>
+<div class="holder row">
+    <div class="container-fluid table-responsive-xl">
+    <h3 id="user_title" class="texteous ins">
+        Список пользователей:
+    </h3>
+    <table id="user-list-table" class="table bg-white"
+            data-filter-control="true"
+            data-pagination="true"
+            data-page-list="[5, 10, 25, 50, All]"
+            data-ajax="ajaxRequest"
+            data-query-params="queryParams"
+            data-show-refresh="false"
+            data-auto-refresh="true"
+            data-auto-refresh-interval="10"
+            data-show-auto-refresh="false"
+            data-side-pagination="server"
+            data-icon-size="lg"
+            data-buttons="buttons"
+            data-show-filter-control-switch="true"
+            data-show-button-icons="false"
+            data-show-button-text="true">
+        <thead>
+            <tr>
+                <th data-field="username" data-filter-control="input" data-sortable="true">Username</th>
+                <th data-field="name" data-filter-control="input" data-sortable="true">Name</th>
+                <th data-field="all_formats" data-filter-control="input" data-sortable="true">Formats</th>
+                <th data-field="all_criteria" data-filter-control="input" data-sortable="true">Criteria</th>
+                <th data-field="check_counts" data-filter-control="input" data-sortable="true" title="insert operator and value with space (f.e > 1000)">Count of checks</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+</div>
+
+{% endblock main %}
+
+
