@@ -50,10 +50,16 @@ REPORT_TYPES = ('LR', 'VKR')
 DEFAULT_REPORT_TYPE_INFO = {'type': 'report', 'report_type': REPORT_TYPES[1]}
 DEFAULT_PRES_TYPE_INFO = {'type': 'pres'}
 DEFAULT_TYPE_INFO = DEFAULT_PRES_TYPE_INFO
+POINT_LEVELS = {"message1": [0.4, 0.6],
+                'Message2': [0.6, 0.7],
+                'Вы набрали необходимый минимум для дальнейшего допуска на защиту ВКР с оценкой "Допущен с рекомендацией значительно снизить оценку". Однако, мы рекомендуем вам продолжить исправления презентации для получения максимального балла. Это повысит ваш допуск до уровня "Допущен".': [0.7, 0.8],
+                'Вы набрали необходимый минимум для дальнейшего допуска на защиту ВКР с оценкой "Допущен с рекомендацией снизить оценку". Однако, мы рекомендуем вам продолжить исправления презентации для получения максимального балла. Это повысит ваш допуск до уровня "Допущен".': [0.8, 0.998],
+                'Уровень Вашего допуска "Допущен"': [0.999, 1.01]
+}
 
 BASE_PACKS = {
-    'pres': BaseCriterionPack(BASE_PRES_CRITERION, DEFAULT_PRES_TYPE_INFO, min_score=1.0,
+    'pres': BaseCriterionPack(BASE_PRES_CRITERION, DEFAULT_PRES_TYPE_INFO, point_levels=POINT_LEVELS, min_score=1.0,
                               name="BasePresentationCriterionPack"),
-    'report': BaseCriterionPack(BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, min_score=1.0,
+    'report': BaseCriterionPack(BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, point_levels=POINT_LEVELS, min_score=1.0,
                                 name="BaseReportCriterionPack")
 }
