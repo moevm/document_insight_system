@@ -9,6 +9,9 @@ logs = Blueprint('logs', __name__, template_folder='templates', static_folder='s
 logger = get_root_logger('web')
 
 
+# def get_logger():
+#     return logger
+
 @logs.route("/")
 @login_required
 def logs_main():

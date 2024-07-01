@@ -33,11 +33,12 @@ from app.main.checks import CRITERIA_INFO
 from routes.admin import admin
 from routes.users import users
 from routes.check_list import check_list
-from routes.logs import logs, logger
-# from routes.lti import lti
+from routes.logs import logs
+from routes.lti import lti
+
 from server_consts import UPLOAD_FOLDER, ALLOWED_EXTENSIONS, DOCUMENT_TYPES, TABLE_COLUMNS, URL_DOMEN
 
-# logger = get_root_logger('web')
+logger = get_root_logger('web')
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./templates/")
 app.config.from_pyfile('settings.py')
@@ -51,7 +52,7 @@ app.register_blueprint(admin, url_prefix='/admin')
 app.register_blueprint(users, url_prefix='/users')
 app.register_blueprint(check_list, url_prefix='/check_list')
 app.register_blueprint(logs, url_prefix='/logs')
-# app.register_blueprint(lti, url_prefix='/lti.py')
+app.register_blueprint(lti, url_prefix='/lti.py')
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -67,62 +68,7 @@ def load_user(user_id):
 
 # User chapters req handlers:
 
-@app.route('/lti', methods=['POST'])
-def lti_main():
-    if check_request(request):
-        temporary_user_params = request.form
-        username = temporary_user_params.get('ext_user_username')
-        person_name = utils.get_person_name(temporary_user_params)
-        user_id = f"{username}_{temporary_user_params.get('tool_consumer_instance_guid', '')}"
-        lms_user_id = temporary_user_params.get('user_id', '')
-        params_for_passback = utils.extract_passback_params(temporary_user_params)
-        custom_params = utils.get_custom_params(temporary_user_params)
 
-        # task settings
-        # pack name
-        custom_criterion_pack = custom_params.get('pack', BASE_PACKS.get(DEFAULT_TYPE).name)
-        criterion_pack_info = db_methods.get_criteria_pack(custom_criterion_pack)
-        if not criterion_pack_info:
-            default_criterion_pack = BASE_PACKS.get(DEFAULT_TYPE).name
-            logger.error(
-                f"Ошибка при lti-авторизации. Несуществующий набор {custom_criterion_pack} пользователя {username}. Установлен набор по умолчанию: {default_criterion_pack}")
-            logger.debug(f"lti-параметры: {temporary_user_params}")
-            custom_criterion_pack = default_criterion_pack
-            criterion_pack_info = db_methods.get_criteria_pack(custom_criterion_pack)
-        custom_criterion_pack_obj = BaseCriterionPack(**criterion_pack_info)
-        # get file type and formats from pack
-        file_type_info = custom_criterion_pack_obj.file_type
-        file_type = file_type_info['type']
-        two_files = bool(custom_params.get('two_files'))
-        formats = sorted((set(map(str.lower, custom_params.get('formats', '').split(','))) & ALLOWED_EXTENSIONS[
-            file_type] or ALLOWED_EXTENSIONS[file_type]))
-
-        role = utils.get_role(temporary_user_params)
-
-        logout_user()
-
-        lti_user = db_methods.add_user(user_id, is_LTI=True)
-        if lti_user:
-            lti_user.name = person_name
-            lti_user.is_admin = role
-        else:
-            lti_user = db_methods.get_user(user_id)
-
-        # task settings
-        lti_user.file_type = file_type_info
-        lti_user.two_files = two_files
-        lti_user.formats = formats
-        lti_user.criteria = custom_criterion_pack
-        # passback settings
-        lti_user.params_for_passback = params_for_passback
-        lti_user.lms_user_id = lms_user_id
-
-        db_methods.edit_user(lti_user)
-
-        login_user(lti_user)
-        return redirect(url_for('upload'))
-    else:
-        abort(403)
 
 
 @app.route("/login", methods=["GET", "POST"])
