@@ -40,6 +40,7 @@ from routes.user import user_blueprint
 from routes.tasks import tasks
 from routes.upload import upload
 from routes.recheck import recheck
+from routes.results import results
 
 from server_consts import UPLOAD_FOLDER, ALLOWED_EXTENSIONS, DOCUMENT_TYPES, TABLE_COLUMNS, URL_DOMEN
 
@@ -63,6 +64,7 @@ app.register_blueprint(user_blueprint, url_prefix='/user')
 app.register_blueprint(tasks, url_prefix='/tasks')
 app.register_blueprint(upload, url_prefix='/upload')
 app.register_blueprint(recheck, url_prefix='/recheck')
+app.register_blueprint(results, url_prefix='/results')
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -88,25 +90,6 @@ def signup():
 
 
 # Main chapters req handlers:
-
-
-@app.route("/results/<string:_id>", methods=["GET"])
-def results(_id):
-    try:
-        oid = ObjectId(_id)
-    except bson.errors.InvalidId:
-        logger.error('_id exception:', exc_info=True)
-        return render_template("./404.html")
-    check = db_methods.get_check(oid)
-    if check is not None:
-        # show processing time for user
-        avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
-        return render_template("./results.html", navi_upload=True, results=check,
-                               columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
-                               stats=format_check(check.pack()))
-    else:
-        logger.info("Запрошенная проверка не найдена: " + _id)
-        return render_template("./404.html")
 
     
 @app.route("/api/results/ready/<string:_id>", methods=["GET"])
@@ -364,6 +347,7 @@ def system_capacity():
         'ratio': ratio
     }
 
+# Когда дойду до сюда, первое задание должно быть выполнено
 
 # Handle exceptions
 
@@ -377,7 +361,6 @@ def request_entity_too_large(error=None):
 @login_manager.unauthorized_handler
 def unauthorized_callback():
     return redirect(url_for("login"))
-
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
