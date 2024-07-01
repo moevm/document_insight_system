@@ -32,17 +32,12 @@ from utils import checklist_filter, decorator_assertion, get_file_len, format_ch
 from app.main.checks import CRITERIA_INFO
 from routes.admin import admin
 from routes.users import users
+from routes.check_list import check_list
+from routes.logs import logs, logger
+# from routes.lti import lti
+from server_consts import UPLOAD_FOLDER, ALLOWED_EXTENSIONS, DOCUMENT_TYPES, TABLE_COLUMNS, URL_DOMEN
 
-logger = get_root_logger('web')
-UPLOAD_FOLDER = '/usr/src/project/files'
-ALLOWED_EXTENSIONS = {
-    'pres': {'ppt', 'pptx', 'odp'},
-    'report': {'doc', 'odt', 'docx', 'md'}
-}
-
-DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
-TABLE_COLUMNS = ['Solution', 'User', 'File', 'Criteria', 'Check added', 'LMS date', 'Score']
-URL_DOMEN = os.environ.get('URL_DOMEN', f"http://localhost:{os.environ.get('WEB_PORT', 8080)}")
+# logger = get_root_logger('web')
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./templates/")
 app.config.from_pyfile('settings.py')
@@ -54,7 +49,9 @@ app.config['CELERY_BROKER_URL'] = os.environ.get("CELERY_BROKER_URL", "redis://l
 
 app.register_blueprint(admin, url_prefix='/admin')
 app.register_blueprint(users, url_prefix='/users')
-
+app.register_blueprint(check_list, url_prefix='/check_list')
+app.register_blueprint(logs, url_prefix='/logs')
+# app.register_blueprint(lti, url_prefix='/lti.py')
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -69,8 +66,9 @@ def load_user(user_id):
 
 
 # User chapters req handlers:
+
 @app.route('/lti', methods=['POST'])
-def lti():
+def lti_main():
     if check_request(request):
         temporary_user_params = request.form
         username = temporary_user_params.get('ext_user_username')
@@ -443,49 +441,6 @@ def get_pdf(_id):
         return render_template("./404.html")
 
 
-@app.route("/check_list")
-@login_required
-def check_list():
-    return render_template("./check_list.html", name=current_user.name, navi_upload=True)
-
-
-
-@app.route("/check_list/data")
-@login_required
-def check_list_data():
-    data = request.args.copy()
-    filter_query = checklist_filter(data)
-    # parse and validate rest query
-    limit = data.get("limit", '')
-    limit = int(limit) if limit.isdigit() else 10
-
-    offset = data.get("offset", '')
-    offset = int(offset) if offset.isdigit() else 0
-
-    sort = data.get("sort")
-    sort = 'upload-date' if not sort else sort
-
-    order = data.get("order")
-    order = 'desc' if not order else order
-
-    sort = "_id" if sort == "upload-date" else sort
-
-    query = dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
-
-    if data.get("latest"):
-        rows, count = db_methods.get_latest_check_cursor(**query)
-    else:
-        # get data and records count
-        rows, count = db_methods.get_checks_cursor(**query)
-
-    # construct response
-    response = {
-        "total": count,
-        "rows": [format_check_for_table(item) for item in rows]
-    }
-
-    # return json data
-    return jsonify(response)
 
 
 def get_query(req):
@@ -563,101 +518,6 @@ def get_zip():
             headers={"Content-disposition": "attachment"}
         )
 
-
-@app.route("/logs")
-@login_required
-def logs():
-    return render_template("./logs.html", name=current_user.name, navi_upload=True)
-
-
-@app.route("/logs/data")
-@login_required
-def logs_data():
-    filters = request.args.get("filter", "{}")
-    try:
-        filters = json.loads(filters)
-        filters = filters if filters else {}
-    except Exception as e:
-        logger.warning("Can't parse filters")
-        logger.warning(repr(e))
-        filters = {}
-
-    # req filter to mongo query filter conversion
-    filter_query = {}
-    if f_service_name := filters.get("service-name", None):
-        filter_query["serviceName"] = {"$regex": f_service_name}
-
-    if f_levelname := filters.get("levelname", None):
-        filter_query["levelname"] = {"$regex": f_levelname}
-
-    if f_pathname := filters.get("pathname", None):
-        filter_query["pathname"] = {"$regex": f_pathname}
-
-    f_lineno = filters.get("lineno", "")
-    f_lineno_list = list(filter(lambda val: val, f_lineno.split("-")))
-    try:
-        if len(f_lineno_list) == 1:
-            filter_query["lineno"] = int(f_lineno_list[0])
-        elif len(f_lineno_list) > 1:
-            filter_query["lineno"] = {
-                "$gte": int(f_lineno_list[0]),
-                "$lte": int(f_lineno_list[1])
-            }
-    except Exception as e:
-        logger.warning("Can't apply lineno filter")
-        logger.warning(repr(e))
-
-    f_timestamp = filters.get("timestamp", "")
-    f_timestamp_list = list(filter(lambda val: val, f_timestamp.split("-")))
-    try:
-        if len(f_timestamp_list) == 1:
-            date = datetime.strptime(f_timestamp_list[0], "%d.%m.%Y")
-            filter_query['timestamp'] = {
-                "$gte": date,
-                "$lte": date + timedelta(hours=23, minutes=59, seconds=59)
-            }
-        elif len(f_timestamp_list) > 1:
-            filter_query['timestamp'] = {
-                "$gte": datetime.strptime(f_timestamp_list[0], "%d.%m.%Y"),
-                "$lte": datetime.strptime(f_timestamp_list[1], "%d.%m.%Y")
-            }
-    except Exception as e:
-        logger.warning("Can't apply timestamp filter")
-        logger.warning(repr(e))
-
-    # parse and validate rest query
-    limit = request.args.get("limit", "")
-    limit = int(limit) if limit.isnumeric() else 10
-
-    offset = request.args.get("offset", "")
-    offset = int(offset) if offset.isnumeric() else 0
-
-    sort = request.args.get("sort", "")
-    sort = 'timestamp' if not sort else sort
-
-    order = request.args.get("order", "")
-    order = 'desc' if not order else order
-
-    # get data and records count
-    rows, count = db_methods.get_logs_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
-
-    # construct response
-    response = {
-        "total": count,
-        "rows": [{
-            "timestamp": item["timestamp"].strftime("%d.%m.%Y %H:%M:%S"),
-            "service-name": item["serviceName"],
-            "levelname": item["levelname"],
-            "message": item["message"],
-            "pathname": item["pathname"],
-            "lineno": item["lineno"]
-        } for item in rows]
-    }
-
-    # return json data
-    return jsonify(response)
-
-
 @app.route("/version")
 def version():
     return render_template("./version.html")
@@ -713,10 +573,12 @@ def unauthorized_callback():
 @app.route('/<path:path>')
 def catch_all(path):
     logger.info("Страница /" + path + " не найдена!")
+    # logger.info(db_methods.show_db_data())
     return render_template("./404.html")
 
 @app.route("/")
 def default():
+    # db_methods.show_db_data()
     if current_user.is_authenticated:
         return redirect(url_for("upload"))
     else:
