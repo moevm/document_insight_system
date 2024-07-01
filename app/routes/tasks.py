@@ -1,7 +1,8 @@
 from os.path import join
 from bson import ObjectId
+from celery.result import AsyncResult
 
-from flask import Blueprint, request, current_app
+from flask import Blueprint, request, current_app, jsonify
 from flask_login import login_required, current_user
 from app.root_logger import get_root_logger
 
@@ -83,3 +84,14 @@ def run_task():
     task = create_task.delay(check.pack(to_str=True))  # add check to queue
     db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
     return {'task_id': task.id, 'check_id': str(file_id)}
+
+@tasks.route("/<task_id>", methods=["GET"])
+@login_required
+def get_status(task_id):
+    task_result = AsyncResult(task_id)
+    result = {
+        "task_id": task_id,
+        "task_status": task_result.status,
+        "task_result": task_result.result,
+    }
+    return jsonify(result), 200
