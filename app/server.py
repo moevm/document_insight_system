@@ -35,6 +35,7 @@ from routes.users import users
 from routes.check_list import check_list
 from routes.logs import logs
 from routes.lti import lti
+from routes.login import login
 
 from server_consts import UPLOAD_FOLDER, ALLOWED_EXTENSIONS, DOCUMENT_TYPES, TABLE_COLUMNS, URL_DOMEN
 
@@ -52,7 +53,8 @@ app.register_blueprint(admin, url_prefix='/admin')
 app.register_blueprint(users, url_prefix='/users')
 app.register_blueprint(check_list, url_prefix='/check_list')
 app.register_blueprint(logs, url_prefix='/logs')
-app.register_blueprint(lti, url_prefix='/lti.py')
+app.register_blueprint(lti, url_prefix='/lti')
+app.register_blueprint(login, url_prefix='/login')
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -65,19 +67,7 @@ login_manager.init_app(app)
 def load_user(user_id):
     return db_methods.get_user(user_id)
 
-
 # User chapters req handlers:
-
-
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "GET":
-        return render_template("./login.html", navi_upload=False)
-    elif request.method == "POST":
-        u = user.login(request.json)
-        return u.username if u is not None and login_user(u, remember=True) else ""
 
 
 @decorator_assertion(app.route("/signup", methods=["GET", "POST"]), app.config["SIGNUP_PAGE_ENABLED"])
