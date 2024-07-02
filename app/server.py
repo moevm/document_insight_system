@@ -47,6 +47,7 @@ from routes.criterion_packs import criterion_packs
 from routes.get_csv import get_csv
 from routes.get_zip import get_zip
 from routes.get_pdf import get_pdf
+from routes.get_last_check_results import get_last_check_results
 
 from server_consts import UPLOAD_FOLDER
 
@@ -77,6 +78,7 @@ app.register_blueprint(criterion_packs, url_prefix='/criterion_packs')
 app.register_blueprint(get_csv, url_prefix='/get_csv')
 app.register_blueprint(get_zip, url_prefix='/get_zip')
 app.register_blueprint(get_pdf, url_prefix='/get_pdf')
+app.register_blueprint(get_last_check_results, url_prefix='/get_last_check_results')
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -99,18 +101,6 @@ def signup():
     elif request.method == "POST":
         u = user.signup(request.json)
         return u.username if u is not None and login_user(u, remember=True) else ""
-
-
-@app.route("/get_last_check_results/<string:moodle_id>", methods=["GET"])
-@login_required
-def get_latest_user_check(moodle_id):
-    check = db_methods.get_latest_user_check_by_moodle(moodle_id)
-    logger.error(str(check))
-    if check:
-        check = check[0]
-        return redirect(url_for('results', _id=str(check['_id'])))
-    else:
-        return render_template("./404.html")
 
 
 @app.route("/version")
