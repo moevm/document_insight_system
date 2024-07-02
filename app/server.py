@@ -42,6 +42,8 @@ from routes.upload import upload
 from routes.recheck import recheck
 from routes.results import results
 from routes.api import api
+from routes.criterion_pack import criterion_pack
+from routes.criterion_packs import criterion_packs
 
 from server_consts import UPLOAD_FOLDER, ALLOWED_EXTENSIONS, DOCUMENT_TYPES, TABLE_COLUMNS, URL_DOMEN
 
@@ -67,6 +69,8 @@ app.register_blueprint(upload, url_prefix='/upload')
 app.register_blueprint(recheck, url_prefix='/recheck')
 app.register_blueprint(results, url_prefix='/results')
 app.register_blueprint(api, url_prefix='/api')
+app.register_blueprint(criterion_pack, url_prefix='/criterion_pack')
+app.register_blueprint(criterion_packs, url_prefix='/criterion_packs')
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -93,40 +97,10 @@ def signup():
 
 # Main chapters req handlers:
 
-    
-
 
 
 ################### Criterion packs ###################
 
-@app.route("/criterion_pack", methods=["GET"])
-@login_required
-def criteria_pack_new():
-    if not current_user.is_admin:
-        abort(403)
-    return render_template('./criteria_pack.html', name=current_user.name, navi_upload=True)
-
-
-@app.route("/criterion_packs", methods=["GET"])
-@login_required
-def criteria_packs():
-    if not current_user.is_admin:
-        abort(403)
-    packs = db_methods.get_criterion_pack_list()
-    return render_template('./pack_list.html', packs=packs, name=current_user.name, navi_upload=True)
-
-
-@app.route("/criterion_pack/<string:name>", methods=["GET"])
-@login_required
-def criteria_pack(name):
-    if not current_user.is_admin:
-        abort(403)
-
-    pack = db_methods.get_criteria_pack(name)
-    if not pack:
-        abort(404)
-    pack['raw_criterions'] = json.dumps(pack['raw_criterions'], indent=4, ensure_ascii=False)
-    return render_template('./criteria_pack.html', pack=pack, name=current_user.name, navi_upload=True)
 
 
 ################### ###################
