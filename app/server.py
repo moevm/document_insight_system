@@ -48,6 +48,7 @@ from routes.get_csv import get_csv
 from routes.get_zip import get_zip
 from routes.get_pdf import get_pdf
 from routes.get_last_check_results import get_last_check_results
+from routes.version import version
 
 from server_consts import UPLOAD_FOLDER
 
@@ -79,6 +80,7 @@ app.register_blueprint(get_csv, url_prefix='/get_csv')
 app.register_blueprint(get_zip, url_prefix='/get_zip')
 app.register_blueprint(get_pdf, url_prefix='/get_pdf')
 app.register_blueprint(get_last_check_results, url_prefix='/get_last_check_results')
+app.register_blueprint(version, url_prefix='/version')
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -101,11 +103,6 @@ def signup():
     elif request.method == "POST":
         u = user.signup(request.json)
         return u.username if u is not None and login_user(u, remember=True) else ""
-
-
-@app.route("/version")
-def version():
-    return render_template("./version.html")
 
 
 @app.route('/profile', methods=["GET"], defaults={'username': ''})
