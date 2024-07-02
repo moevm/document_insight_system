@@ -50,6 +50,7 @@ from routes.get_pdf import get_pdf
 from routes.get_last_check_results import get_last_check_results
 from routes.version import version
 from routes.capacity import capacity
+from routes.profile import profile
 
 from server_consts import UPLOAD_FOLDER
 
@@ -83,6 +84,7 @@ app.register_blueprint(get_pdf, url_prefix='/get_pdf')
 app.register_blueprint(get_last_check_results, url_prefix='/get_last_check_results')
 app.register_blueprint(version, url_prefix='/version')
 app.register_blueprint(capacity, url_prefix='/capacity')
+app.register_blueprint(profile, url_prefix='/profile')
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -105,27 +107,6 @@ def signup():
     elif request.method == "POST":
         u = user.signup(request.json)
         return u.username if u is not None and login_user(u, remember=True) else ""
-
-
-@app.route('/profile', methods=["GET"], defaults={'username': ''})
-@app.route('/profile/<string:username>', methods=["GET"])
-@login_required
-def profile(username):
-    return abort(404)
-    # if current_user.is_admin:
-    #     if username == '':
-    #         return redirect(url_for("profile", username=current_user.username))
-    #     u = db_methods.get_user(username)
-    #     me = True if username == current_user.username else False
-    #     if u is not None:
-    #         return render_template("./profile.html", navi_upload=True, name=current_user.name, user=u, me=me)
-    #     else:
-    #         logger.info("Запрошенный пользователь не найден: " + username)
-    #         return render_template("./404.html")
-    # else:
-    #     abort(403)
-
-
 
 
 # Когда дойду до сюда, первое задание должно быть выполнено
