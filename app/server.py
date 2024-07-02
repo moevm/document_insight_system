@@ -46,6 +46,7 @@ from routes.criterion_pack import criterion_pack
 from routes.criterion_packs import criterion_packs
 from routes.get_csv import get_csv
 from routes.get_zip import get_zip
+from routes.get_pdf import get_pdf
 
 from server_consts import UPLOAD_FOLDER
 
@@ -75,6 +76,7 @@ app.register_blueprint(criterion_pack, url_prefix='/criterion_pack')
 app.register_blueprint(criterion_packs, url_prefix='/criterion_packs')
 app.register_blueprint(get_csv, url_prefix='/get_csv')
 app.register_blueprint(get_zip, url_prefix='/get_zip')
+app.register_blueprint(get_pdf, url_prefix='/get_pdf')
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -99,16 +101,6 @@ def signup():
         return u.username if u is not None and login_user(u, remember=True) else ""
 
 
-# Main chapters req handlers:
-
-
-
-################### Criterion packs ###################
-
-
-
-################### ###################
-
 @app.route("/get_last_check_results/<string:moodle_id>", methods=["GET"])
 @login_required
 def get_latest_user_check(moodle_id):
@@ -118,21 +110,6 @@ def get_latest_user_check(moodle_id):
         check = check[0]
         return redirect(url_for('results', _id=str(check['_id'])))
     else:
-        return render_template("./404.html")
-
-
-@app.route("/get_pdf/<string:_id>", methods=["GET"])
-@login_required
-def get_pdf(_id):
-    try:
-        file = db_methods.find_pdf_by_file_id(ObjectId(_id))
-    except bson.errors.InvalidId:
-        logger.error('_id exception in fetching pdf occured:', exc_info=True)
-        return render_template("./404.html")
-    if file is not None:
-        return Response(file.read(), mimetype='application/pdf')
-    else:
-        logger.info(f'pdf файл для проверки {id} не найден')
         return render_template("./404.html")
 
 
