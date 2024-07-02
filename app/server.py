@@ -95,26 +95,6 @@ def signup():
 
     
 
-@app.route("/checks/<string:_id>", methods=["GET"])
-@login_required
-def checks(_id):
-    try:
-        f = db_methods.get_file_by_check(ObjectId(_id))
-    except bson.errors.InvalidId:
-        logger.error('_id exception in checks occured:', exc_info=True)
-        return render_template("./404.html")
-    if f is not None:
-        n = 'txt/plain'
-        if f.name.endswith('.ppt'):
-            n = 'application/vnd.ms-powerpoint'
-        elif f.name.endswith('.pptx'):
-            n = 'application/vnd.openxmlformats-officedocument.presentationml.presentations'
-        elif f.name.endswith('.odp'):
-            n = 'application/vnd.oasis.opendocument.presentations'
-        return Response(f.read(), mimetype=n)
-    else:
-        logger.info("Запрошенная презентация не найдена: " + _id)
-        return render_template("./404.html")
 
 
 ################### Criterion packs ###################
