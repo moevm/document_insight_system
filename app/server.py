@@ -44,8 +44,10 @@ from routes.results import results
 from routes.api import api
 from routes.criterion_pack import criterion_pack
 from routes.criterion_packs import criterion_packs
+from routes.get_csv import get_csv
+from routes.get_zip import get_zip
 
-from server_consts import UPLOAD_FOLDER, ALLOWED_EXTENSIONS, DOCUMENT_TYPES, TABLE_COLUMNS, URL_DOMEN
+from server_consts import UPLOAD_FOLDER
 
 logger = get_root_logger('web')
 
@@ -71,6 +73,8 @@ app.register_blueprint(results, url_prefix='/results')
 app.register_blueprint(api, url_prefix='/api')
 app.register_blueprint(criterion_pack, url_prefix='/criterion_pack')
 app.register_blueprint(criterion_packs, url_prefix='/criterion_packs')
+app.register_blueprint(get_csv, url_prefix='/get_csv')
+app.register_blueprint(get_zip, url_prefix='/get_zip')
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -131,83 +135,6 @@ def get_pdf(_id):
         logger.info(f'pdf файл для проверки {id} не найден')
         return render_template("./404.html")
 
-
-
-
-def get_query(req):
-    # query for download csv/zip
-    filter_query = checklist_filter(req.args)
-    limit = False
-    offset = False
-    sort = req.args.get("sort", "")
-    sort = 'upload-date' if not sort else sort
-    order = req.args.get("order", "")
-    order = 'desc' if not order else order
-    sort = "_id" if sort == "upload-date" else sort
-    latest = True if req.args.get("latest") else False
-    return dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order, latest=latest)
-
-
-def get_stats():
-    rows, count = db_methods.get_checks(**get_query(request))
-    return [format_check_for_table(item, set_link=URL_DOMEN) for item in rows]
-
-
-@app.route("/get_csv")
-@login_required
-def get_csv():
-    from io import StringIO
-    if not current_user.is_admin:
-        abort(403)
-    response = get_stats()
-    df = pd.read_json(StringIO(json.dumps(response)))
-    return Response(
-        df.to_csv(sep=',', encoding='utf-8', decimal=','),
-        mimetype="text/csv",
-        headers={"Content-disposition": "attachment"}
-    )
-
-
-@app.route("/get_zip")
-@login_required
-def get_zip():
-    if not current_user.is_admin:
-        abort(403)
-
-    original_names = request.args.get('original_names', False) == 'true'    
-
-    # create tmp folder
-    dirpath = tempfile.TemporaryDirectory()
-
-    # write files
-    checks_list, _ = db_methods.get_checks(**get_query(request))
-    for check in checks_list:
-        db_file = db_methods.find_pdf_by_file_id(check['_id'])
-        original_name = db_methods.get_check(check['_id']).filename #get a filename from every check
-        if db_file is not None:
-            final_name = original_name if (original_name and original_names) else db_file.filename
-            # to avoid overwriting files with one name and different content: now we save only last version of pres (from last check)
-            if not os.path.exists(f'{dirpath.name}/{final_name}'):
-                with open(f"{dirpath.name}/{final_name}", 'wb') as os_file:
-                    os_file.write(db_file.read())
-
-    # add csv
-    response = get_stats()
-    df = pd.read_json(StringIO(json.dumps(response)))
-    df.to_csv(f"{dirpath.name}/Статистика.csv")
-
-    # zip
-    tmp = tempfile.TemporaryDirectory()
-    archive_path = shutil.make_archive(f"{tmp}/archive", 'zip', dirpath.name)
-    dirpath.cleanup()
-
-    # send
-    with open(archive_path, 'rb') as zip_file:
-        return Response(
-            zip_file.read(),
-            mimetype="application/zip",
-            headers={"Content-disposition": "attachment"}
-        )
 
 @app.route("/version")
 def version():

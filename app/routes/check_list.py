@@ -1,13 +1,10 @@
 from flask import Blueprint, render_template, jsonify, request
 
-# from app.routes.logs import get_logger
 from app.utils import format_check_for_table, checklist_filter
 from app.db import db_methods
-from app.root_logger import get_root_logger
 from flask_login import login_required, current_user
 
 check_list = Blueprint('check_list', __name__, template_folder='templates', static_folder='static')
-logger = get_root_logger('web')
 
 @check_list.route("/")
 @login_required
@@ -35,7 +32,6 @@ def check_list_data():
 
     sort = "_id" if sort == "upload-date" else sort
 
-    logger.debug("My msg after sorting)))))")
     query = dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
 
     if data.get("latest"):
