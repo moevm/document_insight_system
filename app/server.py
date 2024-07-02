@@ -49,6 +49,7 @@ from routes.get_zip import get_zip
 from routes.get_pdf import get_pdf
 from routes.get_last_check_results import get_last_check_results
 from routes.version import version
+from routes.capacity import capacity
 
 from server_consts import UPLOAD_FOLDER
 
@@ -81,6 +82,7 @@ app.register_blueprint(get_zip, url_prefix='/get_zip')
 app.register_blueprint(get_pdf, url_prefix='/get_pdf')
 app.register_blueprint(get_last_check_results, url_prefix='/get_last_check_results')
 app.register_blueprint(version, url_prefix='/version')
+app.register_blueprint(capacity, url_prefix='/capacity')
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
@@ -124,17 +126,7 @@ def profile(username):
     #     abort(403)
 
 
-@app.route("/capacity", methods=["GET"])
-def system_capacity():
-    units = {'b': 1, 'mb': 1024 ** 2, 'gb': 1024 ** 3}
-    unit = units.get(request.args.get('unit', 'gb').lower(), units['gb'])
-    current_size = db_methods.get_storage()
-    ratio = current_size / app.config['MAX_SYSTEM_STORAGE']
-    return {
-        'size': current_size / unit,
-        'max_size': app.config['MAX_SYSTEM_STORAGE'] / unit,
-        'ratio': ratio
-    }
+
 
 # Когда дойду до сюда, первое задание должно быть выполнено
 
