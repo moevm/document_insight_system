@@ -10,12 +10,12 @@ class ReportMainCharacterCheck(BaseReportCriterion):
     id = "main_character_check"
     priority = True
 
-    def __init__(self, file_info):
+    def __init__(self, file_info, tables_count_to_verify=8):
         super().__init__(file_info)
         self.headers = []
         self.first_check_list = None
         self.second_check_list = None
-        self.tables_count_to_verify = 8
+        self.tables_count_to_verify = tables_count_to_verify
 
     def late_init(self):
         self.headers = self.file.make_headers(self.file_type['report_type'])
