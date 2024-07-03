@@ -1,4 +1,4 @@
-class ReportMainfound_valueSetting:
+class ReportMainPageSetting:
     FIRST_TABLE = [
             {
                 "key": "Направление",

@@ -13,6 +13,7 @@ class ReportMainCharacterCheck(BaseReportCriterion):
         self.headers = []
         self.first_check_list = ReportMainPageSetting.FIRST_TABLE
         self.second_check_list = ReportMainPageSetting.SECOND_TABLE
+        self.tables_count_to_verify = 8
         
 
     def late_init(self):
@@ -21,17 +22,24 @@ class ReportMainCharacterCheck(BaseReportCriterion):
     def check(self):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
+        if len(self.file.styled_paragraphs) == 0:
+            self.file.parse()
+        if self.tables_count_to_verify > len(self.file.tables):
+            return answer(False, f"Количество таблиц на страницах титульного листа, задания и календарного плана должно быть не меньше {self.tables_count_to_verify}")
         self.late_init()
         result_str = ""
         pages = []
         for header in self.headers:
             if header["marker"] and header["main_character"]:
                 pages.append(header["page"])
-        for table in self.file.tables:
-            if "таблица" in self.get_text_before_table(table):
-                break
-            self.check_table(self.first_check_list, table)
-            self.check_table(self.second_check_list, table)
+        for i in range(self.tables_count_to_verify):
+            table = self.file.tables[i]
+            print("table",table)
+            print(type(table))
+            print(table.__dict__)
+            extract_table = self.extract_table_contents(table)
+            self.check_table(self.first_check_list, extract_table)
+            self.check_table(self.second_check_list, extract_table)
         links = self.format_page_link(pages)
         for res in self.first_check_list + self.second_check_list:
             if res["found_key"] > 1 and res["key"] == "Консультант":
@@ -49,43 +57,34 @@ class ReportMainCharacterCheck(BaseReportCriterion):
                           f'<br>Для бакалавров: <a href="https://drive.google.com/drive/folders/1pvv9HJIUB0VZUXteGqtLcVq6zIgZ6rbZ">Формы бланков для бакалавров</a>.' \
                           f'<br>Для магистров: <a href="https://drive.google.com/drive/folders/1KOoXzKv4Wf-XyGzOf1X8gN256sgame1D">Формы бланков для магистров</a>.'
             return answer(False, result_str)
-    
-    def get_text_before_table(self, table):
-        element = table._element.getprevious()
-        while element is not None:
-            if element.text and element.text.strip() != "":
-                return element.text.strip().lower()
-            element = element.getprevious()
         
     def extract_table_contents(self, table):
-        contents = []
-        processed_cells = set()
-        for row in table.rows:
-            row_text = []
-            for cell in row.cells:
-                if cell not in processed_cells:
-                    row_text.append(cell.text.strip())
-                    processed_cells.add(cell)
-            contents.append(' '.join(row_text))
-        return contents
+        collected_table = []
+        for cell in table.table_cells:
+            collected_line = []
+            for item in cell:
+                if item.cell_text not in collected_line:
+                    collected_line.append(item.cell_text)
+            collected_table.append(' '.join(collected_line))
+        print("УСпех"*10)
+        return collected_table
     
-    def calculate_find_value(self, lines, index):
-        count = int((len(lines) - index - 2) / 2)
+    def calculate_find_value(self, table, index):
+        count = int((len(table) - index - 2) / 2)
         if count >= 0:
             return count
         return 0
     
     def check_table(self, check_list, table):
-        lines = self.extract_table_contents(table)
         for item in check_list:
             flag = False
-            for i, line in enumerate(lines):
+            for i, line in enumerate(table):
                 if item["key"] in line:
                     flag = True
                     item["found_key"]+=1
                     if item["key"] == "Консультант":
                         if item["found_key"] == 1:
-                            item["find"] += self.calculate_find_value(lines, i)
+                            item["find"] += self.calculate_find_value(table, i)
                         else:
                             flag = False
                 if flag:
