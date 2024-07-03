@@ -1,4 +1,4 @@
-import { debounce, isFloat, resetTable, ajaxRequest, onPopState } from "./utils"
+import { debounce, isFloat, resetTable, ajaxRequest, onPopState, getLatestAjaxRequest } from "./utils"
 
 let $table;
 const AJAX_URL = "/check_list/data";
@@ -201,7 +201,7 @@ function buttons() {
             text: 'CSV',
             event: function () {
                 //const queryString = window.location.search
-                const params = window.location.search
+                const params = getLatestAjaxRequest()
                 $("[name=FetchCSV]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Exporting..."
                 fetch('get_csv' + '?' + params)
                     .then(response => response.blob())
@@ -215,7 +215,7 @@ function buttons() {
         buttonsObj["FetchZip"] = {
             text: 'Скачать архив',
             event: function () {
-                const params = window.location.search
+                const params = getLatestAjaxRequest()
                 $("[name=FetchZip]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Архивирование..."
                 fetch('get_zip' + '?' + params)
                     .then(response => response.ok ? response.blob() : false)
