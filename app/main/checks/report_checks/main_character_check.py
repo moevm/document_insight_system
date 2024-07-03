@@ -27,24 +27,21 @@ class ReportMainCharacterCheck(BaseReportCriterion):
         for header in self.headers:
             if header["marker"] and header["main_character"]:
                 pages.append(header["page"])
-        for page in range(min(pages), max(pages) + 1):
-            self.check_first_table(page)
-            self.check_second_table(page)
+        for table in self.file.tables:
+            if "таблица" in self.get_text_before_table(table):
+                break
+            self.check_table(self.first_check_list, table)
+            self.check_table(self.second_check_list, table)
+        links = self.format_page_link(pages)
         for res in self.first_check_list + self.second_check_list:
-            if res["found"] != res["find"]:
-                print("="*100)
-                print(pages)
-                print(res)
-                print("="*100)
-                if res["found"] > res["find"] and res["key"] == "Консультант":
-                    links = self.format_page_link(res["page"][1:])
-                    result_str += f"На страниц(е/ах) {links} не нужно указывать консультантов.<br>"
-                elif res["find"] == len(res["page"]) and len(res["page"]):
-                    links = self.format_page_link(res["page"])
-                    result_str += f"На страниц(е/ах) {links} содержимое поля '{res['key']}' указано корректно {res['found']} из {res['find']} раз. Проверьте корректность всех вхождений.<br>"
-                elif res["found"] < res["find"]:
-                    links = self.format_page_link(pages)
-                    result_str += f"Поле '{res['key']}' или его содержимое указано корректно {res['found']} из {res['find']} раз. Проверьте корректность всех вхождений на страницах {links}.<br>"
+            if res["found_key"] > 1 and res["key"] == "Консультант":
+                links = self.format_page_link(pages[1:])
+                result_str += f"На страницах {links} не нужно указывать консультантов.<br>"
+            elif res["found_key"] < res["find"]:
+                result_str += f"Поле '{res['key']}' не найдено на страницах {links}. Его удалось обнаружить {res['found_key']} из {res['find']} раз. Проверьте корректность всех вхождений.<br>"
+            elif res["found_value"] < res["find"]:
+                links = self.format_page_link(pages)
+                result_str += f"Содержимое поля '{res['key']}' указано корректно {res['found_value']} из {res['find']} раз. Проверьте корректность всех вхождений на страницах {links}.<br>"
         if not result_str:
             return answer(True, 'Пройдена!')
         else:
@@ -52,32 +49,49 @@ class ReportMainCharacterCheck(BaseReportCriterion):
                           f'<br>Для бакалавров: <a href="https://drive.google.com/drive/folders/1pvv9HJIUB0VZUXteGqtLcVq6zIgZ6rbZ">Формы бланков для бакалавров</a>.' \
                           f'<br>Для магистров: <a href="https://drive.google.com/drive/folders/1KOoXzKv4Wf-XyGzOf1X8gN256sgame1D">Формы бланков для магистров</a>.'
             return answer(False, result_str)
-            
-    def check_first_table(self, page):
-        text_on_page = self.file.pdf_file.text_on_page[page].replace("\n", "")
-        for item in self.first_check_list:
-            key = item["key"]
-            index = text_on_page.find(key)
-            if index != -1:
-                item["page"].append(page)
-                if any(value in text_on_page[index:] for value in item["value"]):
-                    item["found"] += 1
-
-    def check_second_table(self, page):
-        text_on_page = self.file.pdf_file.text_on_page[page].split("\n")
-        for line in text_on_page:
-            for item in self.second_check_list:
-                key = item["key"]
-                if key in line:
-                    item["page"].append(page)
-                    match = re.search(item["value"][0], line)
-                    if match:
-                        print(line,page)
-                        end_index = match.end()
-                        if ',' in line[end_index:]:
-                            if re.search(item["value"][1], line[end_index:]):
-                                item["found"] += 1
+    
+    def get_text_before_table(self, table):
+        element = table._element.getprevious()
+        while element is not None:
+            if element.text and element.text.strip() != "":
+                return element.text.strip().lower()
+            element = element.getprevious()
+        
+    def extract_table_contents(self, table):
+        contents = []
+        processed_cells = set()
+        for row in table.rows:
+            row_text = []
+            for cell in row.cells:
+                if cell not in processed_cells:
+                    row_text.append(cell.text.strip())
+                    processed_cells.add(cell)
+            contents.append(' '.join(row_text))
+        return contents
+    
+    def calculate_find_value(self, lines, index):
+        count = int((len(lines) - index - 2) / 2)
+        if count >= 0:
+            return count
+        return 0
+    
+    def check_table(self, check_list, table):
+        lines = self.extract_table_contents(table)
+        for item in check_list:
+            flag = False
+            for i, line in enumerate(lines):
+                if item["key"] in line:
+                    flag = True
+                    item["found_key"]+=1
+                    if item["key"] == "Консультант":
+                        if item["found_key"] == 1:
+                            item["find"] += self.calculate_find_value(lines, i)
                         else:
-                            item["found"] += 1
-                    else:
-                        print("((()))",line,page)
+                            flag = False
+                if flag:
+                    for value in item["value"]:
+                        if re.search(value, line):
+                            item["found_value"] += 1
+                            if item["key"] != "Консультант":
+                                flag = False
+                            break
