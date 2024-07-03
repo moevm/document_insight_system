@@ -68,6 +68,7 @@ app.config['CELERY_BROKER_URL'] = os.environ.get("CELERY_BROKER_URL", "redis://l
 app.register_blueprint(admin, url_prefix='/admin')
 app.register_blueprint(users, url_prefix='/users')
 app.register_blueprint(check_list, url_prefix='/check_list')
+app.register_blueprint(checks, url_prefix='/checks')
 app.register_blueprint(logs, url_prefix='/logs')
 app.register_blueprint(lti, url_prefix='/lti')
 app.register_blueprint(login, url_prefix='/login')
