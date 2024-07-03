@@ -122,7 +122,7 @@ def request_entity_too_large(error=None):
 
 @login_manager.unauthorized_handler
 def unauthorized_callback():
-    return redirect(url_for("login"))
+    return redirect(url_for("login.login_main"))
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
