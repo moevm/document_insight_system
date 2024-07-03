@@ -110,11 +110,8 @@ class ReportParagraphsCountCheck(BaseReportCriterion):
     def find_lists_and_captions(self, paragraphs):
         ignored_paragraphs = 0
         count_lists = 0
-        for i, paragraph in enumerate(paragraphs):
+        for paragraph in paragraphs:
             if paragraph["style"].find("вкр_подпись") != -1:
                 ignored_paragraphs += 1
-            # elif paragraph["style"].find("list") != -1:
-            #     ignored_paragraphs += 1
-                # if i == len(paragraphs) - 2 or paragraphs[i + 1]["style"] not in ["list bullet", "list number"]:
-                #     count_lists += 1
+            # necessary search lists
         return count_lists, ignored_paragraphs
