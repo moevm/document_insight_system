@@ -1,3 +1,7 @@
+import os
+import random
+import string
+import traceback
 from datetime import datetime
 from os.path import basename
 
@@ -6,11 +10,15 @@ from bson import ObjectId
 from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 from utils import convert_to
+import dotenv
 
 from .db_types import User, Presentation, Check, Consumers, Logs
 
+dotenv.load_dotenv()
+
+database_name = os.getenv('DATABASE_NAME', 'pres-parser-db')
 client = MongoClient("mongodb://mongodb:27017")
-db = client['pres-parser-db']
+db = client[database_name]
 fs = GridFSBucket(db)
 
 users_collection = db['users']
@@ -50,6 +58,10 @@ def validate_user(username, password_hash):
     else:
         return None
 
+
+# def get_users():
+#     for elem in files_info_collection.find():
+#         print(elem)
 
 # Returns user with given username or None
 def get_user(username):
@@ -230,7 +242,7 @@ def set_passbacked_flag(checks_id, flag):
 def get_latest_users_check(filter=None):
     local_filter = filter
     user = local_filter.get('user')
-    username_filter = {'username': user} if user else {} 
+    username_filter = {'username': user} if user else {}
     all_users = [user['username'] for user in users_collection.find(username_filter, {'username': 1})]
     latest_checks = []
     for user in all_users:
@@ -443,3 +455,60 @@ def get_celery_task(celery_task_id):
 
 def get_celery_task_by_check(check_id):
     return celery_check_collection.find_one({'check_id': check_id})
+
+def random_string(length=8):
+    letters = string.ascii_letters + string.digits
+    return ''.join(random.choice(letters) for _ in range(length))
+
+# def fill_test_data(user_name):
+#     for i in range(5):
+#         filepath = f'document_insight_system/app/db/tests_data/test_file_{i}.docx'
+#         file_type = 'report'
+#         username = user_name
+#         add_file_info_and_content(username, filepath, file_type)
+
+def get_all_collections_name():
+    collection = db.collection_names(include_system_collections=False)
+    lst = []
+    for collect in collection:
+        lst.append(collect)
+    return lst
+
+def get_users_from_table():
+    lst = []
+    for el in users_collection.find():
+        lst.append(el)
+    return lst
+
+def get_files_info_from_table():
+    lst = []
+    for el in files_info_collection.find():
+        lst.append(el)
+    return lst
+
+def get_checks_from_table():
+    lst = []
+    for el in checks_collection.find():
+        lst.append(el)
+    return lst
+
+def get_consumers_from_table():
+    lst = []
+    for el in consumers_collection.find():
+        lst.append(el)
+    return lst
+
+def get_criteria_pack_from_table():
+    lst = []
+    for el in criteria_pack_collection.find():
+        lst.append(el)
+    return lst
+
+def get_logs_from_table():
+    lst = []
+    for el in logs_collection.find():
+        lst.append(el)
+    return lst
+
+
+
