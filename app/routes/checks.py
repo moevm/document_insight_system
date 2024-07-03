@@ -14,7 +14,7 @@ logger = get_root_logger('web')
 
 @checks.route("/<string:_id>", methods=["GET"])
 @login_required
-def checks(_id):
+def checks_main(_id):
     try:
         f = db_methods.get_file_by_check(ObjectId(_id))
     except bson.errors.InvalidId:
