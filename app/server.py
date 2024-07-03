@@ -33,6 +33,7 @@ from app.main.checks import CRITERIA_INFO
 from routes.admin import admin
 from routes.users import users
 from routes.check_list import check_list
+from routes.checks import checks
 from routes.logs import logs
 from routes.lti import lti
 from routes.login import login
