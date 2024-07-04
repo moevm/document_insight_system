@@ -27,9 +27,7 @@ class SlideTextVolumeCheck(BasePresCriterion):
         slides_info = []
         if len(titles) == 0 or len(text_from_slides) == 0:
             return answer(False, 'Презентация пуста или заголовки не найдены.')
-        for i in range(len(titles)):
-            if "Санкт-Петербургский государственный" in titles[i]:
-                continue
+        for i in range(1, len(titles)):
             if "Запасные слайды" in titles[i]:
                 break
             required_list = False
@@ -54,14 +52,14 @@ class SlideTextVolumeCheck(BasePresCriterion):
                 if paragraphs[i] > self.max_count_words_in_paragraph:
                     res += f'Количество слов в абзаце № {i + 1}: {paragraphs[i]};<br>'
             if slide_info['required_list'] and not slide_info['has_list']:
-                res += f'На данном слайде наличие списка является обязательным;'
+                res += f'На данном слайде наличие списка является обязательным;<br>'
             if res:
-                result_str = result_str + f'Слайд {link}:<br>' + res 
+                result_str = result_str + f'<br>Слайд {link}:<br>' + res 
 
         if not result_str:
             return answer(True, 'Пройдена!')
         else:
-            result_str += f'Количество слов на слайде должно быть больше {self.min_count_words_on_slide} и меньше {self.max_count_words_on_slide};<br>' \
+            result_str += f'<br>Количество слов на слайде должно быть больше {self.min_count_words_on_slide} и меньше {self.max_count_words_on_slide};<br>' \
                 f'Количество абзацев на слайде должно быть больше {self.min_count_paragraphs} и меньше {self.max_count_paragraphs};<br>' \
                     f'Количество слов в абзаце должно быть больше {self.min_count_words_in_paragraph} и меньше {self.max_count_words_in_paragraph};<br>'
             return answer(False, result_str)
@@ -70,6 +68,7 @@ class SlideTextVolumeCheck(BasePresCriterion):
         if text is None:
             text = '' 
         paragraphs = [p for p in text.split('\n') if p.strip()]
+        paragraphs = paragraphs[1:-1]
         slide_info = {
             'page': page,
             'required_list': required_list,
