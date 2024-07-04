@@ -10,11 +10,8 @@ from bson import ObjectId
 from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 from utils import convert_to
-import dotenv
 
 from .db_types import User, Presentation, Check, Consumers, Logs
-
-dotenv.load_dotenv()
 
 database_name = os.getenv('DATABASE_NAME', 'pres-parser-db')
 client = MongoClient("mongodb://mongodb:27017")
