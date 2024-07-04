@@ -7,7 +7,13 @@ from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 from utils import convert_to
 
-from .db_types import User, Presentation, Check, Consumers, Logs
+# from .db_types import Check
+from app.db.types.User import User
+from app.db.types.Consumers import Consumers
+from app.db.types.Presentation import Presentation
+from app.db.types.Logs import Logs
+from app.db.types.Check import Check
+
 
 client = MongoClient("mongodb://mongodb:27017")
 db = client['pres-parser-db']
