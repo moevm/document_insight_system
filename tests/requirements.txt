@@ -1,2 +1,3 @@
 selenium==4.18.0
 webdriver-manager==4.0.1 #to avoid problem with binary
+pandas==2.2.2
