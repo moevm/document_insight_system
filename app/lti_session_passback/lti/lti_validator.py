@@ -1,4 +1,4 @@
-from db.db_methods import ConsumersDBManager
+from app.db.types.ConsumerDBManager import ConsumersDBManager
 from oauthlib.oauth1 import RequestValidator
 
 

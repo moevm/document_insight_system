@@ -1,17 +1,19 @@
-from flask import Blueprint, render_template, jsonify, request, redirect, url_for, abort
-from app.utils import format_check_for_table, checklist_filter
-from app.db import db_methods
-from flask_login import login_required, current_user, logout_user, login_user
+from flask import Blueprint, request, redirect, url_for, abort
+from flask_login import logout_user, login_user
 
 from app.lti_session_passback.lti import utils
 from app.lti_session_passback.lti.check_request import check_request
 from app.main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_TYPE
 from app.root_logger import get_root_logger
+from app.db.methods import user as user_methods
+from app.db.methods.edit_user import edit_user
+from app.db.methods import criteria_pack as criteria_pack_methods
 
 from app.server_consts import ALLOWED_EXTENSIONS
 
 lti = Blueprint('lti', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')
+
 
 @lti.route('/lti', methods=['POST'])
 def lti_main():
@@ -27,14 +29,14 @@ def lti_main():
         # task settings
         # pack name
         custom_criterion_pack = custom_params.get('pack', BASE_PACKS.get(DEFAULT_TYPE).name)
-        criterion_pack_info = db_methods.get_criteria_pack(custom_criterion_pack)
+        criterion_pack_info = criteria_pack_methods.get_criteria_pack(custom_criterion_pack)
         if not criterion_pack_info:
             default_criterion_pack = BASE_PACKS.get(DEFAULT_TYPE).name
             logger.error(
                 f"Ошибка при lti-авторизации. Несуществующий набор {custom_criterion_pack} пользователя {username}. Установлен набор по умолчанию: {default_criterion_pack}")
             logger.debug(f"lti-параметры: {temporary_user_params}")
             custom_criterion_pack = default_criterion_pack
-            criterion_pack_info = db_methods.get_criteria_pack(custom_criterion_pack)
+            criterion_pack_info = criteria_pack_methods.get_criteria_pack(custom_criterion_pack)
         custom_criterion_pack_obj = BaseCriterionPack(**criterion_pack_info)
         # get file type and formats from pack
         file_type_info = custom_criterion_pack_obj.file_type
@@ -47,12 +49,12 @@ def lti_main():
 
         logout_user()
 
-        lti_user = db_methods.add_user(user_id, is_LTI=True)
+        lti_user = user_methods.add_user(user_id, is_LTI=True)
         if lti_user:
             lti_user.name = person_name
             lti_user.is_admin = role
         else:
-            lti_user = db_methods.get_user(user_id)
+            lti_user = user_methods.get_user(user_id)
 
         # task settings
         lti_user.file_type = file_type_info
@@ -63,9 +65,10 @@ def lti_main():
         lti_user.params_for_passback = params_for_passback
         lti_user.lms_user_id = lms_user_id
 
-        db_methods.edit_user(lti_user)
+        edit_user(lti_user)
 
         login_user(lti_user)
         return redirect(url_for('upload'))
     else:
         abort(403)
+        

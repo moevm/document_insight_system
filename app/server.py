@@ -17,9 +17,9 @@ from flask_login import (LoginManager, current_user, login_required,
                          login_user, logout_user)
 from flask_recaptcha import ReCaptcha
 
-import servants.user as user
+import servants.user as servants_user
 from app.utils import format_check_for_table, check_file
-from db import db_methods
+from app.db.methods.user import get_user
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
 from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, \
@@ -96,7 +96,7 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db_methods.get_user(user_id)
+    return get_user(user_id)
 
 # User chapters req handlers:
 
@@ -106,7 +106,7 @@ def signup():
     if request.method == "GET":
         return render_template("./signup.html", navi_upload=False)
     elif request.method == "POST":
-        u = user.signup(request.json)
+        u = servants_user.signup(request.json)
         return u.username if u is not None and login_user(u, remember=True) else ""
 
 

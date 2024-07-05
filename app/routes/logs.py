@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, jsonify
 from flask_login import current_user, login_required
 from app.root_logger import get_root_logger
 from datetime import datetime, timedelta
-from app.db import db_methods
+from app.db.methods.log import get_logs_cursor
 # from app.server_consts import logger
 logs = Blueprint('logs', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')
@@ -87,7 +87,7 @@ def logs_data():
     order = 'desc' if not order else order
 
     # get data and records count
-    rows, count = db_methods.get_logs_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+    rows, count = get_logs_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
 
     # construct response
     response = {
