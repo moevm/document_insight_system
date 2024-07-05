@@ -7,6 +7,7 @@ from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 from utils import convert_to
 
+from app.db.methods.client import get_client, get_db, get_fs
 # from .db_types import Check
 from app.db.types.User import User
 from app.db.types.Consumers import Consumers
@@ -14,10 +15,9 @@ from app.db.types.Presentation import Presentation
 from app.db.types.Logs import Logs
 from app.db.types.Check import Check
 
-
-client = MongoClient("mongodb://mongodb:27017")
-db = client['pres-parser-db']
-fs = GridFSBucket(db)
+client = get_client()
+db = get_db()
+fs = get_fs()
 
 users_collection = db['users']
 files_info_collection = db['presentations']  # actually, collection for all files (pres and reports)
@@ -28,9 +28,6 @@ logs_collection = db.create_collection(
     'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
 
-
-def get_client():
-    return client
 
 
 # Returns user if user was created and None if already exists
