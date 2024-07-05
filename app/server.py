@@ -1,34 +1,16 @@
-import json
 import os
-import shutil
-import tempfile
-from datetime import datetime, timedelta
-from os.path import join
 from sys import argv
-from io import StringIO
-
-import bson
-import pandas as pd
-from bson import ObjectId
-from celery.result import AsyncResult
-from flask import (Flask, Response, abort, jsonify, redirect, render_template,
+from flask import (Flask, redirect, render_template,
                    request, url_for)
-from flask_login import (LoginManager, current_user, login_required,
-                         login_user, logout_user)
+from flask_login import (LoginManager, current_user, login_user)
 from flask_recaptcha import ReCaptcha
 
 import servants.user as servants_user
-from app.utils import format_check_for_table, check_file
 from app.db.methods.user import get_user
 from lti_session_passback.lti import utils
-from lti_session_passback.lti.check_request import check_request
-from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, \
-    init_criterions, BASE_PRES_CRITERION, BASE_REPORT_CRITERION
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
-from tasks import create_task
-from utils import checklist_filter, decorator_assertion, get_file_len, format_check
-from app.main.checks import CRITERIA_INFO
+from utils import decorator_assertion
 from routes.admin import admin
 from routes.users import users
 from routes.check_list import check_list
@@ -125,11 +107,13 @@ def request_entity_too_large(error=None):
 def unauthorized_callback():
     return redirect(url_for("login.login_main"))
 
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
     logger.info("Страница /" + path + " не найдена!")
     return render_template("./404.html")
+
 
 @app.route("/")
 def default():

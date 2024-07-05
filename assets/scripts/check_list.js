@@ -218,7 +218,7 @@ function buttons() {
             event: function () {
                 const params = window.location.search
                 $("[name=FetchZip]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Архивирование..."
-                fetch('get_zip' + '?' + params)
+                fetch('../get_zip' + '?' + params)
                     .then(response => response.ok ? response.blob() : false)
                     .then(blob => {
                         $("[name=FetchZip]")[0].textContent = "Скачать архив"

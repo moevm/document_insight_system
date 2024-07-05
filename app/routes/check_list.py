@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, jsonify, request
 
 from app.utils import format_check_for_table, checklist_filter
-from app.db import db_main
 from app.db.methods import check as check_methods
 
 from flask_login import login_required, current_user
