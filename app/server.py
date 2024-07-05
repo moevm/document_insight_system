@@ -20,7 +20,6 @@ from flask_recaptcha import ReCaptcha
 import servants.user as user
 from app.utils import format_check_for_table, check_file
 from db import db_methods
-from db.db_types import Check
 from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
 from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, \

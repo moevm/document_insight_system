@@ -1,4 +1,5 @@
-from app.db.db_types import UserMixin
+from flask_login import UserMixin
+
 from app.db.types.Packable import Packable
 from app.main.check_packs import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO
 

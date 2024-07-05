@@ -8,7 +8,7 @@ from app.root_logger import get_root_logger
 
 from app.utils import get_file_len, check_file
 from app.db import db_methods
-from app.db.db_types import Check
+from app.db.types.Check import Check
 
 from app.server_consts import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
 from app.tasks import create_task

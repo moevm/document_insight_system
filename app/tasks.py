@@ -7,7 +7,7 @@ from celery.signals import worker_ready
 
 from passback_grades import run_passback
 from db import db_methods
-from db.db_types import Check
+from db.types.Check import Check
 from main.checker import check
 from main.parser import parse
 from main.check_packs import BASE_PACKS
