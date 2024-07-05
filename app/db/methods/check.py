@@ -1,14 +1,13 @@
-from gridfs import GridFSBucket, NoFile
+from gridfs import NoFile
 from datetime import datetime
 
 import pymongo
 
-from app.db.db_methods import get_checks_collection, get_users_collection, get_files_info_collection
-from app.db.methods.client import get_client, get_db, get_fs
+from app.db.db_main import get_checks_collection, get_users_collection, get_files_info_collection
+from app.db.methods.client import get_db, get_fs
 from app.db.types.Check import Check
 
 
-# client = get_client()
 db = get_db()
 fs = get_fs()
 
@@ -16,9 +15,6 @@ checks_collection = get_checks_collection()
 
 users_collection = get_users_collection()
 files_info_collection = get_files_info_collection()
-
-
-
 
 
 def add_check(file_id, check):
@@ -132,7 +128,6 @@ def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
 
 
 # get logs cursor with specified parameters
-
 
 
 def get_user_checks(login):

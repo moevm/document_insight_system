@@ -1,15 +1,12 @@
 import pymongo
 
-from app.db.db_methods import get_users_collection
+from app.db.db_main import get_users_collection
 from app.db.methods.client import get_db
 from app.db.types.User import User
 
 from app.db.methods.file import delete_presentation
 
-
-# client = get_client()
 db = get_db()
-# fs = get_fs()
 
 users_collection = get_users_collection()
 

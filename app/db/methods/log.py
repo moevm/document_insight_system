@@ -1,13 +1,11 @@
 import pymongo
 
-from app.db.db_methods import get_logs_collection
-from app.db.methods.client import get_client, get_db, get_fs
+from app.db.db_main import get_logs_collection
+from app.db.methods.client import get_db
 
 from app.db.types.Logs import Logs
 
-# client = get_client()
 db = get_db()
-# fs = get_fs()
 
 logs_collection = get_logs_collection()
 

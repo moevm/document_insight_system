@@ -1,4 +1,4 @@
-from app.db.db_methods import get_files_info_collection, get_users_collection
+from app.db.db_main import get_files_info_collection, get_users_collection
 from app.db.methods.client import get_client, get_db, get_fs
 from os.path import basename
 from bson import ObjectId

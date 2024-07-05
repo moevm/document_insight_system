@@ -1,9 +1,8 @@
-from app.db.methods.client import get_client, get_db, get_fs
+from app.db.methods.client import get_db, get_fs
 
 
 from app.db.types.Consumers import Consumers
 
-# client = get_client()
 db = get_db()
 fs = get_fs()
 

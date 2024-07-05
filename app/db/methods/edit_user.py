@@ -1,4 +1,4 @@
-from app.db.db_methods import users_collection
+from app.db.db_main import users_collection
 
 
 def edit_user(user):

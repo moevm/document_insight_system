@@ -4,13 +4,9 @@ from flask_login import current_user, login_required
 from app.root_logger import get_root_logger
 from datetime import datetime, timedelta
 from app.db.methods.log import get_logs_cursor
-# from app.server_consts import logger
 logs = Blueprint('logs', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')
 
-
-# def get_logger():
-#     return logger
 
 @logs.route("/")
 @login_required

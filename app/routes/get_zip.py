@@ -9,7 +9,7 @@ import pandas as pd
 from flask import Blueprint, abort, request, Response
 from flask_login import login_required, current_user
 
-from app.db import db_methods
+from app.db import db_main
 from app.db.methods import file as file_methods
 from app.db.methods import check as check_methods
 

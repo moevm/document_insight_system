@@ -1,13 +1,9 @@
 from datetime import datetime
 
-from app.db.db_methods import get_celery_check_collection
-from app.db.methods.client import get_client, get_db, get_fs
+from app.db.db_main import get_celery_check_collection
+from app.db.methods.client import get_db
 
-from app.db.types.Logs import Logs
-
-# client = get_client()
 db = get_db()
-# fs = get_fs()
 
 celery_check_collection = get_celery_check_collection()  # collection for mapping celery_task to check
 

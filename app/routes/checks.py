@@ -4,7 +4,7 @@ from bson import ObjectId
 from flask import Blueprint, render_template, Response
 from flask_login import login_required
 
-from app.db import db_methods
+from app.db import db_main
 from app.db.methods import file as file_methods
 from app.root_logger import get_root_logger
 
