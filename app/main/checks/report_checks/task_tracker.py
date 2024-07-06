@@ -7,11 +7,12 @@ class ReportTaskTracker(BaseReportCriterion):
     description = 'Не пропускать задачи из серии "доделать, решить, описать"'
     id = 'report_task_tracker'
 
-    def __init__(self, file_info, chapter='Введение', patterns=('задач', 'объект')):
+    def __init__(self, file_info, chapter='Введение', patterns=('задач', 'объект'), deny_list=['доделать', 'решить', 'описать']):
         super().__init__(file_info)
         self.chapter = chapter
         self.chapters = []
         self.patterns = patterns
+        self.deny_list = [morph.parse(word)[0].normal_form for word in deny_list]
 
     def late_init(self):
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
@@ -23,14 +24,14 @@ class ReportTaskTracker(BaseReportCriterion):
         tasks = self.find_tasks()
         if not tasks:
             return answer(False, f'Раздел "{self.chapter}" не обнаружен!')
-        verbs_in_docs = []
+        word_in_docs = []
         for task in tasks:
-            word = task[0]
-            normal_form = morph.parse(word)[0].normal_form
-            if 'INFN' in morph.parse(normal_form)[0].tag:
-                verbs_in_docs.append(word)
-        if verbs_in_docs:
-            return answer(False, f'Задачи не должны начинаться с глаголов! Обнаруженные глаголы: {verbs_in_docs}')
+            for word in task:
+                normal_form = morph.parse(word)[0].normal_form
+                if normal_form in self.deny_list:
+                    word_in_docs.append(word)
+        if word_in_docs:
+            return answer(False, f'Задачи не должны содержать слова: {self.deny_list}! Обнаруженные слова: {word_in_docs}.')
         else:
             return answer(True, 'Задачи сформулированы корректно!')
 
