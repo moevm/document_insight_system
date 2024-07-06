@@ -10,7 +10,8 @@ class SlideTextVolumeCheck(BasePresCriterion):
                  min_count_paragraphs=2, min_count_words_in_paragraph=10,
                  max_count_words_on_slide=100, max_count_paragraphs=5,
                  max_count_words_in_paragraph=50,
-                 slides_with_required_list=["Цель и задачи", "Заключение"]):
+                 slides_with_required_list=["Цель и задачи", "Заключение"],
+                 allow_only_image_or_table=True):
         super().__init__(file_info)
         self.min_count_words_on_slide = min_count_words_on_slide
         self.min_count_paragraphs = min_count_paragraphs
@@ -19,24 +20,31 @@ class SlideTextVolumeCheck(BasePresCriterion):
         self.max_count_paragraphs = max_count_paragraphs
         self.max_count_words_in_paragraph = max_count_words_in_paragraph
         self.slides_with_required_list = slides_with_required_list
+        self.allow_only_image_or_table = allow_only_image_or_table
 
     def check(self):
         result_str = ''
+        slides = self.file.slides
         text_from_slides = self.file.get_text_from_slides()
         titles = self.file.get_titles()
         slides_info = []
         if len(titles) == 0 or len(text_from_slides) == 0:
             return answer(False, 'Презентация пуста или заголовки не найдены.')
         for i in range(1, len(titles)):
+            page_with_images_or_tables = False
+            required_list = False
             if "Запасные слайды" in titles[i]:
                 break
-            required_list = False
             if titles[i] in self.slides_with_required_list:
                 required_list = True
-            slides_info.append(self.slide_text_analysis(i + 1, text_from_slides[i], required_list))
+            if len(slides[i].get_images()) > 0 or len(slides[i].get_table()) > 0:
+                page_with_images_or_tables = True
+            slides_info.append(self.slide_text_analysis(i + 1, text_from_slides[i], required_list, page_with_images_or_tables, titles[i]))
         for slide_info in slides_info:
             res = '' 
             link = self.format_page_link([slide_info['page']])
+            if self.allow_only_image_or_table and slide_info['has_image_or_table']:
+                continue
             if slide_info['count_words_on_slide'] < self.min_count_words_on_slide:
                 res += f'Количество слов на слайде: {slide_info["count_words_on_slide"]};<br>'
             elif slide_info['count_words_on_slide'] > self.max_count_words_on_slide:
@@ -64,21 +72,22 @@ class SlideTextVolumeCheck(BasePresCriterion):
                     f'Количество слов в абзаце должно быть больше {self.min_count_words_in_paragraph} и меньше {self.max_count_words_in_paragraph};<br>'
             return answer(False, result_str)
     
-    def slide_text_analysis(self, page, text, required_list):
+    def slide_text_analysis(self, page, text, required_list, page_with_images_or_tables, title):
         if text is None:
             text = '' 
-        paragraphs = [p for p in text.split('\n') if p.strip()]
-        paragraphs = paragraphs[1:-1]
+        paragraphs = [p.strip() for p in text.split('\n') if p.strip() and not p.strip().isnumeric() and not p.strip() in title]
         slide_info = {
             'page': page,
             'required_list': required_list,
             'paragraphs': [],
             'count_paragraphs': len(paragraphs),
             'count_words_on_slide': 0,
-            'has_list': False
+            'has_list': True,
+            'has_image_or_table': page_with_images_or_tables,
             }
+        
         for paragraph in paragraphs:
             slide_info['paragraphs'].append(len(paragraph.split()))
-            # has_list???
+            # The variable has_list is currently set to true; after creating the check, set it to false."
         slide_info['count_words_on_slide'] = sum(slide_info['paragraphs'])
         return slide_info
