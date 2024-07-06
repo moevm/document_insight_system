@@ -3,16 +3,16 @@ from unittest.mock import patch, MagicMock
 import os
 
 
-from document_insight_system.app.main.parser import parse
-from document_insight_system.app.utils.converter import convert_to
-from document_insight_system.app.main.reports.docx_uploader.docx_uploader import DocxUploader
-from document_insight_system.app.main.reports.md_uploader import MdUploader
-from document_insight_system.app.main.presentations.pptx.presentation_pptx import PresentationPPTX
+from app.main.parser import parse
+from app.utils.converter import convert_to
+from app.main.reports.docx_uploader.docx_uploader import DocxUploader
+from app.main.reports.md_uploader import MdUploader
+from app.main.presentations.pptx.presentation_pptx import PresentationPPTX
 
 class TestParseFunction(unittest.TestCase):
 
-    @patch('document_insight_system.app.utils.converter.convert_to')
-    @patch('document_insight_system.app.main.reports.docx_uploader.docx_uploader.DocxUploader')
+    @patch('app.utils.converter.convert_to')
+    @patch('app.main.reports.docx_uploader.docx_uploader.DocxUploader')
     def test_parse_docx(self, MockDocxUploader, mock_convert_to):
         filepath = 'test.docx'
         pdf_filepath = 'test.pdf'
@@ -28,5 +28,5 @@ class TestParseFunction(unittest.TestCase):
 
 
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     unittest.main()
