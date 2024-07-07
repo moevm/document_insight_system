@@ -1,4 +1,4 @@
-import {collect_values_if_possible, hash} from "./main";
+import {collect_values_if_possible, hash} from "./general";
 
 import '../styles/signup.css';
 

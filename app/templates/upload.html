@@ -74,7 +74,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th  scope="col">Критерии:</th>
+                                    <th scope="col">Критерии:</th>
                                 </tr>
                                 {% for criterion_name, criterion_descrpt in list_of_check.items()  %}
                                     <tr data-toggle="collapse" data-target="#verd{{ loop.index }}" class="accordion-toggle">
@@ -92,4 +92,6 @@
             </div>
         </div>
     </div>
+<script src={{ url_for("static", filename="upload.js") }}></script>
+
 {% endblock %}

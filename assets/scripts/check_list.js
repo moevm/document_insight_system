@@ -1,3 +1,5 @@
+import {collect_values_if_possible, hash} from "./general";
+
 import { debounce, isFloat, resetTable, ajaxRequest, onPopState } from "./utils"
 
 let $table;
