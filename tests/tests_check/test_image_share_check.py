@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 from app.main.checks.report_checks import ReportImageShareCheck
-from tests_all.tests_check.base_test import BaseTestCase
+from tests.tests_check.base_test import BaseTestCase
 
 class TestReportImageShareCheck(BaseTestCase):
     def setUp(self):

@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock
-from tests_all.tests_check.base_test import BaseTestCase
+from tests.tests_check.base_test import BaseTestCase
 from app.main.checks.base_check import morph, answer
 from app.main.checks.report_checks import ReportChapters
 

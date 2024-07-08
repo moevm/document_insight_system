@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from datetime import datetime
 from app.main.checks.report_checks.template_name import ReportTemplateNameCheck
 from app.main.checks.base_check import answer
-from tests_all.tests_check.base_test import BaseTestCase
+from tests.tests_check.base_test import BaseTestCase
 
 class TestReportTemplateNameCheck(BaseTestCase):
 

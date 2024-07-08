@@ -8,6 +8,6 @@ $ pip install -r requirements.txt
 
 ```bash
 
-$ python -m unittest discover tests_all/tests_check
+$ python -m unittest discover tests/tests_check
 
 ```

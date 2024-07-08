@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 from app.main.checks.report_checks.table_references import TableReferences
 from app.main.checks.base_check import answer
-from tests_all.tests_check.base_test import BaseTestCase
+from tests.tests_check.base_test import BaseTestCase
 
 class TestTableReferences(BaseTestCase):
 

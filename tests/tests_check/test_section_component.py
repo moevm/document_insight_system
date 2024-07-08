@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 from app.main.checks.report_checks import ReportSectionComponent
-from tests_all.tests_check.base_test import BaseTestCase
+from tests.tests_check.base_test import BaseTestCase
 
 class TestReportSectionComponent(BaseTestCase):
     def setUp(self):

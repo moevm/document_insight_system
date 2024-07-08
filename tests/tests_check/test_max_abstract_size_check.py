@@ -1,6 +1,6 @@
 import unittest
 from app.main.checks.report_checks import ReportMaxSizeOfAbstractCheck
-from tests_all.tests_check.base_test import BaseTestCase
+from tests.tests_check.base_test import BaseTestCase
 
 
 class TestReportMaxSizeOfAbstractCheck(BaseTestCase):
