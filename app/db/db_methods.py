@@ -146,10 +146,14 @@ def update_check(check):
     return bool(checks_collection.find_one_and_replace({'_id': check._id}, check.pack()))
 
 
-def add_parsed_and_hashed_text(check_id, parsed_text, hashed_text):
+def add_parsed_text(check_id, parsed_text):
     checks_id = parsed_texts_collection.insert_one(parsed_text.pack()).inserted_id
     files_info_collection.update_one({'_id': check_id}, {"$push": {'parsed_texts': checks_id}})
-    hashed_texts_collection.insert_one(hashed_text.pack())
+    return checks_id
+
+
+def add_hashed_text(check_id, hashed_text):
+    checks_id = hashed_texts_collection.insert_one(hashed_text.pack())
     files_info_collection.update_one({'_id': check_id}, {"$push": {'hashed_texts': checks_id}})
     return checks_id
 

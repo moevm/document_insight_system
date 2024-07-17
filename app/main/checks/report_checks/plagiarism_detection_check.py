@@ -15,16 +15,15 @@ class PlagiarismCheck(BaseReportCriterion):
 
     def check(self):
         result_score = 1
-        percent = 0
+        suspect_text = []
         for i in range(len(self.corpus)):
             for j in range(len(self.corpus)):
                 if self.corpus[i] == self.corpus[j]:
                     continue
                 suspect_text = self.corpus[i]["hashed_text"]
-                # text_to_compare = TextProcessing(suspect_text).processText()
-                # percent = compareTexts(self.text_for_check, text_to_compare)
-                return answer(result_score,"Результат проверки на плагиат: {}% текста {} заимствовано "
-                              "из {}".format(percent, self.corpus[i], self.corpus[j]))
+        percent = compareTexts(suspect_text, self.text_for_check)
+        return answer(result_score, "Результат проверки на плагиат: {}% текста {} "
+                                    "заимствовано из {}".format(percent, 0, 0))
 
     def get_texts(self):
         from ....db.db_methods import get_all_hashed_texts
@@ -32,7 +31,7 @@ class PlagiarismCheck(BaseReportCriterion):
         for i in range(len(hashed_texts)):
             self.corpus.append(hashed_texts["hashed_text"])
 
-    def text_for_check(self):
+    def collect_text_for_check(self):
         text = []
         for page_num, text_on_page in enumerate(self.file.pdf_file.get_text_on_page().values()):
             text.append(text_on_page)

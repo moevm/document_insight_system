@@ -59,9 +59,8 @@ def create_task(self, check_info):
         hashed_text_obj.get_hashed_texts(parsed_text.parsed_chapters)
 
         db_methods.update_check(updated_check)  # save to db
-        db_methods.add_parsed_and_hashed_text(check_id,
-                                              parsed_text=parsed_text,
-                                              hashed_text=hashed_text_obj.hashed_text)
+        db_methods.add_parsed_text(check_id, parsed_text=parsed_text)
+        db_methods.add_hashed_text(check_id, hashed_text=hashed_text_obj)
         db_methods.mark_celery_task_as_finished(self.request.id)
 
         # remove files from FILES_FOLDER after checking

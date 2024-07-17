@@ -1,6 +1,6 @@
 # text1 is the suspect, text2 is potentially borrowed text
 
-def compareTexts(text1, text2):
+def compareTexts(text1: list, text2: list) -> float:
     match = 0
     for shingle in range(len(text1)):
         if text1[shingle] in text2:
