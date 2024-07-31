@@ -10,16 +10,18 @@ class PresImageNameCheck(BasePresCriterion):
         super().__init__(file_info)
 
     def check(self):
-        buf = []
-        count = 0
-        for slide in self.file.slides:
-            if len(slide.get_images()) > 0:
-                count += 1
-                buf.append(slide.get_page_number())
-        buf =  ' '.join(list(map(str,buf)))
-        if count / len(self.file.slides) > self.limit:
-            return answer(False, f'Проверка не пройдена! Изображения в презентации занимают около {round(count / len(self.file.slides), 2)} количества всех слайдов, \
-                                        ограничение - {round(self.limit, 2)}')
+        wrong_slide = []
+        for num, slide in enumerate(self.file.slides, 1):
+            count_image = len(slide.get_images())
+            if count_image > 1:
+                slide_text = slide.get_text()
+                if slide_text.count('Рисунок') != count_image:
+                    wrong_slide.append(num)
+            elif len(slide.get_images()) == 1:
+                # slide_text = slide.get_text()
+                # slide_title = slide.get_titles()
+                pass
+        if wrong_slide:
+            return answer(False, f'{wrong_slide}')
         else:
-            return answer(True, f'Пройдена!')
-        return answer(False, 'Во время обработки произошла критическая ошибка')
+            return answer(True, 'Пройдена!')
