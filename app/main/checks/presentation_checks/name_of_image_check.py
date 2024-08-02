@@ -1,10 +1,10 @@
 from ..base_check import BasePresCriterion, answer
 from app.utils.parse_for_html import format_header
 
-class PresImageNameCheck(BasePresCriterion):
+class PresImageCaptureCheck(BasePresCriterion):
     label = "Проверка наличия подписи к рисункам"
-    description = ''
-    id = 'pres_image_name'
+    description = 'Подписи к рисункам должны содержать слово "Рисунок". Подпись к рисункам на слайдах без текста необязательна'
+    id = 'pres_image_capture'
 
     def __init__(self, file_info):
         super().__init__(file_info)
