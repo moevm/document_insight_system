@@ -28,24 +28,22 @@ class SlidePPTX(SlideBasic):
                 self.images.append(shape)
             if hasattr(shape, "text"):
                 self.text += "\n" + shape.text
-                if self.text.strip():
+                if shape.text.replace(' ', '').replace('<number>', ''): # we replace number of page because it is read as text too
                     self.size_of_shape.append((shape.text, shape.top, shape.left, shape.width))
             if shape.has_table:
                 self.table.append(shape)
 
+
         if self.images:
-            sorted_size_of_shape = sorted(self.size_of_shape, key=lambda x:x[1])
             for image in self.images:
-                for top in sorted_size_of_shape:              
-                    if top[1] > (image.top + image.height):
-                        if top[2] > image.left and (top[3]+top[2]) < (image.left+image.width):
-                            caption = top[0]
-                            self.captions.append(caption)
-                            break
-                        if abs(top[2] - image.left) < 400000 and abs((top[3]+top[2]) - (image.left+image.width)) < 400000:
-                            caption = top[0]
-                            self.captions.append(caption)
-                            break
+                '''
+                The next expression finds the most close text for image.
+                It is work this way, because a holder for picture and a holder for capture don't strictly correspond in size.
+                For example, sometimes the capture holder runs over the picture holder, the text width is always different ect
+                '''
+                sorted_size_of_shape = sorted(self.size_of_shape,
+                                              key=lambda x:(abs(x[1]-(image.top+image.height))+abs(x[2]-image.left) + abs(x[3]+x[2]-(image.left+image.width))))
+                self.captions.append(sorted_size_of_shape[0])
 
     def __str__(self):
         return super().__str__()

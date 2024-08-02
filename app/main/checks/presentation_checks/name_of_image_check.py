@@ -1,5 +1,5 @@
 from ..base_check import BasePresCriterion, answer
-
+from app.utils.parse_for_html import format_header
 
 class PresImageNameCheck(BasePresCriterion):
     label = "Проверка наличия подписи к рисункам"
@@ -10,35 +10,31 @@ class PresImageNameCheck(BasePresCriterion):
         super().__init__(file_info)
 
     def check(self):
-        wrong_slide = []
+        slides_without_capture = set()
+        slide_with_image_only = set()
+        result_str = 'Не пройдена! '
+        all_captions = []
         for num, slide in enumerate(self.file.slides, 1):
             captions = slide.get_captions()
-            # print(captions, 'cappp', num)
-            for caption in captions:
-                if 'Рисунок' not in caption:
-                    wrong_slide.append(caption)
-        if wrong_slide:
-            return answer(False, f'{wrong_slide}')
+            if captions:
+                for caption in captions:
+                    body_text = slide.get_text().replace(captions[0][0], '').replace(slide.get_title(), '').replace('<number>', '').replace(' ', '')
+                    if body_text.strip() or slide.get_table():
+                        all_captions.append(caption[0])
+                        if 'Рисунок' not in caption[0]:
+                            slides_without_capture.add(num)
+                    else:
+                        if caption[0] != slide.get_title():
+                            slide_with_image_only.add(num)
+        if slides_without_capture:
+            result_str += format_header(
+                'Подписи к рисункам на следующих слайдах отсутствуют или не содержат слова "Рисунок": {}'.format(
+                        ', '.join(self.format_page_link(sorted(slides_without_capture)))))
+        if slide_with_image_only:
+            result_str += format_header(
+                'Подписи к рисункам на следующих слайдах без текста необязательны: {}'.format(
+                        ', '.join(self.format_page_link(sorted(slide_with_image_only)))))
+        if result_str:
+            return answer(False, result_str + f'Список всех обнаруженных подписей: {", ".join(all_captions)}')
         else:
             return answer(True, 'Пройдена!')
-
-
-
-
-
-
-        #     if count_image > 1:
-        #         slide_text = slide.get_text()
-
-        #         if slide_text.count('Рисунок') != count_image:
-        #             wrong_slide.append(num)
-        #     elif len(slide.get_images()) == 1:
-        #         slide_title = slide.get_title().lower()
-                
-        #         slide_text = slide.get_text().lower().replace(slide_title, '')
-        #         # print(slide_text)
-
-        # if wrong_slide:
-        #     return answer(False, f'{wrong_slide}')
-        # else:
-        #     return answer(True, 'Пройдена!')
