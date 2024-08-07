@@ -13,11 +13,11 @@ jobs:
         run: |
           cp .env_example .env
           cp app/VERSION_example.json app/VERSION.json
-          docker-compose -f docker-compose.yml -f docker-compose-selenium.yml build
+          docker compose -f docker-compose.yml -f docker-compose-selenium.yml build
       
       - name: Run docker-compose with docker-compose-selenium (tests)
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose-selenium.yml up -d
+          docker compose -f docker-compose.yml -f docker-compose-selenium.yml up -d
           chmod +x tests/scripts/docker_check_tests.sh
           ./tests/scripts/docker_check_tests.sh
 
