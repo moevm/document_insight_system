@@ -70,4 +70,7 @@ class FileLoadTestSelenium(BasicSeleniumTest) with 3 tests
 Test check: if reports wit different extensions loads correctly
 use default documents from "/tests" or your own example
 
+### Test for open criterion_packs_page:
+class CriterionPacksTestSelenium
+group of checks with '/criterion_packs'
 

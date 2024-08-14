@@ -1,9 +1,9 @@
 from basic_selenium_test import BasicSeleniumTest
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import Select
+# from selenium.common.exceptions import NoSuchElementException
 
 class CriterionPacksTestSelenium(BasicSeleniumTest):
-
 
     def begin(self):
         self.authorization()
@@ -22,12 +22,17 @@ class CriterionPacksTestSelenium(BasicSeleniumTest):
 
     def test_open_one_pack(self):
         self.begin()
-        string_in_table = self.driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/table/tbody/tr[1]/td[4]/a")
+        string_in_table = self.driver.find_element(By.XPATH, "//table[contains(@class, 'table')]//tr[1]/td[4]/a")
         pack_name = string_in_table.get_attribute("href").split("/")[-1]
+        pack_type = self.driver.find_element(By.XPATH, "//table[contains(@class, 'table')]//tr[1]/td[2]").text.replace('.', ' ').split(' ')[0]
         URL = self.get_url(f'/criterion_pack/{pack_name}')
         self.get_driver().get(URL)
-        obj = self.get_driver().find_element(By.ID, 'raw_criterions')
-        self.assertNotEquals(obj, None)
+        opened_pack_name = self.get_driver().find_element(By.ID, 'pack_name').get_attribute('value')
+        opened_pack_type = self.get_driver().find_element(By.ID, 'file_type')
+        select = Select(opened_pack_type)
+        selected_type_text = select.first_selected_option.text.strip()
+        self.assertEqual(pack_name, opened_pack_name)
+        self.assertEqual(pack_type, selected_type_text)
 
     def test_open_new_pack(self):
         self.begin()
