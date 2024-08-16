@@ -30,8 +30,8 @@ class CriterionPacksTestSelenium(BasicSeleniumTest):
         save_button = self.get_driver().find_element(By.ID, 'pack_submit_button')
         save_button.click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "error-text")))
-        success_text = self.get_driver().find_element(By.ID, "error-text")
-        self.assertNotEqual(success_text, None)    
+        error_text = self.get_driver().find_element(By.ID, "error-text")
+        self.assertNotEqual(error_text, None)    
 
     def test_open_criterions_pack_list(self):
         self.begin()
@@ -66,3 +66,12 @@ class CriterionPacksTestSelenium(BasicSeleniumTest):
         self.assertEqual(pack_type, selected_type_text)
         self.pack_changing()
         self.pack_wrong_changing()
+
+
+    def test_pack_description(self):
+        self.authorization()
+        description = self.driver.find_element(By.ID, 'btn_table_info')
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "table_info")))
+        table_info = self.get_driver().find_element(By.ID, "table_info")
+        rows = table_info.find_elements(By.TAG_NAME, 'li')
+        self.assertNotEqual(rows, None)
