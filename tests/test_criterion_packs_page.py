@@ -1,6 +1,8 @@
 from basic_selenium_test import BasicSeleniumTest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 # from selenium.common.exceptions import NoSuchElementException
 
 class CriterionPacksTestSelenium(BasicSeleniumTest):
@@ -11,6 +13,26 @@ class CriterionPacksTestSelenium(BasicSeleniumTest):
         self.get_driver().get(URL)
         self.get_driver().implicitly_wait(30)
 
+    def pack_changing(self):
+        form = self.get_driver().find_element(By.ID, 'raw_criterions')
+        text_form = form.get_attribute('value')
+        form.clear()
+        form.send_keys(text_form)
+        save_button = self.get_driver().find_element(By.ID, 'pack_submit_button')
+        save_button.click()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "success-text")))
+        success_text = self.get_driver().find_element(By.ID, "success-text")
+        self.assertNotEqual(success_text, None)
+
+    def pack_wrong_changing(self):
+        form = self.get_driver().find_element(By.ID, 'raw_criterions')
+        form.send_keys('some_wrong_text')
+        save_button = self.get_driver().find_element(By.ID, 'pack_submit_button')
+        save_button.click()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "error-text")))
+        success_text = self.get_driver().find_element(By.ID, "error-text")
+        self.assertNotEqual(success_text, None)    
+
     def test_open_criterions_pack_list(self):
         self.begin()
         string_in_table = self.driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/table/tbody/tr[1]/td[4]/a")
@@ -19,8 +41,17 @@ class CriterionPacksTestSelenium(BasicSeleniumTest):
         #     empty_table = self.driver.find_element(By.CLASS_NAME, "no-records-found")
         #     self.assertNotEqual(empty_table, None)
 
+    def test_open_new_pack(self):
+        self.begin()
+        part_of_link_text = "создать"
+        xpath_expression = f"//a[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ', 'abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя'), '{part_of_link_text.lower()}')]"
+        link_element = self.driver.find_element(By.XPATH, xpath_expression)
+        link_element.click()
+        expected_url = self.get_url('/criterion_pack')
+        self.assertEqual(self.driver.current_url, expected_url)
 
-    def test_open_one_pack(self):
+
+    def test_for_one_pack(self):
         self.begin()
         string_in_table = self.driver.find_element(By.XPATH, "//table[contains(@class, 'table')]//tr[1]/td[4]/a")
         pack_name = string_in_table.get_attribute("href").split("/")[-1]
@@ -33,12 +64,5 @@ class CriterionPacksTestSelenium(BasicSeleniumTest):
         selected_type_text = select.first_selected_option.text.strip()
         self.assertEqual(pack_name, opened_pack_name)
         self.assertEqual(pack_type, selected_type_text)
-
-    def test_open_new_pack(self):
-        self.begin()
-        part_of_link_text = "создать"
-        xpath_expression = f"//a[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ', 'abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя'), '{part_of_link_text.lower()}')]"
-        link_element = self.driver.find_element(By.XPATH, xpath_expression)
-        link_element.click()
-        expected_url = self.get_url('/criterion_pack')
-        self.assertEqual(self.driver.current_url, expected_url)
+        self.pack_changing()
+        self.pack_wrong_changing()
