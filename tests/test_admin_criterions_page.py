@@ -5,9 +5,17 @@ class AdminCriterionsTestSelenium(BasicSeleniumTest):
 
     def begin(self):
         self.authorization()
-        URL = self.get_url('/admin/criterions')
+        URL = self.get_url('/admin')
         self.get_driver().get(URL)
         self.get_driver().implicitly_wait(30)
+        page_text = self.driver.find_element(By.TAG_NAME, "body").text
+        if 'администратор' not in page_text.lower():
+            self.skipTest("This test runs inly with admin's login and password")
+        else:
+            URL = self.get_url('/admin/criterions')
+            self.get_driver().get(URL)
+            self.get_driver().implicitly_wait(30)
+
 
     def test_open_criterions_list(self):
         self.begin()
