@@ -35,8 +35,16 @@ class CriterionPacksTestSelenium(BasicSeleniumTest):
 
     def test_open_criterions_pack_list(self):
         self.begin()
-        string_in_table = self.driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/table/tbody/tr[1]/td[4]/a")
+        string_in_table = self.driver.find_element(By.XPATH, "//table[contains(@class, 'table')]//tbody/tr[1]/td[4]/a")
         self.assertNotEqual(string_in_table, None)
+        headers = self.driver.find_elements(By.XPATH, "//table//th")
+        header_name = any("название" in header.text.lower() for header in headers)
+        header_type = any('тип' in header.text.lower() for header in headers)
+        header_edit = any('редактировать' in header.text.lower() for header in headers)
+        self.assertTrue(header_name, 'header "название" is not found')
+        self.assertTrue(header_type, 'header "тип" is not found')
+        self.assertTrue(header_edit, 'header "редактировать" is not found')
+
         # except NoSuchElementException:
         #     empty_table = self.driver.find_element(By.CLASS_NAME, "no-records-found")
         #     self.assertNotEqual(empty_table, None)
