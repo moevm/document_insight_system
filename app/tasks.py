@@ -78,9 +78,9 @@ def create_task(self, check_info):
         self.retry(countdown=TASK_RETRY_COUNTDOWN)  # Retry the task, adding it to the back of the queue.
 
 @celery.task(name="convert_to_pdf", queue='check-solution', bind=True)
-def convert_to_pdf(self, filename, filepath, file_id):
+def convert_to_pdf(self, filename, filepath, pdf_id):
     try:
-        conv_id = db_methods.write_pdf(filename, filepath, file_id)
+        conv_id = db_methods.write_pdf(filename, filepath, pdf_id)
         # converted_id = db_methods.write_pdf(filename, filepath)
         return conv_id
     except Exception as e:
