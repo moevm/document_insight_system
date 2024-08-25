@@ -1,5 +1,5 @@
 from ..base_check import BasePresCriterion, answer
-from app.utils.parse_for_html import format_header
+from utils import name_of_image_check_results
 
 class PresImageCaptureCheck(BasePresCriterion):
     label = "Проверка наличия подписи к рисункам"
@@ -27,14 +27,14 @@ class PresImageCaptureCheck(BasePresCriterion):
                         if caption[0] != slide.get_title():
                             slide_with_image_only.add(num)
         if slides_without_capture:
-            result_str += format_header(
+            result_str += (
                 'Подписи к рисункам на следующих слайдах отсутствуют или не содержат слова "Рисунок": {}'.format(
-                        ', '.join(self.format_page_link(sorted(slides_without_capture)))))
+                        ', '.join(self.format_page_link(sorted(slides_without_capture)))) + '<br>')
         if slide_with_image_only:
-            result_str += format_header(
+            result_str += (
                 'Подписи к рисункам на следующих слайдах без текста необязательны: {}'.format(
-                        ', '.join(self.format_page_link(sorted(slide_with_image_only)))))
+                        ', '.join(self.format_page_link(sorted(slide_with_image_only)))) + '<br>')
         if result_str:
-            return answer(False, result_str + f'Список всех обнаруженных подписей: {", ".join(all_captions)}')
+            return answer(False, name_of_image_check_results(result_str, all_captions))
         else:
             return answer(True, 'Пройдена!')
