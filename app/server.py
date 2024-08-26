@@ -489,8 +489,8 @@ def check_list_data():
 
 
 def get_query(req):
-    # query for download csv/zip
-    filter_query = checklist_filter(req.args)
+    # query for download csv/zip (only for admins)
+    filter_query = checklist_filter(req.args, is_admin=True)
     limit = False
     offset = False
     sort = req.args.get("sort", "")
