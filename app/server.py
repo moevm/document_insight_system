@@ -489,8 +489,8 @@ def check_list_data():
 
 
 def get_query(req):
-    # query for download csv/zip
-    filter_query = checklist_filter(req.args)
+    # query for download csv/zip (only for admins)
+    filter_query = checklist_filter(req.args, is_admin=True)
     limit = False
     offset = False
     sort = req.args.get("sort", "")
@@ -507,11 +507,20 @@ def get_stats():
     return [format_check_for_table(item, set_link=URL_DOMEN) for item in rows]
 
 
+def check_access_token(access_token):
+    # if request has access_token, and it's equal to ACCESS_TOKEN from env -> accept, esle - check user
+    return access_token and (access_token == os.environ.get('ACCESS_TOKEN'))
+
+
+def check_export_access():
+    return check_access_token(request.args.get('access_token', None)) \
+           or (current_user.is_authenticated and current_user.is_admin)
+
+
 @app.route("/get_csv")
-@login_required
 def get_csv():
     from io import StringIO
-    if not current_user.is_admin:
+    if not check_export_access():
         abort(403)
     response = get_stats()
     df = pd.read_json(StringIO(json.dumps(response)))
@@ -523,9 +532,8 @@ def get_csv():
 
 
 @app.route("/get_zip")
-@login_required
 def get_zip():
-    if not current_user.is_admin:
+    if not check_export_access():
         abort(403)
 
     original_names = request.args.get('original_names', False) == 'true'    
