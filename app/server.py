@@ -507,11 +507,19 @@ def get_stats():
     return [format_check_for_table(item, set_link=URL_DOMEN) for item in rows]
 
 
+def check_access_token(access_token):
+    # if request has access_token, and it's equal to ACCESS_TOKEN from env -> accept, esle - check user
+    return access_token and (access_token == os.environ.getenv('ACCESS_TOKEN'))
+
+
+def check_export_access():
+    return current_user.is_admin or check_access_token(request.args.get('access_token', None))
+
+
 @app.route("/get_csv")
-@login_required
 def get_csv():
     from io import StringIO
-    if not current_user.is_admin:
+    if not check_export_access():
         abort(403)
     response = get_stats()
     df = pd.read_json(StringIO(json.dumps(response)))
@@ -523,9 +531,8 @@ def get_csv():
 
 
 @app.route("/get_zip")
-@login_required
 def get_zip():
-    if not current_user.is_admin:
+    if not check_export_access():
         abort(403)
 
     original_names = request.args.get('original_names', False) == 'true'    
