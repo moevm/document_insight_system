@@ -513,7 +513,8 @@ def check_access_token(access_token):
 
 
 def check_export_access():
-    return current_user.is_admin or check_access_token(request.args.get('access_token', None))
+    return check_access_token(request.args.get('access_token', None)) \
+           or (current_user.is_authenticated and current_user.is_admin)
 
 
 @app.route("/get_csv")
