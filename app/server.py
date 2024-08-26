@@ -509,7 +509,7 @@ def get_stats():
 
 def check_access_token(access_token):
     # if request has access_token, and it's equal to ACCESS_TOKEN from env -> accept, esle - check user
-    return access_token and (access_token == os.environ.getenv('ACCESS_TOKEN'))
+    return access_token and (access_token == os.environ.get('ACCESS_TOKEN'))
 
 
 def check_export_access():
