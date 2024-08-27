@@ -25,7 +25,7 @@ class ReportStyleCheck(BaseReportCriterion):
                                       self.target_styles))
         if header_styles is None:
             self.header_styles = []
-            for style_dict in StyleCheckSettings.LR_CONFIG:
+            for _, style_dict in StyleCheckSettings.LR_CONFIG.items():
                 header_style = {key: style_dict["style"].get(key) for key in StyleCheckSettings.PRECHECKED_PROPS}
                 style = Style()
                 style.__dict__.update(header_style)
