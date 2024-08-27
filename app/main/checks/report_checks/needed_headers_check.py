@@ -18,18 +18,22 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
             self.config = headers_map
         else:
             self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
-            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
+            # self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
 
     def late_init(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
         self.headers_page = self.file.find_header_page(self.file_type['report_type'])
         self.chapters_str = self.file.show_chapters(self.file_type['report_type'])
-        # TODO: change
         self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
-        if self.headers_main == "Задание 1":
-            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
-        elif self.headers_main == "Задание 2":
-            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[1]["headers"]
+        print(self.headers_main)
+        if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
+            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['headers']
+        else:
+            self.patterns = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['headers']
+        # if self.headers_main == "Задание 1":
+        #     self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
+        # elif self.headers_main == "Задание 2":
+        #     self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[1]["headers"]
 
     def check(self):
         if self.file.page_counter() < 4:

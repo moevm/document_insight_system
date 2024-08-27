@@ -82,14 +82,14 @@ class StyleCheckSettings:
     }
 
     # Order of styles may be significant! First level 1, then level 2 and so on.
-    LR_CONFIG = [
+    LR_CONFIG = {'any_header':
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 1"],
             "headers": ["Исходный код программы"],
             "unify_regex": APPENDIX_UNIFY_REGEX,
             "regex": APPENDIX_REGEX,
-        },
+        },'second_header':
         {
             "style": HEADER_2_STYLE,
             "docx_style": ["heading 2"],
@@ -97,16 +97,16 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_1_REGEX
         }
-    ]
+    }
 
-    VKR_CONFIG = [
+    VKR_CONFIG = {'any_header':
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": ["ВВЕДЕНИЕ", "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
             "regex": HEADER_REGEX
-        },
+        },'second_header':
         {
             "style": HEADER_1_NUM_STYLE,
             "docx_style": ["heading 2", "heading 3", "heading 4"],
@@ -114,9 +114,9 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_NUM_REGEX
         }
-    ]
+    }
     
-    NIR_CONFIG = [
+    NIR_CONFIG = {'any_header':
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
@@ -124,7 +124,7 @@ class StyleCheckSettings:
                         "ПЛАН РАБОТЫ НА ОСЕННИЙ СЕМЕСТР", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
             "regex": HEADER_REGEX
-        },
+        }, 'second_header':
         {
             "style": HEADER_1_NUM_STYLE,
             "docx_style": ["heading 3", "heading 4"],
@@ -132,9 +132,10 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_NUM_REGEX
         }
-    ]
+    }
 
-    MD_CONFIG = [
+    MD_CONFIG = {
+        'Задание 1':
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
@@ -146,6 +147,7 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_REGEX
         },
+        'Задание 2':
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
@@ -155,22 +157,54 @@ class StyleCheckSettings:
                         ],
             "unify_regex": None,
             "regex": HEADER_REGEX
-        },
-        {
-            "style": HEADER_1_NUM_STYLE,
-            "docx_style": ["heading 2", "heading 3", "heading 4"],
-            "headers": [],
-            "unify_regex": None,
-            "regex": HEADER_NUM_REGEX
-        },
-        {
-            "style": "Main_header",
-            "docx_style": ["heading 1"],
-            "headers": ["Задание"],
-            "unify_regex": None,
-            "regex": HEADER_NUM_REGEX
         }
-    ]
+        # },'':
+        # {
+        #     "style": HEADER_1_NUM_STYLE,
+        #     "docx_style": ["heading 2", "heading 3", "heading 4"],
+        #     "headers": [],
+        #     "unify_regex": None,
+        #     "regex": HEADER_NUM_REGEX
+        # },'':
+        # {
+        #     "style": "Main_header",
+        #     "docx_style": ["heading 1"],
+        #     "headers": ["Задание"],
+        #     "unify_regex": None,
+        #     "regex": HEADER_NUM_REGEX
+        # }
+    }
+
+    OPNP_CONFIG = {
+        'Сравнение аналогов':
+        {
+            "style": HEADER_1_STYLE,
+            "docx_style": ["heading 2"],
+            "headers": ["Принцип отбора аналогов",
+                        "Критерии сравнения аналогов",
+                        "Выводы по итогам сравнения",
+                        "Выбор метода решения",
+                        ],
+            "unify_regex": None,
+            "regex": HEADER_REGEX
+        },
+        'any_header':
+        {
+            "style": HEADER_1_STYLE,
+            "docx_style": ["heading 2"],
+            "headers": ["Аннотация",
+                        "Введение",
+                        "Обзор предметной области == Сравнение аналогов",
+                        "Выбор метода решения",
+                        "Заключение"
+                        "Список литературы"
+                        ],
+            "unify_regex": None,
+            "regex": HEADER_REGEX
+        },
+
+    }
+
 
     LR_MAIN_TEXT_CONFIG = [
         {
@@ -216,5 +250,6 @@ class StyleCheckSettings:
         'VKR_HEADERS': VKR_CONFIG,
         'VKR_MAIN_TEXT': VKR_MAIN_TEXT_CONFIG,
         'NIR_HEADERS': NIR_CONFIG,
-        'MD_HEADERS' : MD_CONFIG
+        'MD_HEADERS' : MD_CONFIG,
+        'OPNP_HEADERS' : OPNP_CONFIG,
     }
