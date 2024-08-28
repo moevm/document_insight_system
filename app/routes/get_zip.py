@@ -6,41 +6,19 @@ from io import StringIO
 
 import pandas as pd
 
+from app.routes.utils import get_query, get_stats, check_export_access
 from flask import Blueprint, abort, request, Response
-from flask_login import login_required, current_user
 
 from app.db import db_methods
-from app.utils import checklist_filter, format_check_for_table
-from app.server_consts import URL_DOMEN
 
 get_zip = Blueprint('get_zip', __name__, template_folder='templates', static_folder='static')
 
-def get_query(req):
-    # query for download csv/zip
-    filter_query = checklist_filter(req.args)
-    limit = False
-    offset = False
-    sort = req.args.get("sort", "")
-    sort = 'upload-date' if not sort else sort
-    order = req.args.get("order", "")
-    order = 'desc' if not order else order
-    sort = "_id" if sort == "upload-date" else sort
-    latest = True if req.args.get("latest") else False
-    return dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order, latest=latest)
-
-
-def get_stats():
-    rows, count = db_methods.get_checks(**get_query(request))
-    return [format_check_for_table(item, set_link=URL_DOMEN) for item in rows]
-
-
 @get_zip.route("/")
-@login_required
 def get_zip_main():
-    if not current_user.is_admin:
+    if not check_export_access():
         abort(403)
 
-    original_names = request.args.get('original_names', False) == 'true'
+    original_names = request.args.get('original_names', False) == 'true'    
 
     # create tmp folder
     dirpath = tempfile.TemporaryDirectory()

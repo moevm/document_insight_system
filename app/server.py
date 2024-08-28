@@ -111,8 +111,6 @@ def signup():
         return u.username if u is not None and login_user(u, remember=True) else ""
 
 
-# Когда дойду до сюда, первое задание должно быть выполнено
-
 # Handle exceptions
 
 @app.errorhandler(413)
