@@ -11,7 +11,8 @@ class ReportSectionComponent(BaseReportCriterion):
         super().__init__(file_info)
         self.intro = {}
         if headers_map:
-            self.chapter = StyleCheckSettings.CONFIGS.get(headers_map)[0]["headers"][0]
+            self.config = headers_map
+            self.chapter = None
             patterns = ('цель', 'задач')
         else:
             self.chapter = chapter
@@ -21,12 +22,17 @@ class ReportSectionComponent(BaseReportCriterion):
             self.patterns.append({"name": pattern.capitalize(), "text": pattern, "marker": 0})
 
     def late_init(self):
+        if self.chapter is None:
+            self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
+            self.chapter = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]["header_for_report_section_component"]
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
 
     def check(self):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         self.late_init()
+        if not self.chapter:
+            return answer(True, f'Данная проверка не предусмотрена для работы с темой "{self.headers_main}"')
         result_str = ''
         for intro in self.chapters:
             header = intro["text"].lower()

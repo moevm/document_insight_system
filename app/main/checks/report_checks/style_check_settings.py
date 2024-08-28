@@ -144,6 +144,7 @@ class StyleCheckSettings:
                         "Методы обоснования",
                         "Статья",
                         ],
+            "header_for_report_section_component": "Поставленная цель и задачи",
             "unify_regex": None,
             "regex": HEADER_REGEX
         },
@@ -155,6 +156,7 @@ class StyleCheckSettings:
                         "Характеристика выводов",
                         "Статья",
                         ],
+            "header_for_report_section_component": "",
             "unify_regex": None,
             "regex": HEADER_REGEX
         }
