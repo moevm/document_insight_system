@@ -12,7 +12,7 @@ class ReportSectionComponent(BaseReportCriterion):
         self.intro = {}
         if headers_map:
             self.config = headers_map
-            self.chapter = None
+            self.chapter = ''
             patterns = ('цель', 'задач')
         else:
             self.chapter = chapter
@@ -22,9 +22,10 @@ class ReportSectionComponent(BaseReportCriterion):
             self.patterns.append({"name": pattern.capitalize(), "text": pattern, "marker": 0})
 
     def late_init(self):
-        if self.chapter is None:
+        if not self.chapter:
             self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
-            self.chapter = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]["header_for_report_section_component"]
+            if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
+                self.chapter = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]["header_for_report_section_component"]
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
 
     def check(self):
