@@ -204,6 +204,8 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_REGEX
         },
+        'min_ref_for_literature_references_check': 5,
+        'mах_ref_for_literature_references_check': 1000, #just for future possible edit
 
     }
 

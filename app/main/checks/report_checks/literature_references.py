@@ -1,5 +1,5 @@
 import re
-
+from .style_check_settings import StyleCheckSettings
 from ..base_check import BaseReportCriterion, answer
 
 
@@ -8,13 +8,17 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     description = ''
     id = 'literature_references'
 
-    def __init__(self, file_info, min_ref=1, max_ref=1000):
+    def __init__(self, file_info, min_ref=1, max_ref=1000, headers_map=None):
         super().__init__(file_info)
         self.headers = []
         self.literature_header = []
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
-        self.min_ref = min_ref
-        self.max_ref = max_ref
+        if headers_map:
+            self.min_ref = StyleCheckSettings.CONFIGS.get(headers_map)['min_ref_for_literature_references_check']
+            self.max_ref = StyleCheckSettings.CONFIGS.get(headers_map)['mах_ref_for_literature_references_check']
+        else:
+            self.min_ref = min_ref
+            self.max_ref = max_ref
 
     def late_init_vkr(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
@@ -51,7 +55,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             all_numbers.add(i)
         if len(references.symmetric_difference(all_numbers)) == 0:
             if not self.min_ref <= number_of_sources <= self.max_ref:
-                return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть от {self.min_ref} до {self.max_ref}.')
+                return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть не менее {self.min_ref}.')
             else:
                 return answer(True, f"Пройдена!")
         elif len(references.difference(all_numbers)):
