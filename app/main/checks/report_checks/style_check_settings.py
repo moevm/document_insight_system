@@ -82,49 +82,61 @@ class StyleCheckSettings:
     }
 
     # Order of styles may be significant! First level 1, then level 2 and so on.
-    LR_CONFIG = {'any_header':
+    LR_CONFIG = {
+        'any_header':
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 1"],
             "headers": ["Исходный код программы"],
             "unify_regex": APPENDIX_UNIFY_REGEX,
             "regex": APPENDIX_REGEX,
-        },'second_header':
+            "banned_words": ['мы'],
+            'min_count_for_banned_words_check': 3,
+            'max_count_for_banned_words_check': 6,
+        },
+        'second_header':
         {
             "style": HEADER_2_STYLE,
             "docx_style": ["heading 2"],
             "headers": ["Цель работы", "Выполнение работы", "Выводы"],
             "unify_regex": None,
-            "regex": HEADER_1_REGEX
+            "regex": HEADER_1_REGEX,
         }
     }
 
-    VKR_CONFIG = {'any_header':
+    VKR_CONFIG = {
+        'any_header':
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": ["ВВЕДЕНИЕ", "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
-            "regex": HEADER_REGEX
-        },'second_header':
+            "regex": HEADER_REGEX,
+            "banned_words": ['мы'],
+            'min_count_for_banned_words_check': 3,
+            'max_count_for_banned_words_check': 6,
+        },
+        'second_header':
         {
             "style": HEADER_1_NUM_STYLE,
             "docx_style": ["heading 2", "heading 3", "heading 4"],
             "headers": [],
             "unify_regex": None,
-            "regex": HEADER_NUM_REGEX
+            "regex": HEADER_NUM_REGEX,
         }
     }
     
-    NIR_CONFIG = {'any_header':
+    NIR_CONFIG = {
+        'any_header':
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": ["ПОСТАНОВКА ЗАДАЧИ", "РЕЗУЛЬТАТЫ РАБОТЫ В ВЕСЕННЕМ СЕМЕСТРЕ", "ОПИСАНИЕ ПРЕДПОЛАГАЕМОГО МЕТОДА РЕШЕНИЯ",
                         "ПЛАН РАБОТЫ НА ОСЕННИЙ СЕМЕСТР", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
-            "regex": HEADER_REGEX
-        }, 'second_header':
+            "regex": HEADER_REGEX,
+        },
+        'second_header':
         {
             "style": HEADER_1_NUM_STYLE,
             "docx_style": ["heading 3", "heading 4"],
@@ -146,7 +158,10 @@ class StyleCheckSettings:
                         ],
             "header_for_report_section_component": "Поставленная цель и задачи",
             "unify_regex": None,
-            "regex": HEADER_REGEX
+            "regex": HEADER_REGEX,
+            "banned_words": ['мы'],
+            'min_count_for_banned_words_check': 3,
+            'max_count_for_banned_words_check': 6,
         },
         'Задание 2':
         {
@@ -158,8 +173,13 @@ class StyleCheckSettings:
                         ],
             "header_for_report_section_component": "",
             "unify_regex": None,
-            "regex": HEADER_REGEX
+            "regex": HEADER_REGEX,
+            "banned_words": ['мы'],
+            'min_count_for_banned_words_check': 3,
+            'max_count_for_banned_words_check': 6,
         }
+        }
+
         # },'':
         # {
         #     "style": HEADER_1_NUM_STYLE,
@@ -175,7 +195,7 @@ class StyleCheckSettings:
         #     "unify_regex": None,
         #     "regex": HEADER_NUM_REGEX
         # }
-    }
+
 
     OPNP_CONFIG = {
         'Сравнение аналогов':
@@ -188,7 +208,16 @@ class StyleCheckSettings:
                         "Выбор метода решения",
                         ],
             "unify_regex": None,
-            "regex": HEADER_REGEX
+            "regex": HEADER_REGEX,
+            "banned_words": ['аттач', 'билдить', 'бинарник', 'валидный', 'дебаг', 'деплоить', 'десктопное', 'железо',
+                             'исходники', 'картинка', 'консольное', 'конфиг', 'кусок', 'либа', 'лог', 'мануал', 'машина',
+                             'отнаследованный', 'парсинг', 'пост', 'распаковать', 'сбоит', 'скачать', 'склонировать', 'скрипт',
+                             'тестить', 'тул', 'тула', 'тулза', 'фиксить', 'флажок', 'флаг', 'юзкейс', 'продакт', 'продакшн',
+                             'прод', 'фидбек', 'дедлайн', 'дэдлайн'],
+            'min_ref_for_literature_references_check': 5,
+            'mах_ref_for_literature_references_check': 1000, #just for future possible edit
+            'min_count_for_banned_words_check': 0,
+            'max_count_for_banned_words_check': 0
         },
         'any_header':
         {
@@ -202,10 +231,13 @@ class StyleCheckSettings:
                         "Список литературы"
                         ],
             "unify_regex": None,
-            "regex": HEADER_REGEX
-        },
-        'min_ref_for_literature_references_check': 5,
-        'mах_ref_for_literature_references_check': 1000, #just for future possible edit
+            "regex": HEADER_REGEX,
+            "banned_words": ['оптимально', 'оптимальный', 'надежный', 'интуитивный'],
+            'min_ref_for_literature_references_check': 5,
+            'mах_ref_for_literature_references_check': 1000, #just for future possible edit
+            'min_count_for_banned_words_check': 0,
+            'max_count_for_banned_words_check': 0
+        }
 
     }
 

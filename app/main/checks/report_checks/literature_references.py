@@ -14,8 +14,9 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         self.literature_header = []
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
         if headers_map:
-            self.min_ref = StyleCheckSettings.CONFIGS.get(headers_map)['min_ref_for_literature_references_check']
-            self.max_ref = StyleCheckSettings.CONFIGS.get(headers_map)['mах_ref_for_literature_references_check']
+            if StyleCheckSettings.CONFIGS.get(headers_map)['limits']:
+                self.min_ref = int(StyleCheckSettings.CONFIGS.get(headers_map)['any_header']['min_ref_for_literature_references_check'])
+                self.max_ref = int(StyleCheckSettings.CONFIGS.get(headers_map)['any_header']['mах_ref_for_literature_references_check'])
         else:
             self.min_ref = min_ref
             self.max_ref = max_ref
