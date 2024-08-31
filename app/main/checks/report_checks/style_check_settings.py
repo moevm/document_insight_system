@@ -180,23 +180,6 @@ class StyleCheckSettings:
         }
         }
 
-        # },'':
-        # {
-        #     "style": HEADER_1_NUM_STYLE,
-        #     "docx_style": ["heading 2", "heading 3", "heading 4"],
-        #     "headers": [],
-        #     "unify_regex": None,
-        #     "regex": HEADER_NUM_REGEX
-        # },'':
-        # {
-        #     "style": "Main_header",
-        #     "docx_style": ["heading 1"],
-        #     "headers": ["Задание"],
-        #     "unify_regex": None,
-        #     "regex": HEADER_NUM_REGEX
-        # }
-
-
     OPNP_CONFIG = {
         'Сравнение аналогов':
         {
@@ -225,7 +208,7 @@ class StyleCheckSettings:
             "docx_style": ["heading 2"],
             "headers": ["Аннотация",
                         "Введение",
-                        "Обзор предметной области == Сравнение аналогов",
+                        "Обзор предметной области",
                         "Выбор метода решения",
                         "Заключение",
                         "Список литературы"
