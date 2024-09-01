@@ -224,7 +224,7 @@ def run_task():
         converted_id = db_methods.add_file_to_db(filenamepdf, filepathpdf)
     else:
         logger.info(
-            f"Запуск конвертации файла '{file.filename}' в pdf")   
+            f"Запуск конвертации файла '{file.filename}' в pdf")
         converted_id = str(db_methods.get_pdf_id(file_id=None))
         convert_to_pdf.delay(filename, filepath, converted_id)
 
