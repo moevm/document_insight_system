@@ -1,0 +1,16 @@
+{% extends "root.html" %}
+
+{% block title %}Список страниц для администраторов{% endblock %}
+
+{% block main %}
+
+<div class="header row">{% include "header.html" %}</div>
+<div class="justify-content-left">
+    <h3 class="texteous ins">Список страниц для администраторов:</h3>
+    <div class="text-left" style="margin-left: 2em;">
+        <li><a class="linked text-left" href="/admin/criterions">Таблица с информацией о критериях</a></li>
+        <li><a class="linked text-left" href="/users">Таблица с информацией о пользователях</a></li>
+    </div>
+</div>
+
+{% endblock main %}
