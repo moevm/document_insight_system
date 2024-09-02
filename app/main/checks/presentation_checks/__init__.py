@@ -13,3 +13,4 @@ from .banned_words import PresBannedWordsCheck
 from .find_theme_in_pres import FindThemeInPres
 from .verify_git_link import PresVerifyGitLinkCheck
 from .empty_slide_check import PresEmptySlideCheck
+from .slide_text_volume_check import SlideTextVolumeCheck

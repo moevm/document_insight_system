@@ -18,6 +18,8 @@ BASE_PRES_CRITERION = [
     ['pres_empty_slide'],
     ['theme_in_pres_check'],
     ['verify_git_link'],
+    ['slide_text_volume_check'],
+    ['slide_text_volume_check', {'work_mode': 'Заключение'}],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
