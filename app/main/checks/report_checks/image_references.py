@@ -26,12 +26,18 @@ class ImageReferences(BaseReportCriterion):
             if not len(self.headers):
                 return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
             number_of_images, all_numbers = self.count_images_vkr()
-            if not number_of_images:
+            count_file_image_object = self.file.pdf_file.get_image_num()
+            if count_file_image_object and not number_of_images:
+                return answer(False, f'В отчёте найдено {count_file_image_object} рисунков, но не найдено ни одной подписи рисунка.<br><br> Если в вашей работе присутствуют рисунки, убедитесь, что для их подписи был '
+                                     f'использован стиль {self.image_style}, и формат: '
+                                     f'"Рисунок <Номер рисунка> — <Название рисунка>".')
+            elif not number_of_images:
                 return answer(True, f'Не найдено ни одного рисунка.<br><br> Если в вашей работе присутствуют рисунки, убедитесь, что для их подписи был '
                                      f'использован стиль {self.image_style}, и формат: '
-                                     f'"Рисунок <Номер рисунка> -- <Название рисунка>".')
+                                     f'"Рисунок <Номер рисунка> — <Название рисунка>".')
         else:
             return answer(False, 'Во время обработки произошла критическая ошибка')
+        
         references = self.search_references()
         if len(references.symmetric_difference(all_numbers)) == 0:
             return answer(True, f"Пройдена!")

@@ -18,7 +18,7 @@ def admin_required(route_func):
 @admin.route('/', methods=["GET"])
 @admin_required
 def index():
-    return "There will be a list of all admin pages here"
+    return render_template('admin_pages_list.html')
 
 
 @admin.route('/criterions', methods=["GET"])
