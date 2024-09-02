@@ -18,6 +18,7 @@ BASE_PRES_CRITERION = [
     ['pres_empty_slide'],
     ['theme_in_pres_check'],
     ['verify_git_link'],
+    ['overview_in_tasks'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
