@@ -24,3 +24,4 @@ from .style_check import ReportStyleCheck
 from .spelling_check import SpellingCheck
 from .max_abstract_size_check import ReportMaxSizeOfAbstractCheck
 from .template_name import ReportTemplateNameCheck
+from .task_tracker import ReportTaskTracker
