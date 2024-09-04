@@ -25,3 +25,9 @@ def tasks_conclusions_feedback(results):
     return format_header('Соответствует на {}%'.format(results[0]), tag.br), \
            'Распознанные заключения: ', \
            *format_descriptions(results[2], tag.div_class, tag.br + tag.close_div)
+
+def name_of_image_check_results(result_str, all_captions):
+    return format_header(result_str) + \
+    f'Список всех обнаруженных подписей:' + \
+    ''.join(format_descriptions(all_captions, tag.div_class, tag.br + tag.close_div))
+
