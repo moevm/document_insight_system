@@ -14,16 +14,20 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         self.literature_header = []
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
         if headers_map:
-            if StyleCheckSettings.CONFIGS.get(headers_map)['limits']:
-                self.min_ref = int(StyleCheckSettings.CONFIGS.get(headers_map)['any_header']['min_ref_for_literature_references_check'])
-                self.max_ref = int(StyleCheckSettings.CONFIGS.get(headers_map)['any_header']['mах_ref_for_literature_references_check'])
+            self.config = headers_map
         else:
-            self.min_ref = min_ref
-            self.max_ref = max_ref
+            self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
 
     def late_init_vkr(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
-        self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
+        self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
+        if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
+            self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['min_ref_for_literature_references_check']
+            self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['mах_ref_for_literature_references_check']
+        else:
+            if 'any_header' in StyleCheckSettings.CONFIGS.get(self.config):
+                self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['min_ref_for_literature_references_check']
+                self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['mах_ref_for_literature_references_check']
 
     def check(self):
         if self.file.page_counter() < 4:

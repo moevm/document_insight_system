@@ -23,12 +23,12 @@ class ReportBannedWordsCheck(BaseReportCriterion):
         if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
             self.words = [morph.normal_forms(word)[0] for word in StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['banned_words']]
             self.min_count = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['min_count_for_banned_words_check']
-            self.max_count = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['min_count_for_banned_words_check']
+            self.max_count = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['max_count_for_banned_words_check']
         else:
             if 'any_header' in StyleCheckSettings.CONFIGS.get(self.config):
                 self.words = [morph.normal_forms(word)[0] for word in StyleCheckSettings.CONFIGS.get(self.config)['any_header']['banned_words']]
                 self.min_count = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['min_count_for_banned_words_check']
-                self.max_count = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['min_count_for_banned_words_check']
+                self.max_count = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['max_count_for_banned_words_check']
 
     def check(self):
         if self.file.page_counter() < 4:
