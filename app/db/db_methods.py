@@ -153,7 +153,7 @@ def add_parsed_text(check_id, parsed_text):
 
 
 def add_hashed_text(check_id, hashed_text):
-    checks_id = hashed_texts_collection.insert_one(hashed_text.pack())
+    checks_id = hashed_texts_collection.insert_one(hashed_text.pack()).inserted_id
     files_info_collection.update_one({'_id': check_id}, {"$push": {'hashed_texts': checks_id}})
     return checks_id
 

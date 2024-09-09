@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from ..antiplagiarism.TextPreprocessing import TextProcessing
 from ..antiplagiarism.compareTexts import compareTexts
 from ..base_check import BaseReportCriterion, answer
@@ -15,6 +18,8 @@ class PlagiarismCheck(BaseReportCriterion):
 
     def check(self):
         result_score = 1
+        self.get_texts()
+        self.collect_text_for_check()
         suspect_text = []
         for i in range(len(self.corpus)):
             for j in range(len(self.corpus)):
