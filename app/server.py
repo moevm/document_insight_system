@@ -730,10 +730,7 @@ def default():
     if current_user.is_authenticated:
         return redirect(url_for("upload"))
     else:
-        link_for_bugs_report = app.config['LINK_FOR_BUGS_REPORT']
-        support_mail = app.config['SUPPORT_MAIL']
-        return render_template("intro_page.html", link_for_bugs_report=link_for_bugs_report, support_mail=support_mail)
-
+        return render_template("intro_page.html")
 
 # Disable caching:
 
