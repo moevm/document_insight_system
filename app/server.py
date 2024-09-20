@@ -41,7 +41,7 @@ from routes.user import user_blueprint
 from routes.tasks import tasks
 from routes.upload import upload
 from routes.recheck import recheck
-from routes.results import results
+from routes.results import results_bp
 from routes.api import api
 from routes.criterion_pack import criterion_pack
 from routes.criterion_packs import criterion_packs
@@ -76,7 +76,7 @@ app.register_blueprint(user_blueprint, url_prefix='/user')
 app.register_blueprint(tasks, url_prefix='/tasks')
 app.register_blueprint(upload, url_prefix='/upload')
 app.register_blueprint(recheck, url_prefix='/recheck')
-app.register_blueprint(results, url_prefix='/results')
+app.register_blueprint(results_bp, url_prefix='/results')
 app.register_blueprint(api, url_prefix='/api')
 app.register_blueprint(criterion_pack, url_prefix='/criterion_pack')
 app.register_blueprint(criterion_packs, url_prefix='/criterion_packs')
