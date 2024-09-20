@@ -41,13 +41,20 @@ def results_svg(_id):
     check = db_methods.get_check(oid)
     if check is not None:
         result_proportion = check.get_proportion()
-        svg_text = f"""
-        <svg width="300" height="50" xmlns="http://www.w3.org/2000/svg">
-            <text xml:space="preserve" text-anchor="start" font-size="20" id="title" y="25" x="10" stroke-width="0" stroke="#000" fill="#000000">Результат:</text>
-            <text xml:space="preserve" text-anchor="start" font-size="20" id="result" y="25" x="100" stroke-width="0" stroke="#000" fill="#000000">{result_proportion[0]}/{result_proportion[1]}</text>
-            <text xml:space="preserve" text-anchor="start" font-size="20" id="result_msg" y="25" x="170" stroke-width="0" stroke="#000" fill="#{'00' if check.is_passed else 'FF'}0000">{'' if check.is_passed else 'не '}пройдена</text>
-        </svg>
-        """
+        if check.is_ended:
+            svg_text = f"""
+            <svg width="300" height="50" xmlns="http://www.w3.org/2000/svg">
+                <text xml:space="preserve" text-anchor="start" font-size="20" id="title" y="25" x="10" stroke-width="0" stroke="#000" fill="#000000">Результат:</text>
+                <text xml:space="preserve" text-anchor="start" font-size="20" id="result" y="25" x="100" stroke-width="0" stroke="#000" fill="#000000">{result_proportion[0]}/{result_proportion[1]}</text>
+                <text xml:space="preserve" text-anchor="start" font-size="20" id="result_msg" y="25" x="170" stroke-width="0" stroke="#000" fill="#{'00' if check.is_passed else 'FF'}0000">{'' if check.is_passed else 'не '}пройдена</text>
+            </svg>
+            """
+        else:
+            svg_text = f"""
+            <svg width="300" height="50" xmlns="http://www.w3.org/2000/svg">
+                <text xml:space="preserve" text-anchor="start" font-size="20" id="title" y="25" x="10" stroke-width="0" stroke="#000" fill="#000000">Работа проверяется</text>
+            </svg>
+            """
         return Response(svg_text, mimetype='image/svg+xml')
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
