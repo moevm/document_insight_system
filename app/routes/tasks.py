@@ -89,11 +89,12 @@ def run_task():
 
 @tasks.route("/md", methods=["POST"])
 def run_md_task_by_api():
-    if not check_access_token(request.args.get('access_token', None)): 
+    if not check_access_token(request.form.get('access_token', None)): 
         return "No valid access token", 401
     
     file = request.files.get('file')
-    criteria = request.args.get('criteria', None)
+    criteria = request.form.get('criteria', None)
+    full_response = request.form.get('full_response', None)
     
     # hardcoded
     file_type = {'type': 'report', 'report_type': 'VKR'}
@@ -142,8 +143,10 @@ def run_md_task_by_api():
     db_methods.add_check(file_id, check)  # add check for parsed_file to db
     task = create_task.delay(check.pack(to_str=True))  # add check to queue
     db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
-    return {'task_id': task.id, 'check_id': str(file_id)}
-
+    if full_response:
+        return {'task_id': task.id, 'check_id': str(file_id)}
+    else:
+        return str(file_id)
 
 @tasks.route("/<task_id>", methods=["GET"])
 @login_required
