@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build docker-compose with docker-compose-selenium (tests)
+      - name: Build docker compose with docker-compose-selenium (tests)
         run: |
           cp .env_example .env
           cp app/VERSION_example.json app/VERSION.json
