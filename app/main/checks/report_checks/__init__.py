@@ -24,4 +24,5 @@ from .style_check import ReportStyleCheck
 from .spelling_check import SpellingCheck
 from .max_abstract_size_check import ReportMaxSizeOfAbstractCheck
 from .template_name import ReportTemplateNameCheck
+from .key_words_check import KeyWordsReportCheck
 from .empty_task_page_check import EmptyTaskPageCheck
