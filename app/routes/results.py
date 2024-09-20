@@ -42,10 +42,10 @@ def results_svg(_id):
     if check is not None:
         result_proportion = check.get_proportion()
         svg_text = f"""
-        <svg width="550" height="100" xmlns="http://www.w3.org/2000/svg">
-            <text xml:space="preserve" text-anchor="start" font-size="40" id="title" y="50" x="10" stroke-width="0" stroke="#000" fill="#000000">Результат:</text>
-            <text xml:space="preserve" text-anchor="start" font-size="40" id="result" y="50" x="190" stroke-width="0" stroke="#000" fill="#000000">{result_proportion[0]}/{result_proportion[1]}</text>
-            <text xml:space="preserve" text-anchor="start" font-size="40" id="result_msg" y="50" x="330" stroke-width="0" stroke="#000" fill="#{'00' if check.is_passed else 'FF'}0000">{'' if check.is_passed else 'не '}пройдена</text>
+        <svg width="300" height="50" xmlns="http://www.w3.org/2000/svg">
+            <text xml:space="preserve" text-anchor="start" font-size="20" id="title" y="25" x="10" stroke-width="0" stroke="#000" fill="#000000">Результат:</text>
+            <text xml:space="preserve" text-anchor="start" font-size="20" id="result" y="25" x="100" stroke-width="0" stroke="#000" fill="#000000">{result_proportion[0]}/{result_proportion[1]}</text>
+            <text xml:space="preserve" text-anchor="start" font-size="20" id="result_msg" y="25" x="170" stroke-width="0" stroke="#000" fill="#{'00' if check.is_passed else 'FF'}0000">{'' if check.is_passed else 'не '}пройдена</text>
         </svg>
         """
         return Response(svg_text, mimetype='image/svg+xml')
