@@ -10,6 +10,9 @@ class StyleCheckSettings:
     HEADER_REGEX = "^\\D+.+$"
     HEADER_1_REGEX = "^()([\\w\\s]+)$"
     HEADER_2_REGEX = "^()([\\w\\s]+)\\.$"
+    STD_BANNED_WORDS = ['мы']
+    STD_MIN_LIT_REF = 1
+    STD_MAX_LIT_REF = 1000 #just in case for future edit
     HEADER_1_STYLE = {
         "bold": True,
         "italic": False,
@@ -90,9 +93,11 @@ class StyleCheckSettings:
             "headers": ["Исходный код программы"],
             "unify_regex": APPENDIX_UNIFY_REGEX,
             "regex": APPENDIX_REGEX,
-            "banned_words": ['мы'],
+            "banned_words": STD_BANNED_WORDS,
             'min_count_for_banned_words_check': 3,
             'max_count_for_banned_words_check': 6,
+            'min_ref_for_literature_references_check': STD_MIN_LIT_REF,
+            'mах_ref_for_literature_references_check': STD_MAX_LIT_REF
         },
         'second_header':
         {
@@ -112,9 +117,11 @@ class StyleCheckSettings:
             "headers": ["ВВЕДЕНИЕ", "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
             "regex": HEADER_REGEX,
-            "banned_words": ['мы'],
+            "banned_words": STD_BANNED_WORDS,
             'min_count_for_banned_words_check': 3,
             'max_count_for_banned_words_check': 6,
+            'min_ref_for_literature_references_check': STD_MIN_LIT_REF,
+            'mах_ref_for_literature_references_check': STD_MAX_LIT_REF
         },
         'second_header':
         {
@@ -159,7 +166,7 @@ class StyleCheckSettings:
             "header_for_report_section_component": "Поставленная цель и задачи",
             "unify_regex": None,
             "regex": HEADER_REGEX,
-            "banned_words": ['мы'],
+            "banned_words": STD_BANNED_WORDS,
             'min_count_for_banned_words_check': 3,
             'max_count_for_banned_words_check': 6,
         },
@@ -174,7 +181,7 @@ class StyleCheckSettings:
             "header_for_report_section_component": "",
             "unify_regex": None,
             "regex": HEADER_REGEX,
-            "banned_words": ['мы'],
+            "banned_words": STD_BANNED_WORDS,
             'min_count_for_banned_words_check': 3,
             'max_count_for_banned_words_check': 6,
         }
