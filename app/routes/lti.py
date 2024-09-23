@@ -66,6 +66,6 @@ def lti_main():
         db_methods.edit_user(lti_user)
 
         login_user(lti_user)
-        return redirect(url_for('upload'))
+        return redirect(url_for('upload.upload_main'))
     else:
         abort(403)
