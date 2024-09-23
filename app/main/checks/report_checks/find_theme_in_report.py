@@ -69,9 +69,13 @@ class FindThemeInReport(BaseReportCriterion):
             if key == 1:
                 lower_text = text_on_page.lower()
                 text_without_punct = lower_text.translate(str.maketrans('', '', string.punctuation))
-                list_full = text_without_punct.split()
-                start = list_full.index('тема') + 1
-                end = list_full.index('студент')
+                list_full = tuple(text_without_punct.split())
+                start, end = 0, len(list_full)
+                for index, value in enumerate(list_full):
+                    if value == "тема":
+                        start = index + 1
+                    elif value in {"студент", "студентка"}:
+                        end = index
                 list_theme = list_full[start:end]
                 lemma_theme = {MORPH_ANALYZER.parse(word)[0].normal_form for word in list_theme if
                                 word not in stop_words}

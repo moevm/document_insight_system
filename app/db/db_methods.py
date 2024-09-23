@@ -59,6 +59,8 @@ def get_user(username):
     else:
         return None
 
+def get_all_users():
+    return users_collection.find()
 
 # Returns True if user was found and updated and false if not (username can not be changed!)
 def edit_user(user):
@@ -296,6 +298,21 @@ def get_logs_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
 
     count = logs_collection.count_documents(filter)
     rows = logs_collection.find(filter)
+
+    if sort and order in ("asc, desc"):
+        rows = rows.sort(sort, pymongo.ASCENDING if order ==
+                                                    "asc" else pymongo.DESCENDING)
+
+    rows = rows.skip(offset) if offset else rows
+    rows = rows.limit(limit) if limit else rows
+
+    return rows, count
+
+def get_user_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
+    sort = 'username' if sort == 'username' else sort
+
+    count = users_collection.count_documents(filter)
+    rows = users_collection.find(filter)
 
     if sort and order in ("asc, desc"):
         rows = rows.sort(sort, pymongo.ASCENDING if order ==

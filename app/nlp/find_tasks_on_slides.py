@@ -12,7 +12,7 @@ def compare_sentences(sentence_1, sentence_2):
     stemming = Stemming()
     set_1 = stemming.get_filtered_docs(sentence_1, False)
     set_2 = stemming.get_filtered_docs(sentence_2, False)
-    rvector = set_1.union(set_2)
+    rvector = set_1 #.union(set_2)
     vector_1 = [w in set_1 for w in rvector]
     vector_2 = [w in set_2 for w in rvector]
     cosine_similarity = 1 - distance.cosine(vector_1, vector_2)
