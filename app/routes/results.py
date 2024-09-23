@@ -1,7 +1,9 @@
 import bson
 from bson import ObjectId
+from time import time
 
 from flask import Blueprint, Response, render_template
+from wsgiref.handlers import format_date_time as format_date
 
 from app.db import db_methods
 from app.utils import format_check
@@ -55,7 +57,7 @@ def results_svg(_id):
                 <text xml:space="preserve" text-anchor="start" font-size="20" id="title" y="25" x="10" stroke-width="0" stroke="#000" fill="#000000">Работа проверяется</text>
             </svg>
             """
-        return Response(svg_text, headers=[("Cache-Control", "no-store")], mimetype='image/svg+xml')
+        return Response(svg_text, headers=[("Cache-Control", "no-cache"), ('Expires', format_date(time()-3600))], mimetype='image/svg+xml')
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return "No such check", 404
