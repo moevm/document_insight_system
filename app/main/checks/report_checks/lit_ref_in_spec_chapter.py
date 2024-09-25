@@ -8,10 +8,12 @@ class LitRefInChapter(BaseReportCriterion):
     description = ''
     id = 'references_in_chapter_check'
 
-    def __init__(self, file_info, headers_map = None):
+    def __init__(self, file_info, min_ref_value=0.5, max_ref_value=0.8, headers_map = None):
         super().__init__(file_info)
         self.chapters_for_lit_ref = {}
         self.lit_ref_count = {}
+        self.min_ref_value = min_ref_value
+        self.max_ref_value = max_ref_value
         if headers_map:
             self.config = headers_map
         else:
@@ -35,22 +37,32 @@ class LitRefInChapter(BaseReportCriterion):
         result = []
         result_str = f'Пройдена!'
         currant_head = ''
+        chapter_for_check = 0
         for chapter in self.chapters:
             if chapter['style'] == "heading 2":
                 header = chapter["text"].lower()
                 if currant_head:
                     self.lit_ref_count[currant_head].append(chapter['number'])
                     if currant_head in self.chapters_for_lit_ref:
+                        chapter_for_check += 1
                         ref_count = len(self.search_references(self.lit_ref_count[currant_head][0], self.lit_ref_count[currant_head][1]))
                         if ref_count > self.chapters_for_lit_ref[currant_head][1] or ref_count < self.chapters_for_lit_ref[currant_head][0]:
                             result.append(f'"{currant_head[0].upper() + currant_head[1:]}" : {ref_count}')
                 self.lit_ref_count[header] = [chapter['number'],]
                 currant_head = header
         if result:
-            result_str = f'Количество ссылок на источники не удовлетворяет допустимому в следующих разделах: <br> {", ".join(res for res in result)}'
-            return answer(False, result_str)
+            ref_value = round((chapter_for_check-len(result))/chapter_for_check, 2)
+            result_str = (f'Доля соответствия количества ссылок необходимому в требуемых разделах равна {ref_value}'
+                        f'<br>Количество ссылок на источники не удовлетворяет допустимому в следующих разделах: <br> {", ".join(res for res in result)}'
+                        f'<br> Допустимые пороги количества ссылок: <br> {self.chapters_for_lit_ref}')
+            if ref_value > self.max_ref_value:
+                return answer(1, f'Пройдена! {result_str}')
+            elif ref_value > self.min_ref_value:
+                return answer(ref_value, f'Частично пройдена! {result_str}')
+            else:
+                return answer(0, f'Не пройдена! {result_str}')
         else:
-            return answer(True, result_str)
+            return answer(1, result_str)
         
     def search_references(self, start_par, end_par):
         array_of_references = []
