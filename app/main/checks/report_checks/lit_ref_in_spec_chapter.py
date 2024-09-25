@@ -8,7 +8,7 @@ class LitRefInChapter(BaseReportCriterion):
     description = ''
     id = 'references_in_chapter_check'
 
-    def __init__(self, file_info, min_ref_value=0.5, max_ref_value=0.8, headers_map = None):
+    def __init__(self, file_info, min_ref_value=0, max_ref_value=0, headers_map = None):
         super().__init__(file_info)
         self.chapters_for_lit_ref = {}
         self.lit_ref_count = {}
@@ -33,7 +33,7 @@ class LitRefInChapter(BaseReportCriterion):
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         self.late_init()
         if not self.chapters_for_lit_ref:
-            return answer(True, 'Для загруженной работы данная проверка не предусмотрена')
+            return answer(True, 'Для загруженной работы данная проверка не предусмотрена.')
         result = []
         result_str = f'Пройдена!'
         currant_head = ''
@@ -47,17 +47,18 @@ class LitRefInChapter(BaseReportCriterion):
                         chapter_for_check += 1
                         ref_count = len(self.search_references(self.lit_ref_count[currant_head][0], self.lit_ref_count[currant_head][1]))
                         if ref_count > self.chapters_for_lit_ref[currant_head][1] or ref_count < self.chapters_for_lit_ref[currant_head][0]:
-                            result.append(f'"{currant_head[0].upper() + currant_head[1:]}" : {ref_count}')
+                            result.append(f'«{currant_head[0].upper() + currant_head[1:]}» : {ref_count}')
                 self.lit_ref_count[header] = [chapter['number'],]
                 currant_head = header
         if result:
             ref_value = round((chapter_for_check-len(result))/chapter_for_check, 2)
             result_str = (f'Доля соответствия количества ссылок необходимому в требуемых разделах равна {ref_value}'
-                        f'<br>Количество ссылок на источники не удовлетворяет допустимому в следующих разделах: <br> {", ".join(res for res in result)}'
-                        f'<br> Допустимые пороги количества ссылок: <br> {self.chapters_for_lit_ref}')
-            if ref_value > self.max_ref_value:
-                return answer(1, f'Пройдена! {result_str}')
-            elif ref_value > self.min_ref_value:
+                        f'<br><b>Количество ссылок на источники не удовлетворяет допустимому в следующих разделах:</b> <br> {"<br>".join(res for res in result)}'
+                        f'<br><b> Допустимые пороги количества ссылок:</b> <br>'
+                        f'{"<br>".join(f"«{chapter.capitalize()}»: от {limit[0]} до {limit[1]}" for chapter, limit in self.chapters_for_lit_ref.items())}')
+            if ref_value >= self.max_ref_value:
+                return answer(1, f'Пройдена!')
+            elif ref_value >= self.min_ref_value:
                 return answer(ref_value, f'Частично пройдена! {result_str}')
             else:
                 return answer(0, f'Не пройдена! {result_str}')
