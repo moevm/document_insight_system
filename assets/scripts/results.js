@@ -87,7 +87,11 @@ $(function(){
             
                 canvas = document.getElementById('the-canvas');
                 ctx = canvas.getContext('2d');
-            
+
+                ctx.font = "20px Times New Roman";
+                ctx.textAlign = "center";
+                ctx.fillText("Конвертация файла в PDF...", canvas.width / 2, canvas.height / 2);
+
                 pdfjsLib
                     .getDocument(href)
                     .promise.then(pdfDoc_ => {
