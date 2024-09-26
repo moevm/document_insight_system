@@ -16,13 +16,13 @@ class ReportChapters(BaseReportCriterion):
         self.target_styles = StyleCheckSettings.VKR_CONFIG
         self.target_styles = list(map(lambda elem: {
             "style": self.construct_style_from_description(elem["style"])
-        }, self.target_styles))
+        }, self.target_styles.values()))
         self.docx_styles = {}
         self.style_regex = {}
         self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
         self.presets = StyleCheckSettings.CONFIGS.get(self.config)
         level = 0
-        for format_description in self.presets:
+        for _, format_description in self.presets.items():
             self.docx_styles.update({level: format_description["docx_style"]})
             pattern = re.compile(format_description["regex"])
             self.style_regex.update({level: pattern})
