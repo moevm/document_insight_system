@@ -45,7 +45,7 @@ def at_start(sender, **k):
 
 
 @celery.task(name="create_task", queue='check-solution', bind=True)
-def create_task(self, check_info):
+def create_task(self, conv_id, check_info):
     check_obj = Check(check_info)
     check_id = str(check_obj._id)
     # get check files filepath
