@@ -21,10 +21,23 @@ criteria_pack_collection = db['criteria_pack']
 logs_collection = db.create_collection(
     'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
+images_collection = db['images']  # коллекция для хранения изображений
 
 
 def get_client():
     return client
+
+def save_image_to_db(check_id, image_data, caption):
+    from app.db.db_types import Image
+
+    image = Image({
+        'check_id': check_id,
+        'image_data': image_data,
+        'caption': caption
+    })
+    images_collection.insert_one(image.pack())
+
+    print("check_id----------",check_id)
 
 
 # Returns user if user was created and None if already exists
