@@ -138,13 +138,20 @@ class StyleCheckSettings:
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
-            "headers": ["ПОСТАНОВКА ЗАДАЧИ", "РЕЗУЛЬТАТЫ РАБОТЫ В ВЕСЕННЕМ СЕМЕСТРЕ", "ОПИСАНИЕ ПРЕДПОЛАГАЕМОГО МЕТОДА РЕШЕНИЯ",
-                        "ПЛАН РАБОТЫ НА ОСЕННИЙ СЕМЕСТР", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
+            "headers": ["постановка задачи", "результаты работы в весеннем семестре", "описание предполагаемого метода решения",
+                        "план работы на осенний семестр", "список использованных источников"],
             "unify_regex": None,
             "regex": HEADER_REGEX,
+            "banned_words": ['wikipedia', 'wikipedia.org'],
+            'min_count_for_banned_words_check': 3,
+            'max_count_for_banned_words_check': 6,
+            'min_ref_for_literature_references_check': STD_MIN_LIT_REF,
+            'mах_ref_for_literature_references_check': STD_MAX_LIT_REF,
+            'template_name': ('^\d+_[А-Яа-я]+\_[А-Я]{2}_NIR2', '1111_Иванов_ИИ_NIR2')
         },
         'second_header':
         {
+            "second_header_check": {"результаты работы в весеннем семестре": ["план", "результаты"]},
             "style": HEADER_1_NUM_STYLE,
             "docx_style": ["heading 3", "heading 4"],
             "headers": ["ПЛАН", "РЕЗУЛЬТАТЫ"],
@@ -274,6 +281,7 @@ class StyleCheckSettings:
         'LR_HEADERS': LR_CONFIG,
         'LR_MAIN_TEXT': LR_MAIN_TEXT_CONFIG,
         'VKR_HEADERS': VKR_CONFIG,
+        'NIR_HEADERS': NIR_CONFIG,
         'VKR_MAIN_TEXT': VKR_MAIN_TEXT_CONFIG,
         'NIR_HEADERS': NIR_CONFIG,
         'MD_HEADERS' : MD_CONFIG,
