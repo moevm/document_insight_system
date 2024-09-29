@@ -46,7 +46,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             self.late_init_vkr()
             header = self.literature_header
             if not header:
-                return answer(True,
+                return answer(False,
                               f'Не найден Список использованных источников.<br><br>Если в вашей работе есть список источников, проверьте корректность использования стилей.')
             start_literature_par = header["number"]
             number_of_sources = self.count_sources_vkr(header)
