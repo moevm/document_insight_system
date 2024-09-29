@@ -2,7 +2,9 @@ import configparser
 
 import urllib3
 
-from db.db_methods import ConsumersDBManager, get_unpassed_checks, set_passbacked_flag
+from app.db.types.ConsumerDBManager import ConsumersDBManager
+from app.db.methods import check as check_methods
+
 from lti_session_passback.lti_provider import LTIProvider
 from root_logger import get_root_logger
 
@@ -20,7 +22,7 @@ def check_success_response(response):
 def grade_passback(check):
     passback_params = check.get('params_for_passback', None)
     if not passback_params or passback_params["lis_outcome_service_url"] == "lis_outcome_service_url":
-        set_passbacked_flag(check.get('_id'), None)
+        check_methods.set_passbacked_flag(check.get('_id'), None)
         return
 
     consumer_secret = ConsumersDBManager.get_secret(passback_params['oauth_consumer_key'])
@@ -38,19 +40,19 @@ def grade_passback(check):
         if check_success_response(response):
             logger.info('Score was successfully passed back: score = {}, check_id = {}'.format(check.get('score'),
                                                                                                check.get('_id')))
-            set_passbacked_flag(check.get('_id'), True)
+            check_methods.set_passbacked_flag(check.get('_id'), True)
         else:
             logger.error('Passback failed for check_id = {}'.format(check.get('_id')))
     else:
         logger.info(
             'LMS score is more then current (not passbacked): LMS_score = {}, system_score = {} check_id = {}'.format(
                 current_lms_score, check.get('score'), check.get('_id')))
-        set_passbacked_flag(check.get('_id'), None)
+        check_methods.set_passbacked_flag(check.get('_id'), None)
 
 
 def run_passback():
     errors, passbacked = [], []
-    for check in get_unpassed_checks():
+    for check in check_methods.get_unpassed_checks():
         try:
             grade_passback(check)
             passbacked.append(str(check['_id']))

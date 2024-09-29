@@ -6,12 +6,12 @@ from celery import Celery
 from celery.signals import worker_ready
 
 from passback_grades import run_passback
-from db import db_methods
-from db.db_types import Check
+from db.types.Check import Check
 from main.checker import check
 from main.parser import parse
-from main.check_packs import BASE_PACKS
 from root_logger import get_root_logger
+from app.db.methods import check as check_methods
+from app.db.methods import celery_check as celery_check_methods
 
 config = ConfigParser()
 config.read('app/config.ini')
@@ -55,8 +55,8 @@ def create_task(self, check_info):
         updated_check = check(parse(original_filepath, pdf_filepath), check_obj)
         updated_check.is_ended = True
         updated_check.is_failed = False
-        db_methods.update_check(updated_check)  # save to db
-        db_methods.mark_celery_task_as_finished(self.request.id)
+        check_methods.update_check(updated_check)  # save to db
+        celery_check_methods.mark_celery_task_as_finished(self.request.id)
 
         # remove files from FILES_FOLDER after checking
         remove_files((original_filepath, pdf_filepath))
@@ -66,11 +66,11 @@ def create_task(self, check_info):
         if self.request.retries == self.max_retries:
             logger.error(f"\tДостигнуто максимальное количество попыток перезапуска. Удаление задачи из очереди",
                          exc_info=True)
-            db_methods.mark_celery_task_as_finished(self.request.id)
+            celery_check_methods.mark_celery_task_as_finished(self.request.id)
             updated_check = Check(check_info)
             updated_check.is_failed = True
             updated_check.is_ended = True
-            db_methods.update_check(updated_check)  # save to db
+            check_methods.update_check(updated_check)  # save to db
             # remove files from FILES_FOLDER after checking
             remove_files((original_filepath, pdf_filepath))
             return 'Not OK, error: {}'.format(e)

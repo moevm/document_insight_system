@@ -1,4 +1,4 @@
-from app.db.db_types import Check
+from app.db.types.Check import Check
 
 
 class Version:

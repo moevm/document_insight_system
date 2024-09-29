@@ -1,7 +1,6 @@
-import {collect_values_if_possible, hash} from "./main";
+import {collect_values_if_possible, hash} from "./general";
 
 import '../styles/login.css';
-
 
 $("#login_button").click(async () => {
     const params = collect_values_if_possible("login_text_field", "password_text_field");
