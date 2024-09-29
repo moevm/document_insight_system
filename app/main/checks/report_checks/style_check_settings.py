@@ -210,7 +210,7 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
-            'min_ref_for_literature_references_check': 5,
+            'min_ref_for_literature_references_check': 1,
             'mах_ref_for_literature_references_check': 1000, #just for future possible edit
             'min_count_for_banned_words_check': 2,
             'max_count_for_banned_words_check': 10
@@ -228,7 +228,7 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
-            'min_ref_for_literature_references_check': 5,
+            'min_ref_for_literature_references_check': 3,
             'mах_ref_for_literature_references_check': 1000, #just for future possible edit
             'min_count_for_banned_words_check': 2,
             'max_count_for_banned_words_check': 10
