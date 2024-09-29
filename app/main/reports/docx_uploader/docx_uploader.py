@@ -40,7 +40,7 @@ class DocxUploader(DocumentUploader):
         tmp_paragraphs = []
         for i in range(len(paragraphs)):
             if len(paragraphs[i].text.strip()):
-                tmp_paragraphs.append(Paragraph(paragraphs[i]))       
+                tmp_paragraphs.append(Paragraph(paragraphs[i]))
         return tmp_paragraphs
 
     def make_chapters(self, work_type):
@@ -160,7 +160,7 @@ class DocxUploader(DocumentUploader):
             tagged_indices.extend(list(map(lambda index: {"index": index, "level": j + 1,
                                                           "styled_text": self.styled_paragraphs[index],
                                                           "style": self.paragraphs[index].paragraph_style_name.lower()},
-                                           indices[j])))  
+                                           indices[j])))
         tagged_indices.sort(key=lambda dct: dct["index"])
         return tagged_indices
 
