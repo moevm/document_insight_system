@@ -37,8 +37,6 @@ def save_image_to_db(check_id, image_data, caption):
     })
     images_collection.insert_one(image.pack())
 
-    print("check_id----------",check_id)
-
 
 # Returns user if user was created and None if already exists
 def add_user(username, password_hash='', is_LTI=False):

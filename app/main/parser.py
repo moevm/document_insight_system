@@ -15,6 +15,8 @@ from app.db.db_types import Check
 logger = logging.getLogger('root_logger')
 
 def parse(filepath, pdf_filepath):
+    from app.db.db_methods import files_info_collection
+
     tmp_filepath = filepath.lower()
     try:
         if tmp_filepath.endswith(('.odp', '.ppt', '.pptx')):
@@ -28,7 +30,13 @@ def parse(filepath, pdf_filepath):
             check = Check({
                 'filename': basename(new_filepath),
             })
-            check_id = add_check(23, check)
+
+            file_id = 0
+            file = files_info_collection.find_one({'name': basename(new_filepath)})
+            if file:
+                file_id = file['_id']
+
+            check_id = add_check(file_id, check)
             presentation.extract_images_with_captions(check_id)
             file_object = presentation
 
@@ -41,11 +49,17 @@ def parse(filepath, pdf_filepath):
 
             docx = DocxUploader()
             docx.upload(new_filepath, pdf_filepath)
-            # Создание проверки
+
             check = Check({
                 'filename': basename(new_filepath),
             })
-            check_id = add_check(23, check)
+
+            file_id = 0
+            file = files_info_collection.find_one({'name': basename(new_filepath)})
+            if file:
+                file_id = file['_id']
+
+            check_id = add_check(file_id, check)
             docx.parse()
             docx.extract_images_with_captions(check_id)
             file_object = docx

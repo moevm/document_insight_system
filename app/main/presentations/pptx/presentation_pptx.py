@@ -1,3 +1,5 @@
+from io import BytesIO
+
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 
@@ -22,23 +24,37 @@ class PresentationPPTX(PresentationBasic):
     def extract_images_with_captions(self, check_id):
         from app.db.db_methods import save_image_to_db
 
-        images_with_captions = []
+        # Проход по каждому слайду в презентации
+        for slide in self.slides:
+            image_found = False
+            image_data = None
+            caption_text = None
 
-        for slide in self.prs.slides:
-            for shape in slide.shapes:
-                if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
-                    image_data = shape.image.blob  # Бинарные данные изображения
-                    caption = ""
+            # Проход по всем шейпам на слайде
+            for shape in slide.slide.shapes:  # Используем slide.slide для доступа к текущему слайду
+                if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:  # Тип 13 соответствует PICTURE
+                    image_found = True
+                    image_part = shape.image  # Получаем объект изображения
 
-                    # Определение подписи. Предполагается, что подпись находится рядом с изображением
-                    if shape.has_text_frame:
-                        caption = shape.text.strip()
-                    else:
-                        # Альтернативный способ: поиск текстового поля рядом с изображением
-                        pass
+                    # Извлекаем бинарные данные изображения
+                    image_stream = image_part.blob
+                    image_data = BytesIO(image_stream)
+                    print(f"Изображение найдено на слайде {slide.index}")
 
-                    # Сохранение изображения и подписи в MongoDB
-                    save_image_to_db(check_id, image_data, caption)
-                    images_with_captions.append({"image_data": image_data, "caption": caption})
+                # Если мы нашли изображение, ищем следующий непустой текст как подпись
+                if image_found:
+                    for shape in slide.slide.shapes:
+                        if not shape.has_text_frame:
+                            continue
+                        text = shape.text.strip()
+                        if text:  # Находим непустое текстовое поле (предположительно, это подпись)
+                            caption_text = text
+                            # Сохраняем изображение и его подпись
+                            save_image_to_db(check_id, image_data.getvalue(), caption_text)
+                            print(f"Подпись найдена: '{caption_text}' на слайде {slide.index}")
+                            break  # Предполагаем, что это подпись к текущему изображению
 
-        return images_with_captions
+                    # Сброс флага и данных изображения для следующего цикла
+                    image_found = False
+                    image_data = None
+                    caption_text = None

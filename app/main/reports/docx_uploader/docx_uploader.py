@@ -244,36 +244,39 @@ class DocxUploader(DocumentUploader):
 
     def extract_images_with_captions(self, check_id):
         from app.db.db_methods import save_image_to_db
-        images_with_captions = []
 
-        # Получение всех встроенных фигур (inline_shapes)
-        for inline_shape in self.file.inline_shapes:
-            # Проверка, является ли встроенный объект изображением
-            if inline_shape.type == 3:  # Тип 3 соответствует изображению (PICTURE)
-                # Извлечение бинарных данных изображения
-                image_stream = inline_shape._inline.graphic.graphicData.pic.blipFill.blip.embed
-                image_data = self.file.part.related_parts[image_stream].blob  # Бинарные данные изображения
+        image_found = False
+        image_data = None
 
-                # Инициализация подписи
-                caption = ""
+        # Проход по всем параграфам документа
+        for i, paragraph in enumerate(self.file.paragraphs):
+            # Проверяем, есть ли в параграфе встроенные объекты
+            for run in paragraph.runs:
+                if "graphic" in run._element.xml:  # Это может быть изображение
+                    image_found = True
 
-                # Поиск параграфа, следующего за изображением, для извлечения подписи
-                for i, paragraph in enumerate(self.file.paragraphs):
-                    # Проверяем, находится ли изображение в параграфе
-                    inline_shape_xml = inline_shape._inline.xml
-                    if inline_shape_xml in paragraph._element.xml:
-                        # Если есть следующий параграф, предположим, что это подпись
-                        if i + 1 < len(self.file.paragraphs):
-                            next_paragraph = self.file.paragraphs[i + 1].text.strip()
-                            if next_paragraph:
-                                caption = next_paragraph
-                        break  # Найдено изображение, больше искать не нужно
+                    # Извлечение бинарных данных изображения
+                    image_streams = run._element.findall('.//a:blip', namespaces={
+                        'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'})
+                    for image_stream in image_streams:
+                        embed_id = image_stream.get(
+                            '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed')
+                        if embed_id:
+                            image_data = self.file.part.related_parts[embed_id].blob
 
-                # Сохранение изображения и подписи в MongoDB
-                save_image_to_db(check_id, image_data, caption)
-                images_with_captions.append({"image_data": image_data, "caption": caption})
-
-        return images_with_captions
+                # Если мы уже нашли изображение, ищем следующий непустой параграф для подписи
+                if image_found:
+                    # Переход к следующему параграфу
+                    next_paragraph_index = i + 1
+                    while next_paragraph_index < len(self.file.paragraphs):
+                        next_paragraph_text = self.file.paragraphs[next_paragraph_index].text.strip()
+                        if next_paragraph_text:  # Находим непустой параграф
+                            # Сохраняем изображение и его подпись
+                            save_image_to_db(check_id, image_data, next_paragraph_text)
+                            break
+                        next_paragraph_index += 1
+                    image_found = False  # Сброс флага, чтобы искать следующее изображение
+                    image_data = None  # Очистка данных изображения
 
 
 def main(args):
