@@ -15,7 +15,7 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
         self.main_heading_style = main_heading_style
         if headers_map:
             self.config = headers_map
-        else:    
+        else:
             self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
     # self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
 
@@ -54,39 +54,6 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
             if result_string_second_lvl:
                 final_str = f'Подразделы главы "{header_text.upper()}":' + f'<ul>{result_string_second_lvl}</ul>'
         return final_str
-
-    # def show_chapters(self):
-    #     chapters_str = "<br>"
-    #     for header in self.headers:
-    #         if header["style"] == self.main_heading_style:
-    #             chapters_str += header["text"] + "<br>"
-    #         else:
-    #             chapters_str += "&nbsp;&nbsp;&nbsp;&nbsp;" + header["text"] + "<br>"
-    #     return chapters_str
-    
-    def find_headers_second_lvl(self, header_ind, header_text):
-        result_string_second_lvl = ''
-        final_str = ''
-        start_ind = header_ind+1
-        patterns_for_sec_lvl = []
-        for pattern in self.patterns_second_lvl:
-            patterns_for_sec_lvl.append({"pattern": pattern, "marker": 0})
-        for header in self.headers[start_ind:]:
-            if header['style'] in StyleCheckSettings.CONFIGS.get(self.config)[1]["docx_style"]:
-                for i in range(len(patterns_for_sec_lvl)):
-                    pattern = patterns_for_sec_lvl[i]["pattern"]
-                    if header['text'].lower().find(pattern.lower()) >= 0:
-                        patterns_for_sec_lvl[i]["marker"] = 1
-            if header['style'] in StyleCheckSettings.CONFIGS.get(self.config)[0]["docx_style"]:
-                break              
-
-        for pattern in patterns_for_sec_lvl:
-            if not pattern["marker"]:
-                result_string_second_lvl += '<li>' + pattern["pattern"] + '</li>'
-            if result_string_second_lvl:
-                final_str = f'подразделы главы "{header_text.upper()}": ' + result_string_second_lvl
-        return final_str    
-        
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -128,13 +95,13 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
             result_str = f'Не найдены следующие обязательные заголовки: <ul>{result_string}</ul>'
             result_str += result_string_second_lvl
             result_str += '''
-            Если не найден существующий раздел, попробуйте сделать следующее:
-            <ul>
-            <li>Убедитесь в отсутствии опечаток и лишних пробельных символов в названии раздела;</li>
-            <li>Убедитесь в соответствии стиля заголовка требованиям к отчету по ВКР;</li>
-            <li>Убедитесь, что заголовок состоит из одного абзаца.</li>
-            </ul>
-            '''
+                        Если не найден существующий раздел, попробуйте сделать следующее:
+                        <ul>
+                        <li>Убедитесь в отсутствии опечаток и лишних пробельных символов в названии раздела;</li>
+                        <li>Убедитесь в соответствии стиля заголовка требованиям к отчету по ВКР;</li>
+                        <li>Убедитесь, что заголовок состоит из одного абзаца.</li>
+                        </ul>
+                        '''
             result_str += f'<br><br><b>Ниже представлена иерархия обработанных заголовков, ' \
             f'сравните с Содержанием {self.format_page_link([self.headers_page])}:</b>'
             result_str += self.chapters_str
