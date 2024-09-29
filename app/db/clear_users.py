@@ -1,6 +1,6 @@
 import logging
 
-from .db_methods import client
+from .db_main import client
 
 logger = logging.getLogger('root_logger')
 
