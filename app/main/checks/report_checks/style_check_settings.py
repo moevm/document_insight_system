@@ -114,7 +114,7 @@ class StyleCheckSettings:
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
-            "headers": ["ВВЕДЕНИЕ", "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
+            "headers": ["введение", "заключение", "список использованных источников"],
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
@@ -139,12 +139,13 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": ["постановка задачи", "результаты работы в весеннем семестре", "описание предполагаемого метода решения",
-                        "план работы на осенний семестр", "список использованных источников"],
+                        "план работы на осенний семестр", "список литературы"],
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": ['wikipedia', 'wikipedia.org'],
             'min_count_for_banned_words_check': 3,
             'max_count_for_banned_words_check': 6,
+            'literature_header': 'список литературы',
             'min_ref_for_literature_references_check': STD_MIN_LIT_REF,
             'mах_ref_for_literature_references_check': STD_MAX_LIT_REF,
             'template_name': ('^\d+_[А-Яа-я]+\_[А-Я]{2}_NIR2', '1111_Иванов_ИИ_NIR2')
