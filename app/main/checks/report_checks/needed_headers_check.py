@@ -12,12 +12,12 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
         super().__init__(file_info)
         self.headers_page = 1
         self.headers = []
+        self.patterns = []
         self.main_heading_style = main_heading_style
         if headers_map:
             self.config = headers_map
         else:
             self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
-    # self.patterns = StyleCheckSettings.CONFIGS.get(self.config)[0]["headers"]
 
     def late_init(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
@@ -30,8 +30,7 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
             if 'any_header' in StyleCheckSettings.CONFIGS.get(self.config):
                 self.headers_main = 'any_header'
                 self.patterns = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['headers']
-                self.second_lvl_headers = StyleCheckSettings.CONFIGS.get(self.config).get('second_header', {}).get('second_header_check')
-
+        self.second_lvl_headers = StyleCheckSettings.CONFIGS.get(self.config).get('second_header', {}).get('second_header_check')
     def find_headers_second_lvl(self, header_ind, header_text):
         result_string_second_lvl = ''
         final_str = ''

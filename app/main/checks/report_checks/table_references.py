@@ -64,7 +64,10 @@ class TableReferences(BaseReportCriterion):
     def search_references(self):
         array_of_references = set()
         for i in range(0, self.last_child_number):
-            detected_references = re.findall(r'таблиц[аеыу][\d .]+', self.file.paragraphs[i].paragraph_text)
+            if  isinstance(self.file.paragraphs[i], str):
+                detected_references = re.findall(r'таблиц[аеыу][\d .]+', self.file.paragraphs[i])
+            else:
+                detected_references = re.findall(r'таблиц[аеыу][\d .]+', self.file.paragraphs[i].paragraph_text)
             if detected_references:
                 for reference in detected_references:
                     for one_part in re.split(r'таблиц[аеыу]| ', reference):
