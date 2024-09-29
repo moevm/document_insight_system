@@ -51,6 +51,8 @@ app.recaptcha = ReCaptcha(app=app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['CELERY_RESULT_BACKEND'] = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
 app.config['CELERY_BROKER_URL'] = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
+app.config['LINK_FOR_BUGS_REPORT'] = os.environ.get("LINK_FOR_BUGS_REPORT", f"")
+app.config['SUPPORT_MAIL'] = os.environ.get("SUPPORT_MAIL", f"support@moevm.info")
 
 app.register_blueprint(admin, url_prefix='/admin')
 app.register_blueprint(users, url_prefix='/users')
@@ -729,7 +731,6 @@ def default():
         return redirect(url_for("upload"))
     else:
         return render_template("intro_page.html")
-
 
 # Disable caching:
 
