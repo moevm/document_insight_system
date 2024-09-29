@@ -18,6 +18,7 @@ ADD ./scripts/local_start.sh ./scripts/
 ADD ./db_versioning ./db_versioning/
 ADD ./app ./app/
 COPY --from=frontend_build /app/src ./src/
+RUN pip install --upgrade PyMuPDF==1.24.10
 
 ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project/app"
 
