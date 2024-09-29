@@ -202,8 +202,9 @@ function buttons() {
             event: function () {
                 //const queryString = window.location.search
                 const params = window.location.search
+                console.log(params);
                 $("[name=FetchCSV]")[0].innerHTML = "<span class='spinner-border spinner-border-sm'></span>   Exporting..."
-                fetch('get_csv' + '?' + params)
+                fetch('../get_csv' + '?' + params)
                     .then(response => response.blob())
                     .then(blob => {
                         $("[name=FetchCSV]")[0].textContent = "CSV"

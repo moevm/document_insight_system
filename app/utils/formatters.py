@@ -22,5 +22,5 @@ def format_check_for_table(check, set_link=None):
         "moodle-date": check['lms_passback_time'].strftime("%d.%m.%Y %H:%M:%S") if check.get(
             'lms_passback_time') else '-',
         "score": check["score"],
-        "link": f"{set_link}{url_for('results',_id=check['_id'])}" if set_link else ''
+        "link": f"{set_link}{url_for('results.results_main',_id=check['_id'])}" if set_link else ''
     }
