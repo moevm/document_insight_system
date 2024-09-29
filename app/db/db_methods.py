@@ -145,15 +145,18 @@ def add_check(file_id, check):
 def update_check(check):
     return bool(checks_collection.find_one_and_replace({'_id': check._id}, check.pack()))
 
-
-def write_pdf(filename, filepath):
-    converted_filepath = convert_to(filepath, target_format='pdf')
-    return add_file_to_db(filename, converted_filepath)
-
-
-def add_file_to_db(filename, filepath, file_id=None):
+def get_pdf_id(file_id=None):
     if not file_id: file_id = ObjectId()
-    fs.upload_from_stream_with_id(file_id, filename, open(filepath, 'rb'))
+    return file_id
+
+def write_pdf(filename, filepath, file_id):
+    converted_filepath = convert_to(filepath, target_format='pdf')
+    return add_file_to_db(filename, converted_filepath, file_id)
+
+
+def add_file_to_db(filename, filepath, file_id):
+    pdf_obj_id = ObjectId(file_id)
+    fs.upload_from_stream_with_id(pdf_obj_id, filename, open(filepath, 'rb'))
     return file_id
 
 
