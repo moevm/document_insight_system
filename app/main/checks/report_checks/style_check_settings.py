@@ -195,6 +195,25 @@ class StyleCheckSettings:
         }
 
     OPNP_CONFIG = {
+        'Ответы на ключевые вопросы':
+        {
+            "style": HEADER_1_STYLE,
+            "docx_style": ["heading 2"],
+            "headers": ["Проблема",
+                        "Актуальность",
+                        "Объект исследования",
+                        "Предмет исследования",
+                        "Цель",
+                        "Задачи"
+                        ],
+            "unify_regex": None,
+            "regex": HEADER_REGEX,
+            "banned_words": STD_BANNED_WORDS,
+            'min_ref_for_literature_references_check': 5,
+            'mах_ref_for_literature_references_check': 1000, #just for future possible edit
+            'min_count_for_banned_words_check': 2,
+            'max_count_for_banned_words_check': 10
+        },
         'Сравнение аналогов':
         {
             "style": HEADER_1_STYLE,
@@ -206,15 +225,11 @@ class StyleCheckSettings:
                         ],
             "unify_regex": None,
             "regex": HEADER_REGEX,
-            "banned_words": ['аттач', 'билдить', 'бинарник', 'валидный', 'дебаг', 'деплоить', 'десктопное', 'железо',
-                             'исходники', 'картинка', 'консольное', 'конфиг', 'кусок', 'либа', 'лог', 'мануал', 'машина',
-                             'отнаследованный', 'парсинг', 'пост', 'распаковать', 'сбоит', 'скачать', 'склонировать', 'скрипт',
-                             'тестить', 'тул', 'тула', 'тулза', 'фиксить', 'флажок', 'флаг', 'юзкейс', 'продакт', 'продакшн',
-                             'прод', 'фидбек', 'дедлайн', 'дэдлайн'],
+            "banned_words": STD_BANNED_WORDS,
             'min_ref_for_literature_references_check': 5,
             'mах_ref_for_literature_references_check': 1000, #just for future possible edit
-            'min_count_for_banned_words_check': 0,
-            'max_count_for_banned_words_check': 0
+            'min_count_for_banned_words_check': 2,
+            'max_count_for_banned_words_check': 10
         },
         'any_header':
         {
@@ -229,11 +244,11 @@ class StyleCheckSettings:
                         ],
             "unify_regex": None,
             "regex": HEADER_REGEX,
-            "banned_words": ['оптимально', 'оптимальный', 'надежный', 'интуитивный'],
+            "banned_words": STD_BANNED_WORDS,
             'min_ref_for_literature_references_check': 5,
             'mах_ref_for_literature_references_check': 1000, #just for future possible edit
-            'min_count_for_banned_words_check': 0,
-            'max_count_for_banned_words_check': 0
+            'min_count_for_banned_words_check': 2,
+            'max_count_for_banned_words_check': 10
         }
 
     }
