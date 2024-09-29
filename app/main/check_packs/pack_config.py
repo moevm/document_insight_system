@@ -46,6 +46,7 @@ BASE_REPORT_CRITERION = [
     ["theme_in_report_check"],
     ['key_words_report_check'],
     ["empty_task_page_check"],
+    ["references_in_chapter_check"],
 ]
 
 DEFAULT_TYPE = 'pres'
