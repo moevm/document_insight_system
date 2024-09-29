@@ -11,7 +11,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def __init__(self, file_info, min_ref=1, max_ref=1000, headers_map=None):
         super().__init__(file_info)
         self.headers = []
-        self.literature_header = []
+        self.literature_header = None
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
         if headers_map:
             self.config = headers_map
@@ -21,6 +21,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def late_init_vkr(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
         self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
+        self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
         if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
             self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['min_ref_for_literature_references_check']
             self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['mах_ref_for_literature_references_check']
