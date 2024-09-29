@@ -37,6 +37,4 @@ def recheck_main(check_id):
     db_methods.add_celery_task(task.id, check_id)  # mapping celery_task to check (check_id = file_id)
     if request.args.get('api'):
         return {'task_id': task.id, 'check_id': check_id}
-    else:
-        return redirect(url_for('results', _id=check_id))
-
+    return redirect(url_for('results.results_main', _id=check_id))
