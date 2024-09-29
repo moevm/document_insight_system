@@ -25,7 +25,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
         if prechecked_props_lst is None:
             prechecked_props_lst = StyleCheckSettings.PRECHECKED_PROPS
         self.styles: List[Style] = []
-        for format_description in self.presets:
+        for _, format_description in self.presets.items():
             prechecked_dict = {key: format_description["style"].get(key) for key in prechecked_props_lst}
             style = Style()
             style.__dict__.update(prechecked_dict)

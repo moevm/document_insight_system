@@ -8,7 +8,7 @@ from flask_login import current_user
 logger = logging.getLogger('root_logger')
 FILTER_PREFIX = 'filter_'
 
-def checklist_filter(data):
+def checklist_filter(data, is_admin=False):
     from utils import timezone_offset
 
     filters = {key[len(FILTER_PREFIX):]: data[key] for key in data if key.startswith(FILTER_PREFIX)}
@@ -80,7 +80,7 @@ def checklist_filter(data):
         logger.warning(repr(e))
 
     # set user filter for current non-admin user
-    if not current_user.is_admin:
+    if not (is_admin or current_user.is_admin):
         filter_query["user"] = current_user.username
 
     return filter_query

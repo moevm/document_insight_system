@@ -73,7 +73,7 @@ class MdUploader(DocumentUploader):
     
     def make_paragraphs(self, html_text):
         html_text = html_text.replace("<li>", "").replace("</li>", "").replace("</ol>", "").replace("<ol>", "")
-        self.paragraphs = html_text.split('\n')
+        self.paragraphs = [paragraph for paragraph in html_text.split('\n') if paragraph.strip()]
         return self.paragraphs
 
     def page_counter(self): # we need this just to find a last page and make link to the literature in banned_words_in_literature 
@@ -121,7 +121,6 @@ class MdUploader(DocumentUploader):
                 else:
                     paragraph["runs"].append({"text": par, "style": 'body text'})           
                 self.styled_paragraphs.append(paragraph)
-            
         return self.styled_paragraphs  
 
     def make_chapters(self, work_type):

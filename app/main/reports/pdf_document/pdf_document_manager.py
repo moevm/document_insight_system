@@ -36,6 +36,8 @@ class PdfDocumentManager:
                 table_coord = table.bbox
                 total_height += (table_coord[3] - table_coord[1])
         return total_height        
+    def get_image_num(self):
+        return len(self.pdf_file.get_page_images(0))
 
     def page_images(self, page_without_pril):
         total_height = 0
@@ -57,7 +59,12 @@ class PdfDocumentManager:
         available_space = (height - top_margin - bottom_margin)*page_without_pril
 
         return available_space
-
+    
+    def page_rows_text(self, page_num):
+        page = self.pdf_file.load_page(page_num)
+        text_blocks = page.get_text("blocks")
+        return text_blocks
+    
     # def get_only_text_on_page(self):
     #     if not self.only_text_on_page:
     #         only_text_on_page = {}

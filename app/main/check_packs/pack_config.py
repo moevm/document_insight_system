@@ -18,6 +18,7 @@ BASE_PRES_CRITERION = [
     ['pres_empty_slide'],
     ['theme_in_pres_check'],
     ['verify_git_link'],
+    ['pres_image_capture'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
@@ -43,8 +44,10 @@ BASE_REPORT_CRITERION = [
     ["spelling_check"],
     ["max_abstract_size_check"],
     ["theme_in_report_check"],
-    ['report_template_name'],
     ["table_share_check"],
+    ['key_words_report_check'],
+    ["empty_task_page_check"],
+    ["template_name"],
 ]
 
 DEFAULT_TYPE = 'pres'
