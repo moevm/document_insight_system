@@ -160,7 +160,7 @@ class MdUploader(DocumentUploader):
         if not self.literature_header:
             for header in self.make_chapters(work_type):
                 header_text = header["text"].lower()
-                if header_text.find('список литературы') >= 0:
+                if header_text.find('Список использованных источников'.lower()) >= 0:
                     self.literature_header = header
         return self.literature_header
     
@@ -173,7 +173,7 @@ class MdUploader(DocumentUploader):
     def parse_md_file(self):
         md_text = self.upload()
         self.parse(md_text)
-        self.get_main_headers()
+        self.get_main_headers(work_type="VKR")
         self.make_chapters(work_type="VKR")
         self.find_literature_vkr(work_type="VKR")
         return f"Заголовки:\n{self.headers_main}\n\nГлавы\n{self.chapters}\n\nСписок литературы:\n\n{self.literature_header}"
