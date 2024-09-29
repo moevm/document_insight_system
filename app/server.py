@@ -364,6 +364,7 @@ def criteria_pack(name):
     if not pack:
         abort(404)
     pack['raw_criterions'] = json.dumps(pack['raw_criterions'], indent=4, ensure_ascii=False)
+    pack['point_levels'] = json.dumps(pack['point_levels'], indent=4, ensure_ascii=False)
     return render_template('./criteria_pack.html', pack=pack, name=current_user.name, navi_upload=True)
 
 
@@ -379,6 +380,7 @@ def api_criteria_pack():
     file_type = form_data.get('file_type')
     report_type = form_data.get('report_type')
     min_score = float(form_data.get('min_score', '1'))
+    point_levels = form_data.get('point_levels')
     # weak validation
     try:
         raw_criterions = json.loads(raw_criterions)
@@ -389,6 +391,7 @@ def api_criteria_pack():
     raw_criterions = raw_criterions if type(raw_criterions) is list else None
     file_type = file_type if file_type in BASE_PACKS.keys() else None
     min_score = min_score if min_score and (0 <= min_score <= 1) else None
+    point_levels = json.loads(point_levels) if point_levels else None
     if not (raw_criterions and file_type and min_score):
         msg = f"Конфигурация набора критериев должна содержать список критериев (непустой список в формате JSON)," \
               f"тип файла (один из {list(BASE_PACKS.keys())})," \
@@ -409,7 +412,8 @@ def api_criteria_pack():
         'name': pack_name,
         'raw_criterions': raw_criterions,
         'file_type': file_type_info,
-        'min_score': min_score
+        'min_score': min_score,
+        'point_levels': point_levels
     })
     return {'data': f"Набор '{pack_name}' сохранен", 'time': datetime.now()}, 200
 
