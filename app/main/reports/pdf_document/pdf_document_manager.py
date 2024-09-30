@@ -1,12 +1,12 @@
-
 # import pdfplumber
 import fitz
 
+# Version of PyMuPDF is important for find_tables() method (now it's PyMuPDF==1.24.10)
 
 from app.utils import convert_to
 
 class PdfDocumentManager:
-    def __init__(self, path_to_file, pdf_filepath):
+    def __init__(self, path_to_file, pdf_filepath=''):
         if not pdf_filepath:
             # self.pdf_file = pdfplumber.open(convert_to(path_to_file, target_format='pdf'))
             self.pdf_file = fitz.open(convert_to(path_to_file, target_format='pdf'))
@@ -18,14 +18,24 @@ class PdfDocumentManager:
         # self.page_count = len(self.pages)
         # self.pages = self.pdf_file.pages
         self.text_on_page = self.get_text_on_page()
-        # self.bboxes = []
-        # self.only_text_on_page = {}
 
     def get_text_on_page(self):
         return {page_num + 1: page.get_text() for page_num, page in enumerate(self.pages)}
+        # return {page + 1: self.pages[page].extract_text() for page in range(self.page_count)}
 
     # def get_text_on_page(self):
     #     return {page + 1: self.pages[page].extract_text() for page in range(self.page_count_all)}
+
+    def page_table(self, page_without_pril):
+        total_height = 0
+        for page_num in range(1, page_without_pril):
+            # page = self.pdf_file.load_page(page_num)
+            page = self.pages[page_num]
+            tables = page.find_tables()
+            for table in tables:
+                table_coord = table.bbox
+                total_height += (table_coord[3] - table_coord[1])
+        return total_height
 
     def get_image_num(self):
         return len(self.pdf_file.get_page_images(0))
@@ -33,8 +43,10 @@ class PdfDocumentManager:
     def page_images(self, page_without_pril):
         total_height = 0
         for page_num in range(page_without_pril):
-            page = self.pdf_file[page_num]
-            images = self.pdf_file.get_page_images(page)
+            page = self.pages[page_num]
+            # page = self.pdf_file[page_num]
+            # images = self.pdf_file.get_page_images(page)
+            images = page.get_images()
             for image in images:
                 image_coord = page.get_image_bbox(image[7], transform=0)    # might be [1.0, 1.0, -1.0, -1.0]
                 image_height = image_coord[3] - image_coord[1]
