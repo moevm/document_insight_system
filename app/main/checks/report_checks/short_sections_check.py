@@ -30,14 +30,13 @@ class ReportShortSectionsCheck(BaseReportCriterion):
             style = Style()
             style.__dict__.update(prechecked_dict)
             self.styles.append(style)
-
     def late_init(self):
         self.file.parse_effective_styles()
         try:
             self.cutoff_line = self.file.pdf_file.get_text_on_page()[2].split("\n")[0]
         except:
             self.cutoff_line = None
-        for preset in self.presets:
+        for _, preset in self.presets.items():
             if preset["unify_regex"] is not None:
                 self.file.unify_multiline_entities(preset["unify_regex"])
 
