@@ -30,16 +30,15 @@ class PresentationPPTX(PresentationBasic):
             image_data = None
             caption_text = None
 
-            # Проход по всем шейпам на слайде
+            # Проход по всем фигурам на слайде
             for shape in slide.slide.shapes:  # Используем slide.slide для доступа к текущему слайду
-                if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:  # Тип 13 соответствует PICTURE
+                if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
                     image_found = True
                     image_part = shape.image  # Получаем объект изображения
 
                     # Извлекаем бинарные данные изображения
                     image_stream = image_part.blob
                     image_data = BytesIO(image_stream)
-                    print(f"Изображение найдено на слайде {slide.index}")
 
                 # Если мы нашли изображение, ищем следующий непустой текст как подпись
                 if image_found:
@@ -51,7 +50,6 @@ class PresentationPPTX(PresentationBasic):
                             caption_text = text
                             # Сохраняем изображение и его подпись
                             save_image_to_db(check_id, image_data.getvalue(), caption_text)
-                            print(f"Подпись найдена: '{caption_text}' на слайде {slide.index}")
                             break  # Предполагаем, что это подпись к текущему изображению
 
                     # Сброс флага и данных изображения для следующего цикла
