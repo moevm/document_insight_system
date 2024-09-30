@@ -32,7 +32,7 @@ class ReportTableShareCheck(BaseReportCriterion):
             return answer(False, result_str)
         else:
             return answer(True, f'Пройдена!')
-    
+
 
     # Below is an check option with processing all pages, including the application and the first page
 
