@@ -43,7 +43,7 @@ pack "BaseReportCriterionPackMd"
     ]
 ]
 '''
-
+import re
 import markdown
 from md2pdf.core import md2pdf
 import re
@@ -147,6 +147,16 @@ class MdUploader(DocumentUploader):
                             {"style": style_name, "text": self.styled_paragraphs[par_ind]["text"],
                                 "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind})    
         return self.chapters   
+    
+    def chapters_to_str(self):
+        result = []
+        for chapter in self.chapters:
+            result.append({
+                "style": chapter['style'],
+                "name": re.sub(r"<[\/\w]*>", "", chapter['text']),
+                "text": "".join(re.sub(r"<[\/\w]*>", "", child['text']) for child in chapter['child'])
+            })
+        return result
     
     def get_tables_size(self):
         count_table_line = 0
