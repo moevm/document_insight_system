@@ -48,7 +48,7 @@ def results_svg(_id):
             <svg width="300" height="50" xmlns="http://www.w3.org/2000/svg">
                 <text xml:space="preserve" text-anchor="start" font-size="20" id="title" y="25" x="10" stroke-width="0" stroke="#000" fill="#000000">Результат:</text>
                 <text xml:space="preserve" text-anchor="start" font-size="20" id="result" y="25" x="100" stroke-width="0" stroke="#000" fill="#000000">{result_proportion[0]}/{result_proportion[1]}</text>
-                <text xml:space="preserve" text-anchor="start" font-size="20" id="result_msg" y="25" x="170" stroke-width="0" stroke="#000" fill="#{'00' if check.is_passed else 'FF'}0000">{'' if check.is_passed else 'не '}пройдена</text>
+                <text xml:space="preserve" text-anchor="start" font-size="20" id="result_msg" y="25" x="170" stroke-width="0" stroke="#000" fill="#{'00FF00' if check.is_passed else 'FF0000'}">{'' if check.is_passed else 'не '}пройдена</text>
             </svg>
             """
         else:
