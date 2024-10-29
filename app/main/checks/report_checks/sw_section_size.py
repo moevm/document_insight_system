@@ -6,10 +6,22 @@ logger = getLogger('root')
 
 SW_CONSTANTS = {
     "SW_KEY_QUESTIONS_SECTIONS": {
-        "Проблема": 1,
-        "Объект исследования": 1,
-        "Предмет исследования": 1,
-        "Цель": 1
+        "Проблема": {
+            "words": 15,
+            "sentences": 1
+        },
+        "Объект исследования": {
+            "words": 15,
+            "sentences": 1
+        },
+        "Предмет исследования": {
+            "words": 15,
+            "sentences": 1
+        },
+        "Цель": {
+            "words": 30,
+            "sentences": 1
+        }
     },
     "SW_ANALOGS_SECTIONS": {},
     "SW_FINAL_SECTIONS": {},
@@ -18,7 +30,7 @@ SW_CONSTANTS = {
 
 class SWSectionSizeCheck(BaseReportCriterion):
     label = "Проверка объема определенных разделов"
-    description = "Проверка объема определенных разделов"
+    description = "Проверка объема определенных разделов по количеству предложений и количеству слов"
     id = "sw_sections_size_check"
     priority = True
 
@@ -30,20 +42,30 @@ class SWSectionSizeCheck(BaseReportCriterion):
             self.sections = SW_CONSTANTS[sections_info]
         elif isinstance(sections_info, dict):
             self.sections = sections_info
-    
+        
     def check(self):
         self.file.make_chapters('VKR')
         chapters = self.file.chapters_to_str()
-        result = dict.fromkeys(self.sections.keys(), False)
+        result = dict.fromkeys(self.sections.keys(), None)
         for chapter in chapters:
             if chapter['name'] in self.sections:
-                # check size (count of sentences)
+                # get size (count of sentences)
                 sentences = list(filter(bool, chapter['text'].split('.')))
-                if len(sentences) <= self.sections[chapter['name']]:
-                    result[chapter['name']] = True
-        if not all(result.values()):
-            feedback = "Размер следующих разделов не удовлетворяет требованиям (размер указан в предложениях): " + \
-                ', '.join(f"'{chapter}' - должен быть {self.sections[chapter]}" for chapter, check in result.items() if not check)
+                # get size (count of words)
+                words = chapter['text'].split()
+                result[chapter['name']] = {
+                    'sentences': len(sentences) <= self.sections[chapter['name']]['sentences'],
+                    'words': len(words) <= self.sections[chapter['name']]['words']
+                }
+        feedback = ""
+        if not all(r['sentences'] for r in result.values()):
+            feedback += "<br>Размер следующих разделов не удовлетворяет требованиям <strong>по количеству предложений</strong> (помните, что часть разделов явлются словосочетаниями, а не полным текстом): <br>  - " + \
+                '<br>  - '.join(f"'{chapter}' - должен быть не более {self.sections[chapter]['sentences']}" for chapter, check in result.items() if not check['sentences'])
+        if not all(r['words'] for r in result.values()):
+            feedback += "<br>Размер следующих разделов не удовлетворяет требованиям <strong>по количеству слов</strong> (попробуйте подобрать более ёмкие и короткие формулировки): <br>  - " + \
+                '<br>  - '.join(f"'{chapter}' - должен быть не более {self.sections[chapter]['words']}" for chapter, check in result.items() if not check['words'])
+               
+        if feedback:
             return answer(0, feedback)
         
         return answer(1, "Проверка пройдена!")
