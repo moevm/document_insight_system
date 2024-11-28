@@ -48,7 +48,9 @@ class SWSectionBannedWordsCheck(BaseReportCriterion):
         feedback = ""
         for chapter in chapters:
             if chapter['name'] in self.sections:
-                feedback += check_text(chapter['text'], self.sections[chapter['name']])
+                found_banned_words = check_text(chapter['text'], self.sections[chapter['name']])
+                if found_banned_words:
+                    feedback += f"<br>Раздел '{chapter['name']}' содержит запрещенные слова {found_banned_words}"
                 
                 # check subchapters text too
                 if chapter['node'].get('children'):

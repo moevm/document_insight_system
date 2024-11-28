@@ -58,6 +58,9 @@ class MdUploader(DocumentUploader):
         self.headers_main = ''
         self.html_text = ''
         self.headers_page = 1
+        self.str_chapters = None
+        self.tree_chapters = None
+
 
     def upload(self):
         with open(self.filepath, "r", encoding="utf-8") as f:
@@ -149,6 +152,7 @@ class MdUploader(DocumentUploader):
         return self.chapters   
     
     def chapters_to_str(self):
+        if self.str_chapters: return self.str_chapters
         result = []
         for chapter in self.chapters:
             result.append({
@@ -156,9 +160,11 @@ class MdUploader(DocumentUploader):
                 "name": re.sub(r"<[\/\w]*>", "", chapter['text']),
                 "text": "".join(re.sub(r"<[\/\w]*>", "", child['text']) for child in chapter['child'])
             })
+        self.str_chapters = result
         return result
     
     def build_chapter_tree(self, chapters):
+        if self.tree_chapters: return self.tree_chapters
         tree = []
         stack = [tree]
         
@@ -180,6 +186,7 @@ class MdUploader(DocumentUploader):
             
             chapter['node'] = new_chapter
         
+        self.tree_chapters = tree
         return tree
     
     def get_tables_size(self):

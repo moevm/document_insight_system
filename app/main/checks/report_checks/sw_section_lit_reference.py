@@ -52,7 +52,7 @@ class SWSectionLiteratureReferenceCheck(BaseReportCriterion):
                     self.search_references(chapter['text'])[0])
                 subchapter_result = []
 
-                if chapter['node']['children']:
+                if chapter['node'].get('children'):
                     for subchapter in chapter['node']['children']:
                         subchapter_references = len(
                             self.search_references(subchapter['text'])[0])
