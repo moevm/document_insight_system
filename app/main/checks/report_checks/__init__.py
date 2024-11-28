@@ -26,5 +26,6 @@ from .max_abstract_size_check import ReportMaxSizeOfAbstractCheck
 from .template_name import ReportTemplateNameCheck
 from .key_words_check import KeyWordsReportCheck
 from .empty_task_page_check import EmptyTaskPageCheck
+from .sw_section_lit_reference import SWSectionLiteratureReferenceCheck
 from .sw_tasks import SWTasksCheck
 from .sw_section_size import SWSectionSizeCheck

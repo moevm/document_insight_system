@@ -158,6 +158,30 @@ class MdUploader(DocumentUploader):
             })
         return result
     
+    def build_chapter_tree(self, chapters):
+        tree = []
+        stack = [tree]
+        
+        for chapter in chapters:
+            level = int(chapter['style'].split(' ')[-1])-1
+            
+            while len(stack) > level:
+                stack.pop()
+                
+            parent = stack[-1]
+            new_chapter = {
+                'name': chapter['name'],
+                'text': chapter['text'],
+                'children': []
+            }
+            
+            parent.append(new_chapter)
+            stack.append(new_chapter['children'])
+            
+            chapter['node'] = new_chapter
+        
+        return tree
+    
     def get_tables_size(self):
         count_table_line = 0
         count_paragraph = len(self.paragraphs)
