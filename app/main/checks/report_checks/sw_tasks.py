@@ -23,6 +23,6 @@ class SWTasksCheck(BaseReportCriterion):
             if "Задачи" in chapter['text']:
                 if self.min_tasks <= len(chapter['child']) <= self.max_tasks:
                     return answer(1, "Проверка пройдена!")
-                feedback = f"Количество задач исследования должно быть в диапазоне [{self.min_tasks};{self.max_tasks}], сейчас их {len(chapter['child'])}"
+                feedback = f"Количество задач исследования должно быть в диапазоне [{self.min_tasks};{self.max_tasks}], сейчас их {len(chapter['child'])}. Проверьте, что раздел не содержит ничего, кроме списка задач."
                 return answer(0, feedback)
         return answer(1, "Проверка пройдена!")
