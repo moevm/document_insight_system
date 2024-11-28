@@ -23,7 +23,6 @@ class SWSectionBannedWordsCheck(BaseReportCriterion):
     label = "Проверка отсутствия запретных слов в определенных разделах"
     description = "Проверка отсутствия запретных слов в определенных разделах"
     id = "sw_section_banned_word"
-    priority = True
 
     def __init__(self, file_info, sections_info=None):
         super().__init__(file_info)
