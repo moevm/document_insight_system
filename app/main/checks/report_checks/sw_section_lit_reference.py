@@ -41,9 +41,7 @@ class SWSectionLiteratureReferenceCheck(BaseReportCriterion):
     def check(self):
         self.file.make_chapters('VKR')
         chapters = self.file.chapters_to_str()
-        getLogger().error(str(chapters))
         chapter_tree = self.file.build_chapter_tree(chapters)
-        getLogger().error(str(chapter_tree))
         result = dict.fromkeys(self.sections.keys(), None)
         feedback = ""
 
