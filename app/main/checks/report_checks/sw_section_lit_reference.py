@@ -19,7 +19,16 @@ SW_CONSTANTS = {
             "subchapters": 1
         }
     },
-    "SW_FINAL_SECTIONS": {},
+    "SW_FINAL_SECTIONS": {
+        "Введение": {
+            "count": 1
+        },
+        "Обзор предметной области": {
+            "count": 4,
+            "subchapters": 1
+        },
+        
+    },
 }
 
 
