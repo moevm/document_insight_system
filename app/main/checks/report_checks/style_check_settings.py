@@ -140,7 +140,7 @@ class StyleCheckSettings:
         }
     }
     
-    NIR_CONFIG = {
+    NIR2_CONFIG = {
         'any_header':
         {
             "style": HEADER_1_STYLE,
@@ -150,14 +150,19 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_REGEX,
         },
-        'second_header':
+    }
+    
+    NIR3_CONFIG = {
+        'any_header':
         {
-            "style": HEADER_1_NUM_STYLE,
-            "docx_style": ["heading 3", "heading 4"],
-            "headers": ["ПЛАН", "РЕЗУЛЬТАТЫ"],
+            "style": HEADER_1_STYLE,
+            "docx_style": ["heading 2"],
+            "headers": ["ПОСТАНОВКА ЗАДАЧИ", "РЕЗУЛЬТАТЫ РАБОТЫ В ОСЕННЕМ СЕМЕСТРЕ", "ОПИСАНИЕ ПРЕДПОЛАГАЕМОГО МЕТОДА РЕШЕНИЯ",
+                        "ПЛАН РАБОТЫ НА ВЕСЕННИЙ СЕМЕСТР", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
-            "regex": HEADER_NUM_REGEX
-        }
+            "regex": HEADER_REGEX,
+            "banned_words": STD_BANNED_WORDS + ['доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление']
+        },
     }
 
     MD_CONFIG = {
@@ -300,7 +305,9 @@ class StyleCheckSettings:
         'LR_MAIN_TEXT': LR_MAIN_TEXT_CONFIG,
         'VKR_HEADERS': VKR_CONFIG,
         'VKR_MAIN_TEXT': VKR_MAIN_TEXT_CONFIG,
-        'NIR_HEADERS': NIR_CONFIG,
+        'NIR_HEADERS': NIR2_CONFIG,
+        'NIR2_HEADERS': NIR2_CONFIG,
+        'NIR3_HEADERS': NIR3_CONFIG,
         'MD_HEADERS' : MD_CONFIG,
         'OPNP_HEADERS' : OPNP_CONFIG,
     }
