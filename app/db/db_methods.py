@@ -27,13 +27,14 @@ images_collection = db['images']  # коллекция для хранения �
 def get_client():
     return client
 
-def save_image_to_db(check_id, image_data, caption):
+def save_image_to_db(check_id, image_data, caption, image_size):
     from app.db.db_types import Image
 
     image = Image({
         'check_id': check_id,
         'image_data': image_data,
-        'caption': caption
+        'caption': caption,
+        'image_size': image_size
     })
     images_collection.insert_one(image.pack())
     print(str(check_id) + " " + str(caption))

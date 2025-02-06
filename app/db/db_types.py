@@ -153,10 +153,12 @@ class Image(PackableWithId):
         self.check_id = dictionary.get('check_id')  # Привязка к check_id
         self.caption = dictionary.get('caption', '')  # Подпись к изображению
         self.image_data = dictionary.get('image_data')  # Файл изображения в формате bindata
+        self.image_size = dictionary.get('image_size')  # Размер изображения в сантимерах
 
     def pack(self):
         package = super().pack()
         package['check_id'] = str(self.check_id)
         package['caption'] = self.caption
         package['image_data'] = self.image_data
+        package['image_size'] = self.image_size
         return package

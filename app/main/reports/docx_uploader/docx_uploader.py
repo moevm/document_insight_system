@@ -244,7 +244,8 @@ class DocxUploader(DocumentUploader):
 
     def extract_images_with_captions(self, check_id):
         from app.db.db_methods import save_image_to_db
-
+        
+        emu_to_cm  = 360000
         image_found = False
         image_data = None
 
@@ -262,8 +263,15 @@ class DocxUploader(DocumentUploader):
                             '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed')
                         if embed_id:
                             image_found = True
-                            image_data = self.file.part.related_parts[embed_id].blob
-
+                            image_part = self.file.part.related_parts[embed_id]
+                            image_data = image_part.blob
+                            extent = run._element.find('.//wp:extent', namespaces={
+                            'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+                            if extent is not None:
+                                width_emu = int(extent.get('cx'))
+                                height_emu = int(extent.get('cy'))
+                                width_cm = width_emu / emu_to_cm
+                                height_cm = height_emu / emu_to_cm
                 # Если мы уже нашли изображение, ищем следующий непустой параграф для подписи
                 if image_found:
                     # Переход к следующему параграфу
@@ -283,13 +291,13 @@ class DocxUploader(DocumentUploader):
                             # Если параграф не содержит изображения и текст не пуст, то это подпись
                             if not contains_image and next_paragraph_text:
                                 # Сохраняем изображение и его подпись
-                                save_image_to_db(check_id, image_data, next_paragraph_text)
+                                save_image_to_db(check_id, image_data, next_paragraph_text, (width_cm, height_cm))
                                 break
                             else:
-                                save_image_to_db(check_id, image_data, "picture without caption")
+                                save_image_to_db(check_id, image_data, "picture without caption", (width_cm, height_cm))
                                 break
                     else:
-                        save_image_to_db(check_id, image_data, "picture without caption")
+                        save_image_to_db(check_id, image_data, "picture without caption", (width_cm, height_cm))
 
                     image_found = False  # Сброс флага, чтобы искать следующее изображение
                     image_data = None  # Очистка данных изображения
