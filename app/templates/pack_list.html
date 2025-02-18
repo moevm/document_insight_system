@@ -32,7 +32,7 @@
     <div class="header row">{% include "header.html" %}</div>
     <div class="row justify-content-center">
 
-        <a href="{{ url_for('criteria_pack_new') }}">Создать новый набор</a><br>
+        <a href="{{ url_for('criterion_pack.criteria_pack_new') }}">Создать новый набор</a><br>
         <table class="table" border="1px">
             <thead>
             <tr>
@@ -70,12 +70,13 @@
                         <script> document.write((new Date({{ "%d"|format(pack['updated'].timestamp()*1000)}})).toLocaleString());</script>
                     </td>
                     <td>
-                        <a href="{{ url_for("criteria_pack", name=pack['name']) }}">>>>>></a>
+                        <a href="{{ url_for('criterion_pack.criteria_pack', name=pack['name']) }}">>>>>></a>
                     </td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
+<script src={{ url_for("static", filename="general.js") }}></script>
 
 {% endblock %}

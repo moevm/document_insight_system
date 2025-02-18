@@ -1,4 +1,4 @@
-from db.db_methods import get_criteria_pack
+from app.db.methods.criteria_pack import get_criteria_pack
 
 from .check_packs import BaseCriterionPack
 
