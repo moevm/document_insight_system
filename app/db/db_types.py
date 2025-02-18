@@ -122,6 +122,11 @@ class Check(PackableWithId):
 
         return float("{:.3f}".format(numerical_score / enabled_value))
 
+    def get_proportion(self):
+        if isinstance(self.enabled_checks, (list,)):
+            return BaseCriterionPack.get_proportion(self.enabled_checks)
+        return 0, 0
+
     def correct(self):
         # check after implementation criterion pack
         if isinstance(self.enabled_checks, (list,)):

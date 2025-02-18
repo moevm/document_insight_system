@@ -55,7 +55,7 @@ class CriterionPacksTestSelenium(BasicSeleniumTest):
         xpath_expression = f"//a[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ', 'abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя'), '{part_of_link_text.lower()}')]"
         link_element = self.driver.find_element(By.XPATH, xpath_expression)
         link_element.click()
-        expected_url = self.get_url('/criterion_pack')
+        expected_url = self.get_url('/criterion_pack/')
         self.assertEqual(self.driver.current_url, expected_url)
 
 
