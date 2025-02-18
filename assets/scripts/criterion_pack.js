@@ -7,6 +7,13 @@ const RAW_CRITERION_VALIDATION_ERRORS = {
     'not_json': 'Строка не является JSON-строкой',
 }
 
+$("#btn_tab1").click(function(){
+  openTab('tab1');
+});
+$("#btn_tab2").click(function(){
+  openTab('tab2');
+});
+
 $("#file_type").change(function () {
     switch ($(this).val()) {
         case "pres": {
@@ -43,6 +50,7 @@ pack_form.submit((e) => {
     fd.append('report_type', $("#report_type").val());
     fd.append('min_score', $("#min_score").val());
     fd.append('raw_criterions', raw_criterions_str);
+    fd.append('point_levels', $("#point_levels").val());
     fetch(`/api/criterion_pack`, {method: "POST", body: fd})
         .then(response => {
             if (response.status === 200) {
@@ -69,7 +77,20 @@ function verifyRawCriterions(text) {
         JSON.parse(text);
         return 0;
     } catch (e) {
-        console.log(text, e)
+        console.log(text, e);
         return 1;
     }
 }
+
+function openTab(tabName) {
+    var i, tabs;
+    tabs = document.getElementsByClassName("tab");
+    for (i = 0; i < tabs.length; i++) {
+        tabs[i].style.display = "none";
+    }
+    document.getElementById(tabName).style.display = "block";
+}
+
+window.onload = function() {
+    openTab('tab1');
+};

@@ -2,7 +2,7 @@ import hashlib
 import logging
 
 from db.db_methods import add_user, get_user, get_client, edit_user, save_criteria_pack
-from main.check_packs.pack_config import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO
+from main.check_packs.pack_config import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO, DEFAULT_PRES_TYPE_INFO
 
 from pymongo.errors import ConnectionFailure
 from server import ALLOWED_EXTENSIONS
@@ -36,8 +36,10 @@ def init(app, debug):
         user.is_admin = True
         edit_user(user)
 
-    user.file_type = DEFAULT_REPORT_TYPE_INFO
-    file_type = DEFAULT_REPORT_TYPE_INFO['type']
+    # user.file_type = DEFAULT_REPORT_TYPE_INFO
+    user.file_type = DEFAULT_PRES_TYPE_INFO
+    # file_type = DEFAULT_REPORT_TYPE_INFO['type']
+    file_type = DEFAULT_PRES_TYPE_INFO['type']
     user.criteria = BASE_PACKS[file_type].name
     user.formats = list(ALLOWED_EXTENSIONS.get(file_type))
     user.two_files = True

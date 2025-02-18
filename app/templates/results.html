@@ -1,6 +1,5 @@
 {# Accepts: header dependicies, results, id, filename #}
 
-
 {% extends "root.html" %}
 
 {% block title %}Результаты проверки{% endblock %}
@@ -18,6 +17,14 @@
                     Результат проверки: {{ "" if results.correct() else "не" }} пройдена! <!-- threshold? -->
                 </h3>
             {% endif %}
+    <div>
+        {% if results.point_levels %}
+        <h6 id="results_message" class="col text-left">
+            <b>{{ results.point_levels }}</b>
+        </h6>
+        <p>
+        {% endif %}
+    </div>
         {% else %}
             <h4 id="results_title" class="texteous ins">
                 <i>Производится проверка файла, страница перезагрузится автоматически. Примерное время: {{ avg_process_time }} сек.</i>

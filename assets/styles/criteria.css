@@ -45,3 +45,7 @@
     box-sizing: border-box;
     border-radius: 4px;
 }
+
+.tab {
+    display: none;
+}
