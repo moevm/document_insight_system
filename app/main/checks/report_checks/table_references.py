@@ -66,7 +66,7 @@ class TableReferences(BaseReportCriterion):
         for i in range(0, self.last_child_number):
             if  isinstance(self.file.paragraphs[i], str):
                 detected_references = re.findall(r'таблиц[аеыу][\d .]+', self.file.paragraphs[i])
-            else:    
+            else:
                 detected_references = re.findall(r'таблиц[аеыу][\d .]+', self.file.paragraphs[i].paragraph_text)
             if detected_references:
                 for reference in detected_references:

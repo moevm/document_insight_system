@@ -135,11 +135,12 @@ class DocxUploader(DocumentUploader):
         self.literature_page += 1
         return self.literature_page
 
-    def find_literature_vkr(self, work_type):
+    def find_literature_vkr(self, work_type, requirement_header):
         if not self.literature_header:
             for header in self.make_chapters(work_type):
                 header_text = header["text"].lower()
-                if header_text.find('список использованных источников') >= 0:
+                # requirement_header = requirement_header
+                if header_text.find(requirement_header) >= 0:
                     self.literature_header = header
         return self.literature_header
 
@@ -162,6 +163,7 @@ class DocxUploader(DocumentUploader):
                                            indices[j])))
         tagged_indices.sort(key=lambda dct: dct["index"])
         return tagged_indices
+
 
     # Parses styles once; subsequent calls have no effect, since the file itself shouldn't change
     def parse_effective_styles(self):

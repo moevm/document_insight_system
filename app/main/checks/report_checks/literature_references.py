@@ -27,7 +27,12 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         else:
             if 'any_header' in StyleCheckSettings.CONFIGS.get(self.config):
                 self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['min_ref_for_literature_references_check']
+                self.headers_main = 'any_header'
                 self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['mах_ref_for_literature_references_check']
+        if 'literature_header' in StyleCheckSettings.CONFIGS.get(self.config).get(self.headers_main):
+            self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'], StyleCheckSettings.CONFIGS[self.config][self.headers_main]['literature_header'])
+        else:
+            self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'], 'список использованных источников')
 
     def check(self):
         if self.file.page_counter() < 4:
