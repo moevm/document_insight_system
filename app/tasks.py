@@ -45,7 +45,7 @@ def at_start(sender, **k):
 
 
 @celery.task(name="create_task", queue='check-solution', bind=True)
-def create_task(self, check_info):
+def create_task(self, conv_id, check_info):
     check_obj = Check(check_info)
     check_id = str(check_obj._id)
     # get check files filepath
@@ -77,6 +77,15 @@ def create_task(self, check_info):
         logger.error(f"\tПри обработке произошла ошибка: {e}. Попытка повторного запуска", exc_info=True)
         self.retry(countdown=TASK_RETRY_COUNTDOWN)  # Retry the task, adding it to the back of the queue.
 
+@celery.task(name="convert_to_pdf", queue='check-solution', bind=True)
+def convert_to_pdf(self, filename, filepath, pdf_id):
+    try:
+        conv_id = db_methods.write_pdf(filename, filepath, pdf_id)
+        # converted_id = db_methods.write_pdf(filename, filepath)
+        return conv_id
+    except Exception as e:
+        logger.error(f"При конвертации файла произошла ошибка: {e}. Новая попытка", exc_info=True)
+        raise self.retry(countdown=TASK_RETRY_COUNTDOWN)
 
 @celery.task(name="passback-task", queue='passback-grade')
 def passback_task():

@@ -10,6 +10,7 @@ from io import StringIO
 import bson
 import pandas as pd
 from bson import ObjectId
+from celery import chain
 from celery.result import AsyncResult
 from flask import (Flask, Response, abort, jsonify, redirect, render_template,
                    request, url_for)
@@ -27,7 +28,7 @@ from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_
     init_criterions, BASE_PRES_CRITERION, BASE_REPORT_CRITERION
 from root_logger import get_logging_stdout_handler, get_root_logger
 from servants import pre_luncher
-from tasks import create_task
+from tasks import create_task, convert_to_pdf
 from utils import checklist_filter, decorator_assertion, get_file_len, format_check
 from app.main.checks import CRITERIA_INFO
 from routes.admin import admin
@@ -223,7 +224,11 @@ def run_task():
         pdf_file.save(filepathpdf)
         converted_id = db_methods.add_file_to_db(filenamepdf, filepathpdf)
     else:
-        converted_id = db_methods.write_pdf(filename, filepath)
+        logger.info(
+            f"Запуск конвертации файла '{file.filename}' в pdf")
+        converted_id = str(db_methods.get_pdf_id(file_id=None))
+        # convert_to_pdf.delay(filename, filepath, converted_id)
+
     check = Check({
         '_id': file_id,
         'conv_pdf_fs_id': converted_id,
@@ -239,9 +244,15 @@ def run_task():
         'params_for_passback': current_user.params_for_passback
     })
     db_methods.add_check(file_id, check)  # add check for parsed_file to db
-    task = create_task.delay(check.pack(to_str=True))  # add check to queue
-    db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
-    return {'task_id': task.id, 'check_id': str(file_id)}
+    # task = create_task.delay(check.pack(to_str=True))  # add check to queue
+    # db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
+    task_chain = chain(
+        convert_to_pdf.s(filename, filepath, converted_id),
+        create_task.s(check.pack(to_str=True))
+)
+    result = task_chain.apply_async()
+    task_id = result.id
+    return {'task_id': task_id, 'check_id': str(file_id)}
 
 
 @app.route("/recheck/<check_id>", methods=["GET"])
