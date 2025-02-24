@@ -8,6 +8,9 @@ def check_file(file, file_extension, allowed_extensions, check_mime=True):
         if file_extension == 'md':
             if file.mimetype not in ('text/markdown', 'text/plain', 'application/octet-stream'):
                 return "mime_type_does_not_match_extension"
+        elif file_extension == 'tex':
+            if file.mimetype not in ('text/x-tex', 'text/plain', 'application/octet-stream'):
+                return "mime_type_does_not_match_extension"
         else:
             if file_extension != filetype.guess_extension(file):
                 return "mime_type_does_not_match_extension"
