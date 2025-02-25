@@ -20,7 +20,7 @@ def parse_arguments():
     parser.add_argument('--pres', type=str, default=os.path.join(script_dir, 'tests_data/example_of_pres.pptx'), help='your path to press for testing')
     parser.add_argument('--report', type=str, default=os.path.join(script_dir, 'tests_data/example_of_report.docx'), help='your path to report in .docx')
     parser.add_argument('--report_doc', type=str, default=os.path.join(script_dir, 'tests_data/example_of_report.doc'), help='your path to report in .doc')
-    
+    # A call to the Latex document parser will be added here
   
     return parser.parse_args()
 
@@ -36,7 +36,7 @@ def main():
             CriterionPacksTestSelenium,
             AdminCriterionsTestSelenium)
 
-    param = (args.host, args.login, args.password, args.report, args.report_doc, args.pres)
+    param = (args.host, args.login, args.password, args.report, args.report_doc, args.pres)  # Here is the tex argument of the file
     for test in tests:
         suite.addTest(BasicSeleniumTest.parametrize(test, param=param))
 
