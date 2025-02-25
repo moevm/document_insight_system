@@ -81,3 +81,4 @@
 
 Презентация:
 https://docs.google.com/presentation/d/1uATNoj571Mwj8OwlokX2zsrTB1GnJC5BgUt7k43DkOA/edit#slide=id.g3384753ae2c_0_23
+Гизатуллин Амир скринкаст: https://drive.google.com/file/d/1jbgFhuySJ1ZuE_JzRvlYjWKMpP58QIkg/view?usp=sharing
