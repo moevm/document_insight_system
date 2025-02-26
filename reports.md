@@ -79,7 +79,8 @@
 
 Исмаилов Максим -- ссылка на скринкаст: https://drive.google.com/file/d/1zhO7JkOA77BibGOPsmqej3f7ujitOuav/view?usp=sharing
 Гребенников Дмитрий -- ссылка на скринкаст: https://drive.google.com/file/d/1pp1fh8vSD7SwIYk-493jZmsvSC4xBQPy/view  
-Березин Дмитрий -- ссылка на скринкаст: https://drive.google.com/file/d/1KR-T2U6Y7N3-csEU50_4-F3I-1nE5Syr/view?usp=share_link
+Березин Дмитрий -- ссылка на скринкаст: https://drive.google.com/file/d/1KR-T2U6Y7N3-csEU50_4-F3I-1nE5Syr/view?usp=share_link  
+Гизатуллин Амир -- ссылка на скринкаст: https://drive.google.com/file/d/1jbgFhuySJ1ZuE_JzRvlYjWKMpP58QIkg/view?usp=sharing
 
 
 Ссылка на презентацию с целями, задачами и функциональностью проекта: https://docs.google.com/presentation/d/1uATNoj571Mwj8OwlokX2zsrTB1GnJC5BgUt7k43DkOA/edit#slide=id.g3384753ae2c_0_86
