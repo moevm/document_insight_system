@@ -77,8 +77,8 @@
 
 Интеграция **Templater** в **DIS** позволит автоматизировать процесс создания документов, улучшить работу пользователей и расширить функциональность системы. После успешного внедрения пользователи смогут легко формировать документы на основе шаблонов, загружать их в облачные хранилища и управлять шаблонами напрямую из интерфейса **Document Insight System**.
 
-Исмаилов Максим - ссылка на скринкаст: https://drive.google.com/file/d/1zhO7JkOA77BibGOPsmqej3f7ujitOuav/view?usp=sharing
-Гребенников Дмитрий - ссылка на скринкаст: https://drive.google.com/file/d/1pp1fh8vSD7SwIYk-493jZmsvSC4xBQPy/view
+Исмаилов Максим -- ссылка на скринкаст: https://drive.google.com/file/d/1zhO7JkOA77BibGOPsmqej3f7ujitOuav/view?usp=sharing
+Гребенников Дмитрий -- ссылка на скринкаст: https://drive.google.com/file/d/1pp1fh8vSD7SwIYk-493jZmsvSC4xBQPy/view
 
 
 Ссылка на презентацию с целями, задачами и функциональностью проекта: https://docs.google.com/presentation/d/1uATNoj571Mwj8OwlokX2zsrTB1GnJC5BgUt7k43DkOA/edit#slide=id.g3384753ae2c_0_86
