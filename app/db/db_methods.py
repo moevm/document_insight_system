@@ -7,7 +7,7 @@ from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 from utils import convert_to
 
-from .db_types import User, Presentation, Check, Consumers, Logs
+from .db_types import User, Presentation, Check, Consumers, Logs, Image
 
 client = MongoClient("mongodb://mongodb:27017")
 db = client['pres-parser-db']
@@ -27,9 +27,17 @@ images_collection = db['images']  # коллекция для хранения �
 def get_client():
     return client
 
-def save_image_to_db(check_id, image_data, caption, image_size):
-    from app.db.db_types import Image
+def get_images(check_id):
+    images = images_collection.find({'check_id': str(check_id)})
+    if images is not None:
+        image_list = []
+        for img in images:
+            image_list.append(Image(img))
+        return image_list
+    else:
+        return None
 
+def save_image_to_db(check_id, image_data, caption, image_size):
     image = Image({
         'check_id': check_id,
         'image_data': image_data,
