@@ -251,6 +251,8 @@ class DocxUploader(DocumentUploader):
         if not self.images:
             # Проход по всем параграфам документа
             for i, paragraph in enumerate(self.file.paragraphs):
+                width_emu = None
+                height_emu = None
                 # Проверяем, есть ли в параграфе встроенные объекты
                 for run in paragraph.runs:
                     if "graphic" in run._element.xml:  # может быть изображение
