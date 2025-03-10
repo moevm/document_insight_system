@@ -4,7 +4,7 @@ from root_logger import get_root_logger
 UPLOAD_FOLDER = '/usr/src/project/files'
 ALLOWED_EXTENSIONS = {
     'pres': {'ppt', 'pptx', 'odp'},
-    'report': {'doc', 'odt', 'docx', 'md', 'tex'}
+    'report': {'doc', 'odt', 'docx', 'md', 'tex', 'zip'}
 }
 DOCUMENT_TYPES = {'Лабораторная работа', 'Курсовая работа', 'ВКР'}
 TABLE_COLUMNS = ['Solution', 'User', 'File', 'Criteria', 'Check added', 'LMS date', 'Score']
