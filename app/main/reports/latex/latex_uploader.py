@@ -121,3 +121,19 @@ class LatexUploader(DocumentUploader):
         for i in range(3):
             tmp_paragraphs.append(Paragraph(None))  # Создаем заглушку для параграфа
         return tmp_paragraph
+
+    def parse_effective_styles(self):
+         # Заглушка для парсинга стилей
+        if self.styled_paragraphs:
+            return
+        self.styled_paragraphs = [{"text": "Пример текста", "runs": []}]    # Статические данные
+
+    def upload_from_cli(self, file):
+        self.upload(file=file)
+    
+    def main(args):
+        file = args.file
+        uploader = LatexUploader()
+        uploader.upload_from_cli(file=file)
+        uploader.parse()
+        uploader.print_info()
