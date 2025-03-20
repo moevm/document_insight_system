@@ -46,7 +46,6 @@ BASE_REPORT_CRITERION = [
     ["theme_in_report_check"],
     ['key_words_report_check'],
     ["empty_task_page_check"],
-    ['image_quality_check'],
 ]
 
 DEFAULT_TYPE = 'pres'

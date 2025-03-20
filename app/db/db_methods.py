@@ -37,16 +37,26 @@ def get_images(check_id):
     else:
         return None
 
-def save_image_to_db(check_id, image_data, caption, image_size):
+def save_image_to_db(check_id, image_data, caption, image_size, text=''):
     image = Image({
         'check_id': check_id,
         'image_data': image_data,
         'caption': caption,
-        'image_size': image_size
+        'image_size': image_size,
+        'text' : text
     })
-    images_collection.insert_one(image.pack())
-    print(str(check_id) + " " + str(caption))
+    result = images_collection.insert_one(image.pack())
+    return result.inserted_id 
 
+def update_image_text(image_id, new_text):
+    try:
+        result = images_collection.update_one(
+            {'_id': image_id},
+            {'$set': {'text': new_text}}
+        )
+        return result.matched_count > 0
+    except Exception:
+        return False
 
 # Returns user if user was created and None if already exists
 def add_user(username, password_hash='', is_LTI=False):

@@ -244,6 +244,7 @@ class DocxUploader(DocumentUploader):
 
     def extract_images_with_captions(self, check_id):
         from app.db.db_methods import save_image_to_db, get_images
+        from app.tesseract_tasks import tesseract_recognize
         
         emu_to_cm  = 360000
         image_found = False
@@ -293,13 +294,16 @@ class DocxUploader(DocumentUploader):
                                 # Если параграф не содержит изображения и текст не пуст, то это подпись
                                 if not contains_image and next_paragraph_text:
                                     # Сохраняем изображение и его подпись
-                                    save_image_to_db(check_id, image_data, next_paragraph_text, (width_cm, height_cm))
+                                    image_id = save_image_to_db(check_id, image_data, next_paragraph_text, (width_cm, height_cm))
+                                    tesseract_recognize.delay(image_id, image_data)
                                     break
                                 else:
-                                    save_image_to_db(check_id, image_data, "picture without caption", (width_cm, height_cm))
+                                    image_id = save_image_to_db(check_id, image_data, "picture without caption", (width_cm, height_cm))
+                                    tesseract_recognize.delay(image_id, image_data)
                                     break
                         else:
-                            save_image_to_db(check_id, image_data, "picture without caption", (width_cm, height_cm))
+                            image_id = save_image_to_db(check_id, image_data, "picture without caption", (width_cm, height_cm))
+                            tesseract_recognize.delay(image_id, image_data)
 
                         image_found = False  # Сброс флага, чтобы искать следующее изображение
                         image_data = None  # Очистка данных изображения

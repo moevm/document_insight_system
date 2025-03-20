@@ -154,6 +154,7 @@ class Image(PackableWithId):
         self.caption = dictionary.get('caption', '')  # Подпись к изображению
         self.image_data = dictionary.get('image_data')  # Файл изображения в формате bindata
         self.image_size = dictionary.get('image_size')  # Размер изображения в сантимерах
+        self.text = dictionary.get('text')
 
     def pack(self):
         package = super().pack()
@@ -161,4 +162,5 @@ class Image(PackableWithId):
         package['caption'] = self.caption
         package['image_data'] = self.image_data
         package['image_size'] = self.image_size
+        package['text'] = self.text
         return package
