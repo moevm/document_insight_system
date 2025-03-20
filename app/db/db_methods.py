@@ -50,6 +50,7 @@ def save_image_to_db(check_id, image_data, caption, image_size, text=''):
 
 def update_image_text(image_id, new_text):
     try:
+        image_id = ObjectId(image_id)
         result = images_collection.update_one(
             {'_id': image_id},
             {'$set': {'text': new_text}}

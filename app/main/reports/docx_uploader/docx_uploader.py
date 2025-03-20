@@ -295,15 +295,15 @@ class DocxUploader(DocumentUploader):
                                 if not contains_image and next_paragraph_text:
                                     # Сохраняем изображение и его подпись
                                     image_id = save_image_to_db(check_id, image_data, next_paragraph_text, (width_cm, height_cm))
-                                    tesseract_recognize.delay(image_id, image_data)
+                                    tesseract_recognize.delay(str(image_id), image_data)
                                     break
                                 else:
                                     image_id = save_image_to_db(check_id, image_data, "picture without caption", (width_cm, height_cm))
-                                    tesseract_recognize.delay(image_id, image_data)
+                                    tesseract_recognize.delay(str(image_id), image_data)
                                     break
                         else:
                             image_id = save_image_to_db(check_id, image_data, "picture without caption", (width_cm, height_cm))
-                            tesseract_recognize.delay(image_id, image_data)
+                            tesseract_recognize.delay(str(image_id), image_data)
 
                         image_found = False  # Сброс флага, чтобы искать следующее изображение
                         image_data = None  # Очистка данных изображения
