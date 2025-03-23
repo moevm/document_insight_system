@@ -18,3 +18,5 @@ def includeme(config):
     config.add_route('add_template', '/add_template')
     config.add_route('api_update_template', '/api/update_template/{template_id}')
     config.add_route('api_add_template', '/api/add_template')
+    config.add_route('export_template', '/export_template/{template_id}')
+    config.add_route('oauth_callback', '/oauth_callback')

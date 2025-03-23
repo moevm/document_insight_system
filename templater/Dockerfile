@@ -1,23 +1,24 @@
-FROM ubuntu:18.04
+# Используем более современный базовый образ
+FROM python:3.9-slim
 
-RUN apt-get update
-RUN apt-get install -y python3.6 python3-pip
+# Устанавливаем системные зависимости
 RUN apt-get update && apt-get install -y \
-    python3.6 \
-    python3-pip \
     libxml2-dev \
-    libxslt1-dev
-RUN pip3 install --upgrade pip setuptools
-RUN pip3 install --prefer-binary markupsafe==2.0.1
-# RUN apt-get install -y pandoc
+    libxslt1-dev \
+    && rm -rf /var/lib/apt/lists/*
 
+# Устанавливаем зависимости Python
 COPY requirements.txt /requirements.txt
-RUN pip3 install -r requirements.txt
+RUN pip install --upgrade pip setuptools && \
+    pip install --prefer-binary -r /requirements.txt
 
+# Копируем приложение
 COPY app /app
 
+# Устанавливаем переменные окружения
 ENV PYTHONPATH=/app
 WORKDIR /app
 
-RUN cd /usr/local/lib/python3.6/dist-packages && \
-    python3 /app/setup.py develop
+# Устанавливаем приложение в режиме разработки
+RUN cd /usr/local/lib/python3.9/site-packages && \
+    python /app/setup.py develop

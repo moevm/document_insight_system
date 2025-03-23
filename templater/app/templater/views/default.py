@@ -12,9 +12,30 @@ import datetime
 import requests
 import json
 import os
+import tempfile
+from .google_drive import authenticate_google, upload_file_to_drive
+from googleapiclient.http import MediaFileUpload
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_FILE_PATH = os.path.join(BASE_DIR, '../data/templates.json')
+
+@view_config(route_name='export_template', request_method='POST', renderer='json')
+def export_template(request):
+    try:
+        service = authenticate_google()
+        
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt', encoding='utf-8') as temp_file:
+            file_content = "Пример содержимого файла"
+            temp_file.write(file_content)
+            temp_file_path = temp_file.name
+
+        file_id = upload_file_to_drive(service, temp_file_path, "example.txt", "text/plain")
+
+        os.unlink(temp_file_path)
+
+        return {'message': 'Файл успешно загружен в Google Drive', 'file_id': file_id}
+    except Exception as e:
+        return {'error': str(e)}, 500
 
 def load_templates():
     with open(JSON_FILE_PATH, 'r', encoding='utf-8') as file:
