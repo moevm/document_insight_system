@@ -1,0 +1,4 @@
+docxtpl==0.10.0
+Jinja2==2.10.1
+python-docx==0.8.10
+secretary==0.2.19

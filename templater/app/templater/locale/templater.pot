@@ -1,0 +1,121 @@
+# Translations template for templater.
+# Copyright (C) 2020 ORGANIZATION
+# This file is distributed under the same license as the templater project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: templater 0.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2020-08-03 12:52+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+
+#: templater/templates/homepage.jinja2:9
+msgid ""
+"Quickly generate documents from docx/odt template using data from "
+"csv/xls/xlsx file."
+msgstr ""
+
+#: templater/templates/homepage.jinja2:15 templater/templates/homepage.jinja2:63
+msgid "Upload Template"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:25
+msgid "Upload Data Table"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:35 templater/templates/homepage.jinja2:122
+msgid "Render"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:45
+msgid "Download Generated Files"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:54
+msgid "Upload Your Template"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:60
+msgid "Use this template"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:61 templater/templates/homepage.jinja2:90
+msgid "or"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:70 templater/templates/homepage.jinja2:99
+msgid "Preview"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:83
+msgid "Upload Your Data Table"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:89
+msgid "Use this data table"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:92
+msgid "Upload Data"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:108
+msgid "Verification result"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:113
+msgid "File name template"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:130
+msgid "Result"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:132
+msgid "Download files:"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:139
+msgid "or download all:"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:143
+msgid "Start with another file"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:154
+msgid "HOW TO USE"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:167
+msgid "Create a document with jinja2 placeholder"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:191
+msgid "Create a data table"
+msgstr ""
+
+#: templater/templates/homepage.jinja2:214
+msgid "Upload to Templater and get the filled in documents"
+msgstr ""
+
+#: templater/views/default.py:73
+msgid "${field} not defined in the template"
+msgstr ""
+
+#: templater/views/default.py:78
+msgid "${field} not defined in the csv"
+msgstr ""
+
+#: templater/views/default.py:83
+msgid "Verification done without warning"
+msgstr ""
+

@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+cd ./app
+python setup.py develop
+python runapp.py

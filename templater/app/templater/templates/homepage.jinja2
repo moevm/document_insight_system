@@ -1,0 +1,240 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class='row'>
+    <div class='col-8 offset-2'>
+
+        <div class="px-3 py-5 pt-md-5 pb-md-4 mx-auto my-5 text-center">
+            <h1 class="display-4">Templater</h1>
+            <p class="lead">{% trans %}Quickly generate documents from docx/odt template using data from csv/xls/xlsx file.{% endtrans %}</p>
+        </div>
+
+        <ul class="nav nav-pills mb-3 justify-content-center" id="pills-tab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="pills-template-tab" data-toggle="pill" href="#pills-template" role="tab" aria-controls="pills-template" aria-selected="true">
+        {% trans %}Upload Template{% endtrans %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <span class="nav-link disabled">
+        >
+                </span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link disabled" id="pills-datatable-tab" data-toggle="pill" href="#pills-datatable" role="tab" aria-controls="pills-datatable" aria-selected="false">
+        {% trans %}Upload Data Table{% endtrans %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <span class="nav-link disabled">
+        >
+                </span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link disabled" id="pills-render-tab" data-toggle="pill" href="#pills-render" role="tab" aria-controls="pills-render" aria-selected="false">
+        {% trans %}Render{% endtrans %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <span class="nav-link disabled">
+        >
+                </span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link disabled" id="pills-result-tab" data-toggle="pill" href="#pills-result" role="tab" aria-controls="pills-result" aria-selected="false">
+        {% trans %}Download Generated Files{% endtrans %}
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-template" role="tabpanel" aria-labelledby="pills-template-tab">
+                <div class="row">
+                    <div class="col-md">
+                        <div class="form-group files">
+                            <label>{% trans %}Upload Your Template{% endtrans %}</label>
+                            <input type="file" id="template-file" class="form-control" multiple="" accept=".docx, .odt, .ods, .odp, .pptx, .xlsx"/>
+                            <progress id="progress-template" value="0" max="100" style="width:100%;"></progress>
+                        </div>
+                        <div class='text-center'>
+                            <span id="template-next-group" class="d-none">
+                                <input type='button' id='btn-use-template' class='btn btn-primary' onclick="activeTabDataTable()" value='{% trans %}Use this template{% endtrans %}' />
+                        {% trans %}or{% endtrans %}
+                            </span>
+                            <input type='button' id='btn-upload-template' class='btn btn-primary' onclick="uploadTemplate()" value='{% trans %}Upload Template{% endtrans %}' />
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-none" id="template-preview">
+                    <div class="col-md">
+                        <div class="form-group">
+                            <label>{% trans %}Preview{% endtrans %} </label>
+                            <div id="preview-container">
+                                <iframe id="iframe-template-preview" style="width:100%; height:500px"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-datatable" role="tabpanel" aria-labelledby="pills-datatable-tab">
+
+                <div class="row">
+                    <div class="col-md">
+                        <div class="form-group files">
+                            <label>{% trans %}Upload Your Data Table{% endtrans %} </label>
+                            <input type="file" id="data-table-file" class="form-control" multiple="" accept=".csv, .xlsx, .xls"/>
+                            <progress id="progress-data-table" value="0" max="100" style="width:100%;"></progress>
+                        </div>
+                        <div class='text-center'>
+                            <span id="data-next-group" class="d-none">
+                                <input type='button' id="btn-verify" class='btn btn-primary' onclick="verifyTemplate()" value='{% trans %}Use this data table{% endtrans %}' />
+                        {% trans %}or{% endtrans %}
+                            </span>
+                            <input type='button' id='btn-upload-data' class='btn btn-primary' onclick="uploadData()" value='{% trans %}Upload Data{% endtrans %}' />
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-none" id="data-table-preview">
+                    <div class="col-md">
+                        <div class="form-group">
+                            <label>{% trans %}Preview{% endtrans %} </label>
+                            <div id='div-data-table-preview'></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-render" role="tabpanel" aria-labelledby="pills-render-tab">
+                <div class="row">
+                    <div class="col-md">
+                        <label>{% trans %}Verification result{% endtrans %}</label>
+                        <div class='border px-4 py-3 mb-3' id="verificationResult">
+
+                        </div>
+                        <div class="form-group">
+                            <label for='filename-template'>{% trans %}File name template{% endtrans %}</label>
+                            <input type='text' class="form-control" id="filename-template" value='' />
+                        </div>
+                        <div class='border p-3 mb-3' id="field-list">
+
+                        </div>
+
+
+                        <div class='text-center'>
+                            <input type='button' id="btn-generate" class='btn btn-primary' onclick="generateResult()" value='{% trans %}Render{% endtrans %}' />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-result" role="tabpanel" aria-labelledby="pills-result-tab">
+                <div class="row">
+                    <div class="col-md">
+                        <label>{% trans %}Result{% endtrans %}</label>
+                        <div class='border px-5 py-3 mb-3' id="render-result">
+                            <span> {% trans %}Download files:{% endtrans %} </span>
+                            <div id="link-files">
+                                <ul>
+                                    <li>Link 1</li>
+                                    <li>Link 1</li>
+                                </ul>
+                            </div>
+                            <span>{% trans %}or download all:{% endtrans %}</span>
+                            <span id="link-archive">Link all</span>
+                        </div>
+                        <div class='text-center'>
+                            <input type='button' class='btn btn-primary' onclick="resetForms()" value='{% trans %}Start with another file{% endtrans %}' />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5 pt-3">
+    <div class="col-6 offset-3 border-bottom border-dark text-center">
+        <h2>{% trans %}HOW TO USE{% endtrans %}</h2>
+    </div>
+</div>
+<div class="row mt-4 text-center">
+    <div class="offset-lg-2 col-lg-2">
+        <div class="card border-0" style="width: 100%">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-4">
+                        <img src="{{request.static_url('templater:static/img/1.png')}}" class="card-img-top" alt=""/>
+                    </div>
+                    <div class="col-lg-12 col-md-8 col-sm-8 d-flex">
+                        <div class="card-body align-self-center">
+                            <p class="card-text">{% trans %}Create a document with jinja2 placeholder{% endtrans %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-1 auto-rotate align-self-center">
+        <div style="width: 48px; height: 48px; display: inline-block;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                <path d="M36 23L24.5 11.5l1.75-1.5L40 24 26.25 38l-1.75-1.5L36 25H8v-2z"></path>
+            </svg>
+        </div>
+    </div>
+    <div class="col-lg-2">
+        <div class="card border-0" style="width: 100%">
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-4">
+                        <img src="{{request.static_url('templater:static/img/2.png')}}" class="card-img-top" alt=""/>
+                    </div>
+                    <div class="col-lg-12 col-md-8 col-sm-8 d-flex">
+                        <div class="card-body align-self-center">
+                            <p class="card-text">{% trans %}Create a data table{% endtrans %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-1 auto-rotate align-self-center">
+        <div style="width: 48px; height: 48px; display: inline-block;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                <path d="M36 23L24.5 11.5l1.75-1.5L40 24 26.25 38l-1.75-1.5L36 25H8v-2z"></path>
+            </svg>
+        </div>
+    </div>
+    <div class="col-lg-2">
+        <div class="card border-0" style="width: 100%">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-4">
+                        <img src="{{request.static_url('templater:static/img/3.png')}}" class="card-img-top" alt=""/>
+                    </div>
+                    <div class="col-lg-12 col-md-8 col-sm-8 d-flex">
+                        <div class="card-body align-self-center">
+                            <p class="card-text">{% trans %}Upload to Templater and get the filled in documents{% endtrans %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="loadingModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="lds-facebook">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{request.static_url('templater:static/js/session.js')}}"></script>
+<script src="{{request.static_url('templater:static/js/main.js')}}"></script>
+{% endblock content %}

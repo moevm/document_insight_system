@@ -1,0 +1,3 @@
+[run]
+source = templater
+omit = templater/test*
