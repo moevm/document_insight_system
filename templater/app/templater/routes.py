@@ -1,13 +1,20 @@
 def includeme(config):
-    # config.add_static_view(name = 'ViewerJS', path = 'templater:static/ViewerJS')
     config.add_static_view('static/css', 'static/css')
     config.add_static_view('static/js', 'static/js')
     config.add_static_view('static/img', 'static/img')
     config.add_static_view('ViewerJS', 'static/ViewerJS')
+
     config.add_route('home', '/')
     config.add_route('upload', '/upload')
     config.add_route('files', '/files')
     config.add_route('verify', '/verify')
     config.add_route('render', '/render')
     config.add_route('locale', '/locale')
-    
+
+    config.add_route('templates', '/templates')
+    config.add_route('edit_template', '/edit_template/{template_id}')
+    config.add_route('delete_template', '/delete_template/{template_id}')
+    config.add_route('delete_templates', '/delete_templates')
+    config.add_route('add_template', '/add_template')
+    config.add_route('api_update_template', '/api/update_template/{template_id}')
+    config.add_route('api_add_template', '/api/add_template')

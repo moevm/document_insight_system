@@ -1,0 +1,52 @@
+{% extends "layout.jinja2" %}
+
+{% block title %}Редактировать шаблон{% endblock %}
+
+{% block content %}
+<link href="{{request.static_url('templater:static/css/styles.css')}}" rel="stylesheet" />
+<div class="edit-template-container">
+    <h1 class="text-center">Редактировать шаблон</h1>
+
+    <div class="form-group">
+        <label for="template-name">Название шаблона</label>
+        <input type="text" class="form-control" id="template-name" value="{{ template.name }}">
+    </div>
+
+    <div class="form-group">
+        <label for="template-description">Описание шаблона</label>
+        <textarea class="form-control" id="template-description" rows="4">{{ template.description }}</textarea>
+    </div>
+
+    <div class="text-center button-group">
+        <button id="cancel-changes" class="btn btn-cancel">Отмена</button>
+        <button id="save-changes" class="btn btn-primary">Сохранить изменения</button>
+    </div>
+</div>
+
+<script>
+    document.getElementById('save-changes').addEventListener('click', async () => {
+        const templateId = {{ template.id }};
+        const name = document.getElementById('template-name').value;
+        const description = document.getElementById('template-description').value;
+
+        const response = await fetch(`/api/update_template/${templateId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, description }),
+        });
+
+        if (response.ok) {
+            alert("Шаблон успешно обновлен");
+            window.location.href = "/templates";
+        } else {
+            alert("Ошибка при обновлении шаблона");
+        }
+    });
+
+    document.getElementById('cancel-changes').addEventListener('click', () => {
+        window.location.href = "/templates";
+    });
+</script>
+{% endblock %}

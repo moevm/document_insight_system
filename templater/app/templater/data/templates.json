@@ -1,0 +1,23 @@
+[
+    {
+        "id": 4,
+        "name": "Шаблон 4",
+        "type": "docx",
+        "description": "Описание шаблона 4",
+        "created_at": "2023-10-04"
+    },
+    {
+        "id": 5,
+        "name": "Шаблон 5",
+        "type": "docx",
+        "description": "Описание шаблона 5",
+        "created_at": "2023-10-05"
+    },
+    {
+        "id": 6,
+        "name": "Шаблон 6",
+        "type": "docx",
+        "description": "Описание шаблона 6",
+        "created_at": "2023-10-06"
+    }
+]
