@@ -1,0 +1,48 @@
+{% extends "layout.jinja2" %}
+
+{% block title %}Список шаблонов{% endblock %}
+
+{% block content %}
+<link href="{{request.static_url('templater:static/css/styles.css')}}" rel="stylesheet" />
+<div class="templates-title">
+    <h1>Список шаблонов</h1>
+</div>
+
+<div class="templates-container">
+    {% for template in templates %}
+    <div class="template-card" data-template-id="{{ template.id }}">
+        <h3>{{ template.name }}</h3>
+        <p><strong>Тип:</strong> {{ template.type }}</p>
+        <p><strong>Описание:</strong> {{ template.description }}</p>
+        <p><small> {{ template.created_at }}</small></p>
+        <div class="template-card-actions">
+            <button class="btn btn-edit" onclick="editTemplate({{ template.id }})">Редактировать</button>
+            <button class="btn btn-delete" onclick="deleteTemplate({{ template.id }})">Удалить</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    function editTemplate(templateId) {
+        window.location.href = `/edit_template/${templateId}`;
+    }
+
+    async function deleteTemplate(templateId) {
+        if (confirm("Вы уверены, что хотите удалить этот шаблон?")) {
+            const response = await fetch(`/delete_template/${templateId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert("Ошибка при удалении шаблона");
+            }
+        }
+    }
+</script>
+{% endblock %}

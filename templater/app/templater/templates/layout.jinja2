@@ -24,22 +24,38 @@
     </head>
 
     <body>
-        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
-            <span class="navbar-brand">Templater</span>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
-                    <li class="nav-item">
-                        <a class='nav-link' href="/locale?language=en">EN</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class='nav-link' href="/locale?language=ru">RU</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+                <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+                    <ul class="nav navbar-nav ml-auto w-90 justify-content-start">
+                                                                    <li class="nav-item">
+                                                                                                                                    <a class="nav-link" href="/dis">DIS</a>
+                                                                                                                                </li>
+                                                                                                                                <li class="nav-item">
+                                                                                                                                    <a class="nav-link" href="/templates">Шаблоны</a>
+                                                                                                                                </li>
+                                                                                                                                <li class="nav-item">
+                                                                                                                                    <a class="nav-link" href="/add_template">Добавить</a>
+                                                                                                                                </li>
+                                                                                                                                <li class="nav-item">
+                                                                                                                                    <a class="nav-link" href="/delete_templates">Удалить</a>
+                                                                                                                                </li>
+                                                                                                                                <li class="nav-item">
+                                                                                                                                    <a class="nav-link" href="/">templater</a>
+                                                                                                                                </li>
+                                                                                                                                </ul>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                                    <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
+                                        <li class="nav-item">
+                                            <a class='nav-link' href="/locale?language=en">EN</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class='nav-link' href="/locale?language=ru">RU</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </nav>
         <script src="https://www.google.com/recaptcha/api.js?render=RECAPTCHA_SITE_KEY"></script>
         <div class="container-fluid">
                 {% block content %}

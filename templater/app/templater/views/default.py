@@ -11,6 +11,112 @@ import urllib
 import datetime
 import requests
 import json
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+JSON_FILE_PATH = os.path.join(BASE_DIR, '../data/templates.json')
+
+def load_templates():
+    with open(JSON_FILE_PATH, 'r', encoding='utf-8') as file:
+        return json.load(file)
+
+def save_templates(templates):
+    with open(JSON_FILE_PATH, 'w', encoding='utf-8') as file:
+        json.dump(templates, file, ensure_ascii=False, indent=4)
+
+@view_config(route_name='templates', renderer='../templates/templates.jinja2')
+def templates(request):
+    templates_data = load_templates()
+    return {'templates': templates_data}
+
+@view_config(route_name='edit_template', renderer='../templates/edit_template.jinja2')
+def edit_template(request):
+    template_id = int(request.matchdict['template_id'])
+    templates_data = load_templates()
+    template = next((t for t in templates_data if t['id'] == template_id), None)
+    if not template:
+        return HTTPNotFound()
+
+    if request.method == 'POST':
+        template['name'] = request.POST.get('name')
+        template['description'] = request.POST.get('description')
+        save_templates(templates_data)
+        return HTTPFound(location=request.route_url('templates'))
+
+    return {'template': template}
+
+@view_config(route_name='delete_template', request_method='POST')
+def delete_template(request):
+    template_id = int(request.matchdict['template_id'])
+    templates_data = load_templates()
+    templates_data = [t for t in templates_data if t['id'] != template_id]
+    save_templates(templates_data)
+    response = Response(json.dumps({"message": "Шаблон успешно удален"}), content_type='application/json; charset=UTF-8')
+    return response
+
+@view_config(route_name='delete_templates', renderer='../templates/delete_templates.jinja2')
+def delete_templates(request):
+    templates_data = load_templates()
+
+    if request.method == 'POST':
+        try:
+            request_data = request.json_body
+            selected_templates = request_data.get('selected_templates', [])
+
+            templates_data = [t for t in templates_data if str(t['id']) not in selected_templates]
+            save_templates(templates_data)
+
+            return Response(json.dumps({"message": "Шаблоны успешно удалены"}), content_type='application/json; charset=UTF-8')
+
+        except Exception as e:
+            return Response(json.dumps({"error": str(e)}), content_type='application/json; charset=UTF-8', status=500)
+
+    return {'templates': templates_data}
+
+
+@view_config(route_name='api_update_template', request_method='POST', renderer='json')
+def api_update_template(request):
+    template_id = int(request.matchdict['template_id'])
+    templates_data = load_templates()
+    template = next((t for t in templates_data if t['id'] == template_id), None)
+    if not template:
+        return {'error': 'Шаблон не найден'}, 404
+
+    data = request.json_body
+    template['name'] = data.get('name')
+    template['description'] = data.get('description')
+    save_templates(templates_data)
+    return {'message': 'Шаблон успешно обновлен'}
+
+@view_config(route_name='add_template', renderer='../templates/add_template.jinja2')
+def add_template(request):
+    return {}
+
+@view_config(route_name='api_add_template', request_method='POST', renderer='json')
+def api_add_template(request):
+    try:
+        data = request.json_body
+        name = data.get('name')
+        description = data.get('description')
+        template_type = "docx"
+        created_at = "2023-10-01"
+
+        templates_data = load_templates()
+        new_id = max(t['id'] for t in templates_data) + 1 if templates_data else 1
+
+        new_template = {
+            "id": new_id,
+            "name": name,
+            "type": template_type,
+            "description": description,
+            "created_at": created_at,
+        }
+
+        templates_data.append(new_template)
+        save_templates(templates_data)
+        return {'message': 'Шаблон успешно добавлен', 'template': new_template}
+    except Exception as e:
+        return {'error': str(e)}, 500
 
 _ = TranslationStringFactory('templater')
 RECAPTCHA_ERROR='Recaptcha is not passed. Try to turn off VPN and / or  exit incognito mode.'

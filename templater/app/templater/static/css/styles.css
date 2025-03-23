@@ -1,0 +1,246 @@
+.templates-title {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.templates-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 50px;
+    justify-content: left;
+    padding: 0 20px;
+}
+
+.template-card {
+    width: calc(25% - 50px);
+    background-color: #ffffff;
+    border: 1px solid black;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: left;
+}
+
+.template-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.template-card p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 0;
+}
+
+.template-card small {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.template-card-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.template-card-actions .btn {
+    padding: 5px 20px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.edit-template-container {
+    max-width: 70%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.edit-template-container h1 {
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+}
+
+.edit-template-container .form-group {
+    margin-bottom: 20px;
+}
+
+.edit-template-container .form-control {
+    font-size: 1rem;
+    padding: 10px;
+}
+
+.edit-template-container .btn-primary {
+    background-color: green;
+    border: none;
+    padding: 5px 20px;
+    font-size: 1rem;
+    color: white;
+    cursor: pointer;
+}
+
+.template-card-actions .btn-edit {
+    background-color: green;
+}
+
+.template-card-actions .btn-delete {
+    background-color: red;
+}
+
+.edit-template-container .btn-cancel {
+    background-color: #6c757d;
+    border: none;
+    padding: 5px 50px;
+    font-size: 1rem;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.edit-template-container .button-group {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.delete-container {
+    width: 70%;
+    margin: 0 auto;
+}
+
+.delete-templates-title {
+    text-align: left;
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+.delete-templates-title h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.delete-templates-title p {
+    font-size: 1.2rem;
+    margin-bottom: 0px;
+    color: #555;
+}
+
+.templates-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    border: 1px solid black;
+}
+
+.templates-table th,
+.templates-table td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid black;
+}
+
+.templates-table th {
+    background-color: white;
+    font-weight: bold;
+}
+
+.delete-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-cancel {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-delete-selected {
+    background-color: red;
+    color: white;
+    padding: 5px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-delete {
+    background-color: red;
+    color: white;
+    padding: 0 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.add-template-container {
+    max-width: 70%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.add-template-title {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.add-template-title h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.add-template-container .form-group {
+    margin-bottom: 20px;
+}
+
+.add-template-container .form-group label {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.add-template-container .form-control {
+    width: 100%;
+    font-size: 1rem;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.add-template-container .button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.add-template-container .btn-cancel {
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.add-template-container .btn-add {
+    background-color: green;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
