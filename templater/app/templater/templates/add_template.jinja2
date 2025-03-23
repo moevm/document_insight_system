@@ -1,0 +1,62 @@
+{% extends "layout.jinja2" %}
+
+{% block title %}Добавить шаблон{% endblock %}
+
+{% block content %}
+<link href="{{request.static_url('templater:static/css/styles.css')}}" rel="stylesheet" />
+<div class="add-template-container">
+    <div class="add-template-title">
+        <h1>Добавить новый шаблон</h1>
+    </div>
+
+    <div id="add-template-form">
+        <div class="form-group">
+            <label for="template-name">Название шаблона</label>
+            <input type="text" class="form-control" id="template-name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="template-description">Описание шаблона</label>
+            <textarea class="form-control" id="template-description" name="description" rows="4" required></textarea>
+        </div>
+
+        <div class="button-group">
+            <button type="button" class="btn btn-cancel" onclick="window.location.href='/templates'">Отмена</button>
+            <button type="button" class="btn btn-add" id="add-template-button">Добавить</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('add-template-button').addEventListener('click', async () => {
+        const name = document.getElementById('template-name').value;
+        const description = document.getElementById('template-description').value;
+
+        if (!name || !description) {
+            alert("Заполните все поля");
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/add_template', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, description }),
+            });
+
+            if (response.ok) {
+                alert("Шаблон успешно добавлен");
+                window.location.href = '/templates';
+            } else {
+                const errorData = await response.json();
+                alert(`Ошибка: ${errorData.error}`);
+            }
+        } catch (error) {
+            alert("Ошибка при отправке запроса на сервер");
+            console.error(error);
+        }
+    });
+</script>
+{% endblock %}
