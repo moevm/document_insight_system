@@ -1,7 +1,7 @@
 let template_id;
 let data_table_id;
 let template_name;
-let recaptcha_site_key = RECAPTCHA_SITE_KEY
+//let recaptcha_site_key = RECAPTCHA_SITE_KEY
 
 function upload(file, callback, processBar, tablePreview = false) {
     grecaptcha.ready(function() {
