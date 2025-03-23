@@ -18,6 +18,7 @@
         <div class="template-card-actions">
             <button class="btn btn-edit" onclick="editTemplate({{ template.id }})">Редактировать</button>
             <button class="btn btn-delete" onclick="deleteTemplate({{ template.id }})">Удалить</button>
+            <button class="btn btn-export" onclick="exportTemplate({{ template.id }})">Export</button>
         </div>
     </div>
     {% endfor %}
@@ -44,5 +45,26 @@
             }
         }
     }
+    
+    async function exportTemplate(templateId) {
+    try {
+        const response = await fetch(`/export_template/${templateId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(result.message);  // Успешный экспорт
+        } else {
+            alert("Ошибка при экспорте: " + result.error);  // Ошибка
+        }
+    } catch (error) {
+        alert("Ошибка при выполнении запроса: " + error.message);  // Ошибка сети или другая проблема
+    }
+}
 </script>
 {% endblock %}

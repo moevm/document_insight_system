@@ -92,6 +92,11 @@
     background-color: red;
 }
 
+.template-card-actions .btn-export {
+    background-color: rgb(252, 249, 100);
+    color: rgb(0, 0, 0)
+}
+
 .edit-template-container .btn-cancel {
     background-color: #6c757d;
     border: none;
