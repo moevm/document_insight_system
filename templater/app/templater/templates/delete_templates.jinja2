@@ -1,0 +1,113 @@
+{% extends "layout.jinja2" %}
+
+{% block title %}Удалить шаблоны{% endblock %}
+
+{% block content %}
+<link href="{{request.static_url('templater:static/css/styles.css')}}" rel="stylesheet" />
+<div class="delete-container">
+    <div class="delete-templates-title">
+        <h1>Удалить шаблон</h1>
+        <p>Выберите один или несколько шаблонов для удаления</p>
+    </div>
+
+    <table class="templates-table">
+        <thead>
+            <tr>
+                <th>Выбрать</th>
+                <th>Название</th>
+                <th>Тип</th>
+                <th>Дата создания</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for template in templates %}
+            <tr data-template-id="{{ template.id }}">
+                <td>
+                    <input type="checkbox" name="selected_templates" value="{{ template.id }}">
+                </td>
+                <td>{{ template.name }}</td>
+                <td>{{ template.type }}</td>
+                <td>{{ template.created_at }}</td>
+                <td>
+                    <button class="btn btn-delete" onclick="deleteSingleTemplate({{ template.id }})">Удалить</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="delete-actions">
+        <button class="btn btn-cancel" id="cancel-button">Отмена</button>
+        <button class="btn btn-delete-selected" id="delete-selected-button">Удалить выбранное</button>
+    </div>
+</div>
+
+<script>
+    document.getElementById('cancel-button').addEventListener('click', () => {
+        const checkboxes = document.querySelectorAll('input[name="selected_templates"]:checked');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    });
+
+    document.getElementById('delete-selected-button').addEventListener('click', async () => {
+        const selectedTemplates = Array.from(document.querySelectorAll('input[name="selected_templates"]:checked'))
+            .map(checkbox => checkbox.value);
+
+        if (selectedTemplates.length === 0) {
+            alert("Выберите хотя бы один шаблон для удаления");
+            return;
+        }
+
+        if (confirm("Вы уверены, что хотите удалить выбранные шаблоны?")) {
+            try {
+                const response = await fetch('/delete_templates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ selected_templates: selectedTemplates }),
+                });
+
+                if (response.ok) {
+                    selectedTemplates.forEach(id => {
+                        const row = document.querySelector(`tr[data-template-id="${id}"]`);
+                        if (row) {
+                            row.remove();
+                        }
+                    });
+                    alert("Шаблоны успешно удалены");
+                } else {
+                    const errorData = await response.json();
+                    alert(`Ошибка: ${errorData.error}`);
+                }
+            } catch (error) {
+                alert("Ошибка при отправке запроса на сервер");
+                console.error(error);
+            }
+        }
+    });
+
+    async function deleteSingleTemplate(templateId) {
+        if (confirm("Вы уверены, что хотите удалить этот шаблон?")) {
+            const response = await fetch(`/delete_template/${templateId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                const row = document.querySelector(`tr[data-template-id="${templateId}"]`);
+                if (row) {
+                    row.remove();
+                }
+                alert("Шаблон успешно удален");
+            } else {
+                alert("Ошибка при удалении шаблона");
+            }
+        }
+    }
+</script>
+{% endblock %}
