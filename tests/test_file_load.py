@@ -60,3 +60,7 @@ class FileLoadTestSelenium(BasicSeleniumTest):
             self.upload_file(self.param[5])
         else:
             self.skipTest("Current criteria pack is not for pres")
+
+    def test_report_load_tex(self):
+        '''Function to check if tex files are uploaded correctly'''
+        pass
