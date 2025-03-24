@@ -1,6 +1,6 @@
 import argparse
 
-from .docx_uploader import main as docx_uploader_main
+# from .docx_uploader import main as docx_uploader_main
 from .latex_uploader import main as latex_uploader_main  # Импортируем LaTeX парсер
 
 def parse_args():

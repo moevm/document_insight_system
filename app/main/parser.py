@@ -41,8 +41,8 @@ def parse(filepath, pdf_filepath):
 
         elif tmp_filepath.endswith('.tex'):
             new_filepath = filepath
-            latex = LatexUploader(new_filepath)
-            latex.upload()
+            latex = LatexUploader()
+            latex.upload(new_filepath, pdf_filepath)
             latex.parse()
             file_object = latex
 

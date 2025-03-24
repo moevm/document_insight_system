@@ -1,8 +1,8 @@
-from .core_properties import CoreProperties
-from .inline_shape import InlineShape
-from .paragraph import Paragraph
-from .style import Style
-from .table import Table, Cell
+from ..docx_uploader.core_properties import CoreProperties
+from ..docx_uploader.inline_shape import InlineShape
+from ..docx_uploader.paragraph import Paragraph
+from ..docx_uploader.style import Style
+from ..docx_uploader.table import Table, Cell
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
 from ..document_uploader import DocumentUploader
 
