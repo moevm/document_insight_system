@@ -6,6 +6,7 @@ import tempfile
 from main.presentations import PresentationPPTX
 from main.reports.docx_uploader import DocxUploader
 from main.reports.md_uploader import MdUploader
+from main.reports.latex import LatexUploader
 from utils import convert_to
 
 logger = logging.getLogger('root_logger')
@@ -38,13 +39,12 @@ def parse(filepath, pdf_filepath):
             doc.parse(md_text)
             file_object = doc
 
-        elif tmp_filepath.endswith('.tex' ):
-        #     new_filepath = filepath
-        #     latex = LaTexUploader(new_filepath)   Need class LaTexUploader 
-        #     latex.upload()
-        #     latex.parse()
-        #     file_object = latex
-            pass
+        elif tmp_filepath.endswith('.tex'):
+            new_filepath = filepath
+            latex = LatexUploader(new_filepath)  
+            latex.upload()
+            latex.parse()
+            file_object = latex
 
         else:
             raise ValueError("Файл с недопустимым именем или недопустимого формата: " + filepath)
