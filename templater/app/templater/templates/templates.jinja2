@@ -47,24 +47,44 @@
     }
     
     async function exportTemplate(templateId) {
-    try {
-        const response = await fetch(`/export_template/${templateId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+        try {
+            // 1. Запросить OAuth-ссылку
+            const authRes = await fetch('/start_auth');
+            const authData = await authRes.json();
 
-        const result = await response.json();
+            if (!authData.auth_url) {
+                alert("Ошибка получения ссылки авторизации");
+                return;
+            }
 
-        if (response.ok) {
-            alert(result.message);  // Успешный экспорт
-        } else {
-            alert("Ошибка при экспорте: " + result.error);  // Ошибка
+            // 2. Открыть Google-авторизацию
+            const authWindow = window.open(authData.auth_url, "_blank");
+
+            // 3. Подождать пока пользователь завершит вход (пример: 5 секунд)
+            await new Promise(resolve => setTimeout(resolve, 10000));
+
+            // 4. Запросить список папок (опционально: можно заменить на заранее выбранную)
+            const folderId = prompt("Введите ID папки Google Drive (оставьте пустым для корневой)");
+
+            // 5. Сделать экспорт
+            const exportRes = await fetch(`/export_template/${templateId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ folder_id: folderId || null })
+            });
+
+            const result = await exportRes.json();
+
+            if (exportRes.ok) {
+                alert(result.message);
+            } else {
+                alert("Ошибка при экспорте: " + result.error);
+            }
+        } catch (error) {
+            alert("Ошибка при выполнении запроса: " + error.message);
         }
-    } catch (error) {
-        alert("Ошибка при выполнении запроса: " + error.message);  // Ошибка сети или другая проблема
     }
-}
 </script>
 {% endblock %}

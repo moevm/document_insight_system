@@ -13,27 +13,59 @@ import requests
 import json
 import os
 import tempfile
-from .google_drive import authenticate_google, upload_file_to_drive
+from .google_drive import (
+    get_auth_url_and_flow, auth_flows,
+    save_token, build_service,
+    upload_file_to_drive, list_drive_folders
+)
 from googleapiclient.http import MediaFileUpload
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_FILE_PATH = os.path.join(BASE_DIR, '../data/templates.json')
 
+@view_config(route_name='start_auth', renderer='json')
+def start_auth(request):
+    auth_url, state, flow = get_auth_url_and_flow()
+    auth_flows[state] = flow
+    return {'auth_url': auth_url}
+
+@view_config(route_name='oauth_callback')
+def oauth_callback(request):
+    state = request.GET.get('state')
+    code = request.GET.get('code')
+
+    flow = auth_flows.pop(state, None)
+    if not flow:
+        return Response("Ошибка: неизвестный state", status=400)
+
+    flow.fetch_token(code=code)
+    creds = flow.credentials
+    save_token(creds)
+
+    return HTTPFound(location="/templates")
+
 @view_config(route_name='export_template', request_method='POST', renderer='json')
 def export_template(request):
     try:
-        service = authenticate_google()
-        
+        template_id = int(request.matchdict['template_id'])
+        templates = load_templates()
+        template = next((t for t in templates if t['id'] == template_id), None)
+        if not template:
+            return {'error': 'Шаблон не найден'}, 404
+
+        folder_id = request.json_body.get("folder_id", None)
+
+        service = build_service()
+
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt', encoding='utf-8') as temp_file:
-            file_content = "Пример содержимого файла"
-            temp_file.write(file_content)
-            temp_file_path = temp_file.name
+            content = f"template_{template_id}"
+            temp_file.write(content)
+            temp_path = temp_file.name
 
-        file_id = upload_file_to_drive(service, temp_file_path, "example.txt", "text/plain")
+        file_id = upload_file_to_drive(service, temp_path, f"template_{template_id}.txt", "text/plain", folder_id)
+        os.unlink(temp_path)
 
-        os.unlink(temp_file_path)
-
-        return {'message': 'Файл успешно загружен в Google Drive', 'file_id': file_id}
+        return {'message': 'Файл успешно экспортирован в Google Drive', 'file_id': file_id}
     except Exception as e:
         return {'error': str(e)}, 500
 
