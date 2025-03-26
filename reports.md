@@ -93,6 +93,8 @@
 
 [Запись скрин-каста работающей системы]()
 
+[Макет-UI](https://github.com/moevm/document_insight_system/blob/reports-dis/ui_mockup.png)
+
 Встречи с командой:
 
 meeting 1 - [2025-03-25](https://github.com/moevm/document_insight_system/blob/reports-dis/meetings/2025-03-03.txt)
