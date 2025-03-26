@@ -4,18 +4,35 @@ import os
 from typing import Dict, Any
 
 ALLOWED_EXTENSIONS = {
-    '.tex': 'latex',
-    '.bib': 'bibtex',
-    '.cls': 'latex_class',
-    '.sty': 'latex_package',
-    '.png': 'image',
-    '.jpeg': 'image',
-    '.jpg': 'image',
-    '.svg': 'image',
-    '.cfg': 'config',
-    '.def': 'definition',
-    '.latexmkrc': 'config'
+    '.tex': 'latex',  # LaTeX документ
+    '.cls': 'latex_class',  # Файл класса LaTeX
+    '.sty': 'latex_package',  # Пакет LaTeX
+    '.png': 'image',  # Изображение
+    '.jpeg': 'image',  # Изображение
+    '.jpg': 'image',  # Изображение
+    '.svg': 'image',  # Изображение
+    '.cfg': 'config',  # Файл конфигурации
+    '.def': 'definition',  # Файл с определениями макросов
+    '.latexmkrc': 'config'  # Конфигурация для latexmk
 }
+
+"""
+Структура данных - словарь, где ключи это путь до файла, а значения - словарь с данными о файле.
+Пример:
+project_structure = {
+    "path/to/main.tex": {
+        "type": "latex",
+        "content": "Содержимое файла main.tex",
+        "name": "main.tex"
+    },
+    "path/to/image.png": {
+        "type": "image",
+        "content": "Содержимое файла image.png",
+        "name": "image.png"
+    }
+}
+Во вложенном словаре в поле "content" будет хранится содержимое файла в виде Base64-строк
+"""
 
 
 class LatexProjectUnarchiver:
@@ -83,11 +100,12 @@ class LatexProjectUnarchiver:
                     'name': file_name
                 }
 
+"""
+def logger():
+    pass
+"""
 
-# def logger():
-#     pass
-
-
+"""
 if __name__ == '__main__':
     # Пример использования
     project_path = 'example_project.zip'
@@ -104,3 +122,4 @@ if __name__ == '__main__':
             print("Архив не является валидным LaTeX проектом")
     except Exception as e:
         print(f"Ошибка: {e}")
+"""
