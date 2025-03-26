@@ -21,3 +21,4 @@ def includeme(config):
     config.add_route('export_template', '/export_template/{template_id}')
     config.add_route('oauth_callback', '/oauth_callback')
     config.add_route('start_auth', '/start_auth')
+    config.add_route('dis_redirect', '/dis')

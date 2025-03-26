@@ -297,3 +297,8 @@ def render_doc(request):
         except:
             return {'status': 'err'}
 
+@view_config(route_name='dis_redirect')
+def dis_redirect(request):
+    dis_url = os.environ.get("DIS_URL", "http://localhost:8080/")
+    return HTTPFound(location=dis_url)
+
