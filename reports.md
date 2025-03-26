@@ -91,7 +91,7 @@
 
 [Use-case](https://github.com/moevm/document_insight_system/blob/reports-dis/use_case/use_case.md)
 
-[Запись скрин-каста работающей системы]()
+[Запись скрин-каста работающей системы](https://drive.google.com/file/d/1JzhOoI6-CBTB5PRT50kM_oB6wanURhgq/view?usp=drive_link)
 
 Встречи с командой:
 
@@ -100,8 +100,6 @@ meeting 1 - [2025-03-25](https://github.com/moevm/document_insight_system/blob/r
 meeting 2 - [2025-03-25](https://github.com/moevm/document_insight_system/blob/reports-dis/meetings/2025-03-25.txt)
 
 meeting 3 - [2025-03-26](https://github.com/moevm/document_insight_system/blob/reports-dis/meetings/2025-03-26.txt)
-
-
 
 
 
