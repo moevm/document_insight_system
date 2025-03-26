@@ -87,10 +87,14 @@
 Ссылка на презентацию с целями, задачами и функциональностью проекта: https://docs.google.com/presentation/d/1uATNoj571Mwj8OwlokX2zsrTB1GnJC5BgUt7k43DkOA/edit#slide=id.g3384753ae2c_0_86
 
 ## Итерация 2
+Встречи с командой:
 
 meeting 1 - [2025-03-25](https://github.com/moevm/document_insight_system/blob/reports-dis/meetings/2025-03-03.txt)
+
 meeting 2 - [2025-03-25](https://github.com/moevm/document_insight_system/blob/reports-dis/meetings/2025-03-25.txt)
+
 meeting 3 - [2025-03-26](https://github.com/moevm/document_insight_system/blob/reports-dis/meetings/2025-03-26.txt)
+
 
 Презентация по проекту v2.0 - (link)
 
