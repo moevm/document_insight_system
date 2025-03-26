@@ -4,45 +4,51 @@ let template_name;
 //let recaptcha_site_key = RECAPTCHA_SITE_KEY
 
 function upload(file, callback, processBar, tablePreview = false) {
-    grecaptcha.ready(function() {
-        grecaptcha.execute(recaptcha_site_key, { action: 'upload' }).then(function(token) {
-            // let url = window.location.origin + "/upload"
-            if (file.size > 15 * 1024 * 1024) {
-                alert('File too large');
-                return;
+    if (file.size > 15 * 1024 * 1024) {
+        alert('File too large');
+        return;
+    }
+    var formData = new FormData();
+
+    formData.append("file", file);
+    if (tablePreview) {
+        formData.append('table-preview', true)
+    }
+    var req = new XMLHttpRequest();
+    req.upload.addEventListener("progress", function(event) {
+        var percent = (event.loaded / event.total) * 100;
+        console.log(percent)
+        processBar.val(Math.round(percent));
+    }, false);
+
+    req.open("POST", "/upload", true);
+
+    req.onload = function(event) {
+        console.log('Response:', req.response);
+
+        // Проверяем, является ли ответ JSON
+        try {
+            var responseJSON = JSON.parse(req.response); // Попытка парсинга JSON
+            console.log(responseJSON);
+
+            if (req.status == 200) {
+                callback(responseJSON);  // Обработка корректного ответа
+                console.log("Uploaded!");
+            } else {
+                alert('Error occurred when trying to upload your file: ' + req.response);
+                console.log("Error " + req.status + " occurred when trying to upload your file.<br \/>");
             }
-            var formData = new FormData();
+        } catch (e) {
+            // Если ошибка при парсинге JSON
+            console.log('Failed to parse JSON:', e);
+            console.log('Server Response:', req.response);
+            alert('Server returned an unexpected response format.');
+        }
+    };
 
-            formData.append("file", file);
-            formData.append("recaptcha-token", token);
-            if (tablePreview) {
-                formData.append('table-preview', true)
-            }
-            var req = new XMLHttpRequest();
-            req.upload.addEventListener("progress", function(event) {
-                var percent = (event.loaded / event.total) * 100;
-                console.log(percent)
-                processBar.val(Math.round(percent));
-            }, false);
-
-            req.open("POST", "/upload", true);
-
-            req.onload = function(event) {
-                console.log(req.response);
-                if (req.status == 200) {
-                    console.log(req.response);
-                    console.log(JSON.parse(req.response));
-                    callback(JSON.parse(req.response));
-                    console.log("Uploaded!");
-                } else {
-                    alert('Error occured when trying to upload your file: '+req.response)
-                    console.log("Error " + req.status + " occurred when trying to upload your file.<br \/>");
-                }
-            };
-            req.send(formData);
-        });
-    });
+    req.send(formData);
 }
+
 
 function uploadTemplate() {
     // check if no file chosen, or extension not supported
@@ -200,132 +206,110 @@ function appendJinjaTag(element) {
 
 function verifyTemplate() {
     if (!template_id || !data_table_id) return;
-    grecaptcha.ready(function() {
-        grecaptcha.execute(recaptcha_site_key, { action: 'validate' }).then(function(token) {
-            $('#loadingModal').modal('show')
-                // send request to verify-url with template_id and data_table_id and put result to #verificationResult
-            var formData = new FormData();
+    $('#loadingModal').modal('show')
+    // send request to verify-url with template_id and data_table_id and put result to #verificationResult
+    var formData = new FormData();
 
-            formData.append("template-id", template_id);
-            formData.append("data-table-id", data_table_id);
+    formData.append("template-id", template_id);
+    formData.append("data-table-id", data_table_id);
 
-            formData.append("name-pattern", data_table_id);
-            formData.append("recaptcha-token", token);
-            // TODO: default if cookie not set??
+    formData.append("name-pattern", data_table_id);
 
-            function getLocale() {
-                const def_val = 'ru'
-                if (document.cookie) {
-                    let entry = document.cookie
-                        .split('; ')
-                        .find(row => row.startsWith('_LOCALE_'))
-                    if (entry) return entry.split('=')[1];
-                    else return def_val
-                } else return def_val
-            }
+    var req = new XMLHttpRequest();
 
-            var req = new XMLHttpRequest();
+    req.open("POST", "/verify", true);
 
-            req.open("POST", "/verify?_LOCALE_=" + getLocale(), true);
+    req.onload = function(event) {
+        console.log(req.response)
+        if (req.status == 200) {
+            var res = JSON.parse(req.response)
 
-            req.onload = function(event) {
-                console.log(req.response)
-                if (req.status == 200) {
-                    var res = JSON.parse(req.response)
+            if (res.status == 'err') {
+                alert('Something wrong occurred: '+req.response)
+            } else {
+                let div_verification = document.getElementById('verificationResult')
 
-                    if (res.status == 'err') {
-                        alert('Something wrong occurred: '+req.response)
-                    } else {
-
-                        let div_verification = document.getElementById('verificationResult')
-
-                        div_verification.innerHTML = ''
-                        for (message of res.messages) {
-                            div_verification.innerHTML += `<p>${message}</p>`
-                        }
-
-                        let input_name_template = document.getElementById('filename-template')
-                        input_name_template.value = `{{ ${res.fields[0]} }}`
-
-                        let div_fields = document.getElementById('field-list')
-                        div_fields.innerHTML = ''
-                        for (field of res.fields) {
-                            div_fields.innerHTML += `<input type='button' onclick='appendJinjaTag(this)' value='${field}'/>`
-                        }
-
-                        localStorage.setItem('verification_result', div_verification.innerHTML)
-                        localStorage.setItem('naming_template', input_name_template.value)
-                        localStorage.setItem('naming_fields', div_fields.innerHTML)
-                        activeTabRender()
-                    }
-                } else {
-                    console.log("Error " + req.status + " occurred");
+                div_verification.innerHTML = ''
+                for (message of res.messages) {
+                    div_verification.innerHTML += `<p>${message}</p>`
                 }
-                setTimeout(function() { $('#loadingModal').modal('hide') }, 500);
-            };
-            req.send(formData);
-        });
-    });
+
+                let input_name_template = document.getElementById('filename-template')
+                input_name_template.value = `{{ ${res.fields[0]} }}`
+
+                let div_fields = document.getElementById('field-list')
+                div_fields.innerHTML = ''
+                for (field of res.fields) {
+                    div_fields.innerHTML += `<input type='button' onclick='appendJinjaTag(this)' value='${field}'/>`
+                }
+
+                localStorage.setItem('verification_result', div_verification.innerHTML)
+                localStorage.setItem('naming_template', input_name_template.value)
+                localStorage.setItem('naming_fields', div_fields.innerHTML)
+                activeTabRender()
+            }
+        } else {
+            console.log("Error " + req.status + " occurred");
+        }
+        setTimeout(function() { $('#loadingModal').modal('hide') }, 500);
+    };
+    req.send(formData);
 }
+
 
 function generateResult() {
     if (!template_id || !data_table_id) return;
-    grecaptcha.ready(function() {
-        grecaptcha.execute(recaptcha_site_key, { action: 'generateResult' }).then(function(token) {
-            $('#loadingModal').modal('show')
-                // send request to render-url with template_id and data_table_id and put result to #render-result
-            var formData = new FormData();
+    $('#loadingModal').modal('show')
+    // send request to render-url with template_id and data_table_id and put result to #render-result
+    var formData = new FormData();
 
-            formData.append("template-id", template_id);
-            formData.append("data-table-id", data_table_id);
-            let name_template = document.getElementById('filename-template').value;
-            if (name_template.length != 0) {
-                formData.append("name-pattern", name_template);
+    formData.append("template-id", template_id);
+    formData.append("data-table-id", data_table_id);
+    let name_template = document.getElementById('filename-template').value;
+    if (name_template.length != 0) {
+        formData.append("name-pattern", name_template);
+    }
+    var req = new XMLHttpRequest();
+
+    req.open("POST", "/render", true);
+
+    req.onload = function(event) {
+        console.log(req.response)
+        if (req.status == 200) {
+            var res = JSON.parse(req.response)
+
+            if (res.status == 'err') {
+                alert('Something wrong occurred: '+req.response)
+            } else {
+                let div_result = document.getElementById('render-result')
+                //div_result.innerHTML = 'Generated files:<br /><ul>'
+                let div_files = document.getElementById('link-files');
+
+                let link_files = "<ul>"
+                // div_files.innerHTML = '<ul>'
+
+                for (let filename in res.files) {
+                    // div_files.innerHTML += `<li><a href='/files?file_id=${res.files[filename]}'>${filename}</a></li>`
+                    link_files += `<li><a href='/files?file_id=${res.files[filename]}'>${filename}</a></li>`
+                };
+                link_files += "</ul>"
+                div_files.innerHTML = link_files
+
+                let div_archive = document.getElementById('link-archive');
+                div_archive.innerHTML = `<a href='/files?file_id=${res.archive}'>${res.archive_name}</a>`
+
+                localStorage.setItem('generated_files', div_result.innerHTML)
+
+                activeTabResult()
             }
-            formData.append("recaptcha-token", token);
-            var req = new XMLHttpRequest();
-
-            req.open("POST", "/render", true);
-
-            req.onload = function(event) {
-                console.log(req.response)
-                if (req.status == 200) {
-                    var res = JSON.parse(req.response)
-
-                    if (res.status == 'err') {
-                        alert('Something wrong occurred: '+req.response)
-                    } else {
-
-                        let div_result = document.getElementById('render-result')
-                            //div_result.innerHTML = 'Generated files:<br /><ul>'
-                        let div_files = document.getElementById('link-files');
-
-                        let link_files = "<ul>"
-                            // div_files.innerHTML = '<ul>'
-
-                        for (let filename in res.files) {
-                            // div_files.innerHTML += `<li><a href='/files?file_id=${res.files[filename]}'>${filename}</a></li>`
-                            link_files += `<li><a href='/files?file_id=${res.files[filename]}'>${filename}</a></li>`
-                        };
-                        link_files += "</ul>"
-                        div_files.innerHTML = link_files
-
-                        let div_archive = document.getElementById('link-archive');
-                        div_archive.innerHTML = `<a href='/files?file_id=${res.archive}'>${res.archive_name}</a>`
-
-                        localStorage.setItem('generated_files', div_result.innerHTML)
-
-                        activeTabResult()
-                    }
-                } else {
-                    console.log("Error " + req.status + " occurred");
-                }
-                setTimeout(function() { $('#loadingModal').modal('hide') }, 500);
-            };
-            req.send(formData);
-        });
-    });
+        } else {
+            console.log("Error " + req.status + " occurred");
+        }
+        setTimeout(function() { $('#loadingModal').modal('hide') }, 500);
+    };
+    req.send(formData);
 }
+
 
 function onFilenameTemplateChange() {
     localStorage.setItem('naming_template', document.getElementById('filename-template').value)
