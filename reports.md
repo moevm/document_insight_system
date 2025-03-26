@@ -41,6 +41,16 @@
 
 ## Итерация 1
 
-Ссылка на артефакты первой встречи с заказчиком - https://disk.yandex.ru/d/G1sWlMyzLW0LTA
+Артефакты первой встречи с заказчиком от [17.02](https://github.com/moevm/document_insight_system/blob/reports-latex/AI/meetings/employer/17.02.txt)
 
-Ссылка на презентацию по результатам первой итерации - https://disk.yandex.ru/d/jVfrgL1ocO7M-A
+Артефакты встреч с командой от [18.02](https://github.com/moevm/document_insight_system/blob/reports-latex/AI/meetings/team/18.02.txt), [25.02](https://github.com/moevm/document_insight_system/blob/reports-latex/AI/meetings/team/24.02.txt)
+
+Презентация по результатам [первой итерации](https://github.com/moevm/document_insight_system/blob/reports-latex/AI/presentations/1_iteration.pptx)
+
+## Итерация 2
+
+Созданы в формате [mermaid](https://mermaid.live/) диаграмы [Use Case](https://github.com/moevm/document_insight_system/blob/reports-latex/AI/diagrams/use_case.md), [UML](https://github.com/moevm/document_insight_system/blob/reports-latex/AI/diagrams/uml.md)
+
+Артефакты встреч с командой от [14.03](https://github.com/moevm/document_insight_system/blob/reports-latex/AI/meetings/team/14.03.txt), [21.03](https://github.com/moevm/document_insight_system/blob/reports-latex/AI/meetings/team/21.03.txt)
+
+Презентация по результатам [второй итерации](https://github.com/moevm/document_insight_system/blob/reports-latex/AI/presentations/2_iteration.pptx)
