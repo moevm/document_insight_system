@@ -25,8 +25,24 @@ class LatexProcessor():
         
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
-        
+            
+        content = self._replace_documentclass(content, base_path)
         content = self._replace_imports(content, base_path)
+        return content
+        
+    def _replace_documentclass(self, content: str, base_path: str) -> str:
+        pattern = re.compile(r"\\documentclass\[.*?\]\{(.*?)\}")
+        match = pattern.search(content)
+        
+        if match:
+            cls_name = match.group(1).strip()
+            cls_file = os.path.join(base_path, f"{cls_name}.cls")
+            
+            if os.path.exists(cls_file):
+                with open(cls_file, "r", encoding="utf-8") as f:
+                    cls_content = f.read()
+                cls_content = re.escape(cls_content)
+                content = pattern.sub(cls_content, content)
         return content
     
     def _replace_imports(self, content: str, base_path: str) -> str:
