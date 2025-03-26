@@ -6,6 +6,8 @@ from ..docx_uploader.table import Table, Cell
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
 from ..document_uploader import DocumentUploader
 from .utils import find_closing_brace
+from .tokenizer import LatexTokenizer
+from .tokenizer import TokenType
 
 class LatexUploader(DocumentUploader):
     def __init__(self):
@@ -84,15 +86,45 @@ class LatexUploader(DocumentUploader):
         raw_preamble = self.extract_preamble(self.latex_content)
         preamble = self.remove_comments(raw_preamble)
         
+        # Извлечение метаданных
         self.core_properties = CoreProperties(
             title=self.extract_command(preamble, 'title'),
             author=self.extract_command(preamble, 'author'),
             date=self.extract_command(preamble, 'date')
         )
         
+        # Токенизация всего документа
+        tokenizer = LatexTokenizer()
+        self.tokens = tokenizer.tokenize(self.latex_content)
+        
+        # Обработка токенов
+        self._process_tokens()
+        
+        # Инициализация временных структур
         self.paragraphs = self.__make_tmp_paragraphs()
         self.parse_effective_styles()
         self.tables = self.__make_tmp_tables()
+
+    def _process_tokens(self):
+        """Первичная обработка токенов документа."""
+        # Заглушка для будущей реализации
+        self.env_stack = []
+        for token in self.tokens:
+            if token.type == TokenType.COMMAND:
+                self._handle_command_token(token)
+            elif token.type == TokenType.ENVIRONMENT:
+                self._handle_environment_token(token)
+
+    def _handle_command_token(self, token):
+        """Обработка токенов-команд."""
+        # Заглушка для обработки команд
+        pass
+
+    def _handle_environment_token(self, token):
+        """Обработка окружений документа."""
+        # Заглушка для обработки окружений
+        pass
+
 
     def __make_tmp_paragraphs(self):
         """Создаёт временные параграфы для тестирования."""
