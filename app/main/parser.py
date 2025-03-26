@@ -38,14 +38,6 @@ def parse(filepath, pdf_filepath):
             doc.parse(md_text)
             file_object = doc
 
-        elif tmp_filepath.endswith('.tex' ):
-        #     new_filepath = filepath
-        #     latex = LaTexUploader(new_filepath)   Need class LaTexUploader 
-        #     latex.upload()
-        #     latex.parse()
-        #     file_object = latex
-            pass
-
         else:
             raise ValueError("Файл с недопустимым именем или недопустимого формата: " + filepath)
         # Если была конвертация, то удаляем временный файл.
