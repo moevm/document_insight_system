@@ -172,21 +172,7 @@ def api_add_template(request):
         return {'error': str(e)}, 500
 
 _ = TranslationStringFactory('templater')
-# RECAPTCHA_ERROR='Recaptcha is not passed. Try to turn off VPN and / or  exit incognito mode.'
-#
-# def recaptcha(request):
-#     ip = request.remote_addr
-#     token = request.POST['recaptcha-token']
-#     key = request.registry.settings['templater']['recaptcha_key']
-#
-#     r = requests.post('https://www.google.com/recaptcha/api/siteverify', data={
-#         'secret': key,
-#         'response': token,
-#         'remoteip': ip
-#     })
-#     print("result of recaptcha request: {}".format(r.json()))
-#
-#     return r.json()['score'] > 0.3
+
 
 
 @view_config(route_name='home', renderer='../templates/homepage.jinja2')
@@ -209,7 +195,6 @@ def set_locale_cookie(request):
 
 @view_config(route_name='upload', request_method='POST', renderer='json')
 def upload_doc(request):
-    # if recaptcha(request):
         file_id = request.fs.put(
             request.POST['file'].file, filename=request.POST['file'].filename)
         max_age = request.registry.settings['templater'][
@@ -223,7 +208,6 @@ def upload_doc(request):
             renderer.load_data(datafile)
             res['data'] = renderer.raw_table
         return res
-    # return HTTPBadRequest(body=json.dumps({'status': 'err', 'reason':RECAPTCHA_ERROR}))
 
 @view_config(route_name='files', request_method='GET')
 def get_doc(request):
@@ -240,7 +224,6 @@ def get_doc(request):
 
 @view_config(route_name='verify', request_method='POST', renderer='json')
 def verify_doc(request):
-    # if recaptcha(request):
         try:
             template_id = request.POST['template-id']
             data_id = request.POST['data-table-id']
@@ -253,7 +236,6 @@ def verify_doc(request):
             renderer.load_data(data)
             result = renderer.verify(template)
 
-            # render messages from result['in_template] and result['in_csv]
             messages = []
             for field in result['in_template']:
                 s = _('${field} not defined in the template', mapping={'field': field})
@@ -272,12 +254,11 @@ def verify_doc(request):
             return {'status': 'OK', 'messages': messages, 'fields': renderer.fieldnames}
         except:
             return {'status': 'err'}
-    # else:
-    #     return HTTPBadRequest(body=json.dumps({'status': 'err', 'reason':RECAPTCHA_ERROR}))
+
 
 @view_config(route_name='render', request_method='POST', renderer='json')
 def render_doc(request):
-    # if recaptcha(request):
+
         try:
             template_id = request.POST['template-id']
             data_id = request.POST['data-table-id']
@@ -315,4 +296,4 @@ def render_doc(request):
             return {'status': 'OK', 'files': files_id, 'archive': str(archive_id) if archive_id is not None else '', 'archive_name': archive_name}
         except:
             return {'status': 'err'}
-    # return HTTPBadRequest(body=json.dumps({'status': 'err', 'reason':RECAPTCHA_ERROR}))
+
