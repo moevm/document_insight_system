@@ -1,14 +1,20 @@
 {# Accepts: "navi_upload", "logout" #}
 
 {% if not current_user.is_anonymous %}
-    <div class="col-sm-4 col-md-3 col-lg-2 my-auto">
+    <div class="text-center">
+        <a href="{{ templater_url }}" target="_blank" class="templater-link">
+            Templater
+        </a>
+    </div>
+    <div class="my-auto">
         {% if navi_upload %}
             <a class="header-linked text-center" href="/upload/" id="upload_ref_link">Загрузить новый файл</a>
         {% endif %}
     </div>
 
 
-    <div class="offset-sm-4 offset-md-3 offset-lg-2 col-sm-4 col-md-6 col-lg-8 my-auto text-right dropdown">
+
+    <div class="my-auto text-right dropdown">
         <h5 class="text-right my-auto" id="user_info" data-toggle="dropdown" aria-haspopup="true"
             aria-expanded="false">{{ current_user.username }}</h5>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
