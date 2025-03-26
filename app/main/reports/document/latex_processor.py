@@ -1,6 +1,9 @@
 import os
 import re
+import logging 
 
+
+logger = logging.getLogger('root_logger')
 
 class LatexProcessor():
     """
@@ -13,11 +16,11 @@ class LatexProcessor():
         
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(merged_content)
-        print(f"Merged LaTeX project saved to {output_file}")
+        logger.info(f"Merged LaTeX project saved to {output_file}")
     
     def _process_file(self, file_path: str, base_path: str) -> str:
         if not os.path.exists(file_path):
-            print(f"Warning: File {file_path} not found!")
+            logger.warning(f"File {file_path} not found!")
             return ""
         
         with open(file_path, "r", encoding="utf-8") as f:
