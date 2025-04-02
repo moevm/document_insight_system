@@ -12,6 +12,7 @@ from ..pdf_document.pdf_document_manager import PdfDocumentManager
 from ..document_uploader import DocumentUploader
 
 
+
 class DocxUploader(DocumentUploader):
     def __init__(self):
         super().__init__()
@@ -243,22 +244,16 @@ class DocxUploader(DocumentUploader):
         return chapters_str
 
     def extract_images_with_captions(self, check_id):
-        from app.db.db_methods import save_image_to_db, get_images
+        from app.db.db_methods import save_image_to_db, get_images, add_tesseract_task_id
         from app.tesseract_tasks import tesseract_recognize
         
         emu_to_cm  = 360000
         image_found = False
         image_data = None
         if not self.images:
-            # Проход по всем параграфам документа
             for i, paragraph in enumerate(self.file.paragraphs):
-                width_emu = None
-                height_emu = None
-                # Проверяем, есть ли в параграфе встроенные объекты
                 for run in paragraph.runs:
-                    if "graphic" in run._element.xml:  # может быть изображение
-
-                        # Извлечение бинарных данных изображения
+                    if "graphic" in run._element.xml:
                         image_streams = run._element.findall('.//a:blip', namespaces={
                             'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'})
                         for image_stream in image_streams:
@@ -270,46 +265,29 @@ class DocxUploader(DocumentUploader):
                                 image_data = image_part.blob
                                 extent = run._element.find('.//wp:extent', namespaces={
                                 'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+                                width_cm = height_cm = None
                                 if extent is not None:
-                                    width_emu = int(extent.get('cx'))
-                                    height_emu = int(extent.get('cy'))
-                                    width_cm = width_emu / emu_to_cm
-                                    height_cm = height_emu / emu_to_cm
-                    # Если мы уже нашли изображение, ищем следующий непустой параграф для подписи
+                                    width_cm = int(extent.get('cx')) / emu_to_cm
+                                    height_cm = int(extent.get('cy')) / emu_to_cm
                     if image_found:
-                        # Переход к следующему параграфу
+                        caption = "picture without caption"
                         next_paragraph_index = i + 1
-
-                        # Проверяем, есть ли следующий параграф
-                        if next_paragraph_index < len(self.file.paragraphs):
-                            while next_paragraph_index < len(self.file.paragraphs):
-                                next_paragraph = self.file.paragraphs[next_paragraph_index]
-                                next_paragraph_text = next_paragraph.text.strip()
-
-                                # Проверка, не содержит ли следующий параграф также изображение
-                                contains_image = any(
-                                    "graphic" in run._element.xml for run in next_paragraph.runs
-                                )
-
-                                # Если параграф не содержит изображения и текст не пуст, то это подпись
-                                if not contains_image and next_paragraph_text:
-                                    # Сохраняем изображение и его подпись
-                                    image_id = save_image_to_db(check_id, image_data, next_paragraph_text, (width_cm, height_cm))
-                                    tesseract_recognize.delay(str(image_id), image_data)
-                                    break
-                                else:
-                                    image_id = save_image_to_db(check_id, image_data, "picture without caption", (width_cm, height_cm))
-                                    tesseract_recognize.delay(str(image_id), image_data)
-                                    break
-                        else:
-                            image_id = save_image_to_db(check_id, image_data, "picture without caption", (width_cm, height_cm))
-                            tesseract_recognize.delay(str(image_id), image_data)
-
-                        image_found = False  # Сброс флага, чтобы искать следующее изображение
-                        image_data = None  # Очистка данных изображения
-            self.images = get_images(check_id)
+                        while next_paragraph_index < len(self.file.paragraphs):
+                            next_paragraph = self.file.paragraphs[next_paragraph_index]
+                            next_text = next_paragraph.text.strip()
+                            if next_text and not any("graphic" in r._element.xml for r in next_paragraph.runs):
+                                caption = next_text
+                                break
+                            next_paragraph_index += 1
                         
+                        image_id = save_image_to_db(check_id, image_data, caption, (width_cm, height_cm))
+                        task = tesseract_recognize.delay(str(image_id), image_data)
+                        add_tesseract_task_id(image_id, task.id)
+                        image_found = False
+                        image_data = None 
                 
+            self.images = get_images(check_id)
+                              
 
 
 def main(args):
