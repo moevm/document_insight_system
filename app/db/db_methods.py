@@ -57,7 +57,6 @@ def add_image_text(tesseract_task_id, new_text):
     return result.matched_count > 0
     
 def add_tesseract_task_id(image_id, tesseract_task_id):
-    # image_id = ObjectId(image_id)
     result = images_collection.update_one(
         {'_id': image_id},
         {'$set': {'tesseract_task_id': tesseract_task_id}}
@@ -65,7 +64,6 @@ def add_tesseract_task_id(image_id, tesseract_task_id):
     return result.matched_count > 0
 
 def get_tesseract_task_id(image_id):
-    # image_id = ObjectId(image_id)
     image = images_collection.find_one({'_id': image_id})
     if image:
         return image.get('tesseract_task_id')

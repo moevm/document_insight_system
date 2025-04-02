@@ -1,13 +1,15 @@
 import os
 from celery import Celery
+from celery.exceptions import SoftTimeLimitExceeded
 from celery.signals import worker_ready
 import pytesseract
 import cv2
 import numpy as np
 from root_logger import get_root_logger
 
-TASK_RETRY_COUNTDOWN = 60
+TASK_RETRY_COUNTDOWN = 30
 MAX_RETRIES = 2
+TASK_SOFT_TIME_LIMIT = 60
 
 logger = get_root_logger('tesseract_tasks')
 
@@ -26,7 +28,7 @@ TESSERACT_CONFIG = {
 def at_start(sender, **k):
     logger.info("Tesseract worker is ready!")
 
-@celery.task(name="tesseract_recognize", queue='tesseract-queue', bind=True, max_retries=MAX_RETRIES)
+@celery.task(name="tesseract_recognize", queue='tesseract-queue', bind=True, max_retries=MAX_RETRIES, soft_time_limit=TASK_SOFT_TIME_LIMIT)
 def tesseract_recognize(self, image_id, image_data):
     try:
         image_array = np.frombuffer(image_data, dtype=np.uint8)
@@ -39,7 +41,9 @@ def tesseract_recognize(self, image_id, image_data):
             text = ""
         logger.info(f"Текст успешно распознан для image_id: {image_id}")
         return text
-
+    except SoftTimeLimitExceeded:
+        logger.warning(f"Превышен мягкий лимит времени для image_id: {image_id}. Задача будет перезапущена.")
+        self.retry(countdown=TASK_RETRY_COUNTDOWN)
     except Exception as e:
         logger.error(f"Ошибка при распознавании текста: {e}", exc_info=True)
         logger.info(f"Пустая строка записана для image_id: {image_id} из-за ошибки: {e}")
