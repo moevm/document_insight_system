@@ -26,3 +26,4 @@ from .max_abstract_size_check import ReportMaxSizeOfAbstractCheck
 from .template_name import ReportTemplateNameCheck
 from .key_words_check import KeyWordsReportCheck
 from .empty_task_page_check import EmptyTaskPageCheck
+from .water_in_the_text_check import WaterInTheTextCheck
