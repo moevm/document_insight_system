@@ -45,9 +45,9 @@ def users_data():
         try:
             f_check_counts_value, f_check_counts_cond = int(f_check_counts.split()[1]), f_check_counts.split()[0]
             if f_check_counts_cond == '>':
-                filter_query["$expr"] = {"$gte": [{"$size": "$presentations"}, f_check_counts_value]}
+                filter_query["$expr"] = {"$gte": [{"$size": "$files"}, f_check_counts_value]}
             elif f_check_counts_cond == "<":
-                filter_query["$expr"] = {"$lte": [{"$size": "$presentations"}, f_check_counts_value]}
+                filter_query["$expr"] = {"$lte": [{"$size": "$files"}, f_check_counts_value]}
         except ValueError:
             pass
 
@@ -72,7 +72,7 @@ def users_data():
             "name": item["name"],
             "all_formats": item["formats"],
             "all_criteria": item["criteria"],
-            "check_counts": len(item["presentations"]),
+            "check_counts": len(item["files"]),
 
         } for item in rows]
     }
