@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     DBCollections.MONGO_URL = args.mongo
 
-    if LAST_VERSION < '4.0'
+    if LAST_VERSION < '4.0':
         DBCollections(db_name='pres-parser-db', files_collection='presentation')
     else:
         DBCollections()
