@@ -33,7 +33,7 @@ class FileLoadTestSelenium(BasicSeleniumTest):
 
     def check_pack(self):
         self.authorization()
-        URL = self.get_url('/upload')
+        URL = self.get_url('/upload/')
         self.get_driver().get(URL)
         self.get_driver().implicitly_wait(30)
         # obj = self.get_driver().find_element(By.XPATH, "/html/body/div/div[2]/div/p/b")
