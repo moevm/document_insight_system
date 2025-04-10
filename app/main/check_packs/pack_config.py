@@ -45,6 +45,8 @@ BASE_REPORT_CRITERION = [
     ["max_abstract_size_check"],
     ["theme_in_report_check"],
     ["empty_task_page_check"],
+    ["water_in_the_text_check"],
+    ['image_quality_check'],
 ]
 
 DEFAULT_TYPE = 'pres'
