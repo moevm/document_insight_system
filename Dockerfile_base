@@ -1,7 +1,7 @@
 FROM python:3.10-slim-bullseye
 
 LABEL project='dis'
-LABEL version='0.3'
+LABEL version='0.4-base'
 
 ENV LANG en_US.UTF-8
 ENV TZ=Europe/Moscow

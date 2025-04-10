@@ -31,7 +31,7 @@
     <h3 id="user_title" class="texteous ins">
         Страница пользователя: <b>{{ user_info.username }}</b>
     </h3>
-    <a href="{{ url_for('check_list', filter_user=user_info.username) }}"
+    <a href="{{ url_for('check_list.check_list_main', filter_user=user_info.username) }}"
                 class="col text-center link">Список всех загрузок пользователя</a>
     <table id="one-user-table" class="table bg-white"
             data-filter-control="true"

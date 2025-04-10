@@ -9,7 +9,7 @@ services:
       - "${WEB_PORT:-8080}:8080"
     depends_on:
       - mongodb
-      - worker
+      - redis
     env_file:
       - .env
     environment:

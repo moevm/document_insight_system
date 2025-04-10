@@ -11,7 +11,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def __init__(self, file_info, min_ref=1, max_ref=1000, headers_map=None):
         super().__init__(file_info)
         self.headers = []
-        self.literature_header = []
+        self.literature_header = None
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
         if headers_map:
             self.config = headers_map
@@ -21,6 +21,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def late_init_vkr(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
         self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
+        self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
         if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
             self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['min_ref_for_literature_references_check']
             self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['mах_ref_for_literature_references_check']
@@ -45,7 +46,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             self.late_init_vkr()
             header = self.literature_header
             if not header:
-                return answer(True,
+                return answer(False,
                               f'Не найден Список использованных источников.<br><br>Если в вашей работе есть список источников, проверьте корректность использования стилей.')
             start_literature_par = header["number"]
             number_of_sources = self.count_sources_vkr(header)
@@ -83,7 +84,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                         <li>Убедитесь, что для ссылки на источник используются квадратные скобки;</li>
                         <li>Убедитесь, что для оформления списка литературы был использован нумированный список;</li>
                         <li>Убедитесь, что после и перед нумированным списком отсутствуют непустые абзацы.</li>
-                        <li>Убедитесь, что один источник не разбит на двае строки клавишей "Enter".</li>
+                        <li>Убедитесь, что один источник не разбит на две строки клавишей "Enter".</li>
                     </ul>
                     '''
         return answer(False, result_str)

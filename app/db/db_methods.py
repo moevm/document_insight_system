@@ -7,7 +7,7 @@ from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 from utils import convert_to
 
-from .db_types import User, Presentation, Check, Consumers, Logs
+from .db_types import User, Presentation, Check, Consumers, Logs, Image
 
 client = MongoClient("mongodb://mongodb:27017")
 db = client['pres-parser-db']
@@ -21,10 +21,31 @@ criteria_pack_collection = db['criteria_pack']
 logs_collection = db.create_collection(
     'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
+images_collection = db['images']  # коллекция для хранения изображений
 
 
 def get_client():
     return client
+
+def get_images(check_id):
+    images = images_collection.find({'check_id': str(check_id)})
+    if images is not None:
+        image_list = []
+        for img in images:
+            image_list.append(Image(img))
+        return image_list
+    else:
+        return None
+
+def save_image_to_db(check_id, image_data, caption, image_size):
+    image = Image({
+        'check_id': check_id,
+        'image_data': image_data,
+        'caption': caption,
+        'image_size': image_size
+    })
+    images_collection.insert_one(image.pack())
+    print(str(check_id) + " " + str(caption))
 
 
 # Returns user if user was created and None if already exists
@@ -424,7 +445,7 @@ def mark_celery_task_as_finished(celery_task_id, finished_time=None):
         '$set': {'finished_at': finished_time,
                  'processing_time': (finished_time - celery_task['started_at']).total_seconds()}})
 
-def get_average_processing_time(min_time=5.0):
+def get_average_processing_time(min_time=15.0):
     # use only success check (failed checks processing time is more bigger than normal)
     result = list(celery_check_collection.aggregate([
         {'$match': {'processing_time': {'$lt': 170}}},

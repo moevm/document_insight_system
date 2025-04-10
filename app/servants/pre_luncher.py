@@ -5,7 +5,7 @@ from db.db_methods import add_user, get_user, get_client, edit_user, save_criter
 from main.check_packs.pack_config import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO
 
 from pymongo.errors import ConnectionFailure
-from server import ALLOWED_EXTENSIONS
+from app.server_consts import ALLOWED_EXTENSIONS
 
 logger = logging.getLogger('root_logger')
 

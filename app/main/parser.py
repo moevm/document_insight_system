@@ -8,10 +8,15 @@ from main.reports.docx_uploader import DocxUploader
 from main.reports.md_uploader import MdUploader
 from utils import convert_to
 
+from os.path import basename
+from app.db.db_methods import add_check
+from app.db.db_types import Check
+
 logger = logging.getLogger('root_logger')
 
-
 def parse(filepath, pdf_filepath):
+    from app.db.db_methods import files_info_collection
+
     tmp_filepath = filepath.lower()
     try:
         if tmp_filepath.endswith(('.odp', '.ppt', '.pptx')):
@@ -19,7 +24,23 @@ def parse(filepath, pdf_filepath):
             if tmp_filepath.endswith(('.odp', '.ppt')):
                 logger.info(f"Презентация {filepath} старого формата. Временно преобразована в pptx для обработки.")
                 new_filepath = convert_to(filepath, target_format='pptx')
-            file_object = PresentationPPTX(new_filepath)
+
+            presentation = PresentationPPTX(new_filepath)
+
+            check = Check({
+                'filename': basename(new_filepath),
+            })
+
+            file_id = 0
+            file = files_info_collection.find_one({'name': basename(new_filepath)})
+            if file:
+                file_id = file['_id']
+
+            check_id = add_check(file_id, check)
+            presentation.extract_images_with_captions(check_id)
+            file_object = presentation
+
+
         elif tmp_filepath.endswith(('.doc', '.odt', '.docx', )):
             new_filepath = filepath
             if tmp_filepath.endswith(('.doc', '.odt')):
@@ -28,7 +49,19 @@ def parse(filepath, pdf_filepath):
 
             docx = DocxUploader()
             docx.upload(new_filepath, pdf_filepath)
+
+            check = Check({
+                'filename': basename(new_filepath),
+            })
+
+            file_id = 0
+            file = files_info_collection.find_one({'name': basename(new_filepath)})
+            if file:
+                file_id = file['_id']
+
+            check_id = add_check(file_id, check)
             docx.parse()
+            docx.extract_images_with_captions(check_id)
             file_object = docx
 
         elif tmp_filepath.endswith('.md' ):

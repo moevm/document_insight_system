@@ -154,7 +154,7 @@ async function upload() {
         method: "POST",
         body: formData
     };
-    const response_text = await (await fetch("/upload", post_data)).text();
+    const response_text = await (await fetch("/upload/", post_data)).text();
     console.log("Answer:", response_text);
     bar.css("width", "100%").attr('aria-valuenow', 100);
     console.log(file);

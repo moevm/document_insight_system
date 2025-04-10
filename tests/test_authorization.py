@@ -36,5 +36,5 @@ class AuthTestSelenium(BasicSeleniumTest):
         time.sleep(10)
         self.check_auth(login, password)
         time.sleep(10)
-        upload_url = self.get_url('/upload')
+        upload_url = self.get_url('/upload/')
         self.assertIn(upload_url, self.get_driver().current_url)

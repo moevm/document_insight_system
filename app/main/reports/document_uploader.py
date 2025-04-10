@@ -12,6 +12,7 @@ class DocumentUploader(ABC):
         self.literature_page = 0
         self.first_lines = []
         self.page_count = 0
+        self.images = []
 
     @abstractmethod
     def upload(self):

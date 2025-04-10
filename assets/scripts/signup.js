@@ -27,5 +27,5 @@ $("#signup_button").click(async () => {
     const name = await (await fetch("/signup", post_data)).text();
     console.log("User " + name + " was" + (name === "" ? " not" : "") + " signed up");
     if (name === "") $("#login_text_field").toggleClass("is-invalid", true);
-    else window.location.href = "/upload";
+    else window.location.href = "/upload/";
 });
