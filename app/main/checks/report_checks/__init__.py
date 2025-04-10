@@ -25,6 +25,7 @@ from .spelling_check import SpellingCheck
 from .max_abstract_size_check import ReportMaxSizeOfAbstractCheck
 from .template_name import ReportTemplateNameCheck
 from .empty_task_page_check import EmptyTaskPageCheck
+from .image_quality_check import ImageQualityCheck
 from .sw_section_banned_words import SWSectionBannedWordsCheck
 from .sw_section_lit_reference import SWSectionLiteratureReferenceCheck
 from .sw_tasks import SWTasksCheck
