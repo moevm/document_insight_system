@@ -21,4 +21,8 @@ COPY --from=frontend_build /app/src ./src/
 
 ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project/app"
 
+RUN apt update && apt install -y texlive-base \
+    texlive-fonts-recommended \
+    texlive-lang-cyrillic
+
 CMD ./scripts/local_start.sh
