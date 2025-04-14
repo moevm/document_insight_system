@@ -7,10 +7,10 @@ RUN npm install && npm install webpack
 ADD ./assets ./assets
 RUN npm run build
 
-FROM dvivanov/dis-base:v0.3
+FROM dvivanov/dis-base:v0.4
 
 LABEL project='dis'
-LABEL version='0.3'
+LABEL version='0.4'
 
 WORKDIR /usr/src/project
 
