@@ -155,7 +155,6 @@ class Image(PackableWithId):
         self.image_data = dictionary.get('image_data')  # Файл изображения в формате bindata
         self.image_size = dictionary.get('image_size')  # Размер изображения в сантимерах
         self.text = dictionary.get('text')
-        self.tesseract_task_id = dictionary.get('tesseract_task_id')
 
     def pack(self):
         package = super().pack()
@@ -164,5 +163,4 @@ class Image(PackableWithId):
         package['image_data'] = self.image_data
         package['image_size'] = self.image_size
         package['text'] = self.text
-        package['tesseract_task_id'] = self.tesseract_task_id
         return package

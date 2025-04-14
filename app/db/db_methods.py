@@ -27,6 +27,14 @@ images_collection = db['images']  # коллекция для хранения �
 def get_client():
     return client
 
+def get_image(image_id):
+    image_id = ObjectId(image_id)
+    image = images_collection.find({'_id': image_id})
+    if image is not None:
+        return Image(image)
+    else:
+        return None
+
 def get_images(check_id):
     images = images_collection.find({'check_id': str(check_id)})
     if images is not None:
@@ -37,38 +45,23 @@ def get_images(check_id):
     else:
         return None
 
-def save_image_to_db(check_id, image_data, caption, image_size, text=None, tesseract_task_id=None):
+def save_image_to_db(check_id, image_data, caption, image_size, text=None):
     image = Image({
         'check_id': check_id,
         'image_data': image_data,
         'caption': caption,
         'image_size': image_size,
-        'text' : text,
-        'tesseract_task_id': tesseract_task_id
+        'text' : text
     })
     result = images_collection.insert_one(image.pack())
     return result.inserted_id 
 
-def add_image_text(tesseract_task_id, new_text):
+def add_image_text(image_id, new_text):
     result = images_collection.update_one(
-        {'tesseract_task_id': tesseract_task_id},
+        {'_id': image_id},
         {'$set': {'text': new_text}}
     )
     return result.matched_count > 0
-    
-def add_tesseract_task_id(image_id, tesseract_task_id):
-    result = images_collection.update_one(
-        {'_id': image_id},
-        {'$set': {'tesseract_task_id': tesseract_task_id}}
-    )
-    return result.matched_count > 0
-
-def get_tesseract_task_id(image_id):
-    image = images_collection.find_one({'_id': image_id})
-    if image:
-        return image.get('tesseract_task_id')
-    else:
-        return None
 
 
 # Returns user if user was created and None if already exists

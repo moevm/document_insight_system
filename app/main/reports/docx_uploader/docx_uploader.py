@@ -244,7 +244,7 @@ class DocxUploader(DocumentUploader):
         return chapters_str
 
     def extract_images_with_captions(self, check_id):
-        from app.db.db_methods import save_image_to_db, get_images, add_tesseract_task_id
+        from app.db.db_methods import save_image_to_db, get_images
         from app.tesseract_tasks import tesseract_recognize
         
         emu_to_cm  = 360000
@@ -279,14 +279,12 @@ class DocxUploader(DocumentUploader):
                                 caption = next_text
                                 break
                             next_paragraph_index += 1
-                        
-                        image_id = save_image_to_db(check_id, image_data, caption, (width_cm, height_cm))
-                        task = tesseract_recognize.delay(str(image_id), image_data)
-                        add_tesseract_task_id(image_id, task.id)
+                        save_image_to_db(check_id, image_data, caption, (width_cm, height_cm))
                         image_found = False
                         image_data = None 
                 
             self.images = get_images(check_id)
+            tesseract_recognize.delay(check_id)
                               
 
 
