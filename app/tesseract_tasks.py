@@ -1,7 +1,6 @@
 import os
 from celery import Celery
 from celery.exceptions import SoftTimeLimitExceeded
-from celery.signals import worker_ready
 import pytesseract
 import cv2
 import numpy as np
@@ -10,9 +9,10 @@ from db import db_methods
 import re
 from bson import ObjectId
 from main.checks.report_checks.image_text_check import SYMBOLS_SET, MAX_SYMBOLS_PERCENTAGE, MAX_TEXT_DENSITY
+from main.check_packs.pack_config import BASE_REPORT_CRITERION
 
-TASK_RETRY_COUNTDOWN = 60
-MAX_RETRIES = 2
+TASK_RETRY_COUNTDOWN = 30
+MAX_RETRIES = 1
 TASK_SOFT_TIME_LIMIT = 120
 
 logger = get_root_logger('tesseract_tasks')
@@ -44,22 +44,22 @@ def tesseract_recognize(self, check_id):
                 if text.strip():
                     logger.info(f"Текст успешно распознан для image_id: {image._id}")
                 else:
-                    logger.warning(f"Текст для image_id: {image._id} пустой.")
-                text = (re.sub(r'\s+', ' ', text)).strip()
+                    logger.info(f"Текст для image_id: {image._id} пустой.")
                 try:
-                    db_methods.add_image_text(image._id, text)
+                    db_methods.add_image_text(image._id, (re.sub(r'\s+', ' ', text)).strip())
                 except Exception as e:
-                    logger.error(f"Ошибка при сохранении текста для image_id: {image._id}: {e}", exc_info=True)
-                    raise
-            update_ImageTextCheck(check_id)
+                    raise ValueError(f"Ошибка при сохранении текста для image_id: {image._id}: {e}")
+            try:
+                update_ImageTextCheck(check_id)
+            except Exception as e:
+                raise ValueError(f"Ошибка во время проверки текста: {e}")
     except SoftTimeLimitExceeded:
         logger.warning(f"Превышен мягкий лимит времени для check_id: {check_id}. Задача будет перезапущена.")
         self.retry(countdown=TASK_RETRY_COUNTDOWN)
     except Exception as e:
-        logger.error(f"Ошибка при распознавании текста для check_id: {check_id}: {e}", exc_info=True)
         if self.request.retries >= self.max_retries:
-            logger.error(f"Достигнуто максимальное количество попыток для check_id: {check_id}")
-            return f"Ошибка: {e}"
+            add_tesseract_result(check_id,[[f"Ошибка при распознавании текста: {e}"], 0])
+        logger.error(f"Ошибка при распознавании текста для check_id: {check_id}: {e}", exc_info=True)
         logger.info(f"Повторная попытка распознавания для check_id: {check_id}. Попытка {self.request.retries + 1} из {self.max_retries}.")
         self.retry(countdown=TASK_RETRY_COUNTDOWN)
 
@@ -87,26 +87,24 @@ def update_ImageTextCheck(check_id):
         result = [[f'Проблемы с текстом на изображениях! <br>{"".join(deny_list)}'], 0]
     else:
         result = [['Текст на изображениях корректен!'], 1]
+    add_tesseract_result(check_id, result)
+
+
+def add_tesseract_result(check_id, result):
     updated_check = db_methods.get_check(ObjectId(check_id))
-    if updated_check.tesseract_result == 0:
-        updated_check.tesseract_result = result
+    updated_check.tesseract_result = result
+    if 'processing_time' in db_methods.get_celery_task_by_check(ObjectId(check_id)):
         update_tesseract_criteria_result(updated_check)
-    else:
-        updated_check.tesseract_result = result   
     db_methods.update_check(updated_check)
-    logger.info(f"Результат тессеракта мяу {updated_check.tesseract_result} записан, статус проверки {updated_check.is_ended}")
 
 def update_tesseract_criteria_result(check):
-    criteria_id = 'image_quality_check'
-    new_verdict = check.tesseract_result[0]
-    new_score = check.tesseract_result[1]
     for criteria in check.enabled_checks:
-        if criteria["id"] == criteria_id:
-            criteria["verdict"] = new_verdict
-            criteria["score"] = new_score
+        if criteria["id"] == 'image_text_check':
+            criteria["verdict"] = check.tesseract_result[0]
+            criteria["score"] = check.tesseract_result[1]
+            check.score = round(check.score - (1 - check.tesseract_result[1]) / len(BASE_REPORT_CRITERION), 3)
             check.is_ended = True
-            return True
-    return False
+            return
 
 def count_symbols_in_text(text):
     return sum(1 for char in text if char in SYMBOLS_SET)
