@@ -113,7 +113,7 @@ def logger():
     pass
 """
 
-
+"""
 if __name__ == '__main__':
     # Пример использования
     project_path = 'ETU-latex-template-main.zip'
@@ -130,3 +130,4 @@ if __name__ == '__main__':
             print("Архив не является валидным LaTeX проектом")
     except Exception as e:
         print(f"Ошибка: {e}")
+"""
