@@ -28,7 +28,6 @@ def get_client():
     return client
 
 def get_image(image_id):
-    image_id = ObjectId(image_id)
     image = images_collection.find({'_id': image_id})
     if image is not None:
         return Image(image)

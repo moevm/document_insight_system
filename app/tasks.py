@@ -12,6 +12,7 @@ from main.checker import check
 from main.parser import parse
 from main.check_packs import BASE_PACKS
 from root_logger import get_root_logger
+from tesseract_tasks import update_tesseract_criteria_result
 
 config = ConfigParser()
 config.read('app/config.ini')
@@ -53,8 +54,13 @@ def create_task(self, check_info):
     pdf_filepath = join(FILES_FOLDER, f"{check_id}.pdf")
     try:
         updated_check = check(parse(original_filepath, pdf_filepath, check_id), check_obj)
-        updated_check.is_ended = True
         updated_check.is_failed = False
+        if updated_check.tesseract_result == -1:
+            updated_check.tesseract_result = 0
+            logger.info(f"Результат тессеракта{updated_check.tesseract_result} записан, статус проверки {updated_check.is_ended}")
+        else:
+            update_tesseract_criteria_result(updated_check)
+            logger.info(f"Результат тессеракта{updated_check.tesseract_result} записан, статус проверки {updated_check.is_ended}")
         db_methods.update_check(updated_check)  # save to db
         db_methods.mark_celery_task_as_finished(self.request.id)
 

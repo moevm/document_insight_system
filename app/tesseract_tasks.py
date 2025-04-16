@@ -8,7 +8,8 @@ import numpy as np
 from root_logger import get_root_logger
 from db import db_methods
 import re
-from .main.checks.report_checks.image_text_check import SYMBOLS_SET, MAX_SYMBOLS_PERCENTAGE, MAX_TEXT_DENSITY
+from bson import ObjectId
+from main.checks.report_checks.image_text_check import SYMBOLS_SET, MAX_SYMBOLS_PERCENTAGE, MAX_TEXT_DENSITY
 
 TASK_RETRY_COUNTDOWN = 60
 MAX_RETRIES = 2
@@ -27,35 +28,35 @@ TESSERACT_CONFIG = {
     'config': '--psm 6',
 }
 
-@worker_ready.connect
-def at_start(sender, **k):
-    logger.info("Tesseract worker is ready!")
-
 @celery.task(name="tesseract_recognize", queue='tesseract-queue', bind=True, max_retries=MAX_RETRIES, soft_time_limit=TASK_SOFT_TIME_LIMIT)
 def tesseract_recognize(self, check_id):
     try:
         images = db_methods.get_images(check_id)
-        for image in images:
-            image_array = np.frombuffer(image.image_data, dtype=np.uint8)
-            img_cv = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-            if img_cv is None:
-                raise ValueError("Не удалось декодировать изображение из двоичных данных")
-            text = pytesseract.image_to_string(img_cv, **TESSERACT_CONFIG)
-            if text is None:
-                logger.warning(f"Tesseract вернул None для image_id: {image._id}.")
-                text = ""
-            logger.info(f"Текст успешно распознан для image_id: {image._id}")
-            
-            text = (re.sub(r'\s+', ' ', text)).strip()
-            db_methods.add_image_text(image._id, text)
-        update_ImageTextCheck(check_id)
-        
+        if images:
+            for image in images:
+                image_array = np.frombuffer(image.image_data, dtype=np.uint8)
+                img_cv = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+                if img_cv is None:
+                    raise ValueError("Не удалось декодировать изображение из двоичных данных")
+                text = image.text
+                if not text:
+                    text = pytesseract.image_to_string(img_cv, **TESSERACT_CONFIG)
+                if text.strip():
+                    logger.info(f"Текст успешно распознан для image_id: {image._id}")
+                else:
+                    logger.warning(f"Текст для image_id: {image._id} пустой.")
+                text = (re.sub(r'\s+', ' ', text)).strip()
+                try:
+                    db_methods.add_image_text(image._id, text)
+                except Exception as e:
+                    logger.error(f"Ошибка при сохранении текста для image_id: {image._id}: {e}", exc_info=True)
+                    raise
+            update_ImageTextCheck(check_id)
     except SoftTimeLimitExceeded:
         logger.warning(f"Превышен мягкий лимит времени для check_id: {check_id}. Задача будет перезапущена.")
         self.retry(countdown=TASK_RETRY_COUNTDOWN)
     except Exception as e:
-        logger.error(f"Ошибка при распознавании текста: {e}", exc_info=True)
-        logger.info(f"Пустая строка записана для check_id: {check_id} из-за ошибки: {e}")
+        logger.error(f"Ошибка при распознавании текста для check_id: {check_id}: {e}", exc_info=True)
         if self.request.retries >= self.max_retries:
             logger.error(f"Достигнуто максимальное количество попыток для check_id: {check_id}")
             return f"Ошибка: {e}"
@@ -64,7 +65,6 @@ def tesseract_recognize(self, check_id):
 
 
 def update_ImageTextCheck(check_id):
-    updated_check = db_methods.get_check(check_id)
     images = db_methods.get_images(check_id)
     deny_list = []
     for image in images:
@@ -84,16 +84,27 @@ def update_ImageTextCheck(check_id):
                 f"{symbols_percentage:.2f}% (максимум {MAX_SYMBOLS_PERCENTAGE}%). Это может означать, что размер шрифта слишком маленький или текст нечитаем.<br>"
             )
     if deny_list:
-        update_criteria_result(updated_check, 'image_quality_check', [f'Проблемы с текстом на изображениях! <br>{"".join(deny_list)}'], 0)
+        result = [[f'Проблемы с текстом на изображениях! <br>{"".join(deny_list)}'], 0]
     else:
-        update_criteria_result(updated_check, 'image_quality_check', ['Текст на изображениях корректен!'], 1)
+        result = [['Текст на изображениях корректен!'], 1]
+    updated_check = db_methods.get_check(ObjectId(check_id))
+    if updated_check.tesseract_result == 0:
+        updated_check.tesseract_result = result
+        update_tesseract_criteria_result(updated_check)
+    else:
+        updated_check.tesseract_result = result   
     db_methods.update_check(updated_check)
+    logger.info(f"Результат тессеракта мяу {updated_check.tesseract_result} записан, статус проверки {updated_check.is_ended}")
 
-def update_criteria_result(check, criteria_id, new_verdict, new_score):
+def update_tesseract_criteria_result(check):
+    criteria_id = 'image_quality_check'
+    new_verdict = check.tesseract_result[0]
+    new_score = check.tesseract_result[1]
     for criteria in check.enabled_checks:
         if criteria["id"] == criteria_id:
             criteria["verdict"] = new_verdict
             criteria["score"] = new_score
+            check.is_ended = True
             return True
     return False
 
