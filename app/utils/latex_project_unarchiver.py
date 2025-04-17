@@ -45,11 +45,19 @@ class LatexProjectUnarchiver:
         self.structure_of_project: Dict[str, Dict[str, Any]] = {}
 
     def __is_latex_project(self) -> bool:
-        """Проверяет, содержит ли архив хотя бы один .tex файл."""
+        """
+        Проверяет, является ли архив валидным LaTeX-проектом.
+        Условие: должен существовать файл main.tex в корне архива.
+        """
         try:
             with zipfile.ZipFile(self.path_on_root_of_project, 'r') as zip_ref:
-                for file in zip_ref.namelist():
-                    if not file.endswith('/') and os.path.splitext(file)[1].lower() == '.tex':
+                root_candidates = [name for name in zip_ref.namelist() if name.endswith('main.tex')]
+
+                for path in root_candidates:
+                    parts = path.strip('/').split('/')
+                    if len(parts) == 2:  # ETU-latex-template-main/main.tex
+                        return True
+                    if len(parts) == 1:  # main.tex
                         return True
                 return False
         except zipfile.BadZipFile:
@@ -81,7 +89,7 @@ class LatexProjectUnarchiver:
         with zipfile.ZipFile(self.path_on_root_of_project, 'r') as zip_ref:
             for file_info in zip_ref.infolist():
                 if file_info.is_dir():
-                    continue  # Пропускаем директории
+                    continue  # Пропускаем только каталоги (сами по себе)
 
                 file_path = file_info.filename
                 file_type = self.__get_file_type(file_path)
@@ -108,7 +116,7 @@ def logger():
 """
 if __name__ == '__main__':
     # Пример использования
-    project_path = 'example_project.zip'
+    project_path = 'ETU-latex-template-main.zip'
     unarchiver = LatexProjectUnarchiver(project_path)
 
     try:
