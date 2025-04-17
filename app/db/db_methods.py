@@ -18,6 +18,7 @@ files_info_collection = db['presentations']  # actually, collection for all file
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
+parsed_texts_collection = db['parsed_texts']
 logs_collection = db.create_collection(
     'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
@@ -44,16 +45,20 @@ def get_images(check_id):
     else:
         return None
 
-def save_image_to_db(check_id, image_data, caption, image_size, text=None):
+def save_image_to_db(check_id, image_data, caption, image_size, text=None, page=None):
     image = Image({
         'check_id': check_id,
         'image_data': image_data,
         'caption': caption,
         'image_size': image_size,
-        'text' : text
+        'text' : text,
+        'page' : page,
     })
     result = images_collection.insert_one(image.pack())
     return result.inserted_id 
+
+def update_image(image):
+    return bool(images_collection.find_one_and_replace({'_id': image._id}, image.pack()))
 
 def add_image_text(image_id, new_text):
     result = images_collection.update_one(
@@ -62,6 +67,12 @@ def add_image_text(image_id, new_text):
     )
     return result.matched_count > 0
 
+def add_image_page(image_id, page):
+    result = images_collection.update_one(
+        {'_id': image_id},
+        {'$set': {'page': page}}
+    )
+    return result.matched_count > 0
 
 # Returns user if user was created and None if already exists
 def add_user(username, password_hash='', is_LTI=False):
@@ -181,6 +192,12 @@ def add_check(file_id, check):
 def update_check(check):
     return bool(checks_collection.find_one_and_replace({'_id': check._id}, check.pack()))
 
+def add_parsed_text(check_id, parsed_text):
+    result = parsed_texts_collection.update_one({'filename': parsed_text.filename}, {'$set': parsed_text.pack()}, upsert=True)
+    if result.upserted_id: parsed_texts_id = result.upserted_id
+    else: parsed_texts_id = parsed_texts_collection.find_one({'filename': parsed_text.filename})['_id']
+    files_info_collection.update_one({'_id': check_id}, {"$push": {'parsed_texts': parsed_texts_id}})
+    return parsed_texts_id
 
 def write_pdf(filename, filepath):
     converted_filepath = convert_to(filepath, target_format='pdf')

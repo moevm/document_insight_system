@@ -42,13 +42,13 @@ def tesseract_recognize(self, check_id):
                 if not text:
                     text = pytesseract.image_to_string(img_cv, **TESSERACT_CONFIG)
                 if text.strip():
-                    logger.info(f"Текст успешно распознан для image_id: {image._id}")
+                    logger.info(f"Текст успешно распознан для изображения с подписью: {image.caption}")
                 else:
-                    logger.info(f"Текст для image_id: {image._id} пустой.")
+                    logger.info(f"Текст для изображения с подписью: {image.caption} пустой.")
                 try:
                     db_methods.add_image_text(image._id, (re.sub(r'\s+', ' ', text)).strip())
                 except Exception as e:
-                    raise ValueError(f"Ошибка при сохранении текста для image_id: {image._id}: {e}")
+                    raise ValueError(f"Ошибка при сохранении текста для изображения с подписью: {image.caption}: {e}")
             try:
                 update_ImageTextCheck(check_id)
             except Exception as e:

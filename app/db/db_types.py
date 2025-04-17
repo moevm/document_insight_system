@@ -160,7 +160,8 @@ class Image(PackableWithId):
         self.caption = dictionary.get('caption', '')  # Подпись к изображению
         self.image_data = dictionary.get('image_data')  # Файл изображения в формате bindata
         self.image_size = dictionary.get('image_size')  # Размер изображения в сантимерах
-        self.text = dictionary.get('text')
+        self.text = dictionary.get('text', None)
+        self.page = dictionary.get('page', None)
 
     def pack(self):
         package = super().pack()
@@ -169,4 +170,12 @@ class Image(PackableWithId):
         package['image_data'] = self.image_data
         package['image_size'] = self.image_size
         package['text'] = self.text
+        package['page'] = self.page
         return package
+
+class ParsedText(PackableWithId):
+    def __init__(self, dictionary=None):
+        super().__init__(dictionary)
+        dictionary = dictionary or {}
+        self.filename = dictionary.get('filename', '')
+        self.parsed_chapters = dictionary.get('parsed_chapters', [])

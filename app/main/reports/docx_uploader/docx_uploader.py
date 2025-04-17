@@ -250,6 +250,7 @@ class DocxUploader(DocumentUploader):
         emu_to_cm  = 360000
         image_found = False
         image_data = None
+        image_style="ВКР_Подпись для рисунков"
         if not self.images:
             for i, paragraph in enumerate(self.file.paragraphs):
                 for run in paragraph.runs:
@@ -274,8 +275,11 @@ class DocxUploader(DocumentUploader):
                         next_paragraph_index = i + 1
                         while next_paragraph_index < len(self.file.paragraphs):
                             next_paragraph = self.file.paragraphs[next_paragraph_index]
+                            style_name = next_paragraph.style.name.lower()
                             next_text = next_paragraph.text.strip()
-                            if next_text and not any("graphic" in r._element.xml for r in next_paragraph.runs):
+                            if any("graphic" in r._element.xml for r in next_paragraph.runs):
+                                break
+                            elif next_text and style_name == image_style.lower() and 'Рисунок' in next_text:
                                 caption = next_text
                                 break
                             next_paragraph_index += 1
