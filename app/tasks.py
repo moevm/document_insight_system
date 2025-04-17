@@ -55,6 +55,7 @@ def create_task(self, check_info):
     try:
         updated_check = check(parse(original_filepath, pdf_filepath, check_id), check_obj)
         updated_check.is_failed = False
+        updated_check.tesseract_result = db_methods.get_check(check_obj._id).tesseract_result
         if updated_check.tesseract_result != -1:
             update_tesseract_criteria_result(updated_check)
         db_methods.update_check(updated_check)  # save to db
