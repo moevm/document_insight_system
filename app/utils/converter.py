@@ -1,9 +1,10 @@
 import os
 import subprocess
-from os.path import dirname, basename
+from os.path import dirname, basename, splitext
 
 
 def run_process(cmd: str): return subprocess.run(cmd.split(' '))
+
 
 def run_process_list(cmd_list: str):
     for cmd in cmd_list:
@@ -15,19 +16,21 @@ def run_process_list(cmd_list: str):
 
 def convert_to(filepath, target_format='pdf'):
     new_filename, outdir = None, dirname(filepath)
-    if filepath.rsplit('.', 1)[-1] == 'tex' and target_format == 'pdf':
+    filename, extension = splitext(basename(filepath))
+    print(filename, extension)
+    if extension == '.tex' and target_format == 'pdf':
         convert_cmd = [
             f"mkdir -p {outdir}/tmp_latex",
             f"pdflatex -output-directory={outdir}/tmp_latex -interaction=nonstopmode {filepath}",
-            f"mv {outdir}/tmp_latex/{basename(filepath).rsplit('.', 1)[0]}.pdf {outdir}",
+            f"mv {outdir}/tmp_latex/{filename}.pdf {outdir}",
             f"rm -rf {outdir}/tmp_latex"
         ]
         if run_process_list(convert_cmd).returncode == 0:
             # success conversion
-            new_filename = "{}.{}".format(filepath.rsplit('.', 1)[0], target_format)
+            new_filename = "{}/{}.{}".format(outdir, filename, target_format)
     else:
         # if file is latex then convert to pdf -> convert to another ext
-        if filepath.rsplit('.', 1)[-1] == 'tex':
+        if extension == '.tex':
             filepath = convert_to(filepath, 'pdf')
         convert_cmd = {
             'pdf': f"soffice --headless --convert-to pdf --outdir {outdir} {filepath}",
@@ -37,9 +40,8 @@ def convert_to(filepath, target_format='pdf'):
 
         if run_process(convert_cmd).returncode == 0:
             # success conversion
-            new_filename = "{}.{}".format(filepath.rsplit('.', 1)[0], target_format)
+            new_filename = "{}/{}.{}".format(outdir, filename, target_format)
 
-    print(f'NEW FILENAME: {new_filename}')
     return new_filename
 
 
