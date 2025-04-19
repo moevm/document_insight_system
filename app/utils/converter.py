@@ -17,7 +17,6 @@ def run_process_list(cmd_list: str):
 def convert_to(filepath, target_format='pdf'):
     new_filename, outdir = None, dirname(filepath)
     filename, extension = splitext(basename(filepath))
-    print(filename, extension)
     if extension == '.tex' and target_format == 'pdf':
         convert_cmd = [
             f"mkdir -p {outdir}/tmp_latex",
