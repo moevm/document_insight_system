@@ -47,6 +47,7 @@ BASE_REPORT_CRITERION = [
     ["empty_task_page_check"],
     ["image_text_check"],
     ['image_quality_check'],
+    ["water_in_the_text_check"],
 ]
 
 DEFAULT_TYPE = 'pres'
