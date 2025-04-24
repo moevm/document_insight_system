@@ -125,6 +125,7 @@ def add_tesseract_result(check_id, result):
         update_tesseract_criteria_result(updated_check)
     db_methods.update_check(updated_check)
 
+
 def update_tesseract_criteria_result(check):
     tesseract_task = db_methods.get_celery_tesseract_task_by_check(str(check._id))
     for criteria in check.enabled_checks:
@@ -135,8 +136,10 @@ def update_tesseract_criteria_result(check):
             check.is_ended = True
             return
 
+
 def count_symbols_in_text(text, symbols_set):
     return sum(1 for char in text if char in symbols_set)
+
 
 def calculate_text_density(text, image_area):
     text_without_spaces = ''.join(text.split())

@@ -138,7 +138,7 @@ def run_md_task_by_api():
         'score': -1,  # score=-1 -> checking in progress
         'is_ended': False,
         'is_failed': False,
-        'params_for_passback': current_user.params_for_passback
+        'params_for_passback': None
     })
     db_methods.add_check(file_id, check)  # add check for parsed_file to db
     task = create_task.delay(check.pack(to_str=True))  # add check to queue
