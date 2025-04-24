@@ -78,7 +78,7 @@ services:
   tesseract_worker:
     image: document_insight_system_image
     restart: always
-    command: celery --app=app.tesseract_tasks.celery worker -n tesseract@worker -Q tesseract-queue --loglevel=info
+    command: celery --app=app.tesseract_tasks.celery worker -n tesseract@worker -Q tesseract-queue,callback-queue --loglevel=info
     environment:
       - CELERY_BROKER_URL=${REDIS_URL}
       - CELERY_RESULT_BACKEND=${REDIS_URL}

@@ -104,7 +104,6 @@ class Check(PackableWithId):
         self.is_failed = dictionary.get('is_failed', None)
         self.is_ended = dictionary.get('is_ended', True)
         self.is_passed = dictionary.get('is_passed', int(self.score) == 1)
-        self.tesseract_result = dictionary.get('tesseract_result', -1)
 
     def calc_score(self):
         # check after implementation criterion pack

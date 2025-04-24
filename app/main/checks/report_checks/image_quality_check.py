@@ -7,7 +7,7 @@ class ImageQualityCheck(BaseReportCriterion):
     description = ''
     id = 'image_quality_check'
     # необходимо подобрать min_laplacian и min_entropy
-    def __init__(self, file_info, min_laplacian=10, min_entropy=1):
+    def __init__(self, file_info, min_laplacian=100, min_entropy=1):
         super().__init__(file_info)
         self.images = self.file.images
         self.min_laplacian = min_laplacian
@@ -33,10 +33,10 @@ class ImageQualityCheck(BaseReportCriterion):
                     continue
                 
                 if self.laplacian_score < self.min_laplacian:
-                    deny_list.append(f"Изображение с подписью '{img.caption}' имеет низкий показатель лапласиана: {self.laplacian_score} (минимум {self.min_laplacian}).<br>")
+                    deny_list.append(f"Изображение с подписью '{img.caption}' имеет низкий показатель лапласиана: {self.laplacian_score:.2f} (минимум {self.min_laplacian:.2f}).<br>")
                 
                 if self.entropy_score < self.min_entropy:
-                    deny_list.append(f"Изображение с подписью '{img.caption}' имеет низкую энтропию: {self.entropy_score} (минимум {self.min_entropy}).<br>")
+                    deny_list.append(f"Изображение с подписью '{img.caption}' имеет низкую энтропию: {self.entropy_score:.2f} (минимум {self.min_entropy:.2f}).<br>")
         else: 
             return answer(True, 'Изображения не найдены!')
         if deny_list:

@@ -22,6 +22,8 @@ BASE_PRES_CRITERION = [
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
+    ["image_text_check"],
+    ['image_quality_check'],
     ["banned_words_in_literature"],
     ["page_counter"],
     ["image_share_check"],
@@ -45,8 +47,6 @@ BASE_REPORT_CRITERION = [
     ["max_abstract_size_check"],
     ["theme_in_report_check"],
     ["empty_task_page_check"],
-    ["image_text_check"],
-    ['image_quality_check'],
     ["water_in_the_text_check"],
 ]
 

@@ -61,12 +61,11 @@ def create_task(self, check_info):
         
         updated_check = check(parsed_file_object, check_obj)
         updated_check.is_failed = False
-        updated_check.tesseract_result = db_methods.get_check(check_obj._id).tesseract_result
-        if updated_check.tesseract_result != -1:
-            update_tesseract_criteria_result(updated_check)
         parsed_text = ParsedText(dict(filename=check_info['filename']))
         parsed_text.parsed_chapters = parse_file.parse_headers_and_pages_and_images(chapters, parsed_file_object)
         db_methods.add_parsed_text(check_id, parsed_text)
+        if db_methods.get_celery_tesseract_task_status_by_check(check_id):
+            update_tesseract_criteria_result(updated_check)
         db_methods.update_check(updated_check)  # save to db
         db_methods.mark_celery_task_as_finished(self.request.id)
 

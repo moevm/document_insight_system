@@ -245,7 +245,6 @@ class DocxUploader(DocumentUploader):
 
     def extract_images_with_captions(self, check_id):
         from app.db.db_methods import save_image_to_db, get_images
-        from app.tesseract_tasks import tesseract_recognize
         
         emu_to_cm  = 360000
         image_found = False
@@ -288,7 +287,6 @@ class DocxUploader(DocumentUploader):
                         image_data = None 
                 
             self.images = get_images(check_id)
-            tesseract_recognize.delay(check_id)
                               
 
 

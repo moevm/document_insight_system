@@ -1,8 +1,5 @@
 from ..base_check import BaseReportCriterion, answer
 
-SYMBOLS_SET = ['%', '1']
-MAX_SYMBOLS_PERCENTAGE = 0
-MAX_TEXT_DENSITY = 4
 
 class ImageTextCheck(BaseReportCriterion):
     label = "Проверка текста, считанного с изображений"
@@ -17,7 +14,15 @@ class ImageTextCheck(BaseReportCriterion):
         self.max_text_density = max_text_density
 
     def check(self):
+        from app.tesseract_tasks import tesseract_recognize, callback_task
+        from db.db_methods import add_celery_tesseract_task
         if self.images:
+            tesseract_task = tesseract_recognize.apply_async(
+                args=[self.images[0].check_id, self.symbols_set, self.max_symbols_percentage, self.max_text_density],
+                link=callback_task.s(self.images[0].check_id),
+                link_error=callback_task.s(self.images[0].check_id)
+            )
+            add_celery_tesseract_task(tesseract_task.id, self.images[0].check_id)
             return answer(True, 'Изображения проверяются!')
         else:
             return answer(True, 'Изображения не найдены!')
