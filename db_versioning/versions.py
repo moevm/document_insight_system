@@ -292,17 +292,17 @@ class Version40(Version):
     CHANGES = "Произведено переименование коллекции 'presentations' -> 'files' для загруженных файлов (и в модели пользователя). Требуется ручное переименование БД 'pres-parser-db' -> 'dis-db'!"
 
     @classmethod
-        def update_database(cls, collections, prev_version):
-            NEW_DB_NAME = 'dis-db'
-            if prev_version in (Version31.VERSION_NAME,):
-                database = collections['users'].database
-                if database.name != NEW_DB_NAME:
-                    raise Exception(f'Неверное название БД {database.name}, должно быть {NEW_DB_NAME}')
+    def update_database(cls, collections, prev_version):
+        NEW_DB_NAME = 'dis-db'
+        if prev_version in (Version31.VERSION_NAME,):
+            database = collections['users'].database
+            if database.name != NEW_DB_NAME:
+                raise Exception(f'Неверное название БД {database.name}, должно быть {NEW_DB_NAME}')
 
-                if ('files' not in collections) and ('presentations' in collections):
-                    db["presentations"].rename("files")
-            else:
-                raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
+            if ('files' in collections) and ('presentations' in collections['files'].name):
+                database["presentations"].rename("files")
+        else:
+            raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
 
 VERSIONS = {
@@ -313,7 +313,7 @@ VERSIONS = {
     '2.2': Version22,
     '3.0': Version30,
     '3.1': Version31,
-    '4.0': Version31,
+    '4.0': Version40,
 }
 LAST_VERSION = '4.0'
 

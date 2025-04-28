@@ -14,7 +14,7 @@ class DBCollections:
             cls.instance.init(db_name, files_collection)
         return cls.instance
 
-    def init(self, db_name, iles_collection):
+    def init(self, db_name, files_collection):
         self.client = MongoClient(self.MONGO_URL)
         self.db = self.client[db_name]
         self.users = self.db['users']
@@ -25,10 +25,10 @@ class DBCollections:
 
     def get_by_name(self, name):
         return dict(
-            users=self.db['users'],
-            files=self.db[files_collection],
-            checks=self.db['checks'],
-            criteria_pack=self.db['criteria_pack']
+            users=self.users,
+            files=self.files,
+            checks=self.checks,
+            criteria_pack=self.criteria_pack
         ).get(name)
 
     def to_dict(self):
