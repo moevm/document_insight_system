@@ -10,11 +10,11 @@ from utils import convert_to
 from .db_types import User, Presentation, Check, Consumers, Logs
 
 client = MongoClient("mongodb://mongodb:27017")
-db = client['pres-parser-db']
+db = client['dis-db']
 fs = GridFSBucket(db)
 
 users_collection = db['users']
-files_info_collection = db['presentations']  # actually, collection for all files (pres and reports)
+files_info_collection = db['files']  # actually, collection for all files (pres and reports)
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
@@ -70,16 +70,16 @@ def edit_user(user):
         return False
 
 
-# Deletes user with given username, deleting also all his presentations and their checks, returns user
+# Deletes user with given username, deleting also all his files and their checks, returns user
 def delete_user(username):
     user = get_user(username)
-    for presentation_id in user.presentations:
+    for presentation_id in user.files:
         user, presentation = delete_presentation(user, presentation_id)
     user = User(users_collection.find_one_and_delete({'username': username}))
     return user
 
 
-# Adds presentations with given name to given user presentations, updates user, returns user and presentations id
+# Adds files with given name to given user files, updates user, returns user and files id
 def add_file_info_and_content(username, filepath, file_type, file_id=None):
     if not file_id: file_id = ObjectId()
     # parsed_file's info
@@ -94,36 +94,36 @@ def add_file_info_and_content(username, filepath, file_type, file_id=None):
     # parsed_file's content in GridFS (file_id = file_info_id)
     add_file_to_db(filename, filepath, file_info_id)
     # add parsed_file to user info
-    users_collection.update_one({'username': username}, {"$push": {'presentations': file_info_id}})
+    users_collection.update_one({'username': username}, {"$push": {'files': file_info_id}})
     return file_info_id
 
 
-# Returns presentations with given id or None
-def get_presentation(presentation_id):
-    file = files_info_collection.find_one({'_id': presentation_id})
+# Returns files with given id or None
+def get_presentation(file_id):
+    file = files_info_collection.find_one({'_id': file_id})
     if file is not None:
         return Presentation(file)
     else:
         return None
 
 
-# Returns presentations of given user with given id or None
+# Returns files of given user with given id or None
 def find_presentation(user, presentation_name):
-    presentations = []
-    for presentation_id in user.presentations:
-        presentations.append(get_presentation(presentation_id))
+    files = []
+    for presentation_id in user.files:
+        files.append(get_presentation(presentation_id))
     presentation = next(
-        (x for x in presentations if x.name == presentation_name), None)
+        (x for x in files if x.name == presentation_name), None)
     if presentation is not None:
         return presentation
     else:
         return None
 
 
-# Deletes presentations with given id, deleting also its checks, returns presentations
+# Deletes files with given id, deleting also its checks, returns files
 def delete_presentation(user, presentation_id):
-    if presentation_id in user.presentations:
-        user.presentations.remove(presentation_id)
+    if presentation_id in user.files:
+        user.files.remove(presentation_id)
         edit_user(user)
         presentation = get_presentation(presentation_id)
         for check_id in presentation.checks:
@@ -135,7 +135,7 @@ def delete_presentation(user, presentation_id):
         return user, get_presentation(presentation_id)
 
 
-# Adds checks to given presentations, updates presentations, returns presentations and checks id
+# Adds checks to given files, updates files, returns files and checks id
 def add_check(file_id, check):
     checks_id = checks_collection.insert_one(check.pack()).inserted_id
     files_info_collection.update_one({'_id': file_id}, {"$push": {'checks': checks_id}})
@@ -172,7 +172,7 @@ def get_check(checks_id):
         return None
 
 
-# Returns presentations parsed_file with given id or None
+# Returns files parsed_file with given id or None
 def get_file_by_check(checks_id):
     try:
         return fs.open_download_stream(checks_id)

@@ -10,7 +10,7 @@ class Version:
         """
         <collections> must contains (objects from pymongo)
         - users
-        - presentations
+        - files
         - checks
         - criteria_pack
         """
@@ -287,6 +287,23 @@ class Version31(Version):
         else:
             raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
 
+class Version40(Version):
+    VERSION_NAME = '4.0'
+    CHANGES = "Произведено переименование коллекции 'presentations' -> 'files' для загруженных файлов (и в модели пользователя). Требуется ручное переименование БД 'pres-parser-db' -> 'dis-db'!"
+
+    @classmethod
+    def update_database(cls, collections, prev_version):
+        NEW_DB_NAME = 'dis-db'
+        if prev_version in (Version31.VERSION_NAME,):
+            database = collections['users'].database
+            if database.name != NEW_DB_NAME:
+                raise Exception(f'Неверное название БД {database.name}, должно быть {NEW_DB_NAME}')
+
+            if ('files' in collections) and ('presentations' in collections['files'].name):
+                database["presentations"].rename("files")
+        else:
+            raise Exception(f'Неподдерживаемый переход с версии {prev_version}')
+
 
 VERSIONS = {
     '1.0': Version10,
@@ -296,8 +313,9 @@ VERSIONS = {
     '2.2': Version22,
     '3.0': Version30,
     '3.1': Version31,
+    '4.0': Version40,
 }
-LAST_VERSION = '3.1'
+LAST_VERSION = '4.0'
 
 for _, ver in VERSIONS.items():
     print(ver.to_dict())
