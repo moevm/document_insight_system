@@ -8,17 +8,17 @@ from versions import LAST_VERSION, VERSIONS
 class DBCollections:
     MONGO_URL = ''
 
-    def __new__(cls):
+    def __new__(cls, db_name="dis-db", files_collection='files'):
         if not hasattr(cls, 'instance'):
             cls.instance = super(DBCollections, cls).__new__(cls)
-            cls.instance.init()
+            cls.instance.init(db_name, files_collection)
         return cls.instance
 
-    def init(self):
+    def init(self, db_name, iles_collection):
         self.client = MongoClient(self.MONGO_URL)
-        self.db = self.client['pres-parser-db']
+        self.db = self.client[db_name]
         self.users = self.db['users']
-        self.presentations = self.db['presentations']
+        self.files = self.db[files_collection]
         self.checks = self.db['checks']
         self.criteria_pack = self.db['criteria_pack']
         self.db_version = self.db['db_version']
@@ -26,7 +26,7 @@ class DBCollections:
     def get_by_name(self, name):
         return dict(
             users=self.db['users'],
-            presentations=self.db['presentations'],
+            files=self.db[files_collection],
             checks=self.db['checks'],
             criteria_pack=self.db['criteria_pack']
         ).get(name)
@@ -71,6 +71,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     DBCollections.MONGO_URL = args.mongo
-    DBCollections()
+
+    if LAST_VERSION < '4.0':
+        DBCollections(db_name='pres-parser-db', files_collection='presentation')
+    else:
+        DBCollections()
 
     update_db_version()

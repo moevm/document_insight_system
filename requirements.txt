@@ -32,6 +32,6 @@ pytz~=2023.3
 lxml~=4.9.2
 urllib3~=2.0.3
 filetype==1.2.0
-language-tool-python==2.7.1
+language-tool-python==2.8.1
 markdown==3.4.4
 md2pdf==1.0.1
