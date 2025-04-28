@@ -21,6 +21,7 @@ BASE_PRES_CRITERION = [
     ["slide_headers_duplication_check"],
     ['pres_image_capture'],
     ['task_tracker'],
+    ['overview_in_tasks'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],

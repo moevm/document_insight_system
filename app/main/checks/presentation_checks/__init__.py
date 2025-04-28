@@ -16,3 +16,4 @@ from .empty_slide_check import PresEmptySlideCheck
 from .slide_headers_duplication_check import SlideHeadersDuplicationCheck
 from .name_of_image_check import PresImageCaptureCheck
 from .task_tracker import TaskTracker
+from .overview_in_tasks import OverviewInTasks
