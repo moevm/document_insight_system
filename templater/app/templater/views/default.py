@@ -23,8 +23,7 @@ from googleapiclient.http import MediaFileUpload
 import logging
 log = logging.getLogger(__name__)
 
-CAPTCHA_SECRET_KEY = os.getenv('YANDEX_CAPTCHA_SECRET', 'ysc2_4e0yUQRwmclR0orDgIUDTMQJdCK2rjYTR0X7pq6L2b84dbd4')
-CAPTCHA_SITE_KEY = os.getenv('YANDEX_CAPTCHA_SITE_KEY', 'ysc1_4e0yUQRwmclR0orDgIUDhWwW8bbpnoRF2tRWeoQU87aa91d6')
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_FILE_PATH = os.path.join(BASE_DIR, '../data/templates.json')
@@ -193,18 +192,17 @@ def verify_captcha_view(request):
         else:
             request.session.flash('Ошибка CAPTCHA. Повторите попытку.', 'error')
 
-    return {'captcha_site_key': CAPTCHA_SITE_KEY}
+    return {'captcha_site_key': 'ysc1_4e0yUQRwmclR0orDgIUDhWwW8bbpnoRF2tRWeoQU87aa91d6'}
 
 def verify_captcha(request):
     token = request.POST.get('smart-token')
-    secret_key = CAPTCHA_SECRET_KEY
 
     if not token:
         log.warning("smart-token отсутствует в POST")
         return False
 
     payload = {
-        "secret": secret_key,
+        "secret": "ysc2_4e0yUQRwmclR0orDgIUDTMQJdCK2rjYTR0X7pq6L2b84dbd4",
         "token": token
     }
 
