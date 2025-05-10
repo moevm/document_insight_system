@@ -20,6 +20,12 @@ from .google_drive import (
 )
 from googleapiclient.http import MediaFileUpload
 
+import logging
+log = logging.getLogger(__name__)
+
+CAPTCHA_SECRET_KEY = os.getenv('YANDEX_CAPTCHA_SECRET', 'ysc2_4e0yUQRwmclR0orDgIUDTMQJdCK2rjYTR0X7pq6L2b84dbd4')
+CAPTCHA_SITE_KEY = os.getenv('YANDEX_CAPTCHA_SITE_KEY', 'ysc1_4e0yUQRwmclR0orDgIUDhWwW8bbpnoRF2tRWeoQU87aa91d6')
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_FILE_PATH = os.path.join(BASE_DIR, '../data/templates.json')
 
@@ -172,6 +178,66 @@ def api_add_template(request):
         return {'error': str(e)}, 500
 
 _ = TranslationStringFactory('templater')
+
+
+
+@view_config(route_name='captcha', renderer='../templates/verify_captcha.jinja2')
+def verify_captcha_view(request):
+    if check_captcha_verified(request):
+        return HTTPFound(location=request.route_url('home'))
+
+    if request.method == 'POST':
+        if verify_captcha(request):
+            request.session['captcha_verified'] = True
+            return HTTPFound(location=request.route_url('home'))
+        else:
+            request.session.flash('Ошибка CAPTCHA. Повторите попытку.', 'error')
+
+    return {'captcha_site_key': CAPTCHA_SITE_KEY}
+
+def verify_captcha(request):
+    token = request.POST.get('smart-token')
+    secret_key = CAPTCHA_SECRET_KEY
+
+    if not token:
+        log.warning("smart-token отсутствует в POST")
+        return False
+
+    payload = {
+        "secret": secret_key,
+        "token": token
+    }
+
+    try:
+        response = requests.post(
+            "https://smartcaptcha.yandexcloud.net/validate",
+            json=payload,
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "TemplaterApp/1.0"
+            },
+            timeout=10
+        )
+
+        log.debug(f"SmartCaptcha ответ: {response.status_code} {response.text}")
+
+        if response.status_code == 403:
+            log.error("403 Forbidden. Проверь: ключ, IP, активность капчи")
+            return True
+
+        response.raise_for_status()
+        result = response.json()
+        return result.get("status") == "ok"
+
+    except Exception as e:
+        log.error(f"Ошибка запроса к капче: {str(e)}")
+        return True
+
+def check_captcha_verified(request):
+    return request.session.get('captcha_verified', False)
+
+
+
 
 
 
