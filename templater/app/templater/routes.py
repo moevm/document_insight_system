@@ -4,7 +4,8 @@ def includeme(config):
     config.add_static_view('static/img', 'static/img')
     config.add_static_view('ViewerJS', 'static/ViewerJS')
 
-    config.add_route('home', '/')
+    config.add_route('captcha', '/')
+    config.add_route('home', '/home')
     config.add_route('upload', '/upload')
     config.add_route('files', '/files')
     config.add_route('verify', '/verify')
