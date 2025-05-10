@@ -20,5 +20,4 @@ ENV PYTHONPATH=/app
 WORKDIR /app
 
 # Устанавливаем приложение в режиме разработки
-RUN cd /usr/local/lib/python3.9/site-packages && \
-    python /app/setup.py develop
+RUN pip install -e .
