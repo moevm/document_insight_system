@@ -75,7 +75,7 @@ def callback_task(result, check_id):
     try:
         time.sleep(10)
         check = db_methods.get_check(ObjectId(check_id))
-        if db_methods.get_celery_task_status_by_check(check_id):
+        if db_methods.get_celery_task_status_by_check(ObjectId(check_id)):
             if check.is_ended:
                 logger.info(f"Проверка успешно завершена для check_id: {check_id}")
                 return
@@ -96,21 +96,22 @@ def update_ImageTextCheck(check_id, symbols_set, max_symbols_percentage, max_tex
     images = db_methods.get_images(check_id)
     deny_list = []
     for image in images:
-        width, height = image.image_size
-        text_density = calculate_text_density(image.text, width * height)
-        if text_density > max_text_density:
-            deny_list.append(
-                f"Изображение с подписью '{image.caption}' имеет слишком высокую плотность текста: "
-                f"{text_density:.2f} (максимум {max_text_density:.2f}). Это может означать, что текст нечитаем.<br>"
-            )
-        symbols_count = count_symbols_in_text(image.text, symbols_set)
-        text_length = len(image.text)
-        symbols_percentage = (symbols_count / text_length) * 100
-        if symbols_percentage > max_symbols_percentage:
-            deny_list.append(
-                f"На изображении с подписью '{image.caption}' содержится слишком много неверно распознанных символов: "
-                f"{symbols_percentage:.2f}% (максимум {max_symbols_percentage:.2f}%). Это может означать, что размер шрифта слишком маленький или текст нечитаем.<br>"
-            )
+        if image.text:
+            width, height = image.image_size
+            text_density = calculate_text_density(image.text, width * height)
+            if text_density > max_text_density:
+                deny_list.append(
+                    f"Изображение с подписью '{image.caption}' имеет слишком высокую плотность текста: "
+                    f"{text_density:.2f} (максимум {max_text_density:.2f}). Это может означать, что текст нечитаем.<br>"
+                )
+            symbols_count = count_symbols_in_text(image.text, symbols_set)
+            text_length = len(image.text)
+            symbols_percentage = (symbols_count / text_length) * 100
+            if symbols_percentage > max_symbols_percentage:
+                deny_list.append(
+                    f"На изображении с подписью '{image.caption}' содержится слишком много неверно распознанных символов: "
+                    f"{symbols_percentage:.2f}% (максимум {max_symbols_percentage:.2f}%). Это может означать, что размер шрифта слишком маленький или текст нечитаем.<br>"
+                )
     if deny_list:
         result = [[f'Проблемы с текстом на изображениях! <br>{"".join(deny_list)}'], 0]
     else:
@@ -132,7 +133,7 @@ def update_tesseract_criteria_result(check):
         if criteria["id"] == 'image_text_check':
             criteria["verdict"] = tesseract_task['tesseract_result'][0]
             criteria["score"] = tesseract_task['tesseract_result'][1]
-            check.score = round(check.score - (1 - tesseract_task['tesseract_result'][1]) / len(BASE_REPORT_CRITERION), 3)
+            check.score = max(0, round(check.score - (1 - tesseract_task['tesseract_result'][1]) / len(BASE_REPORT_CRITERION), 3))
             check.is_ended = True
             return
 
