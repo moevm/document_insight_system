@@ -366,3 +366,5 @@ def dis_redirect(request):
     dis_url = os.environ.get("DIS_URL", "http://localhost:8080/")
     return HTTPFound(location=dis_url)
 
+
+
