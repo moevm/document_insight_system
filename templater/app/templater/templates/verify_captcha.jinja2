@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="{{request.locale_name}}">
+<head>
+    <meta charset="utf-8" />
+    <title>Templater</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" />
+    <style>
+        .captcha-container {
+            margin: 100px auto;
+            max-width: 400px;
+            text-align: center;
+        }
+        .captcha-message {
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="captcha-container">
+        <div class="captcha-message">Пожалуйста, подтвердите, что вы не робот</div>
+        <form id="captchaForm" method="POST">
+            <!-- капча внутри формы -->
+            <div class="smart-captcha"
+                 data-sitekey="{{ captcha_site_key }}"
+                 data-hl="ru"
+                 data-callback="smartCaptchaSuccess"
+                 data-error-callback="smartCaptchaError"></div>
+        </form>
+    </div>
+
+    <script>
+        window.smartCaptchaSuccess = function(token) {
+            console.log("Капча пройдена, токен:", token);
+
+            const form = document.getElementById("captchaForm");
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "smart-token";
+            input.value = token;
+            form.appendChild(input);
+
+            form.submit();
+        };
+
+        window.smartCaptchaError = function() {
+            alert("Ошибка капчи. Повторите попытку.");
+        };
+    </script>
+
+    <script src="https://smartcaptcha.yandexcloud.net/captcha.js" defer></script>
+</body>
+</html>
