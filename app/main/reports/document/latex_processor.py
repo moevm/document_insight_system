@@ -25,6 +25,12 @@ class LatexProcessor():
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(merged_content)
         logger.info(f"Merged LaTeX project saved to {output_file}")
+
+    def _find_main_tex(self, structure: Dict[str, Dict[str, Any]]) -> str:
+        for path in structure:
+            if path.endswith("main.tex"):
+                return path
+        return ""
     
     def _process_file(self, file_path: str, base_path: str) -> str:
         if not os.path.exists(file_path):
