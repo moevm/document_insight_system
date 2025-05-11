@@ -1,15 +1,16 @@
-import os
 import re
-import logging 
-
+import base64
+import logging
+from typing import Dict, Any
 
 logger = logging.getLogger('root_logger')
 
-class LatexProcessor():
+class LatexProcessor:
     """
-    Класс для объединения файлов LaTeX в один документ.
+    Класс для объединения файлов LaTeX в один документ,
+    используя структуру проекта в виде словаря.
     """
-    
+
     def merge_latex_project(
         self,
         project_structure: Dict[str, Dict[str, Any]],
@@ -31,43 +32,46 @@ class LatexProcessor():
             if path.endswith("main.tex"):
                 return path
         return ""
-    
-    def _process_file(self, file_path: str, base_path: str) -> str:
-        if not os.path.exists(file_path):
-            logger.warning(f"File {file_path} not found!")
+
+    def _decode_content(self, base64_content: str) -> str:
+        return base64.b64decode(base64_content).decode('utf-8')
+
+    def _process_file(self, file_path: str, structure: Dict[str, Dict[str, Any]]) -> str:
+        if file_path not in structure:
+            logger.warning(f"Файл {file_path} не найден в структуре проекта.")
             return ""
-        
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
-            
-        content = self._replace_documentclass(content, base_path)
-        content = self._replace_imports(content, base_path)
+
+        content = self._decode_content(structure[file_path]['content'])
+        content = self._replace_documentclass(content, structure)
+        content = self._replace_imports(content, structure, file_path)
         return content
-        
-    def _replace_documentclass(self, content: str, base_path: str) -> str:
+
+    def _replace_documentclass(self, content: str, structure: Dict[str, Dict[str, Any]]) -> str:
         pattern = re.compile(r"\\documentclass\[.*?\]\{(.*?)\}")
         match = pattern.search(content)
-        
+
         if match:
             cls_name = match.group(1).strip()
-            cls_file = os.path.join(base_path, f"{cls_name}.cls")
-            
-            if os.path.exists(cls_file):
-                with open(cls_file, "r", encoding="utf-8") as f:
-                    cls_content = f.read()
-                cls_content = re.escape(cls_content)
+            cls_file_path = next((p for p in structure if p.endswith(f"{cls_name}.cls")), None)
+            if cls_file_path:
+                cls_content = self._decode_content(structure[cls_file_path]['content'])
                 content = pattern.sub(cls_content, content)
+            else:
+                logger.warning(f"Класс {cls_name}.cls не найден в проекте.")
         return content
-    
-    def _replace_imports(self, content: str, base_path: str) -> str:
+
+    def _replace_imports(self, content: str, structure: Dict[str, Dict[str, Any]], current_path: str) -> str:
         pattern = re.compile(r"\\(?:include|input)\{([^}]+)\}")
 
         def replace(match):
             relative_path = match.group(1).strip()
             if not relative_path.endswith(".tex"):
                 relative_path += ".tex"
-            file_path = os.path.join(base_path, relative_path)
-            return self._process_file(file_path, base_path)
+
+            base_dir = "/".join(current_path.split("/")[:-1])
+            full_path = os.path.normpath(os.path.join(base_dir, relative_path)).replace("\\", "/")
+
+            return self._process_file(full_path, structure)
 
         return pattern.sub(replace, content)
 
@@ -75,8 +79,8 @@ class LatexProcessor():
 # Пример использования
 '''
 if __name__ == "__main__":
-    project_dir = "path_to_unzipped_folder"
+    project_structure = dict()
     output_file = "output.tex"
     merger = LatexProcessor()
-    merger.merge_latex_project(project_dir, output_file)
+    merger.merge_latex_project(project_structure, output_file)
 '''
