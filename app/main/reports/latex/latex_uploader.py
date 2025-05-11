@@ -3,8 +3,10 @@
 # from ..docx_uploader.paragraph import Paragraph
 # from ..docx_uploader.style import Style
 # from ..docx_uploader.table import Table, Cell
-# from ..pdf_document.pdf_document_manager import PdfDocumentManager
-# from ..document_uploader import DocumentUploader
+import re
+
+from ..pdf_document.pdf_document_manager import PdfDocumentManager
+from ..document_uploader import DocumentUploader
 from .utils import find_closing_brace
 from .tokenizer import LatexTokenizer
 from .tokenizer import TokenType
@@ -208,6 +210,24 @@ class LatexUploader(DocumentUploader):
             styled_paragraphs.append(current_paragraph)
 
         self.styled_paragraphs = styled_paragraphs
+
+    def page_counter(self):
+        if not self.page_count:
+            for k, v in self.pdf_file.text_on_page.items():
+                line = v[:20] if len(v) > 21 else v
+                if re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip()):
+                    break
+                self.page_count += 1
+                line = ''
+                lines = v.split("\n")
+                for i in range(len(lines)):
+                    if i > 1:
+                        break
+                    if i > 0:
+                        line += " "
+                    line += lines[i].strip()
+                self.first_lines.append(line.lower())
+        return self.page_count
 
     def upload_from_cli(self, file):
         """Интерфейс для командной строки."""
