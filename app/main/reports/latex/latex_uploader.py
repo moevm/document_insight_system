@@ -11,8 +11,15 @@ from .tokenizer import TokenType
 
 
 class LatexUploader(DocumentUploader):
+    STYLE_MAP = {
+        "textbf": "bold",
+        "textit": "italic",
+        "underline": "underline",
+        "emph": "italic",
+        "texttt": "monospace"
+    }
+
     def __init__(self):
-        """Инициализирует загрузчик LaTeX-документов."""
         super().__init__()
         self.inline_shapes = []
         self.core_properties = None
@@ -25,14 +32,12 @@ class LatexUploader(DocumentUploader):
         self.page_count = 0
 
     def upload(self, file, pdf_filepath=''):
-        """Загружает LaTeX-файл и инициализирует PDF-менеджер."""
         with open(file, 'r', encoding='utf-8') as f:
             self.latex_content = f.read()
         self.file_path = file
         self.pdf_file = PdfDocumentManager(file, pdf_filepath)
 
     def extract_preamble(self, latex_content):
-        """Извлекает преамбулу документа."""
         start = latex_content.find(r'\documentclass')
         if start == -1:
             return ''
@@ -40,7 +45,6 @@ class LatexUploader(DocumentUploader):
         return latex_content[start:end] if end != -1 else latex_content[start:]
 
     def remove_comments(self, text):
-        """Удаляет комментарии из текста."""
         lines = text.split('\n')
         return '\n'.join(
             line[:line.find('%')].rstrip() if '%' in line else line.rstrip()
@@ -48,7 +52,6 @@ class LatexUploader(DocumentUploader):
         )
 
     def extract_command(self, preamble, command_name):
-        """Извлекает значение LaTeX-команды."""
         def skip_whitespaces(pos, text):
             while pos < len(text) and text[pos].isspace():
                 pos += 1
@@ -81,7 +84,6 @@ class LatexUploader(DocumentUploader):
         return preamble[pos:close_pos].strip()
 
     def parse(self):
-        """Основной метод парсинга документа."""
         raw_preamble = self.extract_preamble(self.latex_content)
         preamble = self.remove_comments(raw_preamble)
 
@@ -95,38 +97,32 @@ class LatexUploader(DocumentUploader):
         self.tokens = tokenizer.tokenize(self.latex_content)
 
         self._process_tokens()
-
         self.paragraphs = self.__make_tmp_paragraphs()
         self.parse_effective_styles()
         self.tables = self.__make_tmp_tables()
 
     def _process_tokens(self):
-        """Первичная обработка токенов документа."""
         self.env_stack = []
         for token in self.tokens:
-            if token.type == TokenType.COMMAND:
-                self._handle_command_token(token)
-            elif token.type == TokenType.ENVIRONMENT:
-                self._handle_environment_token(token)
+            match token.type:
+                case TokenType.COMMAND:
+                    self._handle_command_token(token)
+                case TokenType.ENVIRONMENT:
+                    self._handle_environment_token(token)
 
     def _handle_command_token(self, token):
-        """Обработка токенов-команд."""
         pass
 
     def _handle_environment_token(self, token):
-        """Обработка окружений документа."""
         pass
 
     def __make_tmp_paragraphs(self):
-        """Создаёт временные параграфы для тестирования."""
         return [Paragraph(None) for _ in range(3)]
 
     def __make_tmp_tables(self):
-        """Создаёт временные таблицы для тестирования."""
         return [Table([Cell() for _ in range(3)])]
 
     def parse_effective_styles(self):
-        """Парсит стили текста на основе LaTeX-команд."""
         styled_paragraphs = []
         current_paragraph = {"text": "", "runs": []}
 
@@ -140,52 +136,48 @@ class LatexUploader(DocumentUploader):
         while i < len(self.tokens):
             token = self.tokens[i]
 
-            if token.type == TokenType.COMMAND:
-                cmd = token.value
-                if cmd in ["textbf", "textit", "underline", "emph", "texttt"]:
-                    style_map = {
-                        "textbf": "bold",
-                        "textit": "italic",
-                        "underline": "underline",
-                        "emph": "italic",
-                        "texttt": "monospace"
-                    }
+            match token.type:
+                case TokenType.COMMAND:
+                    cmd = token.value
+                    if cmd not in self.STYLE_MAP:
+                        i += 1
+                        continue
+
                     if i + 2 < len(self.tokens) and self.tokens[i + 1].type == TokenType.BRACE_OPEN:
                         j = i + 2
                         text_inside = ""
                         brace_level = 1
                         while j < len(self.tokens) and brace_level > 0:
-                            if self.tokens[j].type == TokenType.BRACE_OPEN:
-                                brace_level += 1
-                            elif self.tokens[j].type == TokenType.BRACE_CLOSE:
-                                brace_level -= 1
-                                if brace_level == 0:
-                                    break
-                            else:
-                                if self.tokens[j].type == TokenType.TEXT:
+                            match self.tokens[j].type:
+                                case TokenType.BRACE_OPEN:
+                                    brace_level += 1
+                                case TokenType.BRACE_CLOSE:
+                                    brace_level -= 1
+                                    if brace_level == 0:
+                                        break
+                                case TokenType.TEXT:
                                     text_inside += self.tokens[j].value
                             j += 1
 
-                        style = style_map[cmd]
+                        style = self.STYLE_MAP[cmd]
                         current_paragraph["runs"].append(apply_styles(text_inside, [style]))
                         current_paragraph["text"] += text_inside
                         i = j
                     else:
                         i += 1
-                else:
+
+                case TokenType.TEXT:
+                    current_paragraph["runs"].append(apply_styles(token.value, []))
+                    current_paragraph["text"] += token.value
                     i += 1
 
-            elif token.type == TokenType.TEXT:
-                current_paragraph["runs"].append(apply_styles(token.value, []))
-                current_paragraph["text"] += token.value
-                i += 1
+                case TokenType.SPECIAL_CHAR:
+                    current_paragraph["runs"].append(apply_styles(" ", []))
+                    current_paragraph["text"] += " "
+                    i += 1
 
-            elif token.type == TokenType.SPECIAL_CHAR:
-                current_paragraph["runs"].append(apply_styles(" ", []))
-                current_paragraph["text"] += " "
-                i += 1
-            else:
-                i += 1
+                case _:
+                    i += 1
 
         if current_paragraph["text"]:
             styled_paragraphs.append(current_paragraph)
@@ -193,12 +185,10 @@ class LatexUploader(DocumentUploader):
         self.styled_paragraphs = styled_paragraphs
 
     def upload_from_cli(self, file):
-        """Интерфейс для командной строки."""
         self.upload(file=file)
 
     @staticmethod
     def main(args):
-        """Точка входа CLI."""
         uploader = LatexUploader()
         uploader.upload_from_cli(file=args.file)
         uploader.parse()
