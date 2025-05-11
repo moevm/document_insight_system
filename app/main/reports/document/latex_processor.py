@@ -10,10 +10,18 @@ class LatexProcessor():
     Класс для объединения файлов LaTeX в один документ.
     """
     
-    def merge_latex_project(self, project_path: str, output_file: str) -> None:
-        main_file = os.path.join(project_path, "main.tex")
-        merged_content = self._process_file(main_file, project_path)
-        
+    def merge_latex_project(
+        self,
+        project_structure: Dict[str, Dict[str, Any]],
+        output_file: str
+    ) -> None:
+        main_path = self._find_main_tex(project_structure)
+        if not main_path:
+            logger.error("main.tex не найден в структуре проекта.")
+            raise ValueError("main.tex не найден.")
+
+        merged_content = self._process_file(main_path, project_structure)
+
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(merged_content)
         logger.info(f"Merged LaTeX project saved to {output_file}")
