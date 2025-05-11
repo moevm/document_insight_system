@@ -1,13 +1,30 @@
-from ..docx_uploader.core_properties import CoreProperties
-from ..docx_uploader.inline_shape import InlineShape
-from ..docx_uploader.paragraph import Paragraph
-from ..docx_uploader.style import Style
-from ..docx_uploader.table import Table, Cell
-from ..pdf_document.pdf_document_manager import PdfDocumentManager
-from ..document_uploader import DocumentUploader
+# from ..docx_uploader.core_properties import CoreProperties
+# from ..docx_uploader.inline_shape import InlineShape
+# from ..docx_uploader.paragraph import Paragraph
+# from ..docx_uploader.style import Style
+# from ..docx_uploader.table import Table, Cell
+# from ..pdf_document.pdf_document_manager import PdfDocumentManager
+# from ..document_uploader import DocumentUploader
 from .utils import find_closing_brace
 from .tokenizer import LatexTokenizer
 from .tokenizer import TokenType
+
+
+# Временные заглушки для теста
+class CoreProperties:
+    def __init__(self, title=None, author=None, date=None):
+        self.title = title
+        self.author = author
+        self.date = date
+
+class Paragraph:
+    def __init__(self, _): pass
+
+class Table:
+    def __init__(self, _): pass
+
+class Cell:
+    def __init__(self): pass
 
 
 class LatexUploader(DocumentUploader):
