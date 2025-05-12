@@ -107,6 +107,26 @@ class LatexProjectUnarchiver:
                     'content': content_b64,
                     'name': file_name
                 }
+    
+    def save_files_to_folder(self, outdir: str) -> str:
+        """
+        Сохраняет все файлы из архива в папку.
+        """
+        # Определяем имя папки на основе имени архива (без расширения)
+        archive_name = os.path.basename(self.path_on_root_of_project)
+        folder_name = os.path.splitext(archive_name)[0]
+        
+        # Создаем полный путь к папке
+        target_folder = os.path.join(outdir, folder_name)
+        
+        # Создаем папку если она не существует
+        os.makedirs(target_folder, exist_ok=True)
+        
+        # Извлекаем все файлы
+        with zipfile.ZipFile(self.path_on_root_of_project, 'r') as zip_ref:
+            zip_ref.extractall(target_folder)
+            
+        return target_folder
 
 """
 def logger():
