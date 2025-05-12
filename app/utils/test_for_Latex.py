@@ -1,6 +1,7 @@
 import zipfile
 import base64
 import os
+import tempfile
 from typing import Dict, Any
 
 ALLOWED_EXTENSIONS = {
@@ -41,7 +42,7 @@ class LatexProjectUnarchiver:
     def __init__(self, path_on_root_of_project: str):
         self.path_on_root_of_project = path_on_root_of_project
         self.structure_of_project: Dict[str, Dict[str, Any]] = {}
-        self.is_single_tex_file = False
+        self.processed_file_path = None
 
     def __is_latex_project(self) -> bool:
         """
@@ -74,28 +75,53 @@ class LatexProjectUnarchiver:
         """Возвращает структуру проекта."""
         return self.structure_of_project
 
-    def check_project_validity(self) -> bool:
-        """Проверяет, является ли LaTeX проектом: zip или одиночный tex файл."""
-        if self.__is_latex_project():
-            self.is_single_tex_file = False
-            return True
-        if self.__is_single_tex_file():
-            self.is_single_tex_file = True
-            return True
-        return False
+    def __is_zip_file(self) -> bool:
+        return zipfile.is_zipfile(self.path_on_root_of_project)
 
-    def __process_single_tex_file(self):
+    def __is_single_tex_file(self) -> bool:
+        return os.path.isfile(self.path_on_root_of_project) and self.path_on_root_of_project.endswith('.tex')
+
+    def check_project_validity(self) -> bool:
+        return self.__is_single_tex_file() or self.__is_zip_file()
+
+    def __process_single_tex_file(self, path: str):
         """Обработка одиночного .tex файла."""
-        with open(self.path_on_root_of_project, 'rb') as file:
+        with open(path, 'rb') as file:
             content = file.read()
             content_b64 = base64.b64encode(content).decode('utf-8')
-
-        file_name = os.path.basename(self.path_on_root_of_project)
+        file_name = os.path.basename(path)
         self.structure_of_project[file_name] = {
             'type': 'latex',
             'content': content_b64,
             'name': file_name
         }
+
+    def __unzip_and_merge_tex_files(self) -> str:
+        """
+        Распаковывает zip, объединяет все .tex файлы и возвращает путь к итоговому merged_main.tex
+        """
+        temp_dir = tempfile.mkdtemp()
+        with zipfile.ZipFile(self.path_on_root_of_project, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
+
+        merged_content = []
+        for root, _, files in os.walk(temp_dir):
+            for file in files:
+                if file.endswith('.tex'):
+                    full_path = os.path.join(root, file)
+                    with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        merged_content.append(f"% >>> {file} <<<\n")
+                        merged_content.append(f.read())
+                        merged_content.append("\n\n")
+
+        if not merged_content:
+            raise ValueError("Архив не содержит .tex файлов")
+
+        merged_path = os.path.join(temp_dir, 'merged_main.tex')
+        with open(merged_path, 'w', encoding='utf-8') as merged_file:
+            merged_file.write("\n".join(merged_content))
+
+        return merged_path
 
     def extract_and_decode_project_structure(self) -> None:
         """
@@ -134,19 +160,17 @@ class LatexProjectUnarchiver:
 
 
 if __name__ == '__main__':
-    # Пример использования
-    project_path = 'ETU-latex-template-main1.zip'
+    project_path = 'ETU-latex-template-main.zip'  # или 'main.tex'
     unarchiver = LatexProjectUnarchiver(project_path)
 
     try:
         if unarchiver.check_project_validity():
             unarchiver.extract_and_decode_project_structure()
             structure = unarchiver.get_project_structure()
-            print("Структура проекта успешно извлечена:")
-            print(structure)
+            print("Структура проекта:")
             for path, data in structure.items():
-                print(f"Путь: {path}, Тип: {data['type']}, Имя: {data['name']}")
+                print(f"Файл: {data['name']}, Тип: {data['type']}")
         else:
-            print("Архив не является валидным LaTeX проектом")
+            print("Файл не является .tex или .zip")
     except Exception as e:
         print(f"Ошибка: {e}")
