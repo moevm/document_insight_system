@@ -281,6 +281,19 @@ class LatexUploader(DocumentUploader):
             if header_text.find('список использованных источников') >= 0:
                 self.literature_header = header
         return self.literature_header
+    
+    def find_literature_page(self):
+        if self.literature_page:
+            return self.literature_page
+        
+        for k, v in self.pdf_file.text_on_page.items():
+            line = v[:40] if len(v) > 21 else v
+            if re.search('список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)', line.strip().lower()):
+                break
+            self.literature_page += 1
+        self.literature_page += 1
+
+        return self.literature_page
 
     def show_chapters(self, work_type):
         chapters_str = "<br>"
