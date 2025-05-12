@@ -23,6 +23,9 @@ ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project/app"
 
 RUN apt update && apt install -y texlive-latex-base \
     texlive-fonts-recommended \
-    texlive-lang-cyrillic
+    texlive-lang-cyrillic \
+    texlive-xetex \
+    latexmk \
+    biber
 
 CMD ./scripts/local_start.sh
