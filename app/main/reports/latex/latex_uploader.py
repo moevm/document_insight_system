@@ -248,6 +248,31 @@ class LatexUploader(DocumentUploader):
 
         return self.headers_page
     
+    def make_chapters(self, work_type):
+        if self.chapters:
+            return self.chapters
+        tmp_chapters = []
+        if work_type == 'VKR':
+            header_ind = -1
+            par_num = 0
+            head_par_ind = -1
+            for par_ind in range(len(self.styled_paragraphs)):
+                head_par_ind += 1
+                style_name = self.paragraphs[par_ind].paragraph_style_name.lower()
+                if style_name.find("heading") >= 0:
+                    header_ind += 1
+                    par_num = 0
+                    tmp_chapters.append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"].strip(),
+                                         "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind,
+                                         "child": []})
+                elif header_ind >= 0:
+                    par_num += 1
+                    tmp_chapters[header_ind]["child"].append(
+                        {"style": style_name, "text": self.styled_paragraphs[par_ind]["text"],
+                         "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind})
+            self.chapters = tmp_chapters
+        return self.chapters
+    
     def find_literature_vkr(self, work_type):
         if self.literature_header:
             return self.literature_header
