@@ -203,6 +203,50 @@ class LatexUploader(DocumentUploader):
 
         return self.page_count
 
+    def make_headers(self, work_type):
+        if self.headers:
+            return self.headers
+
+        if work_type == 'VKR':
+            headers = [
+                {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный",
+                "main_character": True, "page": 0},
+                {"name": "Задание на выпускную квалификационную работу", "marker": False, "key": "задание",
+                "main_character": True, "page": 0},
+                {"name": "Календарный план", "marker": False, "key": "календарный план", "main_character": True,
+                "page": 0},
+                {"name": "Реферат", "marker": False, "key": "реферат", "main_character": False,  "page": 0},
+                {"name": "Abstract", "marker": False, "key": "abstract", "main_character": False, "page": 0},
+                {"name": "Cодержание", "marker": False, "key": "содержание", "main_character": False, "page": 0}
+            ]
+
+            for page in range(1, self.page_count if self.page_counter() < 2 * len(headers) else 2 * len(headers)):
+                page_text = (self.pdf_file.get_text_on_page()[page].split("\n")[0]).lower()
+                for i in range(len(headers)):
+                    if not headers[i]["marker"]:
+                        if page_text.find(headers[i]["key"]) >= 0:
+                            headers[i]["marker"] = True
+                            headers[i]["page"] = page
+                            break
+
+            self.headers = headers
+
+        return self.headers
+
+    def find_header_page(self, work_type):
+        if self.headers_page:
+            return self.headers_page
+
+        if work_type != 'VKR':
+            self.headers_page = 1
+            return self.headers_page
+
+        for header in self.make_headers(work_type):
+            if header["name"].find('Cодержание') >= 0:
+                self.headers_page = header["page"] if header["page"] else 1
+                break
+
+        return self.headers_page
 
     def upload_from_cli(self, file):
         self.upload(file=file)
