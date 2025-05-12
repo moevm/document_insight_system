@@ -247,6 +247,15 @@ class LatexUploader(DocumentUploader):
                 break
 
         return self.headers_page
+    
+    def find_literature_vkr(self, work_type):
+        if self.literature_header:
+            return self.literature_header
+        for header in self.make_chapters(work_type):
+            header_text = header["text"].lower()
+            if header_text.find('список использованных источников') >= 0:
+                self.literature_header = header
+        return self.literature_header
 
     def show_chapters(self, work_type):
         chapters_str = "<br>"
