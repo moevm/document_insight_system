@@ -8,6 +8,8 @@ from main.reports.docx_uploader import DocxUploader
 from main.reports.md_uploader import MdUploader
 from main.reports.latex import LatexUploader
 from utils import convert_to
+from utils.latex_project_unarchiver import LatexProjectUnarchiver
+from utils.latex_processor import LatexProcessor
 
 logger = logging.getLogger('root_logger')
 
@@ -39,12 +41,28 @@ def parse(filepath, pdf_filepath):
             doc.parse(md_text)
             file_object = doc
 
+
         elif tmp_filepath.endswith('.tex'):
             new_filepath = filepath
             latex = LatexUploader()
             latex.upload(new_filepath, pdf_filepath)
             latex.parse()
             file_object = latex
+
+        elif tmp_filepath.endswith('.zip'):
+            unarchiver = LatexProjectUnarchiver(filepath)
+            unarchiver.extract_and_decode_project_structure()
+            project_structure = unarchiver.get_project_structure()
+
+            dir_path = os.path.dirname(filepath)
+            processor = LatexProcessor(project_structure, dir_path)
+            new_filepath = processor.merge_latex_project()
+
+            latex = LatexUploader()
+            latex.upload(new_filepath, pdf_filepath)
+            latex.parse()
+            file_object = latex
+
 
         else:
             raise ValueError("Файл с недопустимым именем или недопустимого формата: " + filepath)
