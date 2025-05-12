@@ -1,3 +1,5 @@
+import re
+
 from ..docx_uploader.core_properties import CoreProperties
 from ..docx_uploader.inline_shape import InlineShape
 from ..docx_uploader.paragraph import Paragraph
@@ -183,6 +185,24 @@ class LatexUploader(DocumentUploader):
             styled_paragraphs.append(current_paragraph)
 
         self.styled_paragraphs = styled_paragraphs
+
+    def page_counter(self):
+        if self.page_count:
+            return self.page_count
+
+        for k, v in self.pdf_file.text_on_page.items():
+            preview = v[:20] if len(v) > 20 else v
+            if re.search(r'ПРИЛОЖЕНИЕ [А-Я]', preview.strip()):
+                break
+
+            self.page_count += 1
+
+            lines = v.split("\n")
+            first_two = " ".join(line.strip() for line in lines[:2])
+            self.first_lines.append(first_two.lower())
+
+        return self.page_count
+
 
     def upload_from_cli(self, file):
         self.upload(file=file)
