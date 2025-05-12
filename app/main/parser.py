@@ -9,7 +9,7 @@ from main.reports.md_uploader import MdUploader
 from main.reports.latex import LatexUploader
 from utils import convert_to
 from utils.latex_project_unarchiver import LatexProjectUnarchiver
-from utils.latex_processor import LatexProcessor
+from main.reports.document.latex_processor import LatexProcessor
 
 logger = logging.getLogger('root_logger')
 
