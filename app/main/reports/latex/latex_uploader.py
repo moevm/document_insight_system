@@ -248,6 +248,15 @@ class LatexUploader(DocumentUploader):
 
         return self.headers_page
 
+    def show_chapters(self, work_type):
+        chapters_str = "<br>"
+        for header in self.make_chapters(work_type):
+            if header["style"] == 'heading 2':
+                chapters_str += header["text"] + "<br>"
+            else:
+                chapters_str += "&nbsp;&nbsp;&nbsp;&nbsp;" + header["text"] + "<br>"
+        return chapters_str
+
     def upload_from_cli(self, file):
         self.upload(file=file)
 
