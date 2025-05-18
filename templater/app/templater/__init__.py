@@ -65,10 +65,10 @@ def make_application(global_config, settings, templater_config):
 
     config.add_request_method(add_db, 'db', reify=True)
     config.add_request_method(add_fs, 'fs', reify=True)
-    config = Configurator(settings=settings)
+    
 
-    # Настраиваем фабрику сессий
-    my_session_factory = SignedCookieSessionFactory('itsaseekreet')  # 🔑 замените ключ на свой секрет
+   
+    my_session_factory = SignedCookieSessionFactory('itsaseekreet')
     config.set_session_factory(my_session_factory)
     config.add_translation_dirs('locale/')
 
