@@ -152,8 +152,36 @@ class LatexUploader(DocumentUploader):
         return tmp_paragraphs
 
 
+    # def __make_tmp_tables(self):
+    #     return [Table([Cell() for _ in range(3)])]
     def __make_tmp_tables(self):
-        return [Table([Cell() for _ in range(3)])]
+        tables = []
+        current_table = []
+        in_table = False
+
+        for token in self.tokens:
+            if token.type == TokenType.ENVIRONMENT and token.name == "tabular":
+                in_table = True
+                current_table = []
+                rows = token.content.split(r'\\')  # предполагаем, что строки разделяются `\\`
+                for row in rows:
+                    row = row.strip()
+                    if not row:
+                        continue
+                    cells = row.split('&')  # ячейки таблицы разделяются `&`
+                    cell_objs = []
+                    for cell_text in cells:
+                        styled_paragraph = {"text": cell_text.strip(), "runs": [{"text": cell_text.strip(), "style": []}]}
+                        paragraph = Paragraph(None)
+                        paragraph.text = styled_paragraph["text"]
+                        paragraph.runs = styled_paragraph["runs"]
+                        cell_objs.append(Cell(None, [paragraph]))
+                    current_table.append(cell_objs)
+                tables.append(Table(None, current_table))
+                in_table = False
+
+        return tables
+        
 
     def parse_effective_styles(self):
         styled_paragraphs = []
