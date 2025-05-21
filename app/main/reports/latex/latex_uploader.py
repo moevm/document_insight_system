@@ -120,6 +120,32 @@ class LatexUploader(DocumentUploader):
 
     def __make_tmp_paragraphs(self):
         return [Paragraph(None) for _ in range(3)]
+    
+
+    def __make_tmp_paragraphs(self):
+        tmp_paragraphs = []
+        
+        for styled_par in self.styled_paragraphs:
+            # Создаем объект Paragraph без привязки к оригинальному docx элементу
+            paragraph = Paragraph(None)
+            
+            # Устанавливаем текст
+            paragraph.text = styled_par["text"]
+            
+            # Устанавливаем "runs", если такая структура поддерживается в Paragraph
+            paragraph.runs = styled_par["runs"]
+            
+            # Определяем имя стиля параграфа на основе первого стиля, либо оставляем как "Normal"
+            if styled_par["runs"]:
+                styles = set(style for run in styled_par["runs"] for style in run.get("style", []))
+                paragraph.paragraph_style_name = " ".join(styles) if styles else "Normal"
+            else:
+                paragraph.paragraph_style_name = "Normal"
+            
+            tmp_paragraphs.append(paragraph)
+
+        return tmp_paragraphs
+
 
     def __make_tmp_tables(self):
         return [Table([Cell() for _ in range(3)])]
@@ -306,6 +332,9 @@ class LatexUploader(DocumentUploader):
 
     def upload_from_cli(self, file):
         self.upload(file=file)
+
+
+    
 
     @staticmethod
     def main(args):
