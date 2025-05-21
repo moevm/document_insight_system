@@ -23,7 +23,7 @@ def convert_to(filepath, target_format='pdf'):
     if extension == '.tex' and target_format == 'pdf':
         convert_cmd = [
             f"mkdir -p {outdir}/tmp_latex",
-            f"pdflatex -output-directory={outdir}/tmp_latex -interaction=nonstopmode {filepath}",
+            f"latexmk -xelatex -output-directory={outdir}/tmp_latex -interaction=nonstopmode -file-line-error -pdf {filepath}",
             f"mv {outdir}/tmp_latex/{filename}.pdf {outdir}",
             f"rm -rf {outdir}/tmp_latex"
         ]
@@ -37,17 +37,16 @@ def convert_to(filepath, target_format='pdf'):
             unarchived_dir = unarchiver.save_files_to_folder(outdir)
 
             main_latex_file = f'{unarchived_dir}/main.tex'
-            result_dir = f'{unarchived_dir}/result'
 
             run_process(f'chmod -R 777 {unarchived_dir}')
             run_process(
-                'latexmk -xelatex -shell-escape -synctex=1 -interaction=nonstopmode -file-line-error '
-                f'-outdir={result_dir} -aux-directory={result_dir} {main_latex_file}',
+                'latexmk -xelatex -shell-escape -interaction=nonstopmode -file-line-error '
+                f'-outdir={unarchived_dir} {main_latex_file}',
                 unarchived_dir
             )
 
             move_and_clean_cmd = [
-                f'cp {result_dir}/main.pdf {outdir}/{filename}.pdf',
+                f'cp {unarchived_dir}/main.pdf {outdir}/{filename}.pdf',
                 f'rm -rf {unarchived_dir}'
             ]
             if run_process_list(move_and_clean_cmd).returncode == 0:
