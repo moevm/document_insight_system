@@ -29,7 +29,7 @@ class DocxUploader(DocumentUploader):
         self.pdf_file = PdfDocumentManager(file, pdf_filepath)
 
     def parse(self):
-        self.core_properties = CoreProperties(self.file)
+        self.core_properties = CoreProperties.from_doc(self.file)
         for i in range(len(self.file.inline_shapes)):
             self.inline_shapes.append(InlineShape(self.file.inline_shapes[i]))
         self.paragraphs = self.__make_paragraphs(self.file.paragraphs)
