@@ -85,20 +85,22 @@ class LatexUploader(DocumentUploader):
 
         return preamble[pos:close_pos].strip()
     
-    @staticmethod
-    def from_doc(latex_content, extract_command_fn):
-        preamble = LatexUploader.remove_comments(
-            LatexUploader.extract_preamble(latex_content)
-        )
+    def extract_core_properties_from_preamble(self):
+        preamble = self.extract_preamble(self.latex_content)
+        preamble = self.remove_comments(preamble)
 
-        return CoreProperties(
-            title=extract_command_fn(preamble, 'title'),
-            author=extract_command_fn(preamble, 'author'),
-            date=extract_command_fn(preamble, 'date')
+        title = self.extract_command(preamble, 'title')
+        author = self.extract_command(preamble, 'author')
+        date = self.extract_command(preamble, 'date')
+
+        self.core_properties = CoreProperties(
+            title=title,
+            author=author,
+            date=date,
         )
 
     def parse(self):
-        self.core_properties = self.from_doc(self.latex_content, self.extract_command)
+        self.extract_core_properties_from_preamble()
 
         tokenizer = LatexTokenizer()
         self.tokens = tokenizer.tokenize(self.latex_content)
