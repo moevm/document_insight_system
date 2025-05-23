@@ -92,11 +92,21 @@ class LatexUploader(DocumentUploader):
         title = self.extract_command(preamble, 'title')
         author = self.extract_command(preamble, 'author')
         date = self.extract_command(preamble, 'date')
+        university = self.extract_command(preamble, 'university')
+        faculty = self.extract_command(preamble, 'faculty')
+        department = self.extract_command(preamble, 'department')
+        speciality = self.extract_command(preamble, 'speciality')
+        degree = self.extract_command(preamble, 'degree')
 
         self.core_properties = CoreProperties(
             title=title,
             author=author,
             date=date,
+            university=university,
+            faculty=faculty,
+            department=department,
+            speciality=speciality,
+            degree=degree
         )
 
     def parse(self):
