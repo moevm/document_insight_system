@@ -18,7 +18,12 @@ class CoreProperties:
         subject=None,
         title=None,
         version=None,
-        date=None  
+        date=None, 
+        university=None, # Название вуза
+        faculty=None,    # Факультет
+        department=None, # Кафедра
+        speciality=None, # Специальность
+        degree=None      # Уровень образования
     ):
         self.author = author
         self.category = category
@@ -35,7 +40,12 @@ class CoreProperties:
         self.subject = subject
         self.title = title
         self.version = version
-        self.date = date 
+        self.date = date
+        self.university = university
+        self.faculty = faculty
+        self.department = department
+        self.speciality = speciality
+        self.degree = degree
 
     @staticmethod
     def from_doc(doc):
@@ -62,10 +72,12 @@ class CoreProperties:
             self.author, self.category, self.comments, self.content_status, self.created,
             self.identifier, self.keywords, self.language, self.last_modified_by,
             self.last_printed, self.modified, self.revision, self.subject, self.title,
-            self.version, self.date 
+            self.version, self.date, self.university, self.faculty, self.department, 
+            self.speciality, self.degree
         ]})
         df.index = [
             'AUTHOR', 'CATEGORY', 'COMMENTS', 'CONTENT STATUS', 'CREATED', 'IDENTIFIER', 'KEYWORDS', 'LANGUAGE',
-            'LAST MODIFIED BY', 'LAST PRINTED', 'MODIFIED', 'REVISION', 'SUBJECT', 'TITLE', 'VERSION', 'DATE'  
+            'LAST MODIFIED BY', 'LAST PRINTED', 'MODIFIED', 'REVISION', 'SUBJECT', 'TITLE', 'VERSION', 'DATE', 
+            'UNIVERSITY', 'FACULTY', 'DEEPARTMENT', 'SPECIALITY', 'DEGREE'
         ]
         return df.to_string()
