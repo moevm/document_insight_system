@@ -14,11 +14,21 @@
         <h3>{{ template.name }}</h3>
         <p><strong>Тип:</strong> {{ template.type }}</p>
         <p><strong>Описание:</strong> {{ template.description }}</p>
-        <p><small> {{ template.created_at }}</small></p>
+        <p><small>{{ template.created_at }}</small></p>
+
+        <p><strong>Статус данных:</strong>
+            {% if template.data %}
+                <span style="color: green;">Данные введены</span>
+            {% else %}
+                <span style="color: red;">Данные отсутствуют</span>
+            {% endif %}
+        </p>
+
         <div class="template-card-actions">
             <button class="btn btn-edit" onclick="editTemplate({{ template.id }})">Редактировать</button>
             <button class="btn btn-delete" onclick="deleteTemplate({{ template.id }})">Удалить</button>
             <button class="btn btn-export" onclick="exportTemplate({{ template.id }})">Export</button>
+            <button class="btn btn-input-data" onclick="inputData({{ template.id }})">Ввести данные</button>
         </div>
     </div>
     {% endfor %}
@@ -48,7 +58,6 @@
     
     async function exportTemplate(templateId) {
         try {
-            // 1. Запросить OAuth-ссылку
             const authRes = await fetch('/start_auth');
             const authData = await authRes.json();
 
@@ -57,16 +66,11 @@
                 return;
             }
 
-            // 2. Открыть Google-авторизацию
             const authWindow = window.open(authData.auth_url, "_blank");
-
-            // 3. Подождать пока пользователь завершит вход (пример: 5 секунд)
             await new Promise(resolve => setTimeout(resolve, 10000));
 
-            // 4. Запросить список папок (опционально: можно заменить на заранее выбранную)
             const folderId = prompt("Введите ID папки Google Drive (оставьте пустым для корневой)");
 
-            // 5. Сделать экспорт
             const exportRes = await fetch(`/export_template/${templateId}`, {
                 method: 'POST',
                 headers: {
@@ -85,6 +89,10 @@
         } catch (error) {
             alert("Ошибка при выполнении запроса: " + error.message);
         }
+    }
+
+    function inputData(templateId) {
+        window.location.href = `/input_template_data/${templateId}`;
     }
 </script>
 {% endblock %}
