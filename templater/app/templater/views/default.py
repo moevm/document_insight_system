@@ -357,29 +357,49 @@ def render_doc(request):
             return {'status': 'err'}
 
 
+@view_config(route_name='export_archive_to_drive', request_method='POST', renderer='json')
 def export_archive_to_drive(request):
     try:
         data = request.json_body
-        file_id = data.get('file_id')
-        if not file_id:
-            return {'error': 'file_id не указан'}, 400
+    except Exception:
+        return {'error': 'Неверный формат JSON в запросе'}, 400
 
+    file_id = data.get('file_id')
+    if not file_id:
+        return {'error': 'file_id не указан'}, 400
+
+    try:
+        # Проверяем, что file_id валиден
         file_obj = request.fs.get(ObjectId(file_id))
+    except Exception:
+        return {'error': 'Файл с таким file_id не найден'}, 404
 
+    try:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(file_obj.read())
             tmp_path = tmp.name
+    except Exception:
+        return {'error': 'Ошибка при создании временного файла'}, 500
 
-        service = build_service()
-
-        uploaded_file_id = upload_file_to_drive(service, tmp_path, file_obj.name, file_obj.content_type)
-
-        os.unlink(tmp_path)
-
-        return {'message': 'Файл успешно загружен в Google Drive', 'file_id': uploaded_file_id}
-
+    try:
+        service = build_service()  # функция из google_drive.py, должна вернуть Google Drive API клиент
     except Exception as e:
-        return {'error': str(e)}, 500
+        os.unlink(tmp_path)
+        return {'error': f'Ошибка аутентификации Google Drive: {str(e)}'}, 500
+
+    try:
+        uploaded_file_id = upload_file_to_drive(service, tmp_path, file_obj.name, file_obj.content_type)
+    except Exception as e:
+        os.unlink(tmp_path)
+        return {'error': f'Ошибка загрузки файла в Google Drive: {str(e)}'}, 500
+
+    # Очистка временного файла
+    try:
+        os.unlink(tmp_path)
+    except Exception:
+        pass  # Если не удалось удалить — можно игнорировать
+
+    return {'message': 'Файл успешно загружен в Google Drive', 'file_id': uploaded_file_id}
 
 
 @view_config(route_name='dis_redirect')
