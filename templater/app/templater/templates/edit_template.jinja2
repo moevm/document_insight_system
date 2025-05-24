@@ -17,9 +17,12 @@
         <textarea class="form-control" id="template-description" rows="4">{{ template.description }}</textarea>
     </div>
 
-    <div class="text-center button-group">
+    <div class="text-center button-group" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
         <button id="cancel-changes" class="btn btn-cancel">Отмена</button>
         <button id="save-changes" class="btn btn-primary">Сохранить изменения</button>
+        <a href="{{ request.route_url('input_template_data', template_id=template.id) }}" class="btn btn-input-data" style="background-color:#17a2b8; color: white; border:none; padding: 10px 20px; border-radius: 4px; cursor: pointer; text-decoration: none;">
+            Ввести данные
+        </a>
     </div>
 </div>
 

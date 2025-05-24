@@ -1,0 +1,134 @@
+{% extends "layout.jinja2" %}
+
+{% block title %}Ввод данных для шаблона{% endblock %}
+
+{% block content %}
+<link href="{{request.static_url('templater:static/css/styles.css')}}" rel="stylesheet" />
+
+<div class="input-data-container">
+    <h1>Ввод данных для шаблона: {{ template.name }}</h1>
+
+    <form id="input-data-form">
+        <div id="fields-container">
+            {% if template.data %}
+                {% for key, value in template.data.items() %}
+                <div class="form-group">
+                    <label for="field-{{ key }}">{{ key }}</label>
+                    <input type="text" class="form-control" id="field-{{ key }}" name="{{ key }}" value="{{ value }}" required>
+                </div>
+                {% endfor %}
+            {% else %}
+                {% for i in range(3) %}
+                <div class="form-group">
+                    <label for="field-{{ i }}">Поле {{ i + 1 }}</label>
+                    <input type="text" class="form-control" id="field-{{ i }}" name="field_{{ i }}" required>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <button type="button" id="add-field-btn" class="btn btn-add">Добавить поле</button>
+
+        <div class="button-group" style="margin-top: 15px;">
+            <button type="button" class="btn btn-cancel" onclick="window.location.href='/templates'">Отмена</button>
+            <button type="submit" class="btn btn-save">Сохранить данные</button>
+        </div>
+    </form>
+</div>
+
+<script>
+let formChanged = false;
+
+document.getElementById('add-field-btn').addEventListener('click', () => {
+    const container = document.getElementById('fields-container');
+    const fieldCount = container.children.length;
+    const fieldId = `new_field_${fieldCount}`;
+
+    const div = document.createElement('div');
+    div.className = 'form-group';
+
+    const label = document.createElement('label');
+    label.setAttribute('for', fieldId);
+    label.textContent = `Новое поле ${fieldCount + 1}`;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'form-control';
+    input.id = fieldId;
+    input.name = fieldId;
+    input.required = true;
+
+    div.appendChild(label);
+    div.appendChild(input);
+
+    container.appendChild(div);
+
+    formChanged = true;  // Помечаем, что форма изменилась
+});
+
+document.getElementById('input-data-form').addEventListener('input', () => {
+    formChanged = true;
+});
+
+window.addEventListener('beforeunload', (e) => {
+    if (formChanged) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
+const saveBtn = document.querySelector('.btn-save');
+const cancelBtn = document.querySelector('.btn-cancel');
+
+document.getElementById('input-data-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    saveBtn.disabled = true;
+    cancelBtn.disabled = true;
+    saveBtn.textContent = 'Сохранение...';
+
+    const form = event.target;
+    const formData = new FormData(form);
+    const data = {};
+
+    for (let [key, value] of formData.entries()) {
+        if (!value.trim()) {
+            alert("Все поля должны быть заполнены");
+            saveBtn.disabled = false;
+            cancelBtn.disabled = false;
+            saveBtn.textContent = 'Сохранить данные';
+            return;
+        }
+        data[key] = value.trim();
+    }
+
+    try {
+        const response = await fetch('/api/save_template_data/{{ template.id }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data }),
+        });
+
+        if (response.ok) {
+            formChanged = false;
+            alert("Данные успешно сохранены");
+            window.location.href = '/templates';
+        } else {
+            const errorData = await response.json();
+            alert(`Ошибка: ${errorData.error || 'Неизвестная ошибка'}`);
+            saveBtn.disabled = false;
+            cancelBtn.disabled = false;
+            saveBtn.textContent = 'Сохранить данные';
+        }
+    } catch (error) {
+        alert("Ошибка при отправке данных на сервер");
+        console.error(error);
+        saveBtn.disabled = false;
+        cancelBtn.disabled = false;
+        saveBtn.textContent = 'Сохранить данные';
+    }
+});
+</script>
+{% endblock %}

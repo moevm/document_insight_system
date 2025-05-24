@@ -357,6 +357,51 @@ def render_doc(request):
             return {'status': 'err'}
 
 
+@view_config(route_name='input_template_data', renderer='../templates/input_data_template.jinja2')
+def input_template_data_view(request):
+    template_id = int(request.matchdict['template_id'])
+    templates_data = load_templates()
+    template = next((t for t in templates_data if t['id'] == template_id), None)
+    if not template:
+        return HTTPNotFound()
+
+    return {'template': template}
+
+
+@view_config(route_name='api_save_template_data', request_method='POST', renderer='json')
+def api_save_template_data(request):
+    try:
+        template_id = int(request.matchdict['template_id'])
+        data = request.json_body.get('data')
+        if not data:
+            return {'error': 'Данные не переданы'}, 400
+
+        templates_data = load_templates()
+        template = next((t for t in templates_data if t['id'] == template_id), None)
+        if not template:
+            return {'error': 'Шаблон не найден'}, 404
+
+        template['data'] = data
+        save_templates(templates_data)
+
+        return {'message': 'Данные успешно сохранены'}
+    except Exception as e:
+        return {'error': str(e)}, 500
+
+
+@view_config(route_name='api_get_template_data_status', renderer='json', request_method='GET')
+def api_get_template_data_status(request):
+    try:
+        template_id = int(request.matchdict['template_id'])
+        templates_data = load_templates()
+        template = next((t for t in templates_data if t['id'] == template_id), None)
+        if not template:
+            return {'error': 'Шаблон не найден'}, 404
+        has_data = bool(template.get('data'))
+        return {'has_data': has_data}
+    except Exception as e:
+        return {'error': str(e)}, 500
+
 async function uploadArchiveToGoogleDrive() {
     try {
         const btn = document.querySelector("input[value='Загрузить в Google Drive']");
