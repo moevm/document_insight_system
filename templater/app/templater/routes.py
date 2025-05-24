@@ -26,3 +26,4 @@ def includeme(config):
 
     config.add_route('input_template_data', '/input_template_data/{template_id}')
     config.add_route('api_save_template_data', '/api/save_template_data/{template_id}')
+    config.add_route('api_get_template_data_status', '/api/get_template_data_status/{template_id}')

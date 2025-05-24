@@ -376,6 +376,7 @@ def input_template_data_view(request):
 
     return {'template': template}
 
+
 @view_config(route_name='api_save_template_data', request_method='POST', renderer='json')
 def api_save_template_data(request):
     try:
@@ -395,5 +396,20 @@ def api_save_template_data(request):
         return {'message': 'Данные успешно сохранены'}
     except Exception as e:
         return {'error': str(e)}, 500
+
+
+@view_config(route_name='api_get_template_data_status', renderer='json', request_method='GET')
+def api_get_template_data_status(request):
+    try:
+        template_id = int(request.matchdict['template_id'])
+        templates_data = load_templates()
+        template = next((t for t in templates_data if t['id'] == template_id), None)
+        if not template:
+            return {'error': 'Шаблон не найден'}, 404
+        has_data = bool(template.get('data'))
+        return {'has_data': has_data}
+    except Exception as e:
+        return {'error': str(e)}, 500
+
 
 

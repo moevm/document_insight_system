@@ -11,18 +11,15 @@
 <div class="templates-container">
     {% for template in templates %}
     <div class="template-card" data-template-id="{{ template.id }}">
-        <h3>{{ template.name }}</h3>
+        <h3>
+            {{ template.name }}
+            <span class="data-status" style="margin-left: 10px; font-weight: normal; font-size: 0.9em; color: grey;">
+                Загрузка...
+            </span>
+        </h3>
         <p><strong>Тип:</strong> {{ template.type }}</p>
         <p><strong>Описание:</strong> {{ template.description }}</p>
         <p><small>{{ template.created_at }}</small></p>
-
-        <p><strong>Статус данных:</strong>
-            {% if template.data %}
-                <span style="color: green;">Данные введены</span>
-            {% else %}
-                <span style="color: red;">Данные отсутствуют</span>
-            {% endif %}
-        </p>
 
         <div class="template-card-actions">
             <button class="btn btn-edit" onclick="editTemplate({{ template.id }})">Редактировать</button>
@@ -55,7 +52,7 @@
             }
         }
     }
-    
+
     async function exportTemplate(templateId) {
         try {
             const authRes = await fetch('/start_auth');
@@ -94,5 +91,28 @@
     function inputData(templateId) {
         window.location.href = `/input_template_data/${templateId}`;
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.template-card');
+        cards.forEach(card => {
+            const templateId = card.getAttribute('data-template-id');
+
+            fetch(`/api/get_template_data_status/${templateId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const statusElem = card.querySelector('.data-status');
+                    if (data.has_data) {
+                        statusElem.textContent = 'Данные введены';
+                        statusElem.style.color = 'green';
+                    } else {
+                        statusElem.textContent = 'Данные отсутствуют';
+                        statusElem.style.color = 'red';
+                    }
+                })
+                .catch(() => {
+                    // Если ошибка, оставляем "Загрузка..."
+                });
+        });
+    });
 </script>
 {% endblock %}
