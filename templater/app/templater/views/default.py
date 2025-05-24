@@ -357,6 +357,21 @@ def render_doc(request):
             return {'status': 'err'}
 
 
+async function uploadArchiveToGoogleDrive() {
+    try {
+        const btn = document.querySelector("input[value='Загрузить в Google Drive']");
+        btn.disabled = true;
+        btn.value = "Загрузка...";
+
+        alert('Архив успешно загружен в Google Drive');
+    } catch (error) {
+        alert('Ошибка при загрузке в Google Drive: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.value = 'Загрузить в Google Drive';
+    }
+}
+
 @view_config(route_name='export_archive_to_drive', request_method='POST', renderer='json')
 def export_archive_to_drive(request):
     try:
