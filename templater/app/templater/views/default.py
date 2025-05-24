@@ -361,17 +361,21 @@ def render_doc(request):
 def export_archive_to_drive(request):
     try:
         data = request.json_body
+        logger.info("Получен запрос на загрузку файла в Google Drive")
     except Exception:
+        logger.error("Ошибка парсинга JSON в запросе", exc_info=True)
         return {'error': 'Неверный формат JSON в запросе'}, 400
 
     file_id = data.get('file_id')
     if not file_id:
+        logger.warning("file_id не указан в запросе")
         return {'error': 'file_id не указан'}, 400
 
     try:
-        # Проверяем, что file_id валиден
         file_obj = request.fs.get(ObjectId(file_id))
+        logger.info(f"Файл с id {file_id} найден для загрузки")
     except Exception:
+        logger.error(f"Файл с id {file_id} не найден", exc_info=True)
         return {'error': 'Файл с таким file_id не найден'}, 404
 
     try:
