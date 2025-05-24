@@ -37,6 +37,8 @@
 </div>
 
 <script>
+let formChanged = false;
+
 document.getElementById('add-field-btn').addEventListener('click', () => {
     const container = document.getElementById('fields-container');
     const fieldCount = container.children.length;
@@ -60,10 +62,30 @@ document.getElementById('add-field-btn').addEventListener('click', () => {
     div.appendChild(input);
 
     container.appendChild(div);
+
+    formChanged = true;  // Помечаем, что форма изменилась
 });
+
+document.getElementById('input-data-form').addEventListener('input', () => {
+    formChanged = true;
+});
+
+window.addEventListener('beforeunload', (e) => {
+    if (formChanged) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
+const saveBtn = document.querySelector('.btn-save');
+const cancelBtn = document.querySelector('.btn-cancel');
 
 document.getElementById('input-data-form').addEventListener('submit', async (event) => {
     event.preventDefault();
+
+    saveBtn.disabled = true;
+    cancelBtn.disabled = true;
+    saveBtn.textContent = 'Сохранение...';
 
     const form = event.target;
     const formData = new FormData(form);
@@ -72,6 +94,9 @@ document.getElementById('input-data-form').addEventListener('submit', async (eve
     for (let [key, value] of formData.entries()) {
         if (!value.trim()) {
             alert("Все поля должны быть заполнены");
+            saveBtn.disabled = false;
+            cancelBtn.disabled = false;
+            saveBtn.textContent = 'Сохранить данные';
             return;
         }
         data[key] = value.trim();
@@ -87,15 +112,22 @@ document.getElementById('input-data-form').addEventListener('submit', async (eve
         });
 
         if (response.ok) {
+            formChanged = false;
             alert("Данные успешно сохранены");
             window.location.href = '/templates';
         } else {
             const errorData = await response.json();
             alert(`Ошибка: ${errorData.error || 'Неизвестная ошибка'}`);
+            saveBtn.disabled = false;
+            cancelBtn.disabled = false;
+            saveBtn.textContent = 'Сохранить данные';
         }
     } catch (error) {
         alert("Ошибка при отправке данных на сервер");
         console.error(error);
+        saveBtn.disabled = false;
+        cancelBtn.disabled = false;
+        saveBtn.textContent = 'Сохранить данные';
     }
 });
 </script>
