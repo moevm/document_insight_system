@@ -1,8 +1,8 @@
-version: '2'
-
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: document_insight_system_image
     restart: always
     ports:
@@ -18,7 +18,7 @@ services:
       - CELERY_BROKER_URL=${REDIS_URL}
       - CELERY_RESULT_BACKEND=${REDIS_URL}
     volumes:
-      - presentation_files:/usr/src/project/files/
+      - files:/usr/src/project/files/
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     cpuset: ${CONTAINER_CPU:-0-1}
@@ -34,7 +34,7 @@ services:
       - redis
       - mongodb
     volumes:
-      - presentation_files:/usr/src/project/files/
+      - files:/usr/src/project/files/
       - language_tool_cache:/root/.cache/language_tool_python/
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
@@ -67,16 +67,39 @@ services:
     cpuset: ${CONTAINER_CPU:-0-1}
 
   mongodb:
-    image: mongo:4.0.17-xenial
+    image: mongo:7.0
     restart: always
     command:
       - '--wiredTigerCacheSizeGB=${MONGODB_CACHE_SIZE:-1}'
     volumes:
-      - ../slides_checker_mongo_data:/data/db
+      - ../dis_mongo_data:/data/db
     cpuset: ${CONTAINER_CPU:-0-1}
+
+  templater:
+    env_file:
+      - .env
+    build:
+      context: ./templater
+      dockerfile: Dockerfile
+    command: python3 -u runapp.py
+    ports:
+      - "8092:5000"
+    links:
+      - db
+    volumes:
+      - ./templater/app:/app
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+  db:
+    image: mongo:3.6
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
 volumes:
   flower_data:
   language_tool_cache:
-  presentation_files:
+  files:
   redis_data:
