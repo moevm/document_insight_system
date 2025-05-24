@@ -23,3 +23,6 @@ def includeme(config):
     config.add_route('oauth_callback', '/oauth_callback')
     config.add_route('start_auth', '/start_auth')
     config.add_route('dis_redirect', '/dis')
+
+    config.add_route('input_template_data', '/input_template_data/{template_id}')
+    config.add_route('api_save_template_data', '/api/save_template_data/{template_id}')
