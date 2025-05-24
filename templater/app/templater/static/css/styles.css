@@ -249,3 +249,47 @@
     border-radius: 5px;
     cursor: pointer;
 }
+
+.btn-add {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.btn-add:hover {
+    background-color: #0056b3;
+}
+
+.btn-input-data {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-input-data:hover {
+    background-color: #117a8b;
+}
+
+.input-data-container {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+.template-card-actions button,
+.template-card-actions .btn-input-data {
+    margin-right: 8px;
+    margin-bottom: 6px;
+}
