@@ -402,68 +402,30 @@ def api_get_template_data_status(request):
     except Exception as e:
         return {'error': str(e)}, 500
 
-async function uploadArchiveToGoogleDrive() {
-    try {
-        const btn = document.querySelector("input[value='Загрузить в Google Drive']");
-        btn.disabled = true;
-        btn.value = "Загрузка...";
-
-        alert('Архив успешно загружен в Google Drive');
-    } catch (error) {
-        alert('Ошибка при загрузке в Google Drive: ' + error.message);
-    } finally {
-        btn.disabled = false;
-        btn.value = 'Загрузить в Google Drive';
-    }
-}
-
 @view_config(route_name='export_archive_to_drive', request_method='POST', renderer='json')
 def export_archive_to_drive(request):
     try:
         data = request.json_body
-        logger.info("Получен запрос на загрузку файла в Google Drive")
-    except Exception:
-        logger.error("Ошибка парсинга JSON в запросе", exc_info=True)
-        return {'error': 'Неверный формат JSON в запросе'}, 400
+        file_id = data.get('file_id')
+        if not file_id:
+            return {'error': 'file_id не указан'}, 400
 
-    file_id = data.get('file_id')
-    if not file_id:
-        logger.warning("file_id не указан в запросе")
-        return {'error': 'file_id не указан'}, 400
-
-    try:
         file_obj = request.fs.get(ObjectId(file_id))
-        logger.info(f"Файл с id {file_id} найден для загрузки")
-    except Exception:
-        logger.error(f"Файл с id {file_id} не найден", exc_info=True)
-        return {'error': 'Файл с таким file_id не найден'}, 404
 
-    try:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(file_obj.read())
             tmp_path = tmp.name
-    except Exception:
-        return {'error': 'Ошибка при создании временного файла'}, 500
 
-    try:
-        service = build_service()  # функция из google_drive.py, должна вернуть Google Drive API клиент
-    except Exception as e:
-        os.unlink(tmp_path)
-        return {'error': f'Ошибка аутентификации Google Drive: {str(e)}'}, 500
+        service = build_service()
 
-    try:
         uploaded_file_id = upload_file_to_drive(service, tmp_path, file_obj.name, file_obj.content_type)
+
+        os.unlink(tmp_path)
+
+        return {'message': 'Файл успешно загружен в Google Drive', 'file_id': uploaded_file_id}
+
     except Exception as e:
-        os.unlink(tmp_path)
-        return {'error': f'Ошибка загрузки файла в Google Drive: {str(e)}'}, 500
-
-    # Очистка временного файла
-    try:
-        os.unlink(tmp_path)
-    except Exception:
-        pass  # Если не удалось удалить — можно игнорировать
-
-    return {'message': 'Файл успешно загружен в Google Drive', 'file_id': uploaded_file_id}
+        return {'error': str(e)}, 500
 
 
 @view_config(route_name='dis_redirect')

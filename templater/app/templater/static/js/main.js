@@ -162,6 +162,50 @@ function activeTabDataTable(updateStorage = true) {
     }
 }
 
+async function uploadArchiveToGoogleDrive() {
+    try {
+        const archiveLink = document.querySelector('#link-archive a');
+        if (!archiveLink) {
+            alert('Архив не найден для загрузки');
+            return;
+        }
+
+        const urlParams = new URLSearchParams(new URL(archiveLink.href).search);
+        const file_id = urlParams.get('file_id');
+        if (!file_id) {
+            alert('Не удалось получить ID файла архива');
+            return;
+        }
+
+        // Заблокируем кнопку, покажем загрузку
+        const btn = document.querySelector("input[value='Загрузить в Google Drive']");
+        btn.disabled = true;
+        btn.value = "Загрузка...";
+
+        const response = await fetch('/export_archive_to_drive', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({file_id})
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('Архив успешно загружен в Google Drive');
+        } else {
+            alert('Ошибка при загрузке: ' + (result.error || 'Неизвестная ошибка'));
+        }
+    } catch (e) {
+        alert('Ошибка при загрузке в Google Drive: ' + e.message);
+    } finally {
+        const btn = document.querySelector("input[value='Загрузка...']");
+        if (btn) {
+            btn.disabled = false;
+            btn.value = 'Загрузить в Google Drive';
+        }
+    }
+}
+
 function activeTabRender(updateStorage = true) {
     if (data_table_id) {
         var pills_tab = $('#pills-render-tab');
