@@ -27,3 +27,5 @@ def includeme(config):
     config.add_route('api_save_template_data', '/api/save_template_data/{template_id}')
     config.add_route('api_get_template_data_status', '/api/get_template_data_status/{template_id}')
     config.add_route('export_archive_to_drive', '/export_archive_to_drive')
+    config.add_route('user_home', '/user_home')
+

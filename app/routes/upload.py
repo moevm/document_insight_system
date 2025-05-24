@@ -31,13 +31,17 @@ def upload_main():
     formats = set(current_user.formats)
     formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
 
-    templater_url = current_app.config.get("TEMPLATER_URL", "http://localhost:8092/")
+    role = "admin" if current_user.is_admin else "user"
+    base_url = current_app.config.get("TEMPLATER_URL", "http://localhost:8092")
+    templater_url = f"{base_url}?role={role}"
+
+
 
     return render_template(
         "./upload.html",
         navi_upload=False,
         formats=sorted(formats),
         list_of_check=check_labels_and_discrpt,
-        templater_url=templater_url  # ✅ передаём в шаблон
+        templater_url=templater_url
     )
 

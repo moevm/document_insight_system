@@ -179,20 +179,35 @@ def api_add_template(request):
 _ = TranslationStringFactory('templater')
 
 
-
 @view_config(route_name='captcha', renderer='../templates/verify_captcha.jinja2')
 def verify_captcha_view(request):
-    if check_captcha_verified(request):
+    role = request.params.get('role')
+
+    if role:
+        request.session['role'] = role 
+
+    current_role = request.session.get('role')
+
+    if current_role == 'admin':
         return HTTPFound(location=request.route_url('home'))
+    if current_role == 'user':
+        return HTTPFound(location=request.route_url('user_home'))
+
+    if check_captcha_verified(request):
+        return HTTPFound(location=request.route_url('user_home'))
 
     if request.method == 'POST':
         if verify_captcha(request):
             request.session['captcha_verified'] = True
-            return HTTPFound(location=request.route_url('home'))
+            return HTTPFound(location=request.route_url('user_home'))
         else:
             request.session.flash('Ошибка CAPTCHA. Повторите попытку.', 'error')
 
-    return {'captcha_site_key': 'ysc1_4e0yUQRwmclR0orDgIUDhWwW8bbpnoRF2tRWeoQU87aa91d6'}
+    return {
+        'captcha_site_key': 'ysc1_4e0yUQRwmclR0orDgIUDhWwW8bbpnoRF2tRWeoQU87aa91d6',
+        'role': role  # передаем роль в шаблон
+    }
+
 
 def verify_captcha(request):
     token = request.POST.get('smart-token')
@@ -426,6 +441,12 @@ def export_archive_to_drive(request):
 
     except Exception as e:
         return {'error': str(e)}, 500
+
+
+@view_config(route_name='user_home', renderer='../templates/user_home.jinja2')
+def user_home_page(request):
+    request.response.samesite = 'none'
+    return {'project': 'Templater'}
 
 
 @view_config(route_name='dis_redirect')
