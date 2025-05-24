@@ -234,11 +234,6 @@ def verify_captcha(request):
 def check_captcha_verified(request):
     return request.session.get('captcha_verified', False)
 
-
-
-
-
-
 @view_config(route_name='home', renderer='../templates/homepage.jinja2')
 def home_page(request):
     request.response.samesite = 'none'
@@ -361,10 +356,33 @@ def render_doc(request):
         except:
             return {'status': 'err'}
 
+
+def export_archive_to_drive(request):
+    try:
+        data = request.json_body
+        file_id = data.get('file_id')
+        if not file_id:
+            return {'error': 'file_id не указан'}, 400
+
+        file_obj = request.fs.get(ObjectId(file_id))
+
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            tmp.write(file_obj.read())
+            tmp_path = tmp.name
+
+        service = build_service()
+
+        uploaded_file_id = upload_file_to_drive(service, tmp_path, file_obj.name, file_obj.content_type)
+
+        os.unlink(tmp_path)
+
+        return {'message': 'Файл успешно загружен в Google Drive', 'file_id': uploaded_file_id}
+
+    except Exception as e:
+        return {'error': str(e)}, 500
+
+
 @view_config(route_name='dis_redirect')
 def dis_redirect(request):
     dis_url = os.environ.get("DIS_URL", "http://localhost:8080/")
     return HTTPFound(location=dis_url)
-
-
-
