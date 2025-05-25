@@ -40,7 +40,7 @@ class DocxUploader(DocumentUploader):
         tmp_paragraphs = []
         for i in range(len(paragraphs)):
             if len(paragraphs[i].text.strip()):
-                tmp_paragraphs.append(Paragraph(paragraphs[i]))
+                tmp_paragraphs.append(Paragraph.from_doc_paragraph(paragraphs[i]))
         return tmp_paragraphs
 
     def make_chapters(self, work_type):
