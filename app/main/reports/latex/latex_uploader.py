@@ -152,7 +152,7 @@ class LatexUploader(DocumentUploader):
         return tmp_paragraphs
 
 
-    def __make_tmp_tables(self):
+    def __make_tables(self):
         tables = []
         current_table = []
         in_table = False
