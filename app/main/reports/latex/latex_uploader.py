@@ -121,7 +121,7 @@ class LatexUploader(DocumentUploader):
     def __make_tmp_paragraphs(self):
         return [Paragraph(None) for _ in range(3)]
 
-    def __make_tmp_tables(self):
+    def __make_tables(self):
         tables = []
         current_table = []
         in_table = False
