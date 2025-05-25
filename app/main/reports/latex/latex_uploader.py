@@ -118,14 +118,21 @@ class LatexUploader(DocumentUploader):
     def _handle_environment_token(self, token):
         pass 
 
-    def __make_paragraphs(self):
+    def __make_tmp_paragraphs(self):
         tmp_paragraphs = []
         
         for styled_par in self.styled_paragraphs:
-            paragraph = Paragraph.from_doc_paragraph(styled_par)
+            # Используем конструктор Paragraph, передавая только доступные поля
+            paragraph = Paragraph(
+                paragraph_text=styled_par.get("text", "")
+            )
+            # Установка paragraph_style_name на основе runs
+            if styled_par.get("runs"):
+                styles = set(style for run in styled_par.get("runs", []) for style in run.get("style", []))
+                paragraph.paragraph_style_name = " ".join(styles) if styles else "Normal"
             tmp_paragraphs.append(paragraph)
     
-        return paragraphs
+        return tmp_paragraphs
 
 
     def __make_tmp_tables(self):
