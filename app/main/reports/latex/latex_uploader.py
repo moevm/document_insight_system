@@ -135,14 +135,14 @@ class LatexUploader(DocumentUploader):
     def _handle_environment_token(self, token):
         pass 
 
-    def __make_tmp_paragraphs(self):
+    def __make_paragraphs(self):
         tmp_paragraphs = []
         
         for styled_par in self.styled_paragraphs:
             paragraph = Paragraph.from_doc_paragraph(styled_par)
             tmp_paragraphs.append(paragraph)
     
-        return tmp_paragraphs
+        return paragraphs
 
 
     def __make_tmp_tables(self):
