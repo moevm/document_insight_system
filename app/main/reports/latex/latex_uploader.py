@@ -133,21 +133,16 @@ class LatexUploader(DocumentUploader):
         pass
 
     def _handle_environment_token(self, token):
-        pass
+        pass 
 
     def __make_tmp_paragraphs(self):
-        return [Paragraph(None) for _ in range(3)]
+        tmp_paragraphs = []
+        
+        for styled_par in self.styled_paragraphs:
+            paragraph = Paragraph.from_doc_paragraph(styled_par)
+            tmp_paragraphs.append(paragraph)
     
-
-def __make_paragraphs(self):
-    tmp_paragraphs = []
-    
-    for styled_par in self.styled_paragraphs:
-        # Создаем объект Paragraph с помощью статического метода
-        paragraph = Paragraph.from_doc_paragraph(styled_par)
-        tmp_paragraphs.append(paragraph)
-
-    return tmp_paragraphs
+        return tmp_paragraphs
 
 
     def __make_tmp_tables(self):
