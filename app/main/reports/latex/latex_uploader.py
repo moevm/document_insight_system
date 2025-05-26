@@ -116,9 +116,9 @@ class LatexUploader(DocumentUploader):
         self.tokens = tokenizer.tokenize(self.latex_content)
 
         self._process_tokens()
-        self.paragraphs = self.__make_tmp_paragraphs()
+        self.paragraphs = self.__make_paragraphs()
         self.parse_effective_styles()
-        self.tables = self.__make_tmp_tables()
+        self.tables = self.__make_tables()
 
     def _process_tokens(self):
         self.env_stack = []
@@ -135,7 +135,7 @@ class LatexUploader(DocumentUploader):
     def _handle_environment_token(self, token):
         pass 
 
-    def __make_tmp_paragraphs(self):
+    def __make_paragraphs(self):
         tmp_paragraphs = []
         
         for styled_par in self.styled_paragraphs:
@@ -155,11 +155,9 @@ class LatexUploader(DocumentUploader):
     def __make_tables(self):
         tables = []
         current_table = []
-        in_table = False
 
         for token in self.tokens:
             if token.type == TokenType.ENVIRONMENT and token.name == "tabular":
-                in_table = True
                 current_table = []
                 rows = token.content.split(r'\\')  # предполагаем, что строки разделяются `\\`
                 for row in rows:
@@ -176,7 +174,6 @@ class LatexUploader(DocumentUploader):
                         cell_objs.append(Cell(None, [paragraph]))
                     current_table.append(cell_objs)
                 tables.append(Table(None, current_table))
-                in_table = False
 
         return tables
         
