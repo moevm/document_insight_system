@@ -11,17 +11,23 @@
     <form id="input-data-form">
         <div id="fields-container">
             {% if template.data %}
-                {% for key, value in template.data.items() %}
+                {% for key, field in template.data.items() %}
                 <div class="form-group">
-                    <label for="field-{{ key }}">{{ key }}</label>
-                    <input type="text" class="form-control" id="field-{{ key }}" name="{{ key }}" value="{{ value }}" required>
+                    <label>Название поля</label>
+                    <input type="text" class="form-control" name="label_{{ key }}" value="{{ field.label }}" required>
+
+                    <label>Значение поля</label>
+                    <input type="text" class="form-control" name="value_{{ key }}" value="{{ field.value }}" required>
                 </div>
                 {% endfor %}
             {% else %}
                 {% for i in range(3) %}
                 <div class="form-group">
-                    <label for="field-{{ i }}">Поле {{ i + 1 }}</label>
-                    <input type="text" class="form-control" id="field-{{ i }}" name="field_{{ i }}" required>
+                    <label>Название поля</label>
+                    <input type="text" class="form-control" name="label_field_{{ i }}" required>
+
+                    <label>Значение поля</label>
+                    <input type="text" class="form-control" name="value_field_{{ i }}" required>
                 </div>
                 {% endfor %}
             {% endif %}
@@ -38,32 +44,25 @@
 
 <script>
 let formChanged = false;
+let newFieldCount = 0;
 
 document.getElementById('add-field-btn').addEventListener('click', () => {
     const container = document.getElementById('fields-container');
-    const fieldCount = container.children.length;
-    const fieldId = `new_field_${fieldCount}`;
+    const fieldId = `new_field_${newFieldCount++}`;
 
     const div = document.createElement('div');
     div.className = 'form-group';
 
-    const label = document.createElement('label');
-    label.setAttribute('for', fieldId);
-    label.textContent = `Новое поле ${fieldCount + 1}`;
+    div.innerHTML = `
+        <label>Название поля</label>
+        <input type="text" class="form-control" name="label_${fieldId}" required>
 
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'form-control';
-    input.id = fieldId;
-    input.name = fieldId;
-    input.required = true;
-
-    div.appendChild(label);
-    div.appendChild(input);
+        <label>Значение поля</label>
+        <input type="text" class="form-control" name="value_${fieldId}" required>
+    `;
 
     container.appendChild(div);
-
-    formChanged = true;  // Помечаем, что форма изменилась
+    formChanged = true;
 });
 
 document.getElementById('input-data-form').addEventListener('input', () => {
@@ -89,17 +88,21 @@ document.getElementById('input-data-form').addEventListener('submit', async (eve
 
     const form = event.target;
     const formData = new FormData(form);
-    const data = {};
+    const entries = Array.from(formData.entries());
 
-    for (let [key, value] of formData.entries()) {
-        if (!value.trim()) {
+    const data = {};
+    const labels = entries.filter(([key]) => key.startsWith('label_'));
+    for (let [labelKey, labelValue] of labels) {
+        const suffix = labelKey.substring(6);
+        const value = formData.get(`value_${suffix}`);
+        if (!labelValue.trim() || !value.trim()) {
             alert("Все поля должны быть заполнены");
             saveBtn.disabled = false;
             cancelBtn.disabled = false;
             saveBtn.textContent = 'Сохранить данные';
             return;
         }
-        data[key] = value.trim();
+        data[suffix] = { label: labelValue.trim(), value: value.trim() };
     }
 
     try {
