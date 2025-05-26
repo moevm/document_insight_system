@@ -79,6 +79,7 @@ class LatexProcessor:
             base_dir = "/".join(current_path.split("/")[:-1])
             full_path = os.path.normpath(os.path.join(base_dir, relative_path)).replace("\\", "/")
 
+            logger.debug(f"Импорт найден: {relative_path} → полный путь: {full_path}")
             return self._process_file(full_path, structure)
 
         return pattern.sub(replace, content)
