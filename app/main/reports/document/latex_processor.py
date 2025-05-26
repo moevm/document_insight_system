@@ -58,8 +58,10 @@ class LatexProcessor:
 
         if match:
             cls_name = match.group(1).strip()
+            logger.debug(f"Обнаружен documentclass: {cls_name}")
             cls_file_path = next((p for p in structure if p.endswith(f"{cls_name}.cls")), None)
             if cls_file_path:
+                logger.info(f"Файл класса найден: {cls_file_path}")
                 cls_content = self._decode_content(structure[cls_file_path]['content'])
                 content = pattern.sub(cls_content, content)
             else:
