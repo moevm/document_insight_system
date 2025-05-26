@@ -1,4 +1,5 @@
 import re
+import logging
 from functools import reduce
 
 from ..docx_uploader.core_properties import CoreProperties
@@ -13,6 +14,8 @@ from .tokenizer import LatexTokenizer
 from .tokenizer import TokenType
 
 
+logger = logging.getLogger('latex_uploader')
+
 class LatexUploader(DocumentUploader):
     STYLE_MAP = {
         "textbf": "bold",
@@ -23,6 +26,7 @@ class LatexUploader(DocumentUploader):
     }
 
     def __init__(self):
+        logger.debug("Инициализация LatexUploader")
         super().__init__()
         self.inline_shapes = []
         self.core_properties = None
@@ -35,19 +39,24 @@ class LatexUploader(DocumentUploader):
         self.page_count = 0
 
     def upload(self, file, pdf_filepath=''):
+        logger.info(f"Загрузка LaTeX файла: {file}")
         with open(file, 'r', encoding='utf-8') as f:
             self.latex_content = f.read()
         self.file_path = file
+        logger.debug(f"Инициализация PdfDocumentManager для файла: {pdf_filepath}")
         self.pdf_file = PdfDocumentManager(file, pdf_filepath)
 
     def extract_preamble(self, latex_content):
+        logger.debug("Извлечение преамбулы документа")
         start = latex_content.find(r'\documentclass')
         if start == -1:
+            logger.warning("Не найден documentclass в документе")
             return ''
         end = latex_content.find(r'\begin{document}', start)
         return latex_content[start:end] if end != -1 else latex_content[start:]
 
     def remove_comments(self, text):
+        logger.debug("Удаление комментариев из текста")
         lines = text.split('\n')
         return '\n'.join(
             line[:line.find('%')].rstrip() if '%' in line else line.rstrip()
@@ -55,6 +64,7 @@ class LatexUploader(DocumentUploader):
         )
 
     def extract_command(self, preamble, command_name):
+        logger.debug(f"Извлечение команды: {command_name}")
         def skip_whitespaces(pos, text):
             while pos < len(text) and text[pos].isspace():
                 pos += 1
@@ -63,6 +73,7 @@ class LatexUploader(DocumentUploader):
         command_str = f'\\{command_name}'
         start_idx = preamble.find(command_str)
         if start_idx == -1:
+            logger.debug(f"Команда {command_name} не найдена в преамбуле")
             return None
 
         pos = start_idx + len(command_str)
@@ -72,21 +83,25 @@ class LatexUploader(DocumentUploader):
             pos += 1
             close_pos, _ = find_closing_brace(preamble, pos, '[', ']')
             if close_pos == -1:
+                logger.warning(f"Незакрытые квадратные скобки в команде {command_name}")
                 return None
             pos = close_pos + 1
             pos = skip_whitespaces(pos, preamble)
 
         if pos >= len(preamble) or preamble[pos] != '{':
+            logger.warning(f"Не найдена открывающая фигурная скобка для команды {command_name}")
             return None
 
         pos += 1
         close_pos, brace_level = find_closing_brace(preamble, pos)
         if brace_level != 0:
+            logger.warning(f"Несбалансированные скобки в команде {command_name}")
             return None
 
         return preamble[pos:close_pos].strip()
     
     def extract_core_properties_from_preamble(self):
+        logger.info("Извлечение основных свойств из преамбулы")
         preamble = self.extract_preamble(self.latex_content)
         preamble = self.remove_comments(preamble)
 
@@ -99,6 +114,7 @@ class LatexUploader(DocumentUploader):
         speciality = self.extract_command(preamble, 'speciality')
         degree = self.extract_command(preamble, 'degree')
 
+        logger.debug(f"Извлеченные свойства: title={title}, author={author}, date={date}")
         self.core_properties = CoreProperties(
             title=title,
             author=author,
@@ -111,6 +127,7 @@ class LatexUploader(DocumentUploader):
         )
 
     def get_paragraph_indices_by_style(self, style_list):
+        logger.debug(f"Получение индексов параграфов по стилям: {style_list}")
         result = []
         for template_style in style_list:
             matched_pars = []
@@ -122,8 +139,10 @@ class LatexUploader(DocumentUploader):
         return result
 
     def parse(self):
+        logger.info("Начало парсинга LaTeX документа")
         self.extract_core_properties_from_preamble()
 
+        logger.debug("Токенизация содержимого")
         tokenizer = LatexTokenizer()
         self.tokens = tokenizer.tokenize(self.latex_content)
 
@@ -131,8 +150,10 @@ class LatexUploader(DocumentUploader):
         self.parse_effective_styles()
         self.paragraphs = self.__make_paragraphs()
         self.tables = self.__make_tables()
+        logger.info("Парсинг завершен")
 
     def _process_tokens(self):
+        logger.debug("Обработка токенов")
         self.env_stack = []
         for token in self.tokens:
             match token.type:
@@ -142,41 +163,42 @@ class LatexUploader(DocumentUploader):
                     self._handle_environment_token(token)
 
     def _handle_command_token(self, token):
-        pass
+        logger.debug(f"Обработка командного токена: {token.value}")
 
     def _handle_environment_token(self, token):
-        pass 
+        logger.debug(f"Обработка токена окружения: {token.name}")
 
     def __make_paragraphs(self):
+        logger.debug("Создание объектов Paragraph")
         tmp_paragraphs = []
         
         for styled_par in self.styled_paragraphs:
-            # Используем конструктор Paragraph, передавая только доступные поля
             paragraph = Paragraph(
                 paragraph_text=styled_par.get("text", "")
             )
-            # Установка paragraph_style_name на основе runs
             if styled_par.get("runs"):
                 styles = set(style for run in styled_par.get("runs", []) for style in run.get("style", []))
                 paragraph.paragraph_style_name = " ".join(styles) if styles else "Normal"
+                logger.debug(f"Создан Paragraph со стилями: {paragraph.paragraph_style_name}")
             tmp_paragraphs.append(paragraph)
     
         return tmp_paragraphs
 
-
     def __make_tables(self):
+        logger.debug("Создание таблиц")
         tables = []
         current_table = []
 
         for token in self.tokens:
             if token.type == TokenType.ENVIRONMENT and token.name == "tabular":
+                logger.debug("Найдено окружение tabular")
                 current_table = []
-                rows = token.content.split(r'\\')  # предполагаем, что строки разделяются `\\`
+                rows = token.content.split(r'\\')
                 for row in rows:
                     row = row.strip()
                     if not row:
                         continue
-                    cells = row.split('&')  # ячейки таблицы разделяются `&`
+                    cells = row.split('&')
                     cell_objs = []
                     for cell_text in cells:
                         styled_paragraph = {"text": cell_text.strip(), "runs": [{"text": cell_text.strip(), "style": []}]}
@@ -186,11 +208,12 @@ class LatexUploader(DocumentUploader):
                         cell_objs.append(Cell(None, [paragraph]))
                     current_table.append(cell_objs)
                 tables.append(Table(None, current_table))
+                logger.debug(f"Добавлена таблица с {len(current_table)} строками")
 
         return tables
-        
 
     def parse_effective_styles(self):
+        logger.debug("Анализ эффективных стилей")
         styled_paragraphs = []
         current_paragraph = {"text": "", "runs": []}
 
@@ -230,6 +253,7 @@ class LatexUploader(DocumentUploader):
                         style = self.STYLE_MAP[cmd]
                         current_paragraph["runs"].append(apply_styles(text_inside, [style]))
                         current_paragraph["text"] += text_inside
+                        logger.debug(f"Применен стиль {style} к тексту: {text_inside[:20]}...")
                         i = j
                     else:
                         i += 1
@@ -249,6 +273,7 @@ class LatexUploader(DocumentUploader):
 
         if current_paragraph["text"]:
             styled_paragraphs.append(current_paragraph)
+            logger.debug(f"Добавлен параграф с текстом: {current_paragraph['text'][:20]}...")
 
         self.styled_paragraphs = styled_paragraphs
 
@@ -256,6 +281,7 @@ class LatexUploader(DocumentUploader):
         if self.page_count:
             return self.page_count
 
+        logger.debug("Подсчет страниц документа")
         for k, v in self.pdf_file.text_on_page.items():
             preview = v[:20] if len(v) > 20 else v
             if re.search(r'ПРИЛОЖЕНИЕ [А-Я]', preview.strip()):
@@ -267,12 +293,14 @@ class LatexUploader(DocumentUploader):
             first_two = " ".join(line.strip() for line in lines[:2])
             self.first_lines.append(first_two.lower())
 
+        logger.info(f"Всего страниц документа: {self.page_count}")
         return self.page_count
 
     def make_headers(self, work_type):
         if self.headers:
             return self.headers
 
+        logger.info(f"Создание заголовков для типа работы: {work_type}")
         if work_type == 'VKR':
             headers = [
                 {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный",
@@ -293,6 +321,7 @@ class LatexUploader(DocumentUploader):
                         if page_text.find(headers[i]["key"]) >= 0:
                             headers[i]["marker"] = True
                             headers[i]["page"] = page
+                            logger.debug(f"Найден заголовок '{headers[i]['name']}' на странице {page}")
                             break
 
             self.headers = headers
@@ -301,13 +330,16 @@ class LatexUploader(DocumentUploader):
     
     def get_main_headers(self, work_type):
         if not self.headers_main:
+            logger.debug(f"Получение основных заголовков для {work_type}")
             if work_type == 'VKR':
                 headers = self.make_headers(work_type)
                 if len(headers) > 1:
                     self.headers_main = self.make_headers(work_type)[1]['name']
+                    logger.debug(f"Основной заголовок: {self.headers_main}")
         return self.headers_main
     
     def unify_multiline_entities(self, first_line_regex_str):
+        logger.debug(f"Объединение многострочных сущностей по шаблону: {first_line_regex_str}")
         pattern = re.compile(first_line_regex_str)
         pars_to_delete = []
         skip_flag = False
@@ -322,6 +354,7 @@ class LatexUploader(DocumentUploader):
                 par["text"] += ("\n" + next_par["text"])
                 par["runs"].extend(next_par["runs"])
                 pars_to_delete.append(next_par)
+                logger.debug(f"Объединены параграфы {i} и {i+1}")
                 continue
         for par in pars_to_delete:
             self.styled_paragraphs.remove(par)
@@ -330,6 +363,7 @@ class LatexUploader(DocumentUploader):
         if self.headers_page:
             return self.headers_page
 
+        logger.debug(f"Поиск страницы с заголовками для {work_type}")
         if work_type != 'VKR':
             self.headers_page = 1
             return self.headers_page
@@ -337,6 +371,7 @@ class LatexUploader(DocumentUploader):
         for header in self.make_headers(work_type):
             if header["name"].find('Cодержание') >= 0:
                 self.headers_page = header["page"] if header["page"] else 1
+                logger.debug(f"Страница с содержанием: {self.headers_page}")
                 break
 
         return self.headers_page
@@ -344,6 +379,7 @@ class LatexUploader(DocumentUploader):
     def make_chapters(self, work_type):
         if self.chapters:
             return self.chapters
+        logger.info(f"Создание структуры глав для {work_type}")
         tmp_chapters = []
         if work_type == 'VKR':
             header_ind = -1
@@ -358,6 +394,7 @@ class LatexUploader(DocumentUploader):
                     tmp_chapters.append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"].strip(),
                                          "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind,
                                          "child": []})
+                    logger.debug(f"Добавлена глава: {self.styled_paragraphs[par_ind]['text'][:20]}...")
                 elif header_ind >= 0:
                     par_num += 1
                     tmp_chapters[header_ind]["child"].append(
@@ -369,26 +406,31 @@ class LatexUploader(DocumentUploader):
     def find_literature_vkr(self, work_type):
         if self.literature_header:
             return self.literature_header
+        logger.debug("Поиск раздела с литературой")
         for header in self.make_chapters(work_type):
             header_text = header["text"].lower()
             if header_text.find('список использованных источников') >= 0:
                 self.literature_header = header
+                logger.debug("Найден раздел с литературой")
         return self.literature_header
     
     def find_literature_page(self, work_type):
         if self.literature_page:
             return self.literature_page
         
+        logger.debug("Поиск страницы с литературой")
         for k, v in self.pdf_file.text_on_page.items():
             line = v[:40] if len(v) > 21 else v
             if re.search('список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)', line.strip().lower()):
                 break
             self.literature_page += 1
         self.literature_page += 1
+        logger.debug(f"Литература начинается на странице: {self.literature_page}")
 
         return self.literature_page
 
     def show_chapters(self, work_type):
+        logger.debug("Формирование HTML представления глав")
         chapters_str = "<br>"
         for header in self.make_chapters(work_type):
             if header["style"] == 'heading 2':
@@ -398,13 +440,12 @@ class LatexUploader(DocumentUploader):
         return chapters_str
 
     def upload_from_cli(self, file):
+        logger.info(f"Загрузка файла из CLI: {file}")
         self.upload(file=file)
-
-
-    
 
     @staticmethod
     def main(args):
+        logger.info("Запуск LatexUploader из командной строки")
         uploader = LatexUploader()
         uploader.upload_from_cli(file=args.file)
         uploader.parse()
