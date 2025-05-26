@@ -55,8 +55,11 @@ def parse(filepath, pdf_filepath):
             project_structure = unarchiver.get_project_structure()
 
             dir_path = os.path.dirname(filepath)
-            processor = LatexProcessor(project_structure, dir_path)
-            new_filepath = processor.merge_latex_project()
+            base_name = os.path.basename(filepath).split('.')[0]
+            file_name = f'{base_name}.tex'
+            file_path = os.path.join(dir_path, file_name)
+            processor = LatexProcessor()
+            new_filepath = processor.merge_latex_project(project_structure, file_path)
 
             latex = LatexUploader()
             latex.upload(new_filepath, pdf_filepath)
