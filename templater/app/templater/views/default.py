@@ -388,8 +388,9 @@ def api_save_template_data(request):
     try:
         template_id = int(request.matchdict['template_id'])
         data = request.json_body.get('data')
-        if not data:
-            return {'error': 'Данные не переданы'}, 400
+        if not isinstance(data, dict):
+            return {'error': 'Некорректные данные'}, 400
+
 
         templates_data = load_templates()
         template = next((t for t in templates_data if t['id'] == template_id), None)
