@@ -20,6 +20,7 @@ def parse_arguments():
     parser.add_argument('--pres', type=str, default=os.path.join(script_dir, 'tests_data/example_of_pres.pptx'), help='your path to press for testing')
     parser.add_argument('--report', type=str, default=os.path.join(script_dir, 'tests_data/example_of_report.docx'), help='your path to report in .docx')
     parser.add_argument('--report_doc', type=str, default=os.path.join(script_dir, 'tests_data/example_of_report.doc'), help='your path to report in .doc')
+    parser.add_argument('--latex-project', type=str, default=os.path.join(script_dir, 'tests_data/example_of_report.zip'), help='your path to report in .zip')
     # A call to the Latex document parser will be added here
   
     return parser.parse_args()
