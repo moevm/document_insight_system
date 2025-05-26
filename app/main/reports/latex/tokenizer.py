@@ -29,7 +29,7 @@ class Token:
 class LatexTokenizer:
     def __init__(self):
         # Инициализация состояния токенизатора
-        self.state = State.DEFAULT  # Текущее состояние автомата
+        self.state = self.State.DEFAULT  # Текущее состояние автомата
         self.tokens: List[Token] = []  # Список накопленных токенов
         self.buffer: str = ''       # Буфер для накопления символов
         self.position: int = 0      # Текущая позиция в тексте
