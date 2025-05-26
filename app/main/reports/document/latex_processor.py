@@ -42,6 +42,7 @@ class LatexProcessor:
         return base64.b64decode(base64_content).decode('utf-8')
 
     def _process_file(self, file_path: str, structure: Dict[str, Dict[str, Any]]) -> str:
+        logger.debug(f"Обработка файла: {file_path}")
         if file_path not in structure:
             logger.warning(f"Файл {file_path} не найден в структуре проекта.")
             return ""
