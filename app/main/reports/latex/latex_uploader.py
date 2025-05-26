@@ -1,4 +1,5 @@
 import re
+from functools import reduce
 
 from ..docx_uploader.core_properties import CoreProperties
 from ..docx_uploader.inline_shape import InlineShape
@@ -109,6 +110,17 @@ class LatexUploader(DocumentUploader):
             degree=degree
         )
 
+    def get_paragraph_indices_by_style(self, style_list):
+        result = []
+        for template_style in style_list:
+            matched_pars = []
+            for i in range(len(self.styled_paragraphs)):
+                par = self.styled_paragraphs[i]
+                if reduce(lambda prev, run: prev and run["style"].matches(template_style), par["runs"], True):
+                    matched_pars.append(i)
+            result.append(matched_pars)
+        return result
+
     def parse(self):
         self.extract_core_properties_from_preamble()
 
@@ -116,8 +128,8 @@ class LatexUploader(DocumentUploader):
         self.tokens = tokenizer.tokenize(self.latex_content)
 
         self._process_tokens()
-        self.paragraphs = self.__make_paragraphs()
         self.parse_effective_styles()
+        self.paragraphs = self.__make_paragraphs()
         self.tables = self.__make_tables()
 
     def _process_tokens(self):
@@ -286,6 +298,33 @@ class LatexUploader(DocumentUploader):
             self.headers = headers
 
         return self.headers
+    
+    def get_main_headers(self, work_type):
+        if not self.headers_main:
+            if work_type == 'VKR':
+                headers = self.make_headers(work_type)
+                if len(headers) > 1:
+                    self.headers_main = self.make_headers(work_type)[1]['name']
+        return self.headers_main
+    
+    def unify_multiline_entities(self, first_line_regex_str):
+        pattern = re.compile(first_line_regex_str)
+        pars_to_delete = []
+        skip_flag = False
+        for i in range(len(self.styled_paragraphs) - 1):
+            if skip_flag:
+                skip_flag = False
+                continue
+            par = self.styled_paragraphs[i]
+            next_par = self.styled_paragraphs[i + 1]
+            if pattern.match(par["text"]):
+                skip_flag = True
+                par["text"] += ("\n" + next_par["text"])
+                par["runs"].extend(next_par["runs"])
+                pars_to_delete.append(next_par)
+                continue
+        for par in pars_to_delete:
+            self.styled_paragraphs.remove(par)
 
     def find_header_page(self, work_type):
         if self.headers_page:
@@ -336,7 +375,7 @@ class LatexUploader(DocumentUploader):
                 self.literature_header = header
         return self.literature_header
     
-    def find_literature_page(self):
+    def find_literature_page(self, work_type):
         if self.literature_page:
             return self.literature_page
         

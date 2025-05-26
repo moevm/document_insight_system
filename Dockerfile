@@ -27,6 +27,7 @@ RUN apt update && apt install -y texlive-latex-base \
     texlive-xetex \
     latexmk \
     biber \
-    python3-pygments
+    python3-pygments \
+    fonts-liberation
 
 CMD ./scripts/local_start.sh
