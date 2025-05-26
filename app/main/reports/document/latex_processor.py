@@ -30,7 +30,7 @@ class LatexProcessor:
         return output_file
 
     def _find_main_tex(self, structure: Dict[str, Dict[str, Any]]) -> str:
-        logger.debug("Поиск файла main.tex в структуре проекта...")
+        logger.debug("Поиск файла main.tex в структуре проекта.")
         for path in structure:
             if path.endswith("main.tex"):
                 logger.debug(f"Найден main.tex: {path}")
