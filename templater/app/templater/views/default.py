@@ -5,6 +5,7 @@ from pyramid.i18n import TranslationStringFactory
 from pyramid.response import FileIter
 from pyramid.i18n import TranslationStringFactory
 from bson import ObjectId
+from bson.errors import InvalidId
 from templater.lib.templater import RenderResult, TemplateRenderer
 from tempfile import NamedTemporaryFile
 import time
@@ -548,30 +549,34 @@ def render_doc(request):
 
 @view_config(route_name='input_template_data', renderer='../templates/input_data_template.jinja2')
 def input_template_data_view(request):
-    template_id = int(request.matchdict['template_id'])
-    templates_data = load_templates()
-    template = next((t for t in templates_data if t['id'] == template_id), None)
-    if not template:
-        return HTTPNotFound()
+    try:
+        template_id = request.matchdict['template_id']
+        template = request.db['templates'].find_one({'_id': ObjectId(template_id)})
+        if not template:
+            return HTTPNotFound()
 
-    return {'template': template}
+        template['id'] = str(template['_id'])
+        return {'template': template}
+    except (InvalidId, KeyError):
+        return HTTPBadRequest("Некорректный ID шаблона")
 
 
 @view_config(route_name='api_save_template_data', request_method='POST', renderer='json')
 def api_save_template_data(request):
+    from bson import ObjectId
     try:
-        template_id = int(request.matchdict['template_id'])
+        template_id = request.matchdict['template_id']
         data = request.json_body.get('data')
         if not data:
             return {'error': 'Данные не переданы'}, 400
 
-        templates_data = load_templates()
-        template = next((t for t in templates_data if t['id'] == template_id), None)
-        if not template:
-            return {'error': 'Шаблон не найден'}, 404
+        result = request.db['templates'].update_one(
+            {'_id': ObjectId(template_id)},
+            {'$set': {'data': data}}
+        )
 
-        template['data'] = data
-        save_templates(templates_data)
+        if result.matched_count == 0:
+            return {'error': 'Шаблон не найден'}, 404
 
         return {'message': 'Данные успешно сохранены'}
     except Exception as e:
@@ -580,16 +585,19 @@ def api_save_template_data(request):
 
 @view_config(route_name='api_get_template_data_status', renderer='json', request_method='GET')
 def api_get_template_data_status(request):
+    from bson import ObjectId
     try:
-        template_id = int(request.matchdict['template_id'])
-        templates_data = load_templates()
-        template = next((t for t in templates_data if t['id'] == template_id), None)
+        template_id = request.matchdict['template_id']
+        template = request.db['templates'].find_one({'_id': ObjectId(template_id)})
+
         if not template:
             return {'error': 'Шаблон не найден'}, 404
+
         has_data = bool(template.get('data'))
         return {'has_data': has_data}
     except Exception as e:
         return {'error': str(e)}, 500
+    
 
 @view_config(route_name='export_archive_to_drive', request_method='POST', renderer='json')
 def export_archive_to_drive(request):
