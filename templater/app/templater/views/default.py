@@ -3,6 +3,7 @@ from pyramid.response import Response
 from pyramid.httpexceptions import HTTPFound,HTTPBadRequest
 from pyramid.i18n import TranslationStringFactory
 from pyramid.response import FileIter
+from pyramid.i18n import TranslationStringFactory
 from bson import ObjectId
 from templater.lib.templater import RenderResult, TemplateRenderer
 from tempfile import NamedTemporaryFile
@@ -20,6 +21,8 @@ from .google_drive import (
 )
 from googleapiclient.http import MediaFileUpload
 
+_ = TranslationStringFactory('templater')
+
 import logging
 log = logging.getLogger(__name__)
 
@@ -27,6 +30,24 @@ log = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_FILE_PATH = os.path.join(BASE_DIR, '../data/templates.json')
+
+
+
+def convert_objectid_and_date(doc):
+    # Рекурсивное преобразование ObjectId и datetime в строки
+    for k, v in doc.items():
+        if isinstance(v, ObjectId):
+            doc[k] = str(v)
+        elif isinstance(v, datetime.datetime):
+            doc[k] = v.strftime("%Y-%m-%d")  # форматируем дату как строку
+        elif isinstance(v, dict):
+            convert_objectid_and_date(v)
+        elif isinstance(v, list):
+            for i in v:
+                if isinstance(i, dict):
+                    convert_objectid_and_date(i)
+
+
 
 @view_config(route_name='start_auth', renderer='json')
 def start_auth(request):
@@ -74,109 +95,178 @@ def export_template(request):
     except Exception as e:
         return {'error': str(e)}, 500
 
-def load_templates():
-    with open(JSON_FILE_PATH, 'r', encoding='utf-8') as file:
-        return json.load(file)
 
-def save_templates(templates):
-    with open(JSON_FILE_PATH, 'w', encoding='utf-8') as file:
-        json.dump(templates, file, ensure_ascii=False, indent=4)
+def load_templates(request):
+    templates_collection = request.db['templates']
+    templates = list(templates_collection.find())
+    for t in templates:
+        t['id'] = str(t['_id'])  # Для шаблонов в Jinja нужен строковый id
+        t['created_at'] = t.get('date_set')  # или другое поле с датой
+        t['type'] = t.get('file_format')
+    return templates
 
 @view_config(route_name='templates', renderer='../templates/templates.jinja2')
 def templates(request):
-    templates_data = load_templates()
-    return {'templates': templates_data}
+    templates_collection = request.db['templates']
+    templates = list(templates_collection.find())
+    for t in templates:
+        t['id'] = str(t['_id'])
+        t['created_at'] = t.get('date_set')
+        t['type'] = t.get('file_format')
+    return {'templates': templates}
+
+
+
+
+def save_template(request, template):
+    templates_collection = request.db['templates']
+    template_id = ObjectId(template['id'])
+    data = {k: v for k, v in template.items() if k != 'id'}
+    templates_collection.update_one({'_id': template_id}, {'$set': data})
+
+
 
 @view_config(route_name='edit_template', renderer='../templates/edit_template.jinja2')
 def edit_template(request):
-    template_id = int(request.matchdict['template_id'])
-    templates_data = load_templates()
-    template = next((t for t in templates_data if t['id'] == template_id), None)
+    template_id = request.matchdict['template_id']
+    template = request.db['templates'].find_one({'_id': ObjectId(template_id)})
     if not template:
         return HTTPNotFound()
 
     if request.method == 'POST':
-        template['name'] = request.POST.get('name')
-        template['description'] = request.POST.get('description')
-        save_templates(templates_data)
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        request.db['templates'].update_one({'_id': ObjectId(template_id)},
+                                           {'$set': {'name': name, 'description': description}})
         return HTTPFound(location=request.route_url('templates'))
 
+    template['id'] = str(template['_id'])
     return {'template': template}
+
+
 
 @view_config(route_name='delete_template', request_method='POST')
 def delete_template(request):
-    template_id = int(request.matchdict['template_id'])
-    templates_data = load_templates()
-    templates_data = [t for t in templates_data if t['id'] != template_id]
-    save_templates(templates_data)
-    response = Response(json.dumps({"message": "Шаблон успешно удален"}), content_type='application/json; charset=UTF-8')
-    return response
+    template_id = request.matchdict['template_id']
+    request.db['templates'].delete_one({'_id': ObjectId(template_id)})
+    return Response(json.dumps({"message": "Шаблон успешно удален"}), content_type='application/json; charset=UTF-8')
+
+
+
 
 @view_config(route_name='delete_templates', renderer='../templates/delete_templates.jinja2')
 def delete_templates(request):
-    templates_data = load_templates()
-
     if request.method == 'POST':
         try:
             request_data = request.json_body
             selected_templates = request_data.get('selected_templates', [])
-
-            templates_data = [t for t in templates_data if str(t['id']) not in selected_templates]
-            save_templates(templates_data)
+            object_ids = [ObjectId(tid) for tid in selected_templates]
+            request.db['templates'].delete_many({'_id': {'$in': object_ids}})
 
             return Response(json.dumps({"message": "Шаблоны успешно удалены"}), content_type='application/json; charset=UTF-8')
 
         except Exception as e:
             return Response(json.dumps({"error": str(e)}), content_type='application/json; charset=UTF-8', status=500)
 
+    templates_data = list(request.db['templates'].find())
+    for t in templates_data:
+        t['id'] = str(t['_id'])
+        t['file_format'] = t.get('file_format', '')
+        if t.get('date_set'):
+            t['date_set'] = t['date_set'].strftime('%Y-%m-%d %H:%M')
+        else:
+            t['date_set'] = ''
+
     return {'templates': templates_data}
+
 
 
 @view_config(route_name='api_update_template', request_method='POST', renderer='json')
 def api_update_template(request):
-    template_id = int(request.matchdict['template_id'])
-    templates_data = load_templates()
-    template = next((t for t in templates_data if t['id'] == template_id), None)
+    template_id = request.matchdict['template_id']
+    template = request.db['templates'].find_one({'_id': ObjectId(template_id)})
     if not template:
         return {'error': 'Шаблон не найден'}, 404
 
     data = request.json_body
-    template['name'] = data.get('name')
-    template['description'] = data.get('description')
-    save_templates(templates_data)
+    request.db['templates'].update_one({'_id': ObjectId(template_id)},
+                                       {'$set': {'name': data.get('name'), 'description': data.get('description')}})
+
     return {'message': 'Шаблон успешно обновлен'}
+
 
 @view_config(route_name='add_template', renderer='../templates/add_template.jinja2')
 def add_template(request):
     return {}
 
+import logging
+log = logging.getLogger(__name__)
+
+
+import traceback
+import logging
+log = logging.getLogger(__name__)
+
+import traceback
+import logging
+log = logging.getLogger(__name__)
+
 @view_config(route_name='api_add_template', request_method='POST', renderer='json')
 def api_add_template(request):
+    import traceback
     try:
-        data = request.json_body
-        name = data.get('name')
-        description = data.get('description')
-        template_type = "docx"
-        created_at = "2023-10-01"
+        upload_file = request.POST.get('file')
+        if upload_file is None or upload_file.filename == '':
+            return {'error': 'Файл не предоставлен'}
 
-        templates_data = load_templates()
-        new_id = max(t['id'] for t in templates_data) + 1 if templates_data else 1
+        if not hasattr(upload_file, 'file'):
+            return {'error': 'Нет доступа к файлу в запросе'}
 
-        new_template = {
-            "id": new_id,
-            "name": name,
-            "type": template_type,
-            "description": description,
-            "created_at": created_at,
+        file_id = request.fs.put(upload_file.file, filename=upload_file.filename)
+
+        name = request.POST.get('name', upload_file.filename)
+        description = request.POST.get('description', '')
+        file_format = upload_file.filename.rsplit('.', 1)[-1].lower()
+        date_set = datetime.datetime.utcnow()
+
+        template_doc = {
+            'name': name,
+            'description': description,
+            'date_set': date_set,
+            'file_format': file_format,
+            'file_id': file_id
         }
 
-        templates_data.append(new_template)
-        save_templates(templates_data)
-        return {'message': 'Шаблон успешно добавлен', 'template': new_template}
-    except Exception as e:
-        return {'error': str(e)}, 500
+        inserted = request.db['templates'].insert_one(template_doc)
+        template_doc['id'] = str(inserted.inserted_id)
 
-_ = TranslationStringFactory('templater')
+        # Преобразуем поля ObjectId в строки
+        template_doc = convert_objectid_to_str(template_doc)
+
+        # Преобразуем дату в строку
+        template_doc['created_at'] = date_set.strftime('%d.%m.%Y')
+        del template_doc['date_set']
+
+        return {'message': 'Шаблон успешно добавлен', 'template': template_doc}
+
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(tb)
+        request.response.status = 500
+        return {'error': str(e), 'traceback': tb}
+
+    
+
+def convert_objectid_to_str(document):
+    for key, value in document.items():
+        if isinstance(value, ObjectId):
+            document[key] = str(value)
+        elif isinstance(value, dict):
+            document[key] = convert_objectid_to_str(value)
+        elif isinstance(value, list):
+            document[key] = [convert_objectid_to_str(i) if isinstance(i, dict) else i for i in value]
+    return document
+
 
 
 @view_config(route_name='captcha', renderer='../templates/verify_captcha.jinja2')
@@ -207,6 +297,47 @@ def verify_captcha_view(request):
         'captcha_site_key': 'ysc1_4e0yUQRwmclR0orDgIUDhWwW8bbpnoRF2tRWeoQU87aa91d6',
         'role': role  # передаем роль в шаблон
     }
+
+@view_config(route_name='api_data_files', renderer='json')
+def api_data_files(request):
+    files = []
+    # Ищем только таблицы данных по file_format
+    cursor = request.db['templates'].find({"file_format": {"$in": ["csv", "xlsx", "xls"]}})
+
+    for doc in cursor:
+        files.append({
+            'id': str(doc.get('file_id', '')),
+            'name': doc.get('name', 'Unnamed'),
+            'uploaded': doc.get('date_set').strftime('%Y-%m-%d %H:%M') if doc.get('date_set') else ''
+        })
+
+    return {'files': files}
+
+
+
+
+
+@view_config(route_name='preview_file', request_method='GET')
+def preview_file(request):
+    from bson import ObjectId
+    file_id = ObjectId(request.GET['file_id'])
+    file = request.fs.get(file_id)
+
+    response = request.response
+    response.app_iter = FileIter(file)
+    response.content_disposition = "inline" 
+
+    # Устанавливаем MIME тип
+    if file.name.endswith('.docx'):
+        response.content_type = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    elif file.name.endswith('.odt'):
+        response.content_type = 'application/vnd.oasis.opendocument.text'
+    else:
+        response.content_type = 'application/octet-stream'
+
+    return response
+
+
 
 
 def verify_captcha(request):
@@ -249,10 +380,49 @@ def verify_captcha(request):
 def check_captcha_verified(request):
     return request.session.get('captcha_verified', False)
 
+
 @view_config(route_name='home', renderer='../templates/homepage.jinja2')
 def home_page(request):
+    templates_cursor = request.db['templates'].find()
+    templates = []
+    data_tables = []
+
+    for t in templates_cursor:
+        t['id'] = str(t['_id'])
+        t['name'] = t.get('name', 'Unnamed')
+        t['file_format'] = t.get('file_format', '')
+        t['file_id'] = str(t.get('file_id', ''))
+
+        if t['file_format'] in ['csv', 'xlsx', 'xls']:
+            data_tables.append(t)
+        else:
+            templates.append(t)
+
     request.response.samesite = 'none'
-    return {'project': 'Templater'}
+    return {
+        'project': 'Templater',
+        'templates': templates,
+        'data_tables': data_tables 
+    }
+
+
+@view_config(route_name='api_templates', renderer='json')
+def api_templates(request):
+    cursor = request.db['templates'].find()
+    templates = []
+
+    for t in cursor:
+        templates.append({
+            'id': str(t.get('file_id', '')),
+            'name': t.get('name', 'Unnamed'),
+            'file_format': t.get('file_format', ''),
+        })
+
+    return {'templates': templates}
+
+
+
+
 
 
 @view_config(route_name='locale')
@@ -298,36 +468,40 @@ def get_doc(request):
 
 @view_config(route_name='verify', request_method='POST', renderer='json')
 def verify_doc(request):
-        try:
-            template_id = request.POST['template-id']
-            data_id = request.POST['data-table-id']
+    try:
+        template_id = request.POST['template-id']
+        data_id = request.POST['data-table-id']
 
-            template = request.fs.get(ObjectId(template_id))
-            data = request.fs.get(ObjectId(data_id))
+        template = request.fs.get(ObjectId(template_id))
+        data = request.fs.get(ObjectId(data_id))
 
-            renderer = TemplateRenderer()
+        renderer = TemplateRenderer()
 
-            renderer.load_data(data)
-            result = renderer.verify(template)
+        renderer.load_data(data)
+        result = renderer.verify(template)
 
-            messages = []
-            for field in result['in_template']:
-                s = _('${field} not defined in the template', mapping={'field': field})
-                s = request.localizer.translate(s)
-                messages.append(s)
+        messages = []
+        for field in result['in_template']:
+            s = _('${field} not defined in the template', mapping={'field': field})
+            s = request.localizer.translate(s)
+            messages.append(s)
 
-            for field in result['in_csv']:
-                s = _('${field} not defined in the csv', mapping={'field': field})
-                s = request.localizer.translate(s)
-                messages.append(s)
+        for field in result['in_csv']:
+            s = _('${field} not defined in the csv', mapping={'field': field})
+            s = request.localizer.translate(s)
+            messages.append(s)
 
-            if(len(messages) == 0):
-                s = _('Verification done without warning')
-                s = request.localizer.translate(s)
-                messages.append(s)
-            return {'status': 'OK', 'messages': messages, 'fields': renderer.fieldnames}
-        except:
-            return {'status': 'err'}
+        if not messages:
+            s = _('Verification done without warning')
+            s = request.localizer.translate(s)
+            messages.append(s)
+
+        return {'status': 'OK', 'messages': messages, 'fields': renderer.fieldnames}
+    
+    except Exception as e:
+        tb = traceback.format_exc()
+        log.error(f"[verify_doc] Ошибка при верификации: {e}\n{tb}")
+        return {'status': 'err', 'error': str(e), 'traceback': tb}
 
 
 @view_config(route_name='render', request_method='POST', renderer='json')
@@ -388,9 +562,8 @@ def api_save_template_data(request):
     try:
         template_id = int(request.matchdict['template_id'])
         data = request.json_body.get('data')
-        if not isinstance(data, dict):
-            return {'error': 'Некорректные данные'}, 400
-
+        if not data:
+            return {'error': 'Данные не переданы'}, 400
 
         templates_data = load_templates()
         template = next((t for t in templates_data if t['id'] == template_id), None)

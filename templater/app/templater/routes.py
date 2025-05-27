@@ -11,6 +11,9 @@ def includeme(config):
     config.add_route('verify', '/verify')
     config.add_route('render', '/render')
     config.add_route('locale', '/locale')
+    config.add_route('preview_file', '/preview')
+    config.add_route('api_data_files', '/api/data-files')
+    config.add_route('api_templates', '/api/templates')
 
     config.add_route('templates', '/templates')
     config.add_route('edit_template', '/edit_template/{template_id}')
