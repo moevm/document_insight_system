@@ -27,10 +27,10 @@
                     <input type="checkbox" name="selected_templates" value="{{ template.id }}">
                 </td>
                 <td>{{ template.name }}</td>
-                <td>{{ template.type }}</td>
-                <td>{{ template.created_at }}</td>
+                <td>{{ template.file_format }}</td>
+                <td>{{ template.date_set }}</td>
                 <td>
-                    <button class="btn btn-delete" onclick="deleteSingleTemplate({{ template.id }})">Удалить</button>
+                    <button class="btn btn-delete" onclick="deleteSingleTemplate('{{ template.id }}')">Удалить</button>
                 </td>
             </tr>
             {% endfor %}
