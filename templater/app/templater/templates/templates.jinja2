@@ -22,10 +22,10 @@
         <p><small>{{ template.created_at }}</small></p>
 
         <div class="template-card-actions">
-            <button class="btn btn-edit" onclick="editTemplate({{ template.id }})">Редактировать</button>
-            <button class="btn btn-delete" onclick="deleteTemplate({{ template.id }})">Удалить</button>
-            <button class="btn btn-export" onclick="exportTemplate({{ template.id }})">Export</button>
-            <button class="btn btn-input-data" onclick="inputData({{ template.id }})">Ввести данные</button>
+            <button class="btn btn-edit" onclick="editTemplate('{{ template.id }}')">Редактировать</button>
+            <button class="btn btn-delete" onclick="deleteTemplate('{{ template.id }}')">Удалить</button>
+            <button class="btn btn-export" onclick="exportTemplate('{{ template.id }}')">Export</button>
+            <button class="btn btn-input-data" onclick="inputData('{{ template.id }}')">Ввести данные</button>
         </div>
     </div>
     {% endfor %}
