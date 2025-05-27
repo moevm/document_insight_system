@@ -54,6 +54,17 @@
                             <label>{% trans %}Upload Your Template{% endtrans %}</label>
                             <input type="file" id="template-file" class="form-control" multiple="" accept=".docx, .odt, .ods, .odp, .pptx, .xlsx"/>
                             <progress id="progress-template" value="0" max="100" style="width:100%;"></progress>
+                            <div class="form-group mt-3">
+    <label>{% trans %}Or select template from database{% endtrans %}</label>
+    <select id="template-select" class="form-control">
+        <option value="">{% trans %}-- Select template --{% endtrans %}</option>
+        {% for template in templates %}
+            <option value="{{ template.file_id }}">{{ template.name }} ({{ template.file_format }})</option>
+        {% endfor %}
+    </select>
+    <button class="btn btn-secondary mt-2" onclick="useSelectedTemplate()">{% trans %}Use Selected Template{% endtrans %}</button>
+</div>
+
                         </div>
                         <div class='text-center'>
                             <span id="template-next-group" class="d-none">
@@ -80,17 +91,30 @@
                 <div class="row">
                     <div class="col-md">
                         <div class="form-group files">
-                            <label>{% trans %}Upload Your Data Table{% endtrans %} </label>
-                            <input type="file" id="data-table-file" class="form-control" multiple="" accept=".csv, .xlsx, .xls"/>
-                            <progress id="progress-data-table" value="0" max="100" style="width:100%;"></progress>
-                        </div>
-                        <div class='text-center'>
-                            <span id="data-next-group" class="d-none">
-                                <input type='button' id="btn-verify" class='btn btn-primary' onclick="verifyTemplate()" value='{% trans %}Use this data table{% endtrans %}' />
-                        {% trans %}or{% endtrans %}
-                            </span>
-                            <input type='button' id='btn-upload-data' class='btn btn-primary' onclick="uploadData()" value='{% trans %}Upload Data{% endtrans %}' />
-                        </div>
+    <label>{% trans %}Upload Your Data Table{% endtrans %}</label>
+    <input type="file" id="data-table-file" class="form-control" multiple="" accept=".csv, .xlsx, .xls"/>
+    <progress id="progress-data-table" value="0" max="100" style="width:100%;"></progress>
+</div>
+
+<div class="form-group mt-3">
+    <label>{% trans %}Or select data table from database{% endtrans %}</label>
+    <select id="data-table-select" class="form-control">
+        <option value="">{% trans %}-- Select data table --{% endtrans %}</option>
+        {% for table in data_tables %}
+            <option value="{{ table.file_id }}">{{ table.name }} ({{ table.file_format }})</option>
+        {% endfor %}
+    </select>
+    <button class="btn btn-secondary mt-2" onclick="useSelectedDataTable()">{% trans %}Use Selected Table{% endtrans %}</button>
+</div>
+
+<div class='text-center'>
+    <span id="data-next-group" class="d-none">
+        <input type='button' id="btn-verify" class='btn btn-primary' onclick="verifyTemplate()" value='{% trans %}Use this data table{% endtrans %}' />
+        {% trans %}or{% endtrans %}
+    </span>
+    <input type='button' id='btn-upload-data' class='btn btn-primary' onclick="uploadData()" value='{% trans %}Upload Data{% endtrans %}' />
+</div>
+
                     </div>
                 </div>
                 <div class="row d-none" id="data-table-preview">
@@ -141,7 +165,6 @@
                         </div>
                         <div class='text-center'>
                             <input type='button' class='btn btn-primary' onclick="resetForms()" value='{% trans %}Start with another file{% endtrans %}' />
-                            <input type='button' class='btn btn-primary' onclick="uploadArchiveToGoogleDrive()" value='Загрузить в Google Drive' />
                         </div>
                     </div>
                 </div>
