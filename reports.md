@@ -76,3 +76,35 @@
 ## 6. Заключение
 
 Интеграция **Templater** в **DIS** позволит автоматизировать процесс создания документов, улучшить работу пользователей и расширить функциональность системы. После успешного внедрения пользователи смогут легко формировать документы на основе шаблонов, загружать их в облачные хранилища и управлять шаблонами напрямую из интерфейса **Document Insight System**.
+
+Исмаилов Максим -- ссылка на скринкаст: https://drive.google.com/file/d/1zhO7JkOA77BibGOPsmqej3f7ujitOuav/view?usp=sharing  
+Гребенников Дмитрий -- ссылка на скринкаст: https://drive.google.com/file/d/1pp1fh8vSD7SwIYk-493jZmsvSC4xBQPy/view  
+Березин Дмитрий -- ссылка на скринкаст: https://drive.google.com/file/d/1KR-T2U6Y7N3-csEU50_4-F3I-1nE5Syr/view?usp=share_link    
+Гизатуллин Амир -- ссылка на скринкаст: https://drive.google.com/file/d/1jbgFhuySJ1ZuE_JzRvlYjWKMpP58QIkg/view?usp=sharing  
+
+Исмаилов Максим -- макет интерфейса + сценарии использования проекта: https://www.figma.com/design/ZYa50S7M3YCn4MVf5UjKfB/DIS-%2B-Templater?node-id=0-1&t=nG8YKFvDaxkc1kqD-1
+
+Ссылка на презентацию с целями, задачами и функциональностью проекта: https://docs.google.com/presentation/d/1uATNoj571Mwj8OwlokX2zsrTB1GnJC5BgUt7k43DkOA/edit#slide=id.g3384753ae2c_0_86
+
+## Итерация 2
+[Презентация по второй итерации](https://docs.google.com/presentation/d/13T82TDFElzonXgqPN-qm_c5MNgQI59wKZ8-toj64mmU/edit?usp=sharing) 
+
+[Use-case](https://github.com/moevm/document_insight_system/blob/reports-dis/use_case/use_case.md)
+
+[Запись скрин-каста работающей системы](https://drive.google.com/file/d/1JzhOoI6-CBTB5PRT50kM_oB6wanURhgq/view?usp=drive_link)
+
+[Макет-UI](https://github.com/moevm/document_insight_system/blob/reports-dis/ui_mockup.png)
+
+Встречи с командой:
+
+meeting 1 - [2025-03-25](https://github.com/moevm/document_insight_system/blob/reports-dis/meetings/2025-03-03.txt)
+
+meeting 2 - [2025-03-25](https://github.com/moevm/document_insight_system/blob/reports-dis/meetings/2025-03-25.txt)
+
+meeting 3 - [2025-03-26](https://github.com/moevm/document_insight_system/blob/reports-dis/meetings/2025-03-26.txt)
+
+
+
+
+
+
