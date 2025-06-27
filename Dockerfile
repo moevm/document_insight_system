@@ -7,10 +7,10 @@ RUN npm install && npm install webpack
 ADD ./assets ./assets
 RUN npm run build
 
-FROM dvivanov/dis-base:v0.4
+FROM dvivanov/dis-base:v0.5
 
 LABEL project='dis'
-LABEL version='0.4'
+LABEL version='0.5'
 
 WORKDIR /usr/src/project
 
@@ -20,14 +20,5 @@ ADD ./app ./app/
 COPY --from=frontend_build /app/src ./src/
 
 ENV PYTHONPATH "${PYTHONPATH}:/usr/src/project/app"
-
-RUN apt update && apt install -y texlive-latex-base \
-    texlive-fonts-recommended \
-    texlive-lang-cyrillic \
-    texlive-xetex \
-    latexmk \
-    biber \
-    python3-pygments \
-    fonts-liberation
 
 CMD ./scripts/local_start.sh
