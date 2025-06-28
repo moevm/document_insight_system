@@ -3,9 +3,7 @@ import logging
 from functools import reduce
 
 from ..docx_uploader.core_properties import CoreProperties
-from ..docx_uploader.inline_shape import InlineShape
 from ..docx_uploader.paragraph import Paragraph
-from ..docx_uploader.style import Style
 from ..docx_uploader.table import Table, Cell
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
 from ..document_uploader import DocumentUploader
@@ -15,6 +13,7 @@ from .tokenizer import TokenType
 
 
 logger = logging.getLogger('latex_uploader')
+logger.level = logging.DEBUG
 
 class LatexUploader(DocumentUploader):
     STYLE_MAP = {
@@ -23,6 +22,16 @@ class LatexUploader(DocumentUploader):
         "underline": "underline",
         "emph": "italic",
         "texttt": "monospace"
+    }
+
+    HEADER_COMMANDS = {
+        'part': 'heading 1',
+        'chapter': 'heading 1',
+        'section': 'heading 2',
+        'subsection': 'heading 3',
+        'subsubsection': 'heading 4',
+        'paragraph': 'heading 5',
+        'subparagraph': 'heading 6'
     }
 
     def __init__(self):
@@ -136,6 +145,7 @@ class LatexUploader(DocumentUploader):
                 if reduce(lambda prev, run: prev and run["style"].matches(template_style), par["runs"], True):
                     matched_pars.append(i)
             result.append(matched_pars)
+
         return result
 
     def parse(self):
@@ -171,17 +181,17 @@ class LatexUploader(DocumentUploader):
     def __make_paragraphs(self):
         logger.debug("Создание объектов Paragraph")
         tmp_paragraphs = []
-        
+
         for styled_par in self.styled_paragraphs:
             paragraph = Paragraph(
-                paragraph_text=styled_par.get("text", "")
+                paragraph_text=styled_par.get("text", "").strip('\n ')
             )
             if styled_par.get("runs"):
                 styles = set(style for run in styled_par.get("runs", []) for style in run.get("style", []))
                 paragraph.paragraph_style_name = " ".join(styles) if styles else "Normal"
                 logger.debug(f"Создан Paragraph со стилями: {paragraph.paragraph_style_name}")
             tmp_paragraphs.append(paragraph)
-    
+
         return tmp_paragraphs
 
     def __make_tables(self):
@@ -230,6 +240,44 @@ class LatexUploader(DocumentUploader):
             match token.type:
                 case TokenType.COMMAND:
                     cmd = token.value
+                    # Обработка команд заголовков
+                    if cmd in self.HEADER_COMMANDS:
+                        # Завершаем текущий параграф, если есть текст
+                        if current_paragraph["text"]:
+                            styled_paragraphs.append(current_paragraph)
+                            logger.debug(f"Добавлен параграф с текстом: {current_paragraph['text'][:20]}...")
+                            current_paragraph = {"text": "", "runs": []}
+
+                        # Получаем текст заголовка
+                        if i + 2 < len(self.tokens) and self.tokens[i + 1].type == TokenType.BRACE_OPEN:
+                            header_text = ""
+                            brace_level = 1
+                            j = i + 2
+                            while j < len(self.tokens) and brace_level > 0:
+                                if self.tokens[j].type == TokenType.BRACE_OPEN:
+                                    brace_level += 1
+                                elif self.tokens[j].type == TokenType.BRACE_CLOSE:
+                                    brace_level -= 1
+                                    if brace_level == 0:
+                                        break
+                                if self.tokens[j].type == TokenType.TEXT:
+                                    header_text += self.tokens[j].value
+                                j += 1
+                            
+                            # Создаем параграф заголовка
+                            header_style = self.HEADER_COMMANDS[cmd]
+
+                            current_paragraph = {
+                                "text": header_text.strip('\n '),
+                                "runs": [{
+                                    "text": header_text.strip(),
+                                    "style": [header_style]
+                                }]
+                            }
+                            i = j
+                        else:
+                            i += 1
+                        
                     if cmd not in self.STYLE_MAP:
                         i += 1
                         continue
@@ -290,8 +338,8 @@ class LatexUploader(DocumentUploader):
             self.page_count += 1
 
             lines = v.split("\n")
-            first_two = " ".join(line.strip() for line in lines[:2])
-            self.first_lines.append(first_two.lower())
+            first_line = re.sub(rf'^[\n\d. ]*', '', lines[0]).lower()
+            self.first_lines.append(first_line)
 
         logger.info(f"Всего страниц документа: {self.page_count}")
         return self.page_count
@@ -311,7 +359,9 @@ class LatexUploader(DocumentUploader):
                 "page": 0},
                 {"name": "Реферат", "marker": False, "key": "реферат", "main_character": False,  "page": 0},
                 {"name": "Abstract", "marker": False, "key": "abstract", "main_character": False, "page": 0},
-                {"name": "Cодержание", "marker": False, "key": "содержание", "main_character": False, "page": 0}
+                {"name": "Cодержание", "marker": False, "key": "содержание", "main_character": False, "page": 0},
+                {"name": "Введение", "marker": False, "key": "введение", "main_character": False, "page": 0},
+                {"name": "Заключение", "marker": False, "key": "заключение", "main_character": False, "page": 0}
             ]
 
             for page in range(1, self.page_count if self.page_counter() < 2 * len(headers) else 2 * len(headers)):

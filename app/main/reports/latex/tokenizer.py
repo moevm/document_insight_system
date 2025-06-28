@@ -132,7 +132,7 @@ class LatexTokenizer:
                 self.tokens.append(Token(
                     TokenType.COMMAND, cmd, self.position - len(cmd) - 1
                 ))
-                self._flush_buffer()
+                self._flush_buffer(False)
                 self.state = self.State.DEFAULT
                 # Возврат позиции для повторной обработки символа
                 self.position -= 1
@@ -180,10 +180,11 @@ class LatexTokenizer:
             # Накопление текста комментария
             self.buffer += char
 
-    def _flush_buffer(self):
+    def _flush_buffer(self, save=True):
         """Сброс буфера в токены типа TEXT."""
         if self.buffer:
-            self.tokens.append(Token(TokenType.TEXT, self.buffer, self.position))
+            if save:
+                self.tokens.append(Token(TokenType.TEXT, self.buffer, self.position))
             self.buffer = ''
 
     def reset(self):
