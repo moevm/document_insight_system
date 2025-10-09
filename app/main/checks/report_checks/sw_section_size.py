@@ -18,7 +18,11 @@ SW_CONSTANTS = {
             "words": 15,
             "sentences": 1
         },
-        "Цель": {
+        "Цель дипломного исследования": {
+            "words": 30,
+            "sentences": 1
+        },
+        "Цель на текущий семестр": {
             "words": 30,
             "sentences": 1
         }
