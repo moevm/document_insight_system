@@ -56,9 +56,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             return answer(False,
                           f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
         references, ref_sequence = self.search_references(start_literature_par)
-        all_numbers = set()
-        for i in range(1, number_of_sources + 1):
-            all_numbers.add(i)
+        all_numbers = set(range(1, number_of_sources + 1))
         if len(references.symmetric_difference(all_numbers)) == 0:
             if not self.min_ref <= number_of_sources <= self.max_ref:
                 return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть не менее {self.min_ref}.')
@@ -81,7 +79,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         result_str += '''
                     Если возникли проблемы, попробуйте сделать следующее:
                     <ul>
-                        <li>Убедитесь, что для ссылки на источник используются квадратные скобки;</li>
+                        <li>Убедитесь, что для ссылки на источник используются квадратные скобки (т.е. [1], [2-4]);</li>
                         <li>Убедитесь, что для оформления списка литературы был использован нумированный список;</li>
                         <li>Убедитесь, что после и перед нумированным списком отсутствуют непустые абзацы.</li>
                         <li>Убедитесь, что один источник не разбит на две строки клавишей "Enter".</li>
@@ -93,13 +91,16 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         prev_ref = 0
         ref_sequence = []
         array_of_references = set()
+        reg_exp = r'\[[\^]{0,1}[\d \-,]+\]'  # md can use [^5] format for hyperlink
         for i in range(0, start_par):
             if isinstance(self.file.paragraphs[i], str):
-                detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i])
+                detected_references = re.findall(reg_exp, self.file.paragraphs[i])
             else:
-                detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i].paragraph_text)
+                detected_references = re.findall(reg_exp, self.file.paragraphs[i].paragraph_text)
+
             if detected_references:
-                for reference in detected_references:
+                for reference_raw in detected_references:
+                    reference = reference_raw.replace('^', '')      # TODO: kostyl'...
                     for one_part in re.split(r'[\[\],]', reference):
                         if re.match(r'\d+[ \-]+\d+', one_part):
                             start, end = re.split(r'[ -]+', one_part)
