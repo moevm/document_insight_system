@@ -6,8 +6,7 @@
 {% block title %}Результаты проверки{% endblock %}
 
 {% block main %}
-    <div class="header row">{% include "header.html" %}</div>
-    <div class="holder row" id="results_holder">
+        <div class="holder row" id="results_holder">
         {% if results.is_ended %}
             {% if results.is_failed %}
                 <h3 id="results_title" class="texteous ins">
