@@ -1,22 +1,29 @@
 {# Accepts: header dependicies #}
 
-
 {% extends "root.html" %}
 
 {% block title %}Главная страница{% endblock %}
 
 {% block main %}
-<div class="header row">
-    <a class="text-right my-auto" id="user_info" href="/login/">Вход для администратора</a>
-</div>
-<div class="holder row justify-content-center">
-    <div class="col-11 col-sm-8 col-md-5 col-lg-4 col-xl-3 my-auto">
-        <h2 class="text-center ins" id="greeting">Добро пожаловать в Document Insight System </h2>
-        <div class="text-center">
-            <p>Для использования системы вам необходимо перейти из курса на 
-                <br><b><a href="https://e.moevm.info">https://e.moevm.info/</a> </br>
-            </p>
+<div style="display: flex; flex-direction: column; min-height: 100vh;">
+    <div class="header row">
+        <a class="text-right my-auto" id="user_info" href="/login/">Вход для администратора</a>
+    </div>
+    <div class="holder row justify-content-center" style="flex: 1;">
+        <div class="col-11 col-sm-8 col-md-5 col-lg-4 col-xl-3 my-auto">
+            <h2 class="text-center ins" id="greeting">Добро пожаловать в Document Insight System</h2>
+            <div class="text-center">
+                <p>Для использования системы вам необходимо перейти из курса на
+                    <br><b><a href="https://e.moevm.info">https://e.moevm.info/</a> </br>
+                </p>
+            </div>
         </div>
+    </div>
+    <div style="text-align: left; margin-top: auto; ">
+        <p>Если вы обнаружили ошибку, пожалуйста,
+            <a href='{{ config.LINK_FOR_BUGS_REPORT }}'>сообщите здесь</a>
+            <br>Адрес поддержки: {{ config.SUPPORT_MAIL }}
+        </p>
     </div>
 </div>
 {% endblock %}
