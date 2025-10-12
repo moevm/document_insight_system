@@ -16,7 +16,7 @@ class ReportParagraphsCountCheck(BaseReportCriterion):
             "subsection": min_paragraphs_in_subsection,
             "subsubsection": min_paragraphs_in_subsubsection
         }
-        self.heading_styles = []
+        self.heading_styles = {style: value["docx_style"] for style, value  in StyleCheckSettings.VKR_CONFIG.items()}
         self.paragraphs_count = []
         self.headers = []
 
@@ -34,9 +34,6 @@ class ReportParagraphsCountCheck(BaseReportCriterion):
         if not self.headers:
             return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
         
-        for item in StyleCheckSettings.VKR_CONFIG:
-            self.heading_styles.append(item["docx_style"])
-        
         self.find_paragraphs_count()
         
         for obj in self.paragraphs_count:
@@ -53,7 +50,7 @@ class ReportParagraphsCountCheck(BaseReportCriterion):
             if "ПРИЛОЖЕНИЕ" in self.headers[i]["text"]:
                 break
             
-            if self.headers[i]["style"] == self.heading_styles[0][0] and not re.search(r'\d', self.headers[i]["text"]):
+            if self.headers[i]["style"] == self.heading_styles['any_header'][0] and not re.search(r'\d', self.headers[i]["text"]):
                 count_lists_section, ignored_paragraphs = self.find_lists_and_captions(self.headers[i]["child"])
                 self.paragraphs_count.append({
                     "name": self.headers[i]["text"], 
@@ -62,17 +59,17 @@ class ReportParagraphsCountCheck(BaseReportCriterion):
                     "lists": count_lists_section
                 })
                 
-            elif self.headers[i]["style"] == self.heading_styles[1][0]:
+            elif self.headers[i]["style"] == self.heading_styles['second_header'][0]:
                 count_lists_section, ignored_paragraphs = self.find_lists_and_captions(self.headers[i]["child"])
                 section_count = len(self.headers[i]["child"]) - ignored_paragraphs + count_lists_section
                 
                 j = i + 1
-                while j < len(self.headers) and self.headers[j]["style"] == self.heading_styles[1][1]:
+                while j < len(self.headers) and self.headers[j]["style"] == self.heading_styles['second_header'][1]:
                     count_lists_subsection, ignored_paragraphs = self.find_lists_and_captions(self.headers[j]["child"])
                     subsection_count = len(self.headers[j]["child"]) - ignored_paragraphs + count_lists_subsection
                     
                     k = j + 1
-                    while k < len(self.headers) and self.headers[k]["style"] == self.heading_styles[1][2]:
+                    while k < len(self.headers) and self.headers[k]["style"] == self.heading_styles['second_header'][2]:
                         count_lists_subsubsection, ignored_paragraphs = self.find_lists_and_captions(self.headers[k]["child"])
                         subsubsection_count = len(self.headers[k]["child"]) - ignored_paragraphs + count_lists_subsubsection
                         subsection_count += subsubsection_count
