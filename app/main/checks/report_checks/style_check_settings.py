@@ -17,7 +17,7 @@ class StyleCheckSettings:
         'тестить', 'тул', 'тула', 'тулза', 'фиксить', 'флажок', 'флаг', 'юзкейс', 'продакт', 'продакшн',
         'прод', 'фидбек', 'дедлайн', 'дэдлайн', 'оптимально', 'оптимальный', 'надежный', 'интуитивный',
         'хороший', 'плохой', 'идеальный', 'быстро', 'медленно', 'какой-нибудь', 'некоторый', 'почти'
-    ]
+    ]   # TODO: list of "warning" words
     STD_MIN_LIT_REF = 1
     STD_MAX_LIT_REF = 1000 #just in case for future edit
     HEADER_1_STYLE = {
@@ -133,22 +133,36 @@ class StyleCheckSettings:
         'second_header':
         {
             "style": HEADER_1_NUM_STYLE,
-            "docx_style": ["heading 2", "heading 3", "heading 4"],
+            "docx_style": ["heading 2", "heading 3", "heading 4"],  # TODO: rm 'heading 2'?
             "headers": [],
             "unify_regex": None,
             "regex": HEADER_NUM_REGEX,
         }
     }
-    
+
+    NIR1_CONFIG = {
+        'any_header':
+        {
+            "style": HEADER_1_STYLE,
+            "docx_style": ["heading 2"],
+            "headers": ["ВВЕДЕНИЕ", "ПОСТАНОВКА ЗАДАЧИ", "ОБЗОР ЛИТЕРАТУРЫ", "ВЫВОДЫ",
+                        "ПЛАН РАБОТЫ НА ВЕСЕННИЙ СЕМЕСТР", "ОТЗЫВ РУКОВОДИТЕЛЯ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
+            "unify_regex": None,
+            "regex": HEADER_REGEX,
+            "banned_words": STD_BANNED_WORDS + ['доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление']
+        },
+    }
+
     NIR2_CONFIG = {
         'any_header':
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
-            "headers": ["ПОСТАНОВКА ЗАДАЧИ", "РЕЗУЛЬТАТЫ РАБОТЫ В ВЕСЕННЕМ СЕМЕСТРЕ", "ОПИСАНИЕ ПРЕДПОЛАГАЕМОГО МЕТОДА РЕШЕНИЯ",
+            "headers": ["ВВЕДЕНИЕ", "ПОСТАНОВКА ЗАДАЧИ", "РЕЗУЛЬТАТЫ РАБОТЫ В ВЕСЕННЕМ СЕМЕСТРЕ", "ОПИСАНИЕ ПРЕДПОЛАГАЕМОГО МЕТОДА РЕШЕНИЯ",
                         "ПЛАН РАБОТЫ НА ОСЕННИЙ СЕМЕСТР", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
             "regex": HEADER_REGEX,
+            "banned_words": STD_BANNED_WORDS + ['доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление']
         },
     }
     
@@ -157,8 +171,8 @@ class StyleCheckSettings:
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
-            "headers": ["ПОСТАНОВКА ЗАДАЧИ", "РЕЗУЛЬТАТЫ РАБОТЫ В ОСЕННЕМ СЕМЕСТРЕ", "ОПИСАНИЕ ПРЕДПОЛАГАЕМОГО МЕТОДА РЕШЕНИЯ",
-                        "ПЛАН РАБОТЫ НА ВЕСЕННИЙ СЕМЕСТР", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
+            "headers": ["ВВЕДЕНИЕ", "ПОСТАНОВКА ЗАДАЧИ", "РЕЗУЛЬТАТЫ РАБОТЫ В ОСЕННЕМ СЕМЕСТРЕ", "ОПИСАНИЕ ПРЕДПОЛАГАЕМОГО МЕТОДА РЕШЕНИЯ",
+                        "ПЛАН РАБОТЫ НА ВЕСЕННИЙ СЕМЕСТР", "ОТЗЫВ РУКОВОДИТЕЛЯ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS + ['доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление']
@@ -307,6 +321,7 @@ class StyleCheckSettings:
         'VKR_HEADERS': VKR_CONFIG,
         'VKR_MAIN_TEXT': VKR_MAIN_TEXT_CONFIG,
         'NIR_HEADERS': NIR2_CONFIG,
+        'NIR1_HEADERS': NIR1_CONFIG,
         'NIR2_HEADERS': NIR2_CONFIG,
         'NIR3_HEADERS': NIR3_CONFIG,
         'MD_HEADERS' : MD_CONFIG,
