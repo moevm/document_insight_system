@@ -7,8 +7,8 @@ class ReportParagraphsCountCheck(BaseReportCriterion):
     description = ""
     id = "paragraphs_count_check"
 
-    def __init__(self, file_info, min_paragraphs_in_unnumbered_section=5, min_paragraphs_in_section=10, 
-                 min_paragraphs_in_subsection=5, min_paragraphs_in_subsubsection=1):
+    def __init__(self, file_info, min_paragraphs_in_unnumbered_section=2, min_paragraphs_in_section=5, 
+                 min_paragraphs_in_subsection=5, min_paragraphs_in_subsubsection=1, skip_sections=None):
         super().__init__(file_info)
         self.min_count_paragraphs = {
             "unnumbered_section": min_paragraphs_in_unnumbered_section,
@@ -19,6 +19,7 @@ class ReportParagraphsCountCheck(BaseReportCriterion):
         self.heading_styles = {style: value["docx_style"] for style, value  in StyleCheckSettings.VKR_CONFIG.items()}
         self.paragraphs_count = []
         self.headers = []
+        self.skip_sections = skip_sections if skip_sections else list()
 
     def late_init(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
@@ -47,6 +48,11 @@ class ReportParagraphsCountCheck(BaseReportCriterion):
     def find_paragraphs_count(self):
         i = 0
         while i < len(self.headers):
+            for skip_section in self.skip_sections:
+                if skip_section.lower() in self.headers[i]["text"].lower():
+                    i+=1
+                    continue
+            
             if "ПРИЛОЖЕНИЕ" in self.headers[i]["text"]:
                 break
             
