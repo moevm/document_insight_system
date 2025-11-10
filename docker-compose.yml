@@ -84,7 +84,7 @@ services:
       - redis
       - mongodb
     volumes:
-      - presentation_files:/usr/src/project/files/
+      - files:/usr/src/project/files/
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     cpuset: ${CONTAINER_CPU:-0-1}
