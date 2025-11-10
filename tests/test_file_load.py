@@ -8,12 +8,12 @@ class FileLoadTestSelenium(BasicSeleniumTest):
 
     def upload_file(self, report_ext):
         report = report_ext
-        form_for_load = self.get_driver().find_element(By.CSS_SELECTOR, 'input[type=file]')
+        form_for_load = self.get_driver().find_element(By.ID, 'upload_file')
         form_for_load.send_keys(report)
-        load_button = self.get_driver().find_element(By.XPATH, '//*[@id="upload_upload_button"]')
+        load_button = self.get_driver().find_element(By.ID, 'upload_upload_button')
         load_button.click()
-        obj = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, '/html/body/div/div[2]/h4/i')))
-        if obj.text.startswith('Производится проверка файла'):
+        obj = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'results_title')))
+        if 'Производится проверка файла' in obj.text:
             start_time = time.time()
             max_time = 240
             while (time.time() - start_time) < max_time:
@@ -36,7 +36,6 @@ class FileLoadTestSelenium(BasicSeleniumTest):
         URL = self.get_url('/upload/')
         self.get_driver().get(URL)
         self.get_driver().implicitly_wait(30)
-        # obj = self.get_driver().find_element(By.XPATH, "/html/body/div/div[2]/div/p/b")
         obj = self.get_driver().find_element(By.ID, "criteria_pack_name")
         return obj.text
 
