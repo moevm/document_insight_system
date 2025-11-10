@@ -6,8 +6,7 @@
 {% block title %}Результаты проверки{% endblock %}
 
 {% block main %}
-    <div class="header row">{% include "header.html" %}</div>
-    <div class="holder row" id="results_holder">
+        <div class="holder row" id="results_holder">
         {% if results.is_ended %}
             {% if results.is_failed %}
                 <h3 id="results_title" class="texteous ins">
@@ -105,7 +104,7 @@
                     <button class="btn" id="prev-page"><i class="bi bi-arrow-left"></i></button>
                     <button class="btn" id="next-page"><i class="bi bi-arrow-right"></i></button>
                     <span class="page-info">
-               Слайд <span id="page-num"></span> из <span id="page-count"></span>
+               Страница <span id="page-num"></span> из <span id="page-count"></span>
               </span>
                 </div>
                 <canvas id="the-canvas" style="border: 1px solid #000000; direction: ltr;"></canvas>

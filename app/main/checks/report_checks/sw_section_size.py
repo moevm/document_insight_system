@@ -18,7 +18,11 @@ SW_CONSTANTS = {
             "words": 15,
             "sentences": 1
         },
-        "Цель": {
+        "Цель дипломного исследования": {
+            "words": 30,
+            "sentences": 1
+        },
+        "Цель на текущий семестр": {
             "words": 30,
             "sentences": 1
         }
@@ -59,11 +63,11 @@ class SWSectionSizeCheck(BaseReportCriterion):
                 }
         feedback = ""
         if not all(r['sentences'] for r in result.values()):
-            feedback += "<br>Размер следующих разделов не удовлетворяет требованиям <strong>по количеству предложений</strong> (помните, что часть разделов явлются словосочетаниями, а не полным текстом): <br>  - " + \
-                '<br>  - '.join(f"'{chapter}' - должен быть не более {self.sections[chapter]['sentences']}" for chapter, check in result.items() if not check['sentences'])
+            feedback += "<br>Размер следующих разделов не удовлетворяет требованиям <strong>по количеству предложений</strong> (считается по знаку препинания 'точка') - помните, что часть разделов явлются словосочетаниями, а не полным текстом: <br>  - " + \
+                '<br>  - '.join(f"'{chapter}' - должен быть не более {self.sections[chapter]['sentences']}" for chapter, check in result.items() if check and not check['sentences'])
         if not all(r['words'] for r in result.values()):
             feedback += "<br>Размер следующих разделов не удовлетворяет требованиям <strong>по количеству слов</strong> (попробуйте подобрать более ёмкие и короткие формулировки): <br>  - " + \
-                '<br>  - '.join(f"'{chapter}' - должен быть не более {self.sections[chapter]['words']}" for chapter, check in result.items() if not check['words'])
+                '<br>  - '.join(f"'{chapter}' - должен быть не более {self.sections[chapter]['words']}" for chapter, check in result.items() if check and not check['words'])
                
         if feedback:
             return answer(0, feedback)
