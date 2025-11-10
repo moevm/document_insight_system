@@ -48,9 +48,7 @@ class ReportMainCharacterCheck(BaseReportCriterion):
         result_score = 1.0
         check_result = self.first_check_list + self.second_check_list
         penalty_score = 1 / len(check_result)
-        print(len(check_result), penalty_score, check_result)
         for res in check_result:
-            print(f"{res['logs']}")
             if res["found_key"] > 1 and res["key"] == "Консультант":
                 links = self.format_page_link(pages[1:])
                 result_str += f"Предупреждение: помните, что на страницах {links} указывается только консультант, являющийся фактическим руководителем (консультант от кафедры / по допразделу не указываются).<br>"
@@ -58,7 +56,6 @@ class ReportMainCharacterCheck(BaseReportCriterion):
                 result_score -= penalty_score * (res["find"] - res['found_value'])
                 result_str += f"Поле '{res['key']}' не найдено на страницах {links}. Его удалось обнаружить {res['found_key']} из {res['find']} раз. Проверьте корректность всех вхождений.<br>"
             elif res["found_value"] < res["find"]:
-                print(result_score, penalty_score, res["find"], res['found_value'])
                 result_score -= penalty_score * (res["find"] - res['found_value'])
                 links = self.format_page_link(pages)
                 result_str += f"Содержимое поля '{res['key']}' указано корректно {res['found_value']} из {res['find']} раз. Проверьте корректность всех вхождений на страницах {links}.<br>"
