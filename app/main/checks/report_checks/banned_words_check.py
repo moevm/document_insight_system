@@ -1,5 +1,5 @@
 import re
-
+from .style_check_settings import StyleCheckSettings
 from ..base_check import BaseReportCriterion, answer, morph
 
 
@@ -8,15 +8,32 @@ class ReportBannedWordsCheck(BaseReportCriterion):
     description = 'Запрещено упоминание слова "мы"'
     id = 'banned_words_check'
 
-    def __init__(self, file_info, words=["мы"], min_count=3, max_count=6):
+    def __init__(self, file_info, headers_map=None):
         super().__init__(file_info)
-        self.words = [morph.normal_forms(word)[0] for word in words]
-        self.min_count = min_count
-        self.max_count = max_count
+        self.words = []
+        self.min_count = 0
+        self.max_count = 0
+        if headers_map:
+            self.config = headers_map
+        else:
+            self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
+
+    def late_init(self):
+        self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
+        if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
+            self.words = [morph.normal_forms(word)[0] for word in StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['banned_words']]
+            self.min_count = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['min_count_for_banned_words_check']
+            self.max_count = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['max_count_for_banned_words_check']
+        else:
+            if 'any_header' in StyleCheckSettings.CONFIGS.get(self.config):
+                self.words = [morph.normal_forms(word)[0] for word in StyleCheckSettings.CONFIGS.get(self.config)['any_header']['banned_words']]
+                self.min_count = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['min_count_for_banned_words_check']
+                self.max_count = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['max_count_for_banned_words_check']
 
     def check(self):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
+        self.late_init()
         detected_lines = {}
         result_str = f'<b>Запрещенные слова: {"; ".join(self.words)}</b><br>'
         count = 0

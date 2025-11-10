@@ -32,7 +32,7 @@ class LRReportSectionCheck(BaseReportCriterion):
         self.file.parse_effective_styles()
         result = True
         result_str = ""
-        for preset in self.presets:
+        for _, preset in self.presets.items():
             full_style = self.construct_style_from_description(preset["style"])
             precheck_dict = {key: preset["style"].get(key) for key in self.prechecked_props}
             precheck_style = self.construct_style_from_description(precheck_dict)

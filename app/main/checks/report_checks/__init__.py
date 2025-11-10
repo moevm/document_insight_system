@@ -24,3 +24,13 @@ from .style_check import ReportStyleCheck
 from .spelling_check import SpellingCheck
 from .max_abstract_size_check import ReportMaxSizeOfAbstractCheck
 from .template_name import ReportTemplateNameCheck
+from .empty_task_page_check import EmptyTaskPageCheck
+from .water_in_the_text_check import WaterInTheTextCheck
+from .sw_section_banned_words import SWSectionBannedWordsCheck
+from .sw_section_lit_reference import SWSectionLiteratureReferenceCheck
+from .sw_tasks import SWTasksCheck
+from .sw_section_size import SWSectionSizeCheck
+from .sw_keywords_check import SWKeywordsCheck
+from .task_tracker import ReportTaskTracker
+from .paragraphs_count_check import ReportParagraphsCountCheck
+from .template_name import ReportTemplateNameCheck

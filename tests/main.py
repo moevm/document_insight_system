@@ -9,7 +9,8 @@ from test_single_card_check import SingleCheckTestSelenium
 from test_version import VersionTestSelenium
 from test_file_load import FileLoadTestSelenium
 from test_csv_load import CsvDownloadTestSelenium
-
+from test_criterion_packs_page import CriterionPacksTestSelenium
+from test_admin_criterions_page import AdminCriterionsTestSelenium
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run Selenium tests with specified data')
@@ -31,8 +32,16 @@ def main():
     args = parse_arguments()
 
     suite = unittest.TestSuite()
-    tests = (
-    AuthTestSelenium, StatisticTestSelenium, FileLoadTestSelenium, SingleCheckTestSelenium, VersionTestSelenium, CsvDownloadTestSelenium)
+
+    tests = (AuthTestSelenium,
+            StatisticTestSelenium,
+            FileLoadTestSelenium,
+            SingleCheckTestSelenium,
+            VersionTestSelenium,
+            CsvDownloadTestSelenium,
+            CriterionPacksTestSelenium,
+            AdminCriterionsTestSelenium)
+
     param = (args.host, args.login, args.password, args.report, args.report_doc, args.pres)
     for test in tests:
         suite.addTest(BasicSeleniumTest.parametrize(test, param=param))
