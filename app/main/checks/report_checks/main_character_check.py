@@ -10,7 +10,7 @@ class ReportMainCharacterCheck(BaseReportCriterion):
     id = "main_character_check"
     priority = True
 
-    def __init__(self, file_info, tables_count_to_verify=7):
+    def __init__(self, file_info, tables_count_to_verify=8):
         super().__init__(file_info)
         self.headers = []
         self.first_check_list = None
