@@ -18,7 +18,7 @@ class SlidePPTX(SlideBasic):
                 else:
                     try:
                         self.page_number = [int(p.text), int(p.left), int(p.top)]
-                    except ValueError:
+                    except (ValueError, TypeError) as exc:
                         self.page_number = [-1, -1, -1]
         if container.shapes.title:
             self.title = container.shapes.title.text

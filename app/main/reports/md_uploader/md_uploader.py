@@ -108,6 +108,8 @@ class MdUploader(DocumentUploader):
         for par in self.paragraphs:
             if len(par.strip()) > 0:
                 paragraph = {"text": par, "runs": []}
+                if '<h1>' in paragraph["text"]:
+                    paragraph["runs"].append({"text": par, "style": "heading 1"})
                 if '<h2>' in paragraph["text"]:
                     paragraph["runs"].append({"text": par, "style": "heading 2"})
                 elif '<h3>' in paragraph["text"]:

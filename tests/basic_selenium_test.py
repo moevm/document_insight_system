@@ -28,7 +28,7 @@ class BasicSeleniumTest(unittest.TestCase):
 
     def authorization(self):
         host, login_param, password_param = self.param[:3]
-        URL = self.get_url('/login')
+        URL = self.get_url('/login/')
         self.get_driver().get(URL)
         self.get_driver().implicitly_wait(30)
         login = self.get_driver().find_element(By.ID, "login_text_field")

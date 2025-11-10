@@ -2,7 +2,7 @@
     --main-color: #01549B;
     --accent-color: #0275D8;
     --text-color: #373A3C;
-    --footer-color: #80878D;
+    --footer-color: #d2dae0;
     --background-color: #E5E5E5;
     --bright-color: #FFFFFF;
     --border-color: #CCCCCC;
@@ -52,7 +52,7 @@ body {
 
 .footer {
     background: var(--footer-color);
-    height: 5vh;
+    /*height: 5vh;*/
 }
 
 .blue_button {
