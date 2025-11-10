@@ -39,9 +39,6 @@ class ReportMainCharacterCheck(BaseReportCriterion):
         for i in range(self.tables_count_to_verify):
             table = self.file.tables[i]
             extract_table = self.extract_table_contents(table)
-            from logging import getLogger
-
-            getLogger("root_logger").info(str(extract_table))
             self.check_table(self.first_check_list, extract_table, i+1)
             self.check_table(self.second_check_list, extract_table, i+1)
         links = self.format_page_link(pages)
