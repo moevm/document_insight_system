@@ -32,3 +32,5 @@ from .sw_tasks import SWTasksCheck
 from .sw_section_size import SWSectionSizeCheck
 from .sw_keywords_check import SWKeywordsCheck
 from .task_tracker import ReportTaskTracker
+from .paragraphs_count_check import ReportParagraphsCountCheck
+from .template_name import ReportTemplateNameCheck
