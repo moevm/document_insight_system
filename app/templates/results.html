@@ -6,8 +6,7 @@
 {% block title %}Результаты проверки{% endblock %}
 
 {% block main %}
-    <div class="header row">{% include "header.html" %}</div>
-    <div class="holder row" id="results_holder">
+        <div class="holder row" id="results_holder">
         {% if results.is_ended %}
             {% if results.is_failed %}
                 <h3 id="results_title" class="texteous ins">
@@ -46,16 +45,16 @@
 
         <!-- Download / statistic links -->
         {% if not current_user.is_anonymous %}
-            <a href="{{ url_for('checks', _id=results._id) }}" id="file_download" class="col text-center"
+            <a href="{{ url_for('checks.checks_main', _id=results._id) }}" id="file_download" class="col text-center"
                download="{{ results.filename }}">Скачать файл в исходном формате ({{ results.filename.upper().rsplit('.', 1)[-1] }})</a>
             {% if results.conv_pdf_fs_id %}
-                <a href="{{ url_for('get_pdf', _id=results.conv_pdf_fs_id) }}" id="pdf_download"
+                <a href="{{ url_for('get_pdf.get_pdf_main', _id=results.conv_pdf_fs_id) }}" id="pdf_download"
                    class="col text-center link">Скачать файл в PDF-формате</a>
             {% endif %}
             <!-- links for lists of sent presentation -->
-            <a href="{{ url_for('check_list', filter_user=stats[1]) }}"
+            <a href="{{ url_for('check_list.check_list_main', filter_user=stats[1]) }}"
                 class="col text-center link">Список всех загрузок пользователя</a>
-            <a href="{{ url_for('check_list', filter_user=stats[1], filter_criteria=current_user.criteria) }}"
+            <a href="{{ url_for('check_list.check_list_main', filter_user=stats[1], filter_criteria=current_user.criteria) }}"
                 class="col text-center link">Cписок загрузок пользователя по критерию "{{current_user.criteria}}"</a>
         {% endif %}
         <!-- Checks table -->
@@ -105,7 +104,7 @@
                     <button class="btn" id="prev-page"><i class="bi bi-arrow-left"></i></button>
                     <button class="btn" id="next-page"><i class="bi bi-arrow-right"></i></button>
                     <span class="page-info">
-               Слайд <span id="page-num"></span> из <span id="page-count"></span>
+               Страница <span id="page-num"></span> из <span id="page-count"></span>
               </span>
                 </div>
                 <canvas id="the-canvas" style="border: 1px solid #000000; direction: ltr;"></canvas>

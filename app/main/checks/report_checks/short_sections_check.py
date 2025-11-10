@@ -25,19 +25,18 @@ class ReportShortSectionsCheck(BaseReportCriterion):
         if prechecked_props_lst is None:
             prechecked_props_lst = StyleCheckSettings.PRECHECKED_PROPS
         self.styles: List[Style] = []
-        for format_description in self.presets:
+        for _, format_description in self.presets.items():
             prechecked_dict = {key: format_description["style"].get(key) for key in prechecked_props_lst}
             style = Style()
             style.__dict__.update(prechecked_dict)
             self.styles.append(style)
-
     def late_init(self):
         self.file.parse_effective_styles()
         try:
             self.cutoff_line = self.file.pdf_file.get_text_on_page()[2].split("\n")[0]
         except:
             self.cutoff_line = None
-        for preset in self.presets:
+        for _, preset in self.presets.items():
             if preset["unify_regex"] is not None:
                 self.file.unify_multiline_entities(preset["unify_regex"])
 

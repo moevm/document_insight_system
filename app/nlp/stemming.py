@@ -6,7 +6,7 @@ from pymorphy2 import MorphAnalyzer
 
 MORPH_ANALYZER = MorphAnalyzer()
 TASKS = 'задачи:'
-
+FURTHER_DEVELOPMENT_KEYWORDS = tuple(map(lambda x: MORPH_ANALYZER.parse(x.lower())[0].normal_form, ('направления', 'дальнейшие', 'улучшения', 'исследования')))
 
 class Stemming:
     def __init__(self):
@@ -27,9 +27,6 @@ class Stemming:
         return self.sentences
 
     def parse_text(self, string, flag):
-        # morph = MorphAnalyzer()
-        FURTHER_DEVELOPMENT = MORPH_ANALYZER.parse('дальнейшие'.lower())[0].normal_form
-        FURTHER_IMPROVEMENTS = MORPH_ANALYZER.parse('улучшения'.lower())[0].normal_form
         self.sentences = []
         self.find_further_development = False
         self.filtered_docs = []
@@ -42,7 +39,7 @@ class Stemming:
             for word in token_sent:
                 w = MORPH_ANALYZER.parse(word)[0].normal_form
                 filtered_doc.append(w)
-                if w in [FURTHER_DEVELOPMENT, FURTHER_IMPROVEMENTS] and not flag:
+                if w in FURTHER_DEVELOPMENT_KEYWORDS and not flag:
                     self.find_further_development = True
                     self.further_dev_sentence = sent
             self.filtered_docs.append(filtered_doc)
