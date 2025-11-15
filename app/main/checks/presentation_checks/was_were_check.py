@@ -13,7 +13,7 @@ class PresWasWereCheck(BasePresCriterion):
     def check(self):
         detected_sentences, total_sentences = get_was_were_sentences(self.file, CritreriaType.PRESENTATION)
         if total_sentences > self.threshold:
-            result_str = generate_output_text(detected_sentences, CritreriaType.PRESENTATION)
+            result_str = generate_output_text(detected_sentences, CritreriaType.PRESENTATION, self.format_page_link)
             result_score = 0
         else:
             result_str = 'Пройдена!'

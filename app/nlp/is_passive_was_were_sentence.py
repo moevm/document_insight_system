@@ -65,12 +65,17 @@ def is_passive_was_were_sentece(sentence):
 
 def generate_output_text(detected_senteces, type: CritreriaType, format_page_link_fn=None):
     output = 'Обнаружены конструкции (Был/Была/Было/Были), которые можно удалить без потери смысла:<br><br>'
+    if type == CritreriaType.REPORT:
+        offset_index = 0
+    elif type == CritreriaType.PRESENTATION:
+        offset_index = 1
     for index, messages in detected_senteces.items():
+        display_index = index + offset_index
         output_type = criteria_type_to_str(type)
         if format_page_link_fn:
-            output += f'<b>{output_type} {format_page_link_fn([index])}:</b> <br>' + '<br>'.join(messages) + '<br><br>'
+            output += f'<b>{output_type} {format_page_link_fn([display_index])}:</b> <br>' + '<br>'.join(messages) + '<br><br>'
         else:
-            output += f'<b>{output_type} №{index}:</b> <br>' + '<br>'.join(messages) + '<br><br>'
+            output += f'<b>{output_type} №{display_index}:</b> <br>' + '<br>'.join(messages) + '<br><br>'
     return output
 
 
@@ -78,12 +83,15 @@ def get_was_were_sentences(file, type: CritreriaType):
     detected = {}
     total_sentences = 0
     for page_index, page_text in get_content_by_file(file, type):
-        lines = page_text.split('\n')
+        lines = re.split(r'\n', page_text)
+        non_empty_line_counter = 0
         for line_index, line in enumerate(lines):
+            print(line_index, line)
             line = line.strip()
             if not line:
                 continue
-            
+
+            non_empty_line_counter += 1
             sentences = re.split(r'[.!?…]+\s*', line)
             
             for sentence in sentences:
@@ -96,6 +104,10 @@ def get_was_were_sentences(file, type: CritreriaType):
                     if page_index not in detected:
                         detected[page_index] = []
                     truncated_sentence = sentence[:50] + '...' if len(sentence) > 50 else sentence
-                    detected[page_index].append(f'Строка {line_index+1}: {truncated_sentence}')
+                    if type == CritreriaType.PRESENTATION:
+                        err_str = f'Строка {non_empty_line_counter}: {truncated_sentence}'
+                    elif type == CritreriaType.REPORT:
+                        err_str = f'Строка {line_index+1}: {truncated_sentence}'
+                    detected[page_index].append(err_str)
                     
     return detected, total_sentences
