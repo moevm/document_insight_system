@@ -28,20 +28,20 @@
             <tr style="text-align: left;">
             <tr>
                 {% for item in columns %}
-                    <th>{{ item }}</th>
+                <th>{{ item }}</th>
                 {% endfor %}
             </tr>
-            </thead>
-            <tbody>
+        </thead>
+        <tbody>
             <tr>
                 <td><a class="id_check" href="{{ '/results/'  ~ stats[0] }}">
-                    {{ (stats[0] | string)[-5:] }}</a></td>
+                        {{ (stats[0] | string)[-5:] }}</a></td>
                 {% for item in stats[1:] %}
-                    <td>{{ item }}</td>
+                <td>{{ item }}</td>
                 {% endfor %}
             </tr>
-            </tbody>
-        </table>
+        </tbody>
+    </table>
 
         <!-- Download / statistic links -->
         {% if not current_user.is_anonymous %}
@@ -57,60 +57,58 @@
             <a href="{{ url_for('check_list.check_list_main', filter_user=stats[1], filter_criteria=current_user.criteria) }}"
                 class="col text-center link">Cписок загрузок пользователя по критерию "{{current_user.criteria}}"</a>
         {% endif %}
-        <!-- Checks table -->
-        {% if results.is_ended and not results.is_failed %}
-            <table class="table table-striped table-hover" id="results_table">
-                <thead>
-                <tr>
-                    <th><button id="showAllVerdicts" class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button></th>
-                    <th class="results_table_index ins" scope="col">#</th>
-                    <th class="results_table_test ins" scope="col">Тест</th>
-                    <th class="results_table_result ins" scope="col">Результат</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for criterion_info in results.enabled_checks %}
-                    <tr data-toggle="collapse" data-target="#verd{{ loop.index }}" class="accordion-toggle">
-                        <td>
-                            <button class="btn btn-default btn-xs"><i class="bi bi-chevron-double-down"></i></button>
-                        </td>
-                        <th scope="row" class="ins">{{ loop.index }}</th>
-                        <td class="ins">{{ criterion_info['name'] }}</td>
-                        {% set colors = {0.0: 'table-danger', 1.0: 'table-success'} %}
-                        {% set result_labels = {0.0: 'Не пройдена', 1.0: 'Пройдена'} %}
-                        <td class="{{ colors.get(criterion_info['score'], 'table-warning') }} ins">
-                            {{ result_labels.get(criterion_info['score'], 'Частично пройдена') }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="4" class="hiddenRow">
-                            <div id="verd{{ loop.index }}" class="accordian-body collapse" style="margin-left: 2em;">
-                                {% for item in criterion_info.get('verdict', ["Пройдена!"] if criterion_info.get('score')==1.0 else
+            <!-- Checks table -->
+    {% if results.is_ended and not results.is_failed %}
+    <table class="table table-striped table-hover" id="results_table">
+        <thead>
+            <tr>
+                <th><button id="toggleButtonResult" class="flat-button"><i class="bi bi-chevron-double-down"></button></th>
+                <th class="results_table_index ins" scope="col">#</th>
+                <th class="results_table_test ins" scope="col">Тест</th>
+                <th class="results_table_result ins" scope="col">Результат</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for criterion_info in results.enabled_checks %}
+            <tr>
+                <td class="toggleresult raw-button"><i class="bi bi-chevron-double-down"></td>
+                <th scope="row" class="ins">{{ loop.index }}</th>
+                <td class="ins">{{ criterion_info['name'] }}</td>
+                {% set colors = {0.0: 'table-danger', 1.0: 'table-success'} %}
+                {% set result_labels = {0.0: 'Не пройдена', 1.0: 'Пройдена'} %}
+                <td class="{{ colors.get(criterion_info['score'], 'table-warning') }} ins">
+                    {{ result_labels.get(criterion_info['score'], 'Частично пройдена') }}
+                </td>
+            </tr>
+            <tr class="hidden">
+                <td colspan="4">
+
+                    {% for item in criterion_info.get('verdict', ["Пройдена!"] if criterion_info.get('score')==1.0 else
                     ["Не пройдена"]) %}
-                                    {{ item|safe }}
-                                {% endfor %}
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
+                    {{ item|safe }}
+                    {% endfor %}
 
-        <!-- PDF viewer -->
-        {% if not current_user.is_anonymous and results.conv_pdf_fs_id %}
-            <div style="text-align:center; width:100%">
-                <div class="top-bar">
-                    <button class="btn" id="prev-page"><i class="bi bi-arrow-left"></i></button>
-                    <button class="btn" id="next-page"><i class="bi bi-arrow-right"></i></button>
-                    <span class="page-info">
-               Страница <span id="page-num"></span> из <span id="page-count"></span>
-              </span>
-                </div>
-                <canvas id="the-canvas" style="border: 1px solid #000000; direction: ltr;"></canvas>
-            </div>
-        {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 
+    <!-- PDF viewer -->
+    {% if not current_user.is_anonymous and results.conv_pdf_fs_id %}
+    <div style="text-align:center; width:100%">
+        <div class="top-bar">
+            <button class="btn" id="prev-page"><i class="bi bi-arrow-left"></i></button>
+            <button class="btn" id="next-page"><i class="bi bi-arrow-right"></i></button>
+            <span class="page-info">
+                Слайд <span id="page-num"></span> из <span id="page-count"></span>
+            </span>
+        </div>
+        <canvas id="the-canvas" style="border: 1px solid #000000; direction: ltr;"></canvas>
     </div>
+    {% endif %}
+
+</div>
 
 {% endblock %}
