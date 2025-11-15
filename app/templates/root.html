@@ -9,9 +9,12 @@
     <link rel="icon" href="{{ url_for("static", filename="favicon.ico") }}" type="image/x-icon"/>
 </head>
 <body>
+<div class="header row">{% include "header.html" %}</div>
+
 <div class="container-fluid">
     {% block main %}{% endblock %}
 </div>
+<div class="footer">{% include "footer.html" %}</div>
 </body>
 <script src={{ url_for("static", filename="vendors.js") }}></script>
 <script src={{ url_for("static", filename="main.js") }}></script>

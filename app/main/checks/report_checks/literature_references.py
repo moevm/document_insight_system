@@ -11,7 +11,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def __init__(self, file_info, min_ref=1, max_ref=1000, headers_map=None):
         super().__init__(file_info)
         self.headers = []
-        self.literature_header = []
+        self.literature_header = None
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
         if headers_map:
             self.config = headers_map
@@ -21,6 +21,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def late_init_vkr(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
         self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
+        self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
         if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
             self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['min_ref_for_literature_references_check']
             self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['mах_ref_for_literature_references_check']
@@ -45,7 +46,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             self.late_init_vkr()
             header = self.literature_header
             if not header:
-                return answer(True,
+                return answer(False,
                               f'Не найден Список использованных источников.<br><br>Если в вашей работе есть список источников, проверьте корректность использования стилей.')
             start_literature_par = header["number"]
             number_of_sources = self.count_sources_vkr(header)
@@ -55,9 +56,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             return answer(False,
                           f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
         references, ref_sequence = self.search_references(start_literature_par)
-        all_numbers = set()
-        for i in range(1, number_of_sources + 1):
-            all_numbers.add(i)
+        all_numbers = set(range(1, number_of_sources + 1))
         if len(references.symmetric_difference(all_numbers)) == 0:
             if not self.min_ref <= number_of_sources <= self.max_ref:
                 return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть не менее {self.min_ref}.')
@@ -80,10 +79,10 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         result_str += '''
                     Если возникли проблемы, попробуйте сделать следующее:
                     <ul>
-                        <li>Убедитесь, что для ссылки на источник используются квадратные скобки;</li>
+                        <li>Убедитесь, что для ссылки на источник используются квадратные скобки (т.е. [1], [2-4]);</li>
                         <li>Убедитесь, что для оформления списка литературы был использован нумированный список;</li>
                         <li>Убедитесь, что после и перед нумированным списком отсутствуют непустые абзацы.</li>
-                        <li>Убедитесь, что один источник не разбит на двае строки клавишей "Enter".</li>
+                        <li>Убедитесь, что один источник не разбит на две строки клавишей "Enter".</li>
                     </ul>
                     '''
         return answer(False, result_str)
@@ -92,13 +91,16 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         prev_ref = 0
         ref_sequence = []
         array_of_references = set()
+        reg_exp = r'\[[\^]{0,1}[\d \-,]+\]'  # md can use [^5] format for hyperlink
         for i in range(0, start_par):
             if isinstance(self.file.paragraphs[i], str):
-                detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i])
+                detected_references = re.findall(reg_exp, self.file.paragraphs[i])
             else:
-                detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i].paragraph_text)
+                detected_references = re.findall(reg_exp, self.file.paragraphs[i].paragraph_text)
+
             if detected_references:
-                for reference in detected_references:
+                for reference_raw in detected_references:
+                    reference = reference_raw.replace('^', '')      # TODO: kostyl'...
                     for one_part in re.split(r'[\[\],]', reference):
                         if re.match(r'\d+[ \-]+\d+', one_part):
                             start, end = re.split(r'[ -]+', one_part)

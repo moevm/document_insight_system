@@ -4,7 +4,7 @@ from .style_check_settings import StyleCheckSettings
 
 class ReportSectionComponent(BaseReportCriterion):
     label = "Проверка наличия необходимых компонентов указанного раздела"
-    description = 'Раздел "Введение", компоненты: "цель", "задачи", "объект", "предмет"'
+    description = "Проверка наличия необходимых компонентов указанного раздела"
     id = 'report_section_component'
 
     def __init__(self, file_info, chapter='Введение', patterns=('цель', 'задач', 'объект', 'предмет'), headers_map = None):
@@ -58,4 +58,4 @@ class ReportSectionComponent(BaseReportCriterion):
             return answer(True, f'Все необходимые компоненты раздела "{self.chapter}" обнаружены!')
         else:
             return answer(False,
-                          f'Не найдены следующие компоненты раздела {self.chapter}: <ul>{result_str}</ul>')
+                          f'Не найдены следующие компоненты раздела {self.chapter} (обратите внимание на требования к разделу и его составляющим): <ul>{result_str}</ul>')

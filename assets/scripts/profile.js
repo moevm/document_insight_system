@@ -14,5 +14,5 @@ $('#user_save_button').click(async () => {
 $('#user_logout_button').click(async () => {
     const post_data = {method: "GET"};
     await fetch("/user", post_data);
-    window.location.href = "/login";
+    window.location.href = "/login/";
 });
