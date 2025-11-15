@@ -8,6 +8,7 @@ from test_authorization import AuthTestSelenium
 from test_single_card_check import SingleCheckTestSelenium
 from test_version import VersionTestSelenium
 from test_file_load import FileLoadTestSelenium
+from test_csv_load import CsvDownloadTestSelenium
 from test_criterion_packs_page import CriterionPacksTestSelenium
 from test_admin_criterions_page import AdminCriterionsTestSelenium
 
@@ -17,22 +18,27 @@ def parse_arguments():
     parser.add_argument('--login', type=str, required=True, help='insert Username')
     parser.add_argument('--password', type=str, required=True, help='insert Password')
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    parser.add_argument('--pres', type=str, default=os.path.join(script_dir, 'tests_data/example_of_pres.pptx'), help='your path to press for testing')
-    parser.add_argument('--report', type=str, default=os.path.join(script_dir, 'tests_data/example_of_report.docx'), help='your path to report in .docx')
-    parser.add_argument('--report_doc', type=str, default=os.path.join(script_dir, 'tests_data/example_of_report.doc'), help='your path to report in .doc')
-    
-  
+    parser.add_argument('--pres', type=str, default=os.path.join(script_dir, 'tests_data/example_of_pres.pptx'),
+                        help='your path to press for testing')
+    parser.add_argument('--report', type=str, default=os.path.join(script_dir, 'tests_data/example_of_report.docx'),
+                        help='your path to report in .docx')
+    parser.add_argument('--report_doc', type=str, default=os.path.join(script_dir, 'tests_data/example_of_report.doc'),
+                        help='your path to report in .doc')
+
     return parser.parse_args()
+
 
 def main():
     args = parse_arguments()
 
     suite = unittest.TestSuite()
+
     tests = (AuthTestSelenium,
             StatisticTestSelenium,
             FileLoadTestSelenium,
             SingleCheckTestSelenium,
             VersionTestSelenium,
+            CsvDownloadTestSelenium,
             CriterionPacksTestSelenium,
             AdminCriterionsTestSelenium)
 
@@ -44,6 +50,7 @@ def main():
 
     BasicSeleniumTest.close_driver()
     sys.exit(returncode)
+
 
 if __name__ == '__main__':
     main()

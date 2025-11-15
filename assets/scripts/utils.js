@@ -1,62 +1,67 @@
 export function debounce(func, timeout) {
-    return function perform(...args) {
-        let previousCall = this.lastCall;
-        let currCall = Date.now();
-        this.lastCall = currCall;
+	return function perform(...args) {
+			let previousCall = this.lastCall;
+			let currCall = Date.now();
+			this.lastCall = currCall;
 
-        if (previousCall && (currCall - previousCall <= timeout)) {
-            clearTimeout(this.lastCallTimer);
-        }
+			if (previousCall && (currCall - previousCall <= timeout)) {
+					clearTimeout(this.lastCallTimer);
+			}
 
-        this.lastCallTimer = setTimeout(() => func(...args), timeout);
-    }
+			this.lastCallTimer = setTimeout(() => func(...args), timeout);
+	}
 };
 
 export function isFloat(str) {
-    const floatRegex = /^-?\d+(?:[.,]\d*?)?$/;
-    if (!floatRegex.test(str))
-        return false;
+	const floatRegex = /^-?\d+(?:[.,]\d*?)?$/;
+	if (!floatRegex.test(str))
+			return false;
 
-    str = parseFloat(str);
-    if (isNaN(str))
-        return false;
-    return true;
+	str = parseFloat(str);
+	if (isNaN(str))
+			return false;
+	return true;
 };
 
 
 export function pushHistoryState(paramsData) {
-    const {limit, offset, sort, order, filter} = paramsData;
+	const {limit, offset, sort, order, filter} = paramsData;
 
-    // push history state
-    history.pushState(paramsData, "", "?" + $.param({limit, offset, filter, sort, order}))
+	// push history state
+	history.pushState(paramsData, "", "?" + $.param({limit, offset, filter, sort, order}))
 };
 
+let currentAjax = ""
 
 export function ajaxRequest(AJAX_URL, params) {
-    const queryString = "?" + $.param(params.data)
-    const url = AJAX_URL + queryString
-    console.log("ajax:", url);
-    $.get(url).then(res => params.success(res))
+	const queryString = "?" + $.param(params.data)
+	currentAjax = queryString
+	const url = AJAX_URL + queryString
+	console.log("ajax:", url);
+	$.get(url).then(res => params.success(res))
 
-    pushHistoryState(params.data)
+	pushHistoryState(params.data)
 };
 
+export function getLatestAjaxRequest(){
+	return currentAjax
+};
 
 export function onPopState() {
-    location.reload()
+	location.reload()
 };
 
 
 export function resetTable($table, queryParams) {
-    let queryString = window.location.search;
-    const params = Object.fromEntries(new URLSearchParams(decodeURIComponent(queryString)).entries());
-    params.filter = "";
+	let queryString = window.location.search;
+	const params = Object.fromEntries(new URLSearchParams(decodeURIComponent(queryString)).entries());
+	params.filter = "";
 
-    pushHistoryState(params);
+	pushHistoryState(params);
 
-    $table.bootstrapTable('refreshOptions', {
-        sortName: "",
-        sortOrder: "",
-        queryParams: queryParams
-    });
+	$table.bootstrapTable('refreshOptions', {
+			sortName: "",
+			sortOrder: "",
+			queryParams: queryParams
+	});
 }
