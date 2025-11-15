@@ -150,3 +150,31 @@ class Check(PackableWithId):
         is_ended = none_to_true(self.is_ended)  # None for old checks => True, True->True, False->False
         is_failed = none_to_false(self.is_failed)  # None for old checks => False, True->True, False->False
         return {'is_ended': is_ended, 'is_failed': is_failed}
+
+class Image(PackableWithId):
+    def __init__(self, dictionary=None):
+        super().__init__(dictionary)
+        dictionary = dictionary or {}
+        self.check_id = dictionary.get('check_id')  # Привязка к check_id
+        self.caption = dictionary.get('caption', '')  # Подпись к изображению
+        self.image_data = dictionary.get('image_data')  # Файл изображения в формате bindata
+        self.image_size = dictionary.get('image_size')  # Размер изображения в сантимерах
+        self.text = dictionary.get('text', None)
+        self.page = dictionary.get('page', None)
+
+    def pack(self):
+        package = super().pack()
+        package['check_id'] = str(self.check_id)
+        package['caption'] = self.caption
+        package['image_data'] = self.image_data
+        package['image_size'] = self.image_size
+        package['text'] = self.text
+        package['page'] = self.page
+        return package
+
+class ParsedText(PackableWithId):
+    def __init__(self, dictionary=None):
+        super().__init__(dictionary)
+        dictionary = dictionary or {}
+        self.filename = dictionary.get('filename', '')
+        self.parsed_chapters = dictionary.get('parsed_chapters', [])

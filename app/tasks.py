@@ -6,12 +6,14 @@ from celery import Celery
 from celery.signals import worker_ready
 
 from passback_grades import run_passback
+from main.reports.pasre_file import parse_file
 from db import db_methods
-from db.db_types import Check
+from db.db_types import Check, ParsedText
 from main.checker import check
 from main.parser import parse
 from main.check_packs import BASE_PACKS
 from root_logger import get_root_logger
+from tesseract_tasks import update_tesseract_criteria_result
 
 config = ConfigParser()
 config.read('app/config.ini')
@@ -52,9 +54,18 @@ def create_task(self, check_info):
     original_filepath = join(FILES_FOLDER, f"{check_id}.{check_obj.filename.rsplit('.', 1)[-1]}")
     pdf_filepath = join(FILES_FOLDER, f"{check_id}.pdf")
     try:
-        updated_check = check(parse(original_filepath, pdf_filepath), check_obj)
-        updated_check.is_ended = True
+        parsed_file_object = parse(original_filepath, pdf_filepath, check_id)
+        parsed_file_object.make_chapters(check_obj.file_type['report_type'])
+        parsed_file_object.make_headers(check_obj.file_type['report_type'])
+        chapters = parse_file.parse_chapters(parsed_file_object)
+        
+        updated_check = check(parsed_file_object, check_obj)
         updated_check.is_failed = False
+        parsed_text = ParsedText(dict(filename=check_info['filename']))
+        parsed_text.parsed_chapters = parse_file.parse_headers_and_pages_and_images(chapters, parsed_file_object)
+        db_methods.add_parsed_text(check_id, parsed_text)
+        if db_methods.get_celery_tesseract_task_status_by_check(check_id):
+            update_tesseract_criteria_result(updated_check)
         db_methods.update_check(updated_check)  # save to db
         db_methods.mark_celery_task_as_finished(self.request.id)
 

@@ -12,6 +12,7 @@ from ..pdf_document.pdf_document_manager import PdfDocumentManager
 from ..document_uploader import DocumentUploader
 
 
+
 class DocxUploader(DocumentUploader):
     def __init__(self):
         super().__init__()
@@ -241,6 +242,52 @@ class DocxUploader(DocumentUploader):
             else:
                 chapters_str += "&nbsp;&nbsp;&nbsp;&nbsp;" + header["text"] + "<br>"
         return chapters_str
+
+    def extract_images_with_captions(self, check_id):
+        from app.db.db_methods import save_image_to_db, get_images
+        
+        emu_to_cm  = 360000
+        image_found = False
+        image_data = None
+        image_style="ВКР_Подпись для рисунков"
+        if not self.images:
+            for i, paragraph in enumerate(self.file.paragraphs):
+                for run in paragraph.runs:
+                    if "graphic" in run._element.xml:
+                        image_streams = run._element.findall('.//a:blip', namespaces={
+                            'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'})
+                        for image_stream in image_streams:
+                            embed_id = image_stream.get(
+                                '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed')
+                            if embed_id:
+                                image_found = True
+                                image_part = self.file.part.related_parts[embed_id]
+                                image_data = image_part.blob
+                                extent = run._element.find('.//wp:extent', namespaces={
+                                'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+                                width_cm = height_cm = None
+                                if extent is not None:
+                                    width_cm = int(extent.get('cx')) / emu_to_cm
+                                    height_cm = int(extent.get('cy')) / emu_to_cm
+                    if image_found:
+                        caption = "picture without caption"
+                        next_paragraph_index = i + 1
+                        while next_paragraph_index < len(self.file.paragraphs):
+                            next_paragraph = self.file.paragraphs[next_paragraph_index]
+                            style_name = next_paragraph.style.name.lower()
+                            next_text = next_paragraph.text.strip()
+                            if any("graphic" in r._element.xml for r in next_paragraph.runs):
+                                break
+                            elif next_text and style_name == image_style.lower() and 'Рисунок' in next_text:
+                                caption = next_text
+                                break
+                            next_paragraph_index += 1
+                        save_image_to_db(check_id, image_data, caption, (width_cm, height_cm))
+                        image_found = False
+                        image_data = None 
+                
+            self.images = get_images(check_id)
+                              
 
 
 def main(args):

@@ -1,14 +1,19 @@
 FROM python:3.10-slim-bullseye
 
 LABEL project='dis'
-LABEL version='0.4-base'
+LABEL version='0.5-base'
 
 ENV LANG en_US.UTF-8
 ENV TZ=Europe/Moscow
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN apt update && apt install -y libreoffice-writer libreoffice-impress default-jre
+RUN apt-get update &&  apt-get install -y \
+    libreoffice-writer \
+    libreoffice-impress \
+    default-jre \
+    tesseract-ocr \
+    tesseract-ocr-rus
 
 ADD requirements.txt .
 RUN python3 -m pip install -r requirements.txt --no-cache-dir
