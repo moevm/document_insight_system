@@ -15,7 +15,7 @@ class ReportWasWereCheck(BaseReportCriterion):
             return answer(False, 'В отчёте недостаточно страниц. Нечего проверять.')
         detected, total_sentences = get_was_were_sentences(self.file, CritreriaType.REPORT)
         if total_sentences > self.threshold:
-            result_str = generate_output_text(detected, CritreriaType.REPORT)
+            result_str = generate_output_text(detected, CritreriaType.REPORT, self.format_page_link)
             result_score = 0
         else:
             result_str = 'Пройдена!'

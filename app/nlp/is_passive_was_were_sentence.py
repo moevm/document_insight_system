@@ -7,8 +7,8 @@ morph = pymorphy2.MorphAnalyzer()
 
 
 class CritreriaType(Enum):
-    REPORT=0
-    PRESENTATION=1
+    REPORT = 'report'
+    PRESENTATION = 'pres'
 
 
 def criteria_type_to_str(type: CritreriaType):
@@ -63,11 +63,14 @@ def is_passive_was_were_sentece(sentence):
     return False
 
 
-def generate_output_text(detected_senteces, type: CritreriaType):
+def generate_output_text(detected_senteces, type: CritreriaType, format_page_link_fn=None):
     output = 'Обнаружены конструкции (Был/Была/Было/Были), которые можно удалить без потери смысла:<br><br>'
     for index, messages in detected_senteces.items():
         output_type = criteria_type_to_str(type)
-        output += f'{output_type} №{index + 1}: <br>' + '<br>'.join(messages) + '<br><br>'
+        if format_page_link_fn:
+            output += f'<b>{output_type} {format_page_link_fn([index])}:</b> <br>' + '<br>'.join(messages) + '<br><br>'
+        else:
+            output += f'<b>{output_type} №{index}:</b> <br>' + '<br>'.join(messages) + '<br><br>'
     return output
 
 
@@ -75,12 +78,24 @@ def get_was_were_sentences(file, type: CritreriaType):
     detected = {}
     total_sentences = 0
     for page_index, page_text in get_content_by_file(file, type):
-        sentences = re.split(r'(?<=[.!?…])\s+', page_text)
-        for sentence_index, sentence in enumerate(sentences):
-            if is_passive_was_were_sentece(sentence):
-                total_sentences += 1
-                if page_index not in detected:
-                    detected[page_index] = []
-                truncated_sentence = sentence[:30] + '...' if len(sentence) > 30 else sentence
-                detected[page_index].append(f'{sentence_index+1}: {truncated_sentence}')
+        lines = page_text.split('\n')
+        for line_index, line in enumerate(lines):
+            line = line.strip()
+            if not line:
+                continue
+            
+            sentences = re.split(r'[.!?…]+\s*', line)
+            
+            for sentence in sentences:
+                sentence = sentence.strip()
+                if not sentence:
+                    continue
+                    
+                if is_passive_was_were_sentece(sentence):
+                    total_sentences += 1
+                    if page_index not in detected:
+                        detected[page_index] = []
+                    truncated_sentence = sentence[:50] + '...' if len(sentence) > 50 else sentence
+                    detected[page_index].append(f'Строка {line_index+1}: {truncated_sentence}')
+                    
     return detected, total_sentences
