@@ -72,5 +72,5 @@ class BaseCriterionPack:
         score = 0.
         for check in result:
             score += float(check['score'])
-        return score, len(result)
+        return round(score, 2), len(result)
 
