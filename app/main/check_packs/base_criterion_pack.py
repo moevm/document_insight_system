@@ -1,4 +1,5 @@
 import logging
+import traceback
 from .utils import init_criterions
 
 logger = logging.getLogger('root_logger')
@@ -26,8 +27,10 @@ class BaseCriterionPack:
             try:
                 criterion_check_result = criterion.check()
             except Exception as e:
-                err_msg = f'{criterion.id}: oшибка во время проверки: {e}'
+                trace_msg = traceback.format_exc()
+                err_msg = f'{criterion.id}: oшибка во время проверки: {e} ({trace_msg[len(trace_msg)/2:]})'
                 logger.error(err_msg)
+                logger.error(trace_msg)
                 criterion_check_result = {'score': 0, 'verdict': [UNEXPECTED_CHECK_FAIL_MSG, f"Информация об ошибке для администратора: {err_msg}"]}
             if criterion.priority and not criterion_check_result['score']:
                 failed_priority_check = True
