@@ -5,7 +5,7 @@ from ..base_check import BasePresCriterion, answer
 class PresAbbreviationsCheck(BasePresCriterion):
     label = "Проверка расшифровки аббревиатур в презентации"
     description = "Все аббревиатуры должны быть расшифрованы при первом использовании"
-    id = 'pres_abbreviations_check'
+    id = 'abbreviations_check_pres'
 
     def __init__(self, file_info):
         super().__init__(file_info)

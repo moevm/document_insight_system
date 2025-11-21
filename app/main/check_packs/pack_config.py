@@ -23,6 +23,7 @@ BASE_PRES_CRITERION = [
     ['task_tracker'],
     ['overview_in_tasks'],
     ['PresAbbreviationsCheck'],
+    ['abbreviations_check']
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
