@@ -32,3 +32,4 @@ from .sw_tasks import SWTasksCheck
 from .sw_section_size import SWSectionSizeCheck
 from .sw_keywords_check import SWKeywordsCheck
 from .task_tracker import ReportTaskTracker
+from .abbreviations_check import AbbreviationsCheck
