@@ -12,6 +12,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         super().__init__(file_info)
         self.headers = []
         self.literature_header = None
+        self.literature_reference_text = []
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
         if headers_map:
             self.config = headers_map
@@ -55,6 +56,10 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         if not number_of_sources:
             return answer(False,
                           f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
+
+        if not self.checking_duplicate_sources():
+            return answer(False, 'В списке используемых источников есть дублирующиеся источники.')
+
         references, ref_sequence = self.search_references(start_literature_par)
         all_numbers = set(range(1, number_of_sources + 1))
         if len(references.symmetric_difference(all_numbers)) == 0:
@@ -124,6 +129,12 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         array_of_references.add(k)
         return prev_ref
 
+    def checking_duplicate_sources(self):
+        for source in self.literature_reference_text:
+            if self.literature_reference_text.count(source) >= 2:
+                return False
+        return True
+
     def find_start_paragraph(self):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
@@ -142,6 +153,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 break
             # if re.search(f"дата обращения", child["text"].lower()):
             literature_counter += 1
+            self.literature_reference_text.append(child["text"])
         return literature_counter
 
     def count_sources(self):
@@ -165,6 +177,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             for ind in range(first_string + 1, last_string):
                 if re.match(f"{literature_counter + 1}.", one_page[ind]):
                     literature_counter += 1
+                    self.literature_reference_text.append(one_page[ind])
         return literature_counter
 
     def search_literature_start_pdf(self):
