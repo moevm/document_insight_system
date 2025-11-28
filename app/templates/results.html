@@ -54,11 +54,16 @@
             <!-- links for lists of sent presentation -->
             <a href="{{ url_for('check_list.check_list_main', filter_user=stats[1]) }}"
                 class="col text-center link">Список всех загрузок пользователя</a>
-            <a href="{{ url_for('check_list.check_list_main', filter_user=stats[1], filter_criteria=current_user.criteria) }}"
-                class="col text-center link">Cписок загрузок пользователя по критерию "{{current_user.criteria}}"</a>
+            <a href="{{ url_for('check_list.check_list_main', filter_user=stats[1], filter_criteria=results.criteria) }}"
+                class="col text-center link">Cписок загрузок пользователя по критерию "{{results.criteria}}"</a>
         {% endif %}
             <!-- Checks table -->
     {% if results.is_ended and not results.is_failed %}
+    <div class="col-12 center">
+        <div class="alert-info">
+            <p style="text-align: center">Подробности проверки по каждому критерию доступны по нажатию <i class="bi bi-chevron-double-down"></i> в левом столбце.</p>
+        </div>
+    </div>
     <table class="table table-striped table-hover" id="results_table">
         <thead>
             <tr>
@@ -102,7 +107,7 @@
             <button class="btn" id="prev-page"><i class="bi bi-arrow-left"></i></button>
             <button class="btn" id="next-page"><i class="bi bi-arrow-right"></i></button>
             <span class="page-info">
-                Слайд <span id="page-num"></span> из <span id="page-count"></span>
+                Страница <span id="page-num"></span> из <span id="page-count"></span>
             </span>
         </div>
         <canvas id="the-canvas" style="border: 1px solid #000000; direction: ltr;"></canvas>
