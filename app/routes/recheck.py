@@ -29,11 +29,11 @@ def recheck_main(check_id):
     filepath = join(UPLOAD_FOLDER, f"{check_id}.{check.filename.rsplit('.', 1)[-1]}")
     pdf_filepath = join(UPLOAD_FOLDER, f"{check_id}.pdf")
     db_methods.write_file_from_db_file(oid, filepath)
-    db_methods.write_file_from_db_file(ObjectId(check.conv_pdf_fs_id), pdf_filepath)
+    is_pdf_exist = db_methods.write_file_from_db_file(ObjectId(check.conv_pdf_fs_id), pdf_filepath)    # can be None (if no pdf)
 
     check.is_ended = False
     db_methods.update_check(check)
-    task = create_task.delay(check.pack(to_str=True))  # add check to queue
+    task = create_task.delay(check.pack(to_str=True), not is_pdf_exist)  # add check to queue (and covert to pdf if needed)
     db_methods.add_celery_task(task.id, check_id)  # mapping celery_task to check (check_id = file_id)
     if request.args.get('api'):
         return {'task_id': task.id, 'check_id': check_id}

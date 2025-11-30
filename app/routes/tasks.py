@@ -54,7 +54,9 @@ def run_task():
     file.save(filepath)
     # add file and file's info to db
     file_id = db_methods.add_file_info_and_content(current_user.username, filepath, file_type, file_id)
-    # use pdf from response or convert to pdf and save on disk and db
+    # use pdf from response or convert to pdf and save on disk and db (in future celery task)
+    convert_flag = True
+    converted_id = ObjectId()
     if current_user.two_files and pdf_file:
         if get_file_len(pdf_file) * 2 + db_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
             logger.critical('Storage overload has occured')
@@ -64,9 +66,8 @@ def run_task():
         filenamepdf, extension = pdf_file.filename.rsplit('.', 1)
         filepathpdf = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
         pdf_file.save(filepathpdf)
-        converted_id = db_methods.add_file_to_db(filenamepdf, filepathpdf)
-    else:
-        converted_id = db_methods.write_pdf(filename, filepath)
+        db_methods.add_file_to_db(filenamepdf, filepathpdf, file_id=converted_id)
+        convert_flag = False
     check = Check({
         '_id': file_id,
         'conv_pdf_fs_id': converted_id,
@@ -82,7 +83,7 @@ def run_task():
         'params_for_passback': current_user.params_for_passback
     })
     db_methods.add_check(file_id, check)  # add check for parsed_file to db
-    task = create_task.delay(check.pack(to_str=True))  # add check to queue
+    task = create_task.delay(check_info=check.pack(to_str=True), convert_flag=convert_flag)  # add check to queue
     db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
     return {'task_id': task.id, 'check_id': str(file_id)}
 

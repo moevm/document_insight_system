@@ -45,12 +45,18 @@ def at_start(sender, **k):
 
 
 @celery.task(name="create_task", queue='check-solution', bind=True)
-def create_task(self, check_info):
+def create_task(self, check_info, convert_flag=True):
     check_obj = Check(check_info)
     check_id = str(check_obj._id)
     # get check files filepath
     original_filepath = join(FILES_FOLDER, f"{check_id}.{check_obj.filename.rsplit('.', 1)[-1]}")
-    pdf_filepath = join(FILES_FOLDER, f"{check_id}.pdf")
+    pdf_filename = f"{check_id}.pdf"
+    pdf_filepath = join(FILES_FOLDER, pdf_filename)
+
+    if convert_flag:
+        # convert to pdf
+        db_methods.write_pdf(filename=pdf_filename, filepath=original_filepath, file_id=check_obj.conv_pdf_fs_id)
+
     try:
         updated_check = check(parse(original_filepath, pdf_filepath), check_obj)
         updated_check.is_ended = True

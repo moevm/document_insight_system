@@ -22,5 +22,5 @@ def get_pdf_main(_id):
     if file is not None:
         return Response(file.read(), mimetype='application/pdf')
     else:
-        logger.info(f'pdf файл для проверки {id} не найден')
+        logger.info(f'pdf файл для проверки {_id} не найден')
         return render_template("./404.html")

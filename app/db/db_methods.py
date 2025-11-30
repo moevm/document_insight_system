@@ -146,22 +146,28 @@ def update_check(check):
     return bool(checks_collection.find_one_and_replace({'_id': check._id}, check.pack()))
 
 
-def write_pdf(filename, filepath):
+def get_file_id(file_id):
+    return ObjectId(file_id) if file_id else ObjectId()
+
+
+def write_pdf(filename, filepath, file_id=None):
     converted_filepath = convert_to(filepath, target_format='pdf')
-    return add_file_to_db(filename, converted_filepath)
+    return add_file_to_db(filename, converted_filepath, get_file_id(file_id))
 
 
 def add_file_to_db(filename, filepath, file_id=None):
-    if not file_id: file_id = ObjectId()
-    fs.upload_from_stream_with_id(file_id, filename, open(filepath, 'rb'))
+    file_id = get_file_id(file_id)
+    fs.upload_from_stream_with_id(file_id, filename, open(filepath, 'rb'))  # existing doc error
     return file_id
 
 
 def write_file_from_db_file(file_id, abs_filepath):
-    with open(abs_filepath, 'wb+') as file:
-        fs.download_to_stream(file_id, file)
-    return True
-
+    try:
+        with open(abs_filepath, 'wb+') as file:
+            fs.download_to_stream(file_id, file)
+        return True
+    except NoFile:
+        return None
 
 # Returns checks with given id or None
 def get_check(checks_id):
