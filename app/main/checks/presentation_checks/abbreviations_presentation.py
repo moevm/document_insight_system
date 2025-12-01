@@ -1,5 +1,6 @@
 import re
 from ..base_check import BasePresCriterion, answer
+from ..check_abbreviations import get_unexplained_abbrev
 
 
 class PresAbbreviationsCheck(BasePresCriterion):
@@ -18,35 +19,29 @@ class PresAbbreviationsCheck(BasePresCriterion):
                 return answer(False, "Не удалось получить текст презентации")
 
             full_text = " ".join(slides_text)
+
+            abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(text=full_text)
             
-            abbreviations = self._find_abbreviations(full_text)
-            
-            if not abbreviations:
+            if not abbr_is_finding:
                 return answer(True, "Аббревиатуры не найдены в презентации")
             
-            unexplained_abbr_with_slides = []
-            for abbr in abbreviations:
-                slides_with_abbr = self._find_abbreviation_slides(abbr, slides_text)
-
-                if not self._is_abbreviation_explained(abbr, full_text):
-                    unexplained_abbr_with_slides.append({
-                        'abbr': abbr,
-                        'slides': slides_with_abbr
-                    })
-            
-
-            if unexplained_abbr_with_slides:
-                result_str = "Найдены нерасшифрованные аббревиатуры:<br>"
-
-                for item in unexplained_abbr_with_slides:
-                    slide_links = self.format_page_link(item['slides'])
-                    result_str += f"- {item['abbr']} (слайды: {', '.join(slide_links)})<br>"
-                    
-                result_str += "<br>Каждая аббревиатура должна быть расшифрована при первом использовании в презентации."
-                return answer(False, result_str)
-            
-            else:
+            if not unexplained_abbr:
                 return answer(True, "Все аббревиатуры правильно расшифрованы")
+
+            unexplained_abbr_with_slides = {}
+
+            for slide_num, slide_text in enumerate(slides_text, 1):
+                for abbr in unexplained_abbr:
+                    if abbr in slide_text and abbr not in unexplained_abbr_with_slides:
+                        unexplained_abbr_with_slides[abbr] = slide_num
+
+            result_str = "Найдены нерасшифрованные аббревиатуры при первом использовании:<br>"
+            slide_links = self.format_page_link(list(unexplained_abbr_with_slides.values()))
+            for index_links, abbr in enumerate(unexplained_abbr_with_slides):
+                result_str += f"- {abbr} на слайде {slide_links[index_links]}<br>"
+            
+            result_str += "<br>Каждая аббревиатура должна быть расшифрована при первом использовании в презентации.<br>"
+            return answer(False, result_str)
                 
         except Exception as e:
             return answer(False, f"Ошибка при проверке аббревиатур: {str(e)}")
@@ -60,47 +55,3 @@ class PresAbbreviationsCheck(BasePresCriterion):
                 found_slides.append(slide_num)
         
         return found_slides
-
-    def _find_abbreviations(self, text: str):
-        pattern = r'\b[А-ЯA-Z]{2,5}\b'
-        abbreviations = re.findall(pattern, text)
-        
-        common_abbr = {
-            'СССР', 'РФ', 'США', 'ВКР', 'ИТ', 'ПО', 'ООО', 'ЗАО', 'ОАО', 'HTML', 'CSS', 
-            'JS', 'ЛЭТИ', 'МОЕВМ', 'ЭВМ', 'DVD', 'SSD', 'PC', 'HDD',
-            'AX', 'BX', 'CX', 'DX', 'SI', 'DI', 'BP', 'SP',
-            'AH', 'AL', 'BH', 'BL', 'CH', 'CL', 'DH', 'DL', 
-            'CS', 'DS', 'ES', 'SS', 'FS', 'GS',
-            'IP', 'EIP', 'RIP',
-            'CF', 'PF', 'AF', 'ZF', 'SF', 'TF', 'IF', 'DF', 'OF',
-            'EAX', 'EBX', 'ECX', 'EDX', 'ESI', 'EDI', 'EBP', 'ESP',
-            'RAX', 'RBX', 'RCX', 'RDX', 'RSI', 'RDI', 'RBP', 'RSP',
-            'DOS', 'OS', 'BIOS', 'UEFI', 'MBR', 'GPT',
-            'ASCII', 'UTF', 'UNICODE', 'ANSI',
-            'ЭВМ', 'МОЭВМ',
-            'CPU', 'GPU', 'APU', 'RAM', 'ROM', 'PROM', 'EPROM', 'EEPROM',
-            'USB', 'SATA', 'PCI', 'PCIe', 'AGP', 'ISA', 'VGA', 'HDMI', 'DP',
-            'LAN', 'WAN', 'WLAN', 'VPN', 'ISP', 'DNS', 'DHCP', 'TCP', 'UDP', 'IP',
-            'HTTP', 'HTTPS', 'FTP', 'SSH', 'SSL', 'TLS',
-            'API', 'GUI', 'CLI', 'IDE', 'SDK', 'SQL', 'NoSQL', 'XML', 'JSON', 'YAML',
-            'MAC', 'IBM'
-        }
-        filtered_abbr = [abbr for abbr in abbreviations if abbr not in common_abbr]
-        
-        return list(set(filtered_abbr))
-
-    def _is_abbreviation_explained(self, abbr: str, text: str) -> bool:
-        patterns = [
-            rf'{abbr}\s*\([^)]+\)',  # АААА (расшифровка)
-            rf'\([^)]+\)\s*{abbr}',  # (расшифровка) АААА
-            rf'{abbr}\s*—\s*[^.,;!?]+',  # АААА — расшифровка
-            rf'{abbr}\s*-\s*[^.,;!?]+',  # АААА - расшифровка
-            rf'[^.,;!?]+\s*—\s*{abbr}',  # расшифровка — АААА  
-            rf'[^.,;!?]+\s*-\s*{abbr}'  # расшифровка - АААА 
-        ]
-        
-        for pattern in patterns:
-            if re.search(pattern, text):
-                return True
-        
-        return False

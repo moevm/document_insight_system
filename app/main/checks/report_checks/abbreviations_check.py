@@ -1,6 +1,6 @@
 import re
 from ..base_check import BaseReportCriterion, answer
-
+from ..check_abbreviations import get_unexplained_abbrev
 
 class AbbreviationsCheck(BaseReportCriterion):
     label = "Проверка расшифровки аббревиатур"
@@ -17,26 +17,36 @@ class AbbreviationsCheck(BaseReportCriterion):
             
             if not text:
                 return answer(False, "Не удалось получить текст документа")
-
-            abbreviations = self._find_abbreviations(text)
             
-            if not abbreviations:
+            abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(text=text)
+            
+            if not abbr_is_finding:
                 return answer(True, "Аббревиатуры не найдены в документе")
             
-            unexplained_abbr = []
-            for abbr in abbreviations:
-                if not self._is_abbreviation_explained(abbr, text):
-                    unexplained_abbr.append(abbr)
-            
-            if unexplained_abbr:
-                result_str = f"Найдены нерасшифрованные аббревиатуры: {', '.join(unexplained_abbr)}<br>"
-                result_str += "Каждая аббревиатура должна быть расшифрована при первом использовании в тексте."
-                return answer(False, result_str)
-            else:
+            if not unexplained_abbr:
                 return answer(True, "Все аббревиатуры правильно расшифрованы")
-                
+
+            unexplained_abbr_with_page = {}
+            
+            for page_num in range(1, self.file.page_counter() + 1):
+                text_on_page = self.file.pdf_file.text_on_page[page_num]
+
+                for abbr in unexplained_abbr:
+                    if abbr in text_on_page and abbr not in unexplained_abbr_with_page:
+                        unexplained_abbr_with_page[abbr] = page_num
+
+
+            result_str = "Найдены нерасшифрованные аббревиатуры при первом использовании:"      
+            page_links = self.format_page_link(list(unexplained_abbr_with_page.values()))
+            for index_links, abbr in enumerate(unexplained_abbr_with_page):
+                result_str += f"- {abbr} на странице {page_links[index_links]}<br>"
+            result_str += "Каждая аббревиатура должна быть расшифрована при первом использовании в тексте.<br>"
+            
+            return answer(False, result_str)
+
         except Exception as e:
             return answer(False, f"Ошибка при проверке аббревиатур: {str(e)}")
+                
 
 
     def _get_document_text(self):
@@ -53,48 +63,3 @@ class AbbreviationsCheck(BaseReportCriterion):
                 text_parts.append(text)
             return "\n".join(text_parts)
         return None
-
-    def _find_abbreviations(self, text: str):
-        pattern = r'\b[А-ЯA-Z]{2,5}\b'
-        abbreviations = re.findall(pattern, text)
-        
-        common_abbr = {
-            'СССР', 'РФ', 'США', 'ВКР', 'ИТ', 'ПО', 'ООО', 'ЗАО', 'ОАО', 'HTML', 'CSS', 
-            'JS', 'ЛЭТИ', 'МОЕВМ', 'ЭВМ', 'DVD', 'SSD', 'PC', 'HDD',
-            'AX', 'BX', 'CX', 'DX', 'SI', 'DI', 'BP', 'SP',
-            'AH', 'AL', 'BH', 'BL', 'CH', 'CL', 'DH', 'DL', 
-            'CS', 'DS', 'ES', 'SS', 'FS', 'GS',
-            'IP', 'EIP', 'RIP',
-            'CF', 'PF', 'AF', 'ZF', 'SF', 'TF', 'IF', 'DF', 'OF',
-            'EAX', 'EBX', 'ECX', 'EDX', 'ESI', 'EDI', 'EBP', 'ESP',
-            'RAX', 'RBX', 'RCX', 'RDX', 'RSI', 'RDI', 'RBP', 'RSP',
-            'DOS', 'OS', 'BIOS', 'UEFI', 'MBR', 'GPT',
-            'ASCII', 'UTF', 'UNICODE', 'ANSI',
-            'ЭВМ', 'МОЭВМ',
-            'CPU', 'GPU', 'APU', 'RAM', 'ROM', 'PROM', 'EPROM', 'EEPROM',
-            'USB', 'SATA', 'PCI', 'PCIe', 'AGP', 'ISA', 'VGA', 'HDMI', 'DP',
-            'LAN', 'WAN', 'WLAN', 'VPN', 'ISP', 'DNS', 'DHCP', 'TCP', 'UDP', 'IP',
-            'HTTP', 'HTTPS', 'FTP', 'SSH', 'SSL', 'TLS',
-            'API', 'GUI', 'CLI', 'IDE', 'SDK', 'SQL', 'NoSQL', 'XML', 'JSON', 'YAML',
-            'MAC', 'IBM'
-        }
-        filtered_abbr = [abbr for abbr in abbreviations if abbr not in common_abbr]
-        
-        return list(set(filtered_abbr))
-
-
-    def _is_abbreviation_explained(self, abbr: str, text: str) -> bool:
-        patterns = [
-            rf'{abbr}\s*\([^)]+\)',  # АААА (расшифровка)
-            rf'\([^)]+\)\s*{abbr}',  # (расшифровка) АААА
-            rf'{abbr}\s*—\s*[^.,;!?]+',  # АААА — расшифровка
-            rf'{abbr}\s*-\s*[^.,;!?]+',  # АААА - расшифровка
-            rf'[^.,;!?]+\s*—\s*{abbr}',  # расшифровка — АААА  
-            rf'[^.,;!?]+\s*-\s*{abbr}'  # расшифровка - АААА 
-        ]
-        
-        for pattern in patterns:
-            if re.search(pattern, text, re.IGNORECASE):
-                return True
-        
-        return False
