@@ -22,7 +22,11 @@ BASE_PRES_CRITERION = [
     ['pres_image_capture'],
     ['task_tracker'],
     ['overview_in_tasks'],
+<<<<<<< HEAD
     ['abbreviations_check_pres'],
+=======
+    ['pres_abbreviations_check'],
+>>>>>>> 2c581e8 (correct check abbr)
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],

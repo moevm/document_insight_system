@@ -41,6 +41,8 @@ class PresAbbreviationsCheck(BasePresCriterion):
                 result_str += f"- {abbr} на слайде {slide_links[index_links]}<br>"
             
             result_str += "<br>Каждая аббревиатура должна быть расшифрована при первом использовании в презентации.<br>"
+            result_str += "Расшифровка должны быть по первыми буквам, например, МВД - Министерство внутренних дел.<br>"
+
             return answer(False, result_str)
                 
         except Exception as e:

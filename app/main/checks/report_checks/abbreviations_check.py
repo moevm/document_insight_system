@@ -1,4 +1,3 @@
-import re
 from ..base_check import BaseReportCriterion, answer
 from ..check_abbreviations import get_unexplained_abbrev
 
@@ -36,11 +35,12 @@ class AbbreviationsCheck(BaseReportCriterion):
                         unexplained_abbr_with_page[abbr] = page_num
 
 
-            result_str = "Найдены нерасшифрованные аббревиатуры при первом использовании:"      
+            result_str = "Найдены нерасшифрованные аббревиатуры при первом использовании:<br>"      
             page_links = self.format_page_link(list(unexplained_abbr_with_page.values()))
             for index_links, abbr in enumerate(unexplained_abbr_with_page):
                 result_str += f"- {abbr} на странице {page_links[index_links]}<br>"
             result_str += "Каждая аббревиатура должна быть расшифрована при первом использовании в тексте.<br>"
+            result_str += "Расшифровка должны быть по первыми буквам, например, МВД - Министерство внутренних дел.<br>"
             
             return answer(False, result_str)
 
