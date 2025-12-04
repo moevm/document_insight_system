@@ -7,8 +7,7 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block main %}
-    <div class="header row">{% include "header.html" %}</div>
-    <div class="holder row justify-content-center">
+        <div class="holder row justify-content-center">
         <script>
             const file_upload_limit = {{ config.MAX_CONTENT_LENGTH | tojson }};
             const file_type = "{{file_type}}";

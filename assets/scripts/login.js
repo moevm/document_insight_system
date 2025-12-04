@@ -20,7 +20,7 @@ $("#login_button").click(async () => {
         })
     };
 
-    const name = await (await fetch("/login", post_data)).text();
+    const name = await (await fetch("/login/", post_data)).text();
     console.log("User " + name + " was" + (name === "" ? " not" : "") + " logged in");
     if (name === "") $("#login_text_field").toggleClass("is-invalid", true);
     else window.location.href = "/upload/";

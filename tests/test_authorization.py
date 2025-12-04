@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 class AuthTestSelenium(BasicSeleniumTest):
 
     def check_auth(self, login_param, password_param):
-        URL = self.get_url('/login')
+        URL = self.get_url('/login/')
         self.get_driver().get(URL)
         self.get_driver().implicitly_wait(30)
         login = self.get_driver().find_element(By.ID, "login_text_field")
@@ -19,7 +19,7 @@ class AuthTestSelenium(BasicSeleniumTest):
         login_button.click()
 
     def test_loading(self):
-        URL = self.get_url('/login')
+        URL = self.get_url('/login/')
         self.get_driver().get(URL)
         self.get_driver().implicitly_wait(30)
         obj = self.get_driver().find_element(By.CLASS_NAME, "form-group")
