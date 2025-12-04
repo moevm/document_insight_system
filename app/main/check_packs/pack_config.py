@@ -22,7 +22,7 @@ BASE_PRES_CRITERION = [
     ['pres_image_capture'],
     ['task_tracker'],
     ['overview_in_tasks'],
-    ['pres_abbreviations_check'],
+    ['abbreviations_check_pres'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
