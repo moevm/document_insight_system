@@ -1,7 +1,7 @@
 from ..base_check import BaseReportCriterion, answer
 from ..check_abbreviations import get_unexplained_abbrev
 
-class AbbreviationsCheck(BaseReportCriterion):
+class AbbreviationsCheckPres(BaseReportCriterion):
     label = "Проверка расшифровки аббревиатур"
     description = "Все аббревиатуры должны быть расшифрованы при первом использовании"
     id = 'abbreviations_check'
