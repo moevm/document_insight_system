@@ -6,7 +6,7 @@ from ..base_check import BaseReportCriterion, answer
 import  string
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
-from pymorphy2 import MorphAnalyzer
+from pymorphy3 import MorphAnalyzer
 
 
 MORPH_ANALYZER = MorphAnalyzer()

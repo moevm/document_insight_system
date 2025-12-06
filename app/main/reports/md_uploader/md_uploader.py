@@ -176,7 +176,7 @@ class MdUploader(DocumentUploader):
             while len(stack) > level:
                 stack.pop()
                 
-            parent = stack[-1]
+            parent = stack[-1] if stack else []
             new_chapter = {
                 'name': chapter['name'],
                 'text': chapter['text'],

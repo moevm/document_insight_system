@@ -45,7 +45,7 @@ body {
 
 .holder {
     background: var(--background-color);
-    height: 95vh;
+    height: 96vh;
     overflow-y: auto;
     overflow-x: hidden;
 }
