@@ -1,7 +1,7 @@
 import itertools
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
-from pymorphy2 import MorphAnalyzer
+from pymorphy3 import MorphAnalyzer
 
 
 MORPH_ANALYZER = MorphAnalyzer()

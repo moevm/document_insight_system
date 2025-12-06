@@ -39,3 +39,4 @@ volumes:
   files:
   redis_data:
   flower_data:
+  language_tool_cache:
