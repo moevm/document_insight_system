@@ -10,14 +10,15 @@ class StyleCheckSettings:
     HEADER_REGEX = "^\\D+.+$"
     HEADER_1_REGEX = "^()([\\w\\s]+)$"
     HEADER_2_REGEX = "^()([\\w\\s]+)\\.$"
-    STD_BANNED_WORDS = ['мы', 'моя', 'мои', 'моё', 'наш', 'наши',
+    STD_BANNED_WORDS = ('мы', 'моя', 'мои', 'моё', 'наш', 'наши',
         'аттач', 'билдить', 'бинарник', 'валидный', 'дебаг', 'деплоить', 'десктопное', 'железо',
         'исходники', 'картинка', 'консольное', 'конфиг', 'кусок', 'либа', 'лог', 'мануал',
         'отнаследованный', 'парсинг', 'пост', 'распаковать', 'сбоит', 'скачать', 'склонировать', 'скрипт',
         'тестить', 'тул', 'тула', 'тулза', 'фиксить', 'флажок', 'флаг', 'юзкейс', 'продакт', 'продакшн',
-        'прод', 'фидбек', 'дедлайн', 'дэдлайн', 'оптимально', 'оптимальный', 'надежный', 'интуитивный',
+        'прод', 'фидбек', 'дедлайн', 'дэдлайн', 'оптимально', 'надежный', 'интуитивный',
         'хороший', 'плохой', 'идеальный', 'быстро', 'медленно', 'какой-нибудь', 'некоторый', 'почти'
-    ]   # TODO: list of "warning" words
+    )
+    STD_WARNED_WORDS = ('машина', 'оптимальный') # TODO: list of "warning" words
     STD_MIN_LIT_REF = 1
     STD_MAX_LIT_REF = 1000 #just in case for future edit
     HEADER_1_STYLE = {
@@ -101,6 +102,7 @@ class StyleCheckSettings:
             "unify_regex": APPENDIX_UNIFY_REGEX,
             "regex": APPENDIX_REGEX,
             "banned_words": STD_BANNED_WORDS,
+            "warned_words": STD_WARNED_WORDS,
             'min_count_for_banned_words_check': 3,
             'max_count_for_banned_words_check': 6,
             'min_ref_for_literature_references_check': STD_MIN_LIT_REF,
@@ -125,6 +127,7 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
+            "warned_words": STD_WARNED_WORDS,
             'min_count_for_banned_words_check': 3,
             'max_count_for_banned_words_check': 6,
             'min_ref_for_literature_references_check': STD_MIN_LIT_REF,
@@ -149,7 +152,8 @@ class StyleCheckSettings:
                         "ПЛАН РАБОТЫ НА ВЕСЕННИЙ СЕМЕСТР", "ОТЗЫВ РУКОВОДИТЕЛЯ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
             "regex": HEADER_REGEX,
-            "banned_words": STD_BANNED_WORDS + ['доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление']
+            "banned_words": STD_BANNED_WORDS + ('доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление'),
+            "warned_words": STD_WARNED_WORDS
         },
     }
 
@@ -162,7 +166,8 @@ class StyleCheckSettings:
                         "ПЛАН РАБОТЫ НА ОСЕННИЙ СЕМЕСТР", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
             "regex": HEADER_REGEX,
-            "banned_words": STD_BANNED_WORDS + ['доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление']
+            "banned_words": STD_BANNED_WORDS + ('доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление'),
+            "warned_words": STD_WARNED_WORDS
         },
     }
     
@@ -175,7 +180,8 @@ class StyleCheckSettings:
                         "ПЛАН РАБОТЫ НА ВЕСЕННИЙ СЕМЕСТР", "ОТЗЫВ РУКОВОДИТЕЛЯ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
             "regex": HEADER_REGEX,
-            "banned_words": STD_BANNED_WORDS + ['доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление']
+            "banned_words": STD_BANNED_WORDS + ('доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление'),
+            "warned_words": STD_WARNED_WORDS
         },
     }
 
@@ -193,6 +199,7 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
+            "warned_words": STD_WARNED_WORDS,
             'min_count_for_banned_words_check': 3,
             'max_count_for_banned_words_check': 6,
         },
@@ -208,6 +215,7 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
+            "warned_words": STD_WARNED_WORDS,
             'min_count_for_banned_words_check': 3,
             'max_count_for_banned_words_check': 6,
         }
@@ -230,6 +238,7 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
+            "warned_words": STD_WARNED_WORDS,
             'min_ref_for_literature_references_check': 1,
             'mах_ref_for_literature_references_check': 1000, #just for future possible edit
             'min_count_for_banned_words_check': 2,
@@ -249,6 +258,7 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
+            "warned_words": STD_WARNED_WORDS,
             'min_ref_for_literature_references_check': 3,
             'mах_ref_for_literature_references_check': 1000, #just for future possible edit
             'min_count_for_banned_words_check': 2,
@@ -268,6 +278,7 @@ class StyleCheckSettings:
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
+            "warned_words": STD_WARNED_WORDS,
             'min_ref_for_literature_references_check': 5,
             'mах_ref_for_literature_references_check': 1000, #just for future possible edit
             'min_count_for_banned_words_check': 2,
