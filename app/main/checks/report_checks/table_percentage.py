@@ -7,19 +7,19 @@ default_line_spacing: float = 1.0 # Значение межстрочного и
 chars_per_line: int = 20 # Примерное кол-во символов в строке ячейки
 cell_padding = 5 # Примерный размер отступов от границ ячейки
 row_padding = 2 # Примерное расстояние между строками таблиц
-
 #С данными значениями погрешность 4-5 процентов
 
-class TablePercentage(BaseReportCriterion):
-    label = "Проверка процентного соотношения таблиц в документе"
-    description = "Проверяет, что таблицы занимают не более установленного процента площади документа"
-    id = 'table_percentage'
+
+class ReportTablePercentageCheck(BaseReportCriterion):
+    label = 'Проверка процентного соотношения таблиц в документе'
+    description = 'Проверяет, что таблицы занимают не более установленного процента площади документа'
+    id = 'report_table_percentage_check'
 
 
-    def __init__(self, file_info, hasApplication = True,max_percentage = 30):
+    def __init__(self, file_info, has_application=True, max_percentage=15):
         super().__init__(file_info)
         self._max_percentage = max_percentage
-        self._hasApplication = hasApplication
+        self._hasApplication = has_application
 
     def get_font_size(self, run, paragraph) -> float:
         """Функция получения размера шрифта"""
@@ -32,7 +32,7 @@ class TablePercentage(BaseReportCriterion):
         else:
             return default_font_size
 
-    def heightCell(self, cell) -> float:
+    def height_cell(self, cell) -> float:
         """Функция получения высоты ячейки"""
         total_height = 0
 
@@ -62,7 +62,7 @@ class TablePercentage(BaseReportCriterion):
 
         return total_height
 
-    def heightTable(self, table) -> float:
+    def height_table(self, table) -> float:
         """Функция получения высоты таблицы"""
         total_height = 0
         for row in table.rows:
@@ -71,14 +71,14 @@ class TablePercentage(BaseReportCriterion):
             else:
                 heights = []
                 for cell in row.cells:
-                    heights.append(self.heightCell(cell))
+                    heights.append(self.height_cell(cell))
                 total_height += max(heights) if heights else 0
 
             total_height += row_padding
 
         return total_height
 
-    def getPercentOfTables(self) -> float:
+    def get_percent_of_tables(self) -> float:
         """Функция получение процента таблиц в документе"""
         doc_docx = self.file.file
 
@@ -103,7 +103,7 @@ class TablePercentage(BaseReportCriterion):
 
         for table_index, table in enumerate(doc_docx.tables):
             if table_index < end_index:
-                table_height = self.heightTable(table)
+                table_height = self.height_table(table)
                 tables_height += table_height
 
         percentage = (tables_height / total_height) * 100
@@ -127,19 +127,19 @@ class TablePercentage(BaseReportCriterion):
 
         return None
 
-    def find_tables_indexs_between_text(self,start_text: str, end_text: str | None = None):
+    def find_tables_indexes_between_text(self,start_text: str, end_text: str | None = None):
         """Функция нахождения индексов начала и конца таблиц между двумя текстами"""
         start_index = self.find_table_index_after_text(start_text)
         end_index = self.find_table_index_after_text(end_text)
 
-        return (start_index, end_index)
+        return start_index, end_index
 
     def check(self):
         try:
             if self.file.page_counter() < 4:
                 return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
 
-            percent_tables = self.getPercentOfTables()
+            percent_tables = self.get_percent_of_tables()
 
             if percent_tables <= self._max_percentage:
                 return answer(
@@ -147,18 +147,22 @@ class TablePercentage(BaseReportCriterion):
                     "Пройдена!"
                 )
             else:
+                message = (
+                    f'Таблицы занимают {percent_tables:.1f}% документа, '
+                    f'что превышает допустимые {self._max_percentage}%. '
+                    'Рекомендации: \n'
+                    '<ul>\n'
+                    '    <li>Уменьшите количество таблиц в основном тексте документа;</li>\n'
+                    '    <li>Перенесите вспомогательные таблицы в приложения;</li>\n'
+                    '    <li>Сократите объем данных в таблицах, оставив только самую важную информацию.</li>\n'
+                    '</ul>'
+                )
+
                 return answer(
                     False,
-                    f'''
-                    Таблицы занимают {percent_tables:.1f}% документа, что превышает допустимые {self._max_percentage}%.
-                    Рекомендации:
-                    <ul>
-                        <li>Уменьшите количество таблиц в основном тексте документа;</li>
-                        <li>Перенесите вспомогательные таблицы в приложения;</li>
-                        <li>Сократите объем данных в таблицах, оставив только самую важную информацию.</li>
-                    </ul>
-                    '''
+                    message
                 )
+
         except Exception as e:
             return answer(False, f"Ошибка при проверке процентного соотношения таблиц: {str(e)}")
 
