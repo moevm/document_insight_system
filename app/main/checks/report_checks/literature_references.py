@@ -116,7 +116,6 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         prev_ref = 0
         ref_sequence = []
         array_of_references = set()
-        text = ''
         for i in range(0, start_par):
             paragraph_text = self.file.paragraphs[i] if isinstance(self.file.paragraphs[i], str) else self.file.paragraphs[i].paragraph_text
             match = re.search(r'Таблица ([.\d]+)', paragraph_text)
@@ -126,9 +125,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 table_text = self.get_text_in_table(index_table)
 
             paragraph_text += table_text
-            text += paragraph_text
-
-        prev_ref = self.search_references_in_text(text, prev_ref, array_of_references, ref_sequence)
+            prev_ref = self.search_references_in_text(paragraph_text, prev_ref, array_of_references, ref_sequence)
 
         if ref_sequence:
             if ref_sequence[0][1] == '0':
