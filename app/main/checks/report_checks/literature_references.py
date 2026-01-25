@@ -1,6 +1,7 @@
 import re
 from .style_check_settings import StyleCheckSettings
 from ..base_check import BaseReportCriterion, answer
+from collections import Counter
 
 
 class ReferencesToLiteratureCheck(BaseReportCriterion):
@@ -57,9 +58,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             return answer(False,
                           f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
 
-        if not self.checking_duplicate_sources():
-            return answer(False, 'В списке используемых источников есть дублирующиеся источники.')
-
+        duplicates = self.checking_duplicate_sources()
         references, ref_sequence = self.search_references(start_literature_par)
         all_numbers = set(range(1, number_of_sources + 1))
         if len(references.symmetric_difference(all_numbers)) == 0:
@@ -67,8 +66,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть не менее {self.min_ref}.')
             elif ref_sequence:
                 result_str += f"Источники должны нумероваться в порядке упоминания в тексте. Неправильные последовательности: {'; '.join(num for num in ref_sequence)}"
-                return answer(False, result_str)    
-            else:
+                return answer(False, result_str)
+            elif not duplicates:
                 return answer(True, f"Пройдена!")
         elif len(references.difference(all_numbers)):
             if len(all_numbers.difference(references)) == 0:
@@ -81,13 +80,23 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         else:
             all_numbers -= references
             result_str = f'Упомянуты не все источники из списка.<br>Список источников без упоминания: {", ".join(str(num) for num in sorted(all_numbers))} <br> Всего источников: {number_of_sources}<br><br>'
+
+        if duplicates:
+            message = ''
+            for duplicate in duplicates:
+                message += f'<li>Источники с номерами: {duplicate[1]} ссылаются на один и тот же источник: {duplicate[0]};</li>\n'
+            result_str += (f'Повторяющиеся источники:'
+                           f'<ul>\n'
+                           f'{message}'
+                           f'</ul>')
         result_str += '''
                     Если возникли проблемы, попробуйте сделать следующее:
                     <ul>
-                        <li>Убедитесь, что для ссылки на источник используются квадратные скобки (т.е. [1], [2-4]);</li>
-                        <li>Убедитесь, что для оформления списка литературы был использован нумированный список;</li>
+                        <li>Убедитесь, что для ссылки на источник используются квадратные скобки (т.е. [1], [2-4]).</li>
+                        <li>Убедитесь, что для оформления списка литературы был использован нумированный список.</li>
                         <li>Убедитесь, что после и перед нумированным списком отсутствуют непустые абзацы.</li>
                         <li>Убедитесь, что один источник не разбит на две строки клавишей "Enter".</li>
+                        <li>Убедитесь, что источники не дублируются.</li>
                     </ul>
                     '''
         return answer(False, result_str)
@@ -129,17 +138,29 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         array_of_references.add(k)
         return prev_ref
 
-    def checking_duplicate_sources(self):
-        for source in self.literature_reference_text:
-            if self.literature_reference_text.count(source) >= 2:
-                return False
-        return True
+    def checking_duplicate_sources(self) -> list:
+        """Функция нахождения дубликатов в источниках"""
+        counter = Counter([text.lower() for text in self.literature_reference_text])
+
+        duplicates = []
+        for text, count in counter.items():
+            if count >= 2:
+                positions_duplicates = [i + 1 for i, text_in_ref in enumerate(self.literature_reference_text) if text == text_in_ref.lower()]
+
+                if positions_duplicates:
+                    duplicates.append((
+                        self.literature_reference_text[positions_duplicates[0]],
+                        positions_duplicates
+                    ))
+
+        return duplicates
+
 
     def find_start_paragraph(self):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
             text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
-            if re.fullmatch(f'{self.name_pattern}', text_string):    
+            if re.fullmatch(f'{self.name_pattern}', text_string):
                 start_index = i
                 break
         return start_index
