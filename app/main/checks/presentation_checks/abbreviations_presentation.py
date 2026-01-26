@@ -6,7 +6,7 @@ from ..check_abbreviations import get_unexplained_abbrev
 class PresAbbreviationsCheck(BasePresCriterion):
     label = "Проверка расшифровки аббревиатур в презентации"
     description = "Все аббревиатуры должны быть расшифрованы при первом использовании"
-    id = 'abbreviations_check_pres'
+    id = 'pres_abbreviations_check'
 
     def __init__(self, file_info):
         super().__init__(file_info)
@@ -22,12 +22,7 @@ class PresAbbreviationsCheck(BasePresCriterion):
 
             abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(text=full_text)
             
-            if not abbr_is_finding:
-                return answer(True, "Аббревиатуры не найдены в презентации")
-            
-            if not unexplained_abbr:
-                return answer(True, "Все аббревиатуры правильно расшифрованы")
-
+    
             unexplained_abbr_with_slides = {}
 
             for slide_num, slide_text in enumerate(slides_text, 1):
@@ -47,13 +42,4 @@ class PresAbbreviationsCheck(BasePresCriterion):
                 
         except Exception as e:
             return answer(False, f"Ошибка при проверке аббревиатур: {str(e)}")
-
-    def _find_abbreviation_slides(self, abbr: str, slides_text: list) -> list:
-        found_slides = []
-        
-        for slide_num, slide_text in enumerate(slides_text, 1):
-            pattern = rf'\b{re.escape(abbr)}\b'
-            if re.search(pattern, slide_text, re.IGNORECASE):
-                found_slides.append(slide_num)
-        
-        return found_slides
+    

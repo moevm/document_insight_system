@@ -1,10 +1,10 @@
 from ..base_check import BaseReportCriterion, answer
 from ..check_abbreviations import get_unexplained_abbrev
 
-class AbbreviationsCheckPres(BaseReportCriterion):
+class ReportAbbreviationsCheck(BaseReportCriterion):
     label = "Проверка расшифровки аббревиатур"
     description = "Все аббревиатуры должны быть расшифрованы при первом использовании"
-    id = 'abbreviations_check'
+    id = 'report_abbreviations_check'
 
     def __init__(self, file_info):
         super().__init__(file_info)

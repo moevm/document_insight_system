@@ -13,12 +13,10 @@ from .needed_headers_check import ReportNeededHeadersCheck
 from .page_counter import ReportPageCounter
 from .right_words_check import ReportRightWordsCheck
 from .section_component import ReportSectionComponent
-from .sections_check import LRReportSectionCheck
 from .short_sections_check import ReportShortSectionsCheck
 from .simple_check import ReportSimpleCheck
 from .style_check_settings import StyleCheckSettings
 from .find_theme_in_report import FindThemeInReport
-from .headers_at_page_top_check import ReportHeadersAtPageTopCheck
 from .sections_check import LRReportSectionCheck
 from .style_check import ReportStyleCheck
 from .spelling_check import SpellingCheck
@@ -32,6 +30,5 @@ from .sw_tasks import SWTasksCheck
 from .sw_section_size import SWSectionSizeCheck
 from .sw_keywords_check import SWKeywordsCheck
 from .task_tracker import ReportTaskTracker
-from .abbreviations_check import AbbreviationsCheckPres
 from .paragraphs_count_check import ReportParagraphsCountCheck
-from .template_name import ReportTemplateNameCheck
+from .abbreviations_check import ReportAbbreviationsCheck

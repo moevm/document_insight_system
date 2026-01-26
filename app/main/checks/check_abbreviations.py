@@ -1,5 +1,5 @@
 import re
-from pymorphy2 import MorphAnalyzer
+from pymorphy3 import MorphAnalyzer
 morph = MorphAnalyzer()
 
 
@@ -71,10 +71,37 @@ def is_abbreviation_explained(abbr: str, text: str) -> bool:
 def correctly_explained(abbr, explan):
     words = explan.split()
     
-    first_letter = ""
+    first_letters = ""
     for word in words:
-        first_letter += word[0].upper()
+        first_letters += word[0].upper()
 
-    if(first_letter == abbr[len(first_letter)]):
-        return True
-    return False
+    return first_letters == abbr.upper()
+
+def main_check(text: str):
+    try:
+        continue_check = True
+        res_str = ""
+        if not text:
+            continue_check, res_str = False, "Не удалось получить текст"
+        
+        abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(text=text)
+        
+        if not abbr_is_finding:
+            continue_check, res_str = False, "Аббревиатуры не найдены в представленном документе"
+        
+        if not unexplained_abbr:
+            continue_check, res_str = False, "Все аббревиатуры правильно расшифрованы"
+
+        return continue_check, res_str, unexplained_abbr
+    
+    except Exception as e:
+        return False, f"Ошибка при проверке аббревиатур: {str(e)}", {}
+    
+def forming_response(unexplained_abbr_with_page, format_page_link):
+    result_str = "Найдены нерасшифрованные аббревиатуры при первом использовании:<br>"      
+    page_links = format_page_link(list(unexplained_abbr_with_page.values()))
+    for index_links, abbr in enumerate(unexplained_abbr_with_page):
+        result_str += f"- {abbr} на {page_links[index_links]} странице/слайде<br>"
+    result_str += "Каждая аббревиатура должна быть расшифрована при первом использовании в тексте.<br>"
+    result_str += "Расшифровка должны быть по первыми буквам, например, МВД - Министерство внутренних дел.<br>"
+    return result_str
