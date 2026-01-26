@@ -16,9 +16,6 @@ def get_unexplained_abbrev(text):
     
     return  True, unexplained_abbr
             
-
-
-
 def find_abbreviations(text: str):
     pattern = r'\b[А-ЯA-Z]{2,5}\b'
     abbreviations = re.findall(pattern, text)
@@ -43,12 +40,11 @@ def find_abbreviations(text: str):
         'LAN', 'WAN', 'WLAN', 'VPN', 'ISP', 'DNS', 'DHCP', 'TCP', 'UDP', 'IP',
         'HTTP', 'HTTPS', 'FTP', 'SSH', 'SSL', 'TLS',
         'API', 'GUI', 'CLI', 'IDE', 'SDK', 'SQL', 'NoSQL', 'XML', 'JSON', 'YAML',
-        'MAC', 'IBM', 'ГОСТ'
+        'MAC', 'IBM', 'ГОСТ', 'ООП', 'ЛР', 'КР', 'ОТЧЕТ'
     }
-    filtered_abbr = [abbr for abbr in abbreviations if abbr not in common_abbr and morph.parse(abbr.lower())[0].score != 0]
+    filtered_abbr = {abbr for abbr in abbreviations if abbr not in common_abbr and morph.parse(abbr.lower())[0].score != 0}
     
-    return list(set(filtered_abbr))
-
+    return list(filtered_abbr)
 
 def is_abbreviation_explained(abbr: str, text: str) -> bool:
     patterns = [
@@ -73,7 +69,8 @@ def correctly_explained(abbr, explan):
     
     first_letters = ""
     for word in words:
-        first_letters += word[0].upper()
+        if word:
+            first_letters += word[0].upper()
 
     return first_letters == abbr.upper()
 

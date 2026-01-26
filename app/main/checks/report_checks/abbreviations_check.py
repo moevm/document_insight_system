@@ -1,5 +1,6 @@
 from ..base_check import BaseReportCriterion, answer
-from ..check_abbreviations import get_unexplained_abbrev
+from ..check_abbreviations import main_check, forming_response
+
 
 class ReportAbbreviationsCheck(BaseReportCriterion):
     label = "Проверка расшифровки аббревиатур"
@@ -14,17 +15,10 @@ class ReportAbbreviationsCheck(BaseReportCriterion):
         try:
             text = self._get_document_text()
             
-            if not text:
-                return answer(False, "Не удалось получить текст документа")
+            continue_check, res_str, unexplained_abbr = main_check(text=text)
+            if not continue_check:
+                return answer(True, res_str)
             
-            abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(text=text)
-            
-            if not abbr_is_finding:
-                return answer(True, "Аббревиатуры не найдены в документе")
-            
-            if not unexplained_abbr:
-                return answer(True, "Все аббревиатуры правильно расшифрованы")
-
             unexplained_abbr_with_page = {}
             
             for page_num in range(1, self.file.page_counter() + 1):
@@ -33,15 +27,7 @@ class ReportAbbreviationsCheck(BaseReportCriterion):
                 for abbr in unexplained_abbr:
                     if abbr in text_on_page and abbr not in unexplained_abbr_with_page:
                         unexplained_abbr_with_page[abbr] = page_num
-
-
-            result_str = "Найдены нерасшифрованные аббревиатуры при первом использовании:<br>"      
-            page_links = self.format_page_link(list(unexplained_abbr_with_page.values()))
-            for index_links, abbr in enumerate(unexplained_abbr_with_page):
-                result_str += f"- {abbr} на странице {page_links[index_links]}<br>"
-            result_str += "Каждая аббревиатура должна быть расшифрована при первом использовании в тексте.<br>"
-            result_str += "Расшифровка должны быть по первыми буквам, например, МВД - Министерство внутренних дел.<br>"
-            
+            result_str = forming_response(unexplained_abbr_with_page, lambda pages: self.format_page_link(pages))
             return answer(False, result_str)
 
         except Exception as e:
@@ -63,3 +49,4 @@ class ReportAbbreviationsCheck(BaseReportCriterion):
                 text_parts.append(text)
             return "\n".join(text_parts)
         return None
+    
