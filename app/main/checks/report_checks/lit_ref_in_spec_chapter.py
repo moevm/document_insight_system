@@ -8,7 +8,7 @@ class LitRefInChapter(BaseReportCriterion):
     description = ''
     id = 'references_in_chapter_check'
 
-    def __init__(self, file_info, min_ref_value=0, max_ref_value=0, headers_map = None):
+    def __init__(self, file_info, min_ref_value=0.5, max_ref_value=1, headers_map=None):
         super().__init__(file_info)
         self.chapters_for_lit_ref = {}
         self.lit_ref_count = {}
@@ -23,10 +23,12 @@ class LitRefInChapter(BaseReportCriterion):
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
         self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
         if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
-            self.chapters_for_lit_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['chapters_for_lit_ref']
+            self.chapters_for_lit_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main][
+                'chapters_for_lit_ref']
         else:
             if 'any_header' in StyleCheckSettings.CONFIGS.get(self.config):
-                self.chapters_for_lit_ref= StyleCheckSettings.CONFIGS.get(self.config)['any_header']['chapters_for_lit_ref']
+                self.chapters_for_lit_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header'][
+                    'chapters_for_lit_ref']
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -38,33 +40,43 @@ class LitRefInChapter(BaseReportCriterion):
         result_str = f'Пройдена!'
         currant_head = ''
         chapter_for_check = 0
+        ref_in_annotation = False
         for chapter in self.chapters:
-            if chapter['style'] == "heading 2":
-                header = chapter["text"].lower()
-                if currant_head:
-                    self.lit_ref_count[currant_head].append(chapter['number'])
-                    if currant_head in self.chapters_for_lit_ref:
-                        chapter_for_check += 1
-                        ref_count = len(self.search_references(self.lit_ref_count[currant_head][0], self.lit_ref_count[currant_head][1]))
-                        if ref_count > self.chapters_for_lit_ref[currant_head][1] or ref_count < self.chapters_for_lit_ref[currant_head][0]:
-                            result.append(f'«{currant_head[0].upper() + currant_head[1:]}» : {ref_count}')
-                self.lit_ref_count[header] = [chapter['number'],]
-                currant_head = header
+            header = chapter["text"].lower()
+            if currant_head:
+                self.lit_ref_count[currant_head].append(chapter['number'])
+                if currant_head in self.chapters_for_lit_ref:
+                    chapter_for_check += 1
+                    ref_count = len(self.search_references(self.lit_ref_count[currant_head][0],
+                                                           self.lit_ref_count[currant_head][1]))
+                    if ref_count > self.chapters_for_lit_ref[currant_head][1] or ref_count < \
+                            self.chapters_for_lit_ref[currant_head][0]:
+                        result.append(f'«{currant_head[0].upper() + currant_head[1:]}» : {ref_count}')
+                    if currant_head == 'аннотация' or currant_head == 'annotation':
+                        ref_in_annotation = True
+            self.lit_ref_count[header] = [chapter['number'], ]
+            currant_head = header
         if result:
-            ref_value = round((chapter_for_check-len(result))/chapter_for_check, 2)
+            if chapter_for_check > 0:
+                ref_value = round((chapter_for_check - len(result)) / chapter_for_check, 2)
+            else:
+                ref_value = 1.0
             result_str = (f'Доля соответствия количества ссылок необходимому в требуемых разделах равна {ref_value}'
-                        f'<br><b>Количество ссылок на источники не удовлетворяет допустимому в следующих разделах:</b> <br> {"<br>".join(res for res in result)}'
-                        f'<br><b> Допустимые пороги количества ссылок:</b> <br>'
-                        f'{"<br>".join(f"«{chapter.capitalize()}»: от {limit[0]} до {limit[1]}" for chapter, limit in self.chapters_for_lit_ref.items())}')
-            if ref_value >= self.max_ref_value:
+                          f'<br><b>Количество ссылок на источники не удовлетворяет допустимому в следующих разделах:</b> <br> {"<br>".join(res for res in result)}'
+                          f'<br><b> Допустимые пороги количества ссылок:</b> <br>'
+                          f'{"<br>".join(f"«{chapter.capitalize()}»: от {limit[0]} до {limit[1]}" for chapter, limit in self.chapters_for_lit_ref.items())}')
+            result_str += '<b>В аннотации не должно быть ссылок на литературу.</b>' if ref_in_annotation else ''
+            if ref_value >= self.max_ref_value and not ref_in_annotation:
                 return answer(1, f'Пройдена!')
-            elif ref_value >= self.min_ref_value:
+            elif ref_value >= self.min_ref_value and not ref_in_annotation:
                 return answer(ref_value, f'Частично пройдена! {result_str}')
             else:
                 return answer(0, f'Не пройдена! {result_str}')
+        elif ref_in_annotation:
+            return answer(0, 'В аннотации не должно быть ссылок на литературу.')
         else:
             return answer(1, result_str)
-        
+
     def search_references(self, start_par, end_par):
         array_of_references = []
         for i in range(start_par, end_par):
