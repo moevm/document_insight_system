@@ -4,8 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile_selenium
     environment:
-      - LOGIN=${ADMIN_PASSWORD}
-      - PASSWORD=${ADMIN_PASSWORD}  
+      - LOGIN=admin
+      - PASSWORD=${ADMIN_PASSWORD}
     depends_on:
       - web
     network_mode: service:web

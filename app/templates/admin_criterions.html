@@ -6,7 +6,6 @@
 
 {% block main %}
 
-<div class="header row">{% include "header.html" %}</div>
 <div class="holder row" id="results_holder">
     <h3 id="results_title" class="texteous ins">
         Набор доступных критериев:
@@ -47,6 +46,7 @@
         </tbody>
     </table>
 </div>
+<script src={{ url_for("static", filename="admin_criterions.js") }}></script>
 
 
 
