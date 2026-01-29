@@ -1,9 +1,9 @@
 import re
-import pymorphy2
+import pymorphy3
 import string
 from enum import Enum
 
-morph = pymorphy2.MorphAnalyzer()
+morph = pymorphy3.MorphAnalyzer()
 
 
 class CritreriaType(Enum):

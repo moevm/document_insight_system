@@ -16,6 +16,12 @@ class PresWasWereCheck(BasePresCriterion):
             result_str = generate_output_text(detected_sentences, CritreriaType.PRESENTATION, self.format_page_link)
             result_score = 0
         else:
-            result_str = 'Пройдена!'
+            if total_sentences != 0:
+                result_str = (
+                    generate_output_text(detected_sentences, CritreriaType.PRESENTATION, self.format_page_link)
+                    + 'Пройдена! (но найдены конструкции, которые можно убрать без потери смысла)'
+                )
+            else:
+                result_str = 'Пройдена!'
             result_score = 1 
         return answer(result_score, result_str)
