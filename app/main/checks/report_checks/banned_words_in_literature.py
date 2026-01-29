@@ -8,11 +8,14 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
     description = 'Запрещено упоминание слова "wikipedia"'
     id = 'banned_words_in_literature'
 
-    def __init__(self, file_info, banned_words=["wikipedia"]):
+    def __init__(self, file_info, banned_words=None):
         super().__init__(file_info)
+        self.banned_words = ["habr", "medium", "stackoverflow", "sky.pro", "geeksforgeeks", "wikipedia"] 
+        if banned_words:
+            self.banned_words += banned_words
+        self.banned_words = [morph.normal_forms(word)[0] for word in self.banned_words]
         self.headers_page = 1
         self.literature_header = []
-        self.banned_words = [morph.normal_forms(word)[0] for word in banned_words]
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
 
     def late_init_vkr(self):
