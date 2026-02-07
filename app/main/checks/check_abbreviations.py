@@ -3,7 +3,7 @@ from pymorphy3 import MorphAnalyzer
 morph = MorphAnalyzer()
 
 
-def get_unexplained_abbrev(text):
+def get_unexplained_abbrev(text, title_page):
     abbreviations = find_abbreviations(text)
     
     if not abbreviations:
@@ -11,7 +11,7 @@ def get_unexplained_abbrev(text):
     
     unexplained_abbr = []
     for abbr in abbreviations:
-        if not is_abbreviation_explained(abbr, text):
+        if not is_abbreviation_explained(abbr, text) and not abbr in title_page:
             unexplained_abbr.append(abbr)
     
     return  True, unexplained_abbr
@@ -74,14 +74,14 @@ def correctly_explained(abbr, explan):
 
     return first_letters == abbr.upper()
 
-def main_check(text: str):
+def main_check(text: str, title_page: str):
     try:
         continue_check = True
         res_str = ""
         if not text:
             continue_check, res_str = False, "Не удалось получить текст"
         
-        abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(text=text)
+        abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(text=text, title_page=title_page)
         
         if not abbr_is_finding:
             continue_check, res_str = False, "Аббревиатуры не найдены в представленном документе"

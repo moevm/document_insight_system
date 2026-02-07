@@ -14,8 +14,9 @@ class ReportAbbreviationsCheck(BaseReportCriterion):
     def check(self):
         try:
             text = self._get_document_text()
-            
-            continue_check, res_str, unexplained_abbr = main_check(text=text)
+            title_page = self.file.pdf_file.text_on_page[0]
+
+            continue_check, res_str, unexplained_abbr = main_check(text=text, title_page=title_page)
             if not continue_check:
                 return answer(True, res_str)
             

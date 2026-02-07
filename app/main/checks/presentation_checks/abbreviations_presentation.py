@@ -14,9 +14,10 @@ class PresAbbreviationsCheck(BasePresCriterion):
     def check(self):
         try:
             slides_text = self.file.get_text_from_slides()
+            title_page = slides_text[0]
             full_text = " ".join(slides_text)
 
-            continue_check, res_str, unexplained_abbr = main_check(text=full_text)
+            continue_check, res_str, unexplained_abbr = main_check(text=full_text, title_page=title_page)
             if not continue_check:
                 return answer(True, res_str)
             
