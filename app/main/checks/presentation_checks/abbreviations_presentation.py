@@ -28,7 +28,10 @@ class PresAbbreviationsCheck(BasePresCriterion):
                 for abbr in unexplained_abbr:
                     if abbr in slide_text and abbr not in unexplained_abbr_with_slides:
                         unexplained_abbr_with_slides[abbr] = slide_num
-
+                        
+            if not unexplained_abbr_with_slides:
+                return answer(True, "Все аббревиатуры правильно расшифрованы")
+            
             result_str = forming_response(unexplained_abbr_with_slides, lambda pages: self.format_page_link(pages))
             return answer(False, result_str)
                 

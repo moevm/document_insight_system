@@ -4,19 +4,19 @@ morph = MorphAnalyzer()
 
 
 def get_unexplained_abbrev(text, title_page):
-    abbreviations = find_abbreviations(text)
+    abbreviations = find_abbreviations(text, title_page)
     
     if not abbreviations:
-        return False, None
+        return False, []
     
     unexplained_abbr = []
     for abbr in abbreviations:
-        if not is_abbreviation_explained(abbr, text) and not abbr in title_page:
+        if not is_abbreviation_explained(abbr, text):
             unexplained_abbr.append(abbr)
     
     return  True, unexplained_abbr
             
-def find_abbreviations(text: str):
+def find_abbreviations(text: str, title_page: str):
     pattern = r'\b[А-ЯA-Z]{2,5}\b'
     abbreviations = re.findall(pattern, text)
     
@@ -28,7 +28,7 @@ def find_abbreviations(text: str):
         'AX', 'BX', 'CX', 'DX', 'SI', 'DI', 'BP', 'SP',
         'AH', 'AL', 'BH', 'BL', 'CH', 'CL', 'DH', 'DL', 
         'CS', 'DS', 'ES', 'SS', 'FS', 'GS',
-        'IP', 'EIP', 'RIP',
+        'IP', 'EIP', 'RIP', 'URL',
         'CF', 'PF', 'AF', 'ZF', 'SF', 'TF', 'IF', 'DF', 'OF',
         'EAX', 'EBX', 'ECX', 'EDX', 'ESI', 'EDI', 'EBP', 'ESP',
         'RAX', 'RBX', 'RCX', 'RDX', 'RSI', 'RDI', 'RBP', 'RSP',
@@ -42,7 +42,8 @@ def find_abbreviations(text: str):
         'API', 'GUI', 'CLI', 'IDE', 'SDK', 'SQL', 'NoSQL', 'XML', 'JSON', 'YAML',
         'MAC', 'IBM', 'ГОСТ', 'ООП', 'ЛР', 'КР', 'ОТЧЕТ'
     }
-    filtered_abbr = {abbr for abbr in abbreviations if abbr not in common_abbr and morph.parse(abbr.lower())[0].score != 0}
+    filtered_abbr = {abbr for abbr in abbreviations if abbr not in common_abbr \
+                     and abbr not in title_page and morph.parse(abbr.lower())[0].score != 0}
     
     return list(filtered_abbr)
 
