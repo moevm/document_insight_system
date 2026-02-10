@@ -21,22 +21,19 @@ class ImageReferences(BaseReportCriterion):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         result_str = ''
-        if self.file_type['report_type'] == 'VKR':
-            self.late_init_vkr()
-            if not len(self.headers):
-                return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
-            number_of_images, all_numbers = self.count_images_vkr()
-            count_file_image_object = self.file.pdf_file.get_image_num()
-            if count_file_image_object and not number_of_images:
-                return answer(False, f'В отчёте найдено {count_file_image_object} рисунков, но не найдено ни одной подписи рисунка.<br><br> Если в вашей работе присутствуют рисунки, убедитесь, что для их подписи был '
-                                     f'использован стиль {self.image_style}, и формат: '
-                                     f'"Рисунок <Номер рисунка> — <Название рисунка>".')
-            elif not number_of_images:
-                return answer(True, f'Не найдено ни одного рисунка.<br><br> Если в вашей работе присутствуют рисунки, убедитесь, что для их подписи был '
-                                     f'использован стиль {self.image_style}, и формат: '
-                                     f'"Рисунок <Номер рисунка> — <Название рисунка>".')
-        else:
-            return answer(False, 'Во время обработки произошла критическая ошибка')
+        self.late_init_vkr()
+        if not len(self.headers):
+            return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
+        number_of_images, all_numbers = self.count_images_vkr()
+        count_file_image_object = self.file.pdf_file.get_image_num()
+        if count_file_image_object and not number_of_images:
+            return answer(False, f'В отчёте найдено {count_file_image_object} рисунков, но не найдено ни одной подписи рисунка.<br><br> Если в вашей работе присутствуют рисунки, убедитесь, что для их подписи был '
+                                    f'использован стиль {self.image_style}, и формат: '
+                                    f'"Рисунок <Номер рисунка> — <Название рисунка>".')
+        elif not number_of_images:
+            return answer(True, f'Не найдено ни одного рисунка.<br><br> Если в вашей работе присутствуют рисунки, убедитесь, что для их подписи был '
+                                    f'использован стиль {self.image_style}, и формат: '
+                                    f'"Рисунок <Номер рисунка> — <Название рисунка>".')
         
         references = self.search_references()
         if len(references.symmetric_difference(all_numbers)) == 0:
