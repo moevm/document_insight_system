@@ -74,7 +74,7 @@ class ReportChapters(BaseReportCriterion):
                                     break
                 if not marked_style:
                     err = f"Заголовок \"{header['text']}\": "
-                    err += f'Стиль "{header["style"]}" не соответстует ни одному из стилей заголовков.'
+                    err += f'Стиль "{header["style"]}" не соответствует ни одному из стилей заголовков.'
                     result_str += (str(err) + "<br>")
 
             if not result_str:
