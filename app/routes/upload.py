@@ -15,7 +15,7 @@ upload = Blueprint('upload', __name__, template_folder='templates', static_folde
 @login_required
 def upload_main():
     if request.method == "POST":
-        if current_user.is_LTI or True:  # app.recaptcha.verify(): - disable captcha (cause no login)
+        if current_user.is_LTI or current_user.is_admin:
             return run_task()
         else:
             abort(401)

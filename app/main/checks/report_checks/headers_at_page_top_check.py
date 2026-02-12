@@ -2,7 +2,7 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportHeadersAtPageTopCheck(BaseReportCriterion):
-    label = "Проверка расположения разделов первого уровня с новой страницы"
+    label = "Проверка расположения разделов второго уровня с новой страницы"
     description = ''
     id = "headers_at_page_top_check"
 
@@ -23,6 +23,7 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         result = True
         result_str = ""
+        # TODO: проверить совместимость / дублируемость LR и VKR
         if self.file_type["report_type"] == 'LR':
             for header in self.headers:
                 found = False
@@ -77,7 +78,7 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                                    f"Заголовок второго уровня \"{header['text']}\" "
                                    f"находится не в начале страницы или занимает больше двух строк.")
         else:
-            result_str = "Во время обработки произошла критическая ошибка"
+            result_str = "Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев"
             return answer(False, result_str)
 
         if not result_str:
