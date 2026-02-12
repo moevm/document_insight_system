@@ -1,0 +1,19 @@
+from ..decimal_places_check import DecimalPlacesCheck
+from ..base_check import BaseReportCriterion, answer
+
+class ReportDecimalPlacesCheck(BaseReportCriterion):
+    label = 'Проверка на избыточное количество десятичных знаков'
+    description = 'Проверка на избыточное количество десятичных знаков в числах'
+    id = 'decimal_places_check'
+
+    def __init__(self, file_info, max_decimal_places=2, max_violations=3):
+        super().__init__(file_info)
+        self.checker = DecimalPlacesCheck(file_info, max_decimal_places, max_violations)
+
+    def check(self):
+        if self.file.page_counter() < 4:
+            return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
+        
+        total_violations, detected_pages = self.checker.find_violations_in_texts(self.file.pdf_file.get_text_on_page().items())
+        result_str, result_score = self.checker.get_result_msg_and_score(total_violations, detected_pages, self.format_page_link)
+        return answer(result_score, result_str)
