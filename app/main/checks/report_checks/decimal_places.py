@@ -1,4 +1,4 @@
-from ..decimal_places_check import DecimalPlacesCheck
+from app.utils.decimal_places_check import DecimalPlacesCheck
 from ..base_check import BaseReportCriterion, answer
 
 class ReportDecimalPlacesCheck(BaseReportCriterion):

@@ -1,5 +1,4 @@
 import re
-from .base_check import BaseReportCriterion
 from collections import defaultdict
 
 
