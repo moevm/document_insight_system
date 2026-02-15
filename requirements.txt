@@ -19,7 +19,7 @@ numpy==1.26.4
 oauthlib~=3.1.0
 odfpy==1.4.1
 odfpy==1.4.1
-pandas~=2.0.3
+pandas==3.0.0
 pdfplumber==0.6.1
 PyMuPDF==1.26.6
 PyPDF2~=3.0.1
