@@ -32,3 +32,4 @@ from .sw_keywords_check import SWKeywordsCheck
 from .task_tracker import ReportTaskTracker
 from .paragraphs_count_check import ReportParagraphsCountCheck
 from .abbreviations_check import ReportAbbreviationsCheck
+from .decimal_places import ReportDecimalPlacesCheck

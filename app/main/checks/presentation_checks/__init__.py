@@ -18,3 +18,4 @@ from .name_of_image_check import PresImageCaptureCheck
 from .task_tracker import TaskTracker
 from .overview_in_tasks import OverviewInTasks
 from .abbreviations_presentation import PresAbbreviationsCheck
+from .decimal_places import PresDecimalPlacesCheck
