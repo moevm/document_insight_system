@@ -38,6 +38,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         number_of_sources = 0
         start_literature_par = 0
         result_str = ''
+        # TODO: проверить совместимость / дублируемость LR и VKR
         if self.file_type['report_type'] == 'LR':
             start_literature_par = self.find_start_paragraph()
             if start_literature_par:
@@ -53,7 +54,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             start_literature_par = header["number"]
             number_of_sources = self.count_sources_vkr(header)
         else:
-            return answer(False, 'Во время обработки произошла критическая ошибка')
+            return answer(False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев')
         if not number_of_sources:
             return answer(False,
                           f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')

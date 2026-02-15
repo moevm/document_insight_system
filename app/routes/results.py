@@ -26,8 +26,8 @@ def results_main(_id):
         return render_template("./404.html")
     check = db_methods.get_check(oid)
     if check is not None:
-        # show check only for author or admin
-        if current_user.is_admin or current_user.username == check.user:
+        # show check only for author or admin or api_access_token
+        if current_user.is_admin or current_user.username == check.user or check.user == "api_access_token":
             # show processing time for user
             avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
             return render_template("./results.html", navi_upload=True, results=check,
