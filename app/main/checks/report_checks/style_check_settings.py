@@ -8,8 +8,8 @@ class StyleCheckSettings:
     HEADER_2_NUM_REGEX = "^[1-9][0-9]*\\.([1-9][0-9]*\\ )([\\w\\s]+)$"
     HEADER_NUM_REGEX = "^\\d.+$"
     HEADER_REGEX = "^\\D+.+$"
-    HEADER_1_REGEX = "^()([\\w\\s]+)$"
-    HEADER_2_REGEX = "^()([\\w\\s]+)\\.$"
+    HEADER_1_REGEX = r"^([1-9][0-9]*\.([1-9][0-9]*\.)){0,1}([\w\s]+)$"
+    HEADER_2_REGEX = r"^([1-9][0-9]*\.([1-9][0-9]*\.)*){0,1}([\w\s]+)$"
     STD_BANNED_WORDS = ('мы', 'моя', 'мои', 'моё', 'наш', 'наши',
         'аттач', 'билдить', 'бинарник', 'валидный', 'дебаг', 'деплоить', 'десктопное', 'железо',
         'исходники', 'картинка', 'консольное', 'конфиг', 'кусок', 'либа', 'лог', 'мануал',
@@ -85,10 +85,10 @@ class StyleCheckSettings:
         "line_spacing": 1.0
     }
     TABLE_CAPTION_STYLE_VKR = {
-        "alignment": WD_ALIGN_PARAGRAPH.JUSTIFY,
+        "alignment": WD_ALIGN_PARAGRAPH.LEFT,
         "font_name": "Times New Roman",
         "font_size_pt": 14.0,
-        "first_line_indent_cm": 1.25,
+        "first_line_indent_cm": 0.0,
         "line_spacing": 1.0
     }
 
@@ -96,25 +96,17 @@ class StyleCheckSettings:
     LR_CONFIG = {
         'any_header':
         {
-            "style": HEADER_1_STYLE,
-            "docx_style": ["heading 1"],
-            "headers": ["Исходный код программы"],
-            "unify_regex": APPENDIX_UNIFY_REGEX,
-            "regex": APPENDIX_REGEX,
+            "style": HEADER_2_STYLE,
+            "docx_style": ["heading 3", "heading 4"],
+            "headers": ["Цель работы", "Выполнение работы", "Выводы"],
+            "unify_regex": HEADER_2_REGEX,
+            "regex": HEADER_2_REGEX,
             "banned_words": STD_BANNED_WORDS,
             "warned_words": STD_WARNED_WORDS,
             'min_count_for_banned_words_check': 3,
             'max_count_for_banned_words_check': 6,
             'min_ref_for_literature_references_check': STD_MIN_LIT_REF,
             'mах_ref_for_literature_references_check': STD_MAX_LIT_REF
-        },
-        'second_header':
-        {
-            "style": HEADER_2_STYLE,
-            "docx_style": ["heading 2"],
-            "headers": ["Цель работы", "Выполнение работы", "Выводы"],
-            "unify_regex": None,
-            "regex": HEADER_1_REGEX,
         }
     }
 
@@ -298,12 +290,12 @@ class StyleCheckSettings:
             "style": LISTING_STYLE
         },
         {
-            "name": "Подпись рисунка",
+            "name": "вкр_подпись для рисунков",
             "style": IMAGE_CAPTION_STYLE
         },
         {
-            "name": "Подпись таблицы",
-            "style": TABLE_CAPTION_STYLE
+            "name": "вкр_подпись таблицы",
+            "style": TABLE_CAPTION_STYLE_VKR
         }
     ]
 
