@@ -23,4 +23,3 @@ class PresImageShareCheck(BasePresCriterion):
                                         ограничение - {round(self.limit, 2)}')
         else:
             return answer(True, f'Пройдена!')
-        return answer(False, 'Во время обработки произошла критическая ошибка')

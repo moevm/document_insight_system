@@ -35,3 +35,4 @@ from .task_tracker import ReportTaskTracker
 from .paragraphs_count_check import ReportParagraphsCountCheck
 from .template_name import ReportTemplateNameCheck
 from .check_chapters_3_level import ReportСhaptersLevel3ContentCheck
+from .decimal_places import ReportDecimalPlacesCheck

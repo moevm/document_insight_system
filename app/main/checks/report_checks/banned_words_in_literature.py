@@ -27,6 +27,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         detected_words_dict = {}
+        # TODO: проверить совместимость / дублируемость LR и VKR
         if self.file_type['report_type'] == 'LR':
             list_of_literature = self.find_literature()
             if len(list_of_literature) == 0:
@@ -51,7 +52,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
                         else:
                             detected_words_dict[child_number] = banned_word
         else:
-            return answer(False, 'Во время обработки произошла критическая ошибка')
+            return answer(False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев')
         if detected_words_dict:
             result_str = ""
             for i in sorted(detected_words_dict.keys()):
