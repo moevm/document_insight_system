@@ -11,12 +11,14 @@
 <body>
 <div class="header row">{% include "header.html" %}</div>
 
-<div class="container-fluid">
+<div id="main_content">
     {% block main %}{% endblock %}
 </div>
 <div class="footer">{% include "footer.html" %}</div>
 </body>
 <script src={{ url_for("static", filename="vendors.js") }}></script>
-<script src={{ url_for("static", filename="main.js") }}></script>
+<!--<script src={{ url_for("static", filename="stable.js") }}></script>-->
+<!--<script src={{ url_for("static", filename="runtime.js") }}></script>-->
+<!--<script src={{ url_for("static", filename="main.js") }}></script>-->
 {% block script %}{% endblock %}
 </html>

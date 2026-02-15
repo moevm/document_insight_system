@@ -1,10 +1,11 @@
 import logging
+import traceback
 from .utils import init_criterions
 
 logger = logging.getLogger('root_logger')
 
 PRIORITY_CHECK_FAILED_MSG = "<b>Данный критерий является обязательным для прохождения.<br>Результат всей проверки обнулен, но вы можете ознакомиться с результатами каждого критерия.</b><br>"
-UNEXPECTED_CHECK_FAIL_MSG = "<b>Во время проверки произошла ошибка, попробуйте позже или обратитесь к администратору системы.<b>"
+UNEXPECTED_CHECK_FAIL_MSG = "<b>Во время проверки произошла ошибка: проверьте соответствия оформления файла шаблона (в том числе разделов и уровней заголовков), попробуйте позже или обратитесь к администратору системы.<b>"
 
 class BaseCriterionPack:
 
@@ -17,7 +18,8 @@ class BaseCriterionPack:
 
     def init(self, file_info):
         # create criterion objects, ignore errors - validation was performed earlier
-        self.criterions, errors = init_criterions(self.raw_criterions, file_type=self.file_type, file_info=file_info)
+        file_info['file_type'] = self.file_type
+        self.criterions, errors = init_criterions(self.raw_criterions, file_info=file_info)
 
     def check(self):
         result = []
@@ -26,8 +28,10 @@ class BaseCriterionPack:
             try:
                 criterion_check_result = criterion.check()
             except Exception as e:
-                err_msg = f'{criterion.id}: oшибка во время проверки: {e}'
+                trace_msg = traceback.format_exc()
+                err_msg = f'{criterion.id}: oшибка во время проверки: {e} ({trace_msg[len(trace_msg)//2:]})'
                 logger.error(err_msg)
+                logger.error(trace_msg)
                 criterion_check_result = {'score': 0, 'verdict': [UNEXPECTED_CHECK_FAIL_MSG, f"Информация об ошибке для администратора: {err_msg}"]}
             if criterion.priority and not criterion_check_result['score']:
                 failed_priority_check = True
@@ -72,5 +76,5 @@ class BaseCriterionPack:
         score = 0.
         for check in result:
             score += float(check['score'])
-        return score, len(result)
+        return round(score, 2), len(result)
 

@@ -8,11 +8,14 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
     description = 'Запрещено упоминание слова "wikipedia"'
     id = 'banned_words_in_literature'
 
-    def __init__(self, file_info, banned_words=["wikipedia"]):
+    def __init__(self, file_info, banned_words=None):
         super().__init__(file_info)
+        self.banned_words = ["habr", "medium", "stackoverflow", "sky.pro", "geeksforgeeks", "wikipedia"] 
+        if banned_words:
+            self.banned_words += banned_words
+        self.banned_words = [morph.normal_forms(word)[0] for word in self.banned_words]
         self.headers_page = 1
         self.literature_header = []
-        self.banned_words = [morph.normal_forms(word)[0] for word in banned_words]
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
 
     def late_init_vkr(self):
@@ -24,6 +27,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         detected_words_dict = {}
+        # TODO: проверить совместимость / дублируемость LR и VKR
         if self.file_type['report_type'] == 'LR':
             list_of_literature = self.find_literature()
             if len(list_of_literature) == 0:
@@ -48,7 +52,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
                         else:
                             detected_words_dict[child_number] = banned_word
         else:
-            return answer(False, 'Во время обработки произошла критическая ошибка')
+            return answer(False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев')
         if detected_words_dict:
             result_str = ""
             for i in sorted(detected_words_dict.keys()):

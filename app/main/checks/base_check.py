@@ -1,6 +1,6 @@
-import pymorphy2
+import pymorphy3
 
-morph = pymorphy2.MorphAnalyzer()
+morph = pymorphy3.MorphAnalyzer()
 
 
 def answer(mod, *args):
@@ -13,7 +13,6 @@ def answer(mod, *args):
 class BaseCriterion:
     description = None
     label = None
-    file_type = None
     id = None
     priority = False  # if priority criterion is failed -> check is failed
 
@@ -21,6 +20,7 @@ class BaseCriterion:
         self.file = file_info.get('file')
         self.filename = file_info.get('filename', '')
         self.pdf_id = file_info.get('pdf_id')
+        self.file_type = file_info.get('file_type')
 
     def check(self):
         raise NotImplementedError()
@@ -36,8 +36,8 @@ class BaseCriterion:
 
 
 class BasePresCriterion(BaseCriterion):
-    file_type = 'pres'
+    pass
 
 
 class BaseReportCriterion(BaseCriterion):
-    file_type = {'type': 'report', 'report_type': 'VKR'}
+    pass

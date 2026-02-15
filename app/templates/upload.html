@@ -51,9 +51,6 @@
                                      aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 10%"></div>
                             </div>
                         </div>
-                        {% if not (current_user.is_LTI or current_user.is_admin) %}
-                            {{ recaptcha }}
-                        {% endif %}
                     </form>
                     <p class="text-center" style="color:grey;font-size:15px;"><i>Общий объем загружаемых файлов не должен превышать {{ config.MAX_CONTENT_LENGTH//1024//1024 }} Mб.</i></p>
                     <div class="text-center">
@@ -73,7 +70,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th  scope="col">Критерии:</th>
+                                    <th scope="col">Критерии:</th>
                                 </tr>
                                 {% for criterion_name, criterion_descrpt in list_of_check.items()  %}
                                     <tr data-toggle="collapse" data-target="#verd{{ loop.index }}" class="accordion-toggle">
@@ -91,4 +88,6 @@
             </div>
         </div>
     </div>
+<script src={{ url_for("static", filename="upload.js") }}></script>
+
 {% endblock %}
