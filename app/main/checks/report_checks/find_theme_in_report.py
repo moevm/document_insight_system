@@ -14,7 +14,7 @@ MORPH_ANALYZER = MorphAnalyzer()
 
 class FindThemeInReport(BaseReportCriterion):
     label = "Проверка упоминания темы в отчете"
-    description = "Проверка упоминания темы в отчете"
+    _description = "Проверка упоминания темы в отчете"
     id = 'theme_in_report_check'
 
     def __init__(self, file_info, limit = 40):

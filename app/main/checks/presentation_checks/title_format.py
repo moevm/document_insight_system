@@ -8,7 +8,7 @@ from ..base_check import BasePresCriterion, answer
 
 class TitleFormatCheck(BasePresCriterion):
     label = "Заголовки слайдов присутствуют и занимают не более двух строк"
-    description = 'Проверка наличия и корректности заголовков'
+    _description = 'Проверка наличия и корректности заголовков'
     id = 'slides_headers'
 
     def __init__(self, file_info):

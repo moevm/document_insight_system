@@ -4,7 +4,7 @@ from ..base_check import BaseReportCriterion, answer
 
 class ReportParagraphsCountCheck(BaseReportCriterion):
     label = "Проверка количества абзацев в главах и их подразделах"
-    description = ""
+    _description = ""
     id = "paragraphs_count_check"
 
     def __init__(self, file_info, min_paragraphs_in_unnumbered_section=2, min_paragraphs_in_section=5, 

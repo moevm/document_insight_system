@@ -3,7 +3,7 @@ from ..base_check import BasePresCriterion, answer
 
 class PresImageShareCheck(BasePresCriterion):
     label = "Проверка доли объема презентации, приходящейся на изображения"
-    description = 'Доля изображений не должна превышать 0,9'
+    _description = 'Доля изображений не должна превышать 0,9'
     id = 'pres_image_share'
 
     def __init__(self, file_info, limit=0.9):

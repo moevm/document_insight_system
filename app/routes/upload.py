@@ -23,7 +23,7 @@ def upload_main():
         pack = db_methods.get_criteria_pack(current_user.criteria)
         list_of_check = pack['raw_criterions']
         file_type = current_user.file_type['type']
-        check_labels_and_discrpt = {CRITERIA_INFO[file_type][check[0]]['label']: CRITERIA_INFO[file_type][check[0]]['description'] for check in list_of_check}
+        check_labels_and_discrpt = {CRITERIA_INFO[file_type][check[0]]['label']: CRITERIA_INFO[file_type][check[0]].description(current_user.criteria) for check in list_of_check}
         formats = set(current_user.formats)
         formats = formats & ALLOWED_EXTENSIONS[file_type] if formats else ALLOWED_EXTENSIONS[file_type]
         return render_template("./upload.html", navi_upload=False, formats=sorted(formats), list_of_check=check_labels_and_discrpt)
