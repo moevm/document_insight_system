@@ -97,7 +97,7 @@ class StyleCheckSettings:
         'any_header':
         {
             "style": HEADER_2_STYLE,
-            "docx_style": ["heading 3", "heading 4"],
+            "docx_style": ["heading 2", "heading 3", "heading 4"],
             "headers": ["Цель работы", "Выполнение работы", "Выводы"],
             "unify_regex": HEADER_2_REGEX,
             "regex": HEADER_2_REGEX,
