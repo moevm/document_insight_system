@@ -25,7 +25,6 @@
     }
 </style>
 
-<div class="header row">{% include "header.html" %}</div>
 <div class="holder row">
     <div class="container-fluid table-responsive-xl">
     <h3 id="user_title" class="texteous ins">
@@ -61,5 +60,6 @@
     </table>
 </div>
 </div>
+<script src={{ url_for("static", filename="one_user_info.js") }}></script>
 
 {% endblock main %}

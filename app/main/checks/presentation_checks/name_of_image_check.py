@@ -12,7 +12,8 @@ class PresImageCaptureCheck(BasePresCriterion):
     def check(self):
         slides_without_capture = set()
         slide_with_image_only = set()
-        result_str = 'Не пройдена! '
+        result_str = ''
+        result = True
         all_captions = []
         for num, slide in enumerate(self.file.slides, 1):
             captions = slide.get_captions()
@@ -27,6 +28,7 @@ class PresImageCaptureCheck(BasePresCriterion):
                         if caption[0] != slide.get_title():
                             slide_with_image_only.add(num)
         if slides_without_capture:
+            result = False
             result_str += (
                 'Подписи к рисункам на следующих слайдах отсутствуют или не содержат слова "Рисунок": {}'.format(
                         ', '.join(self.format_page_link(sorted(slides_without_capture)))) + '<br>')
@@ -34,7 +36,7 @@ class PresImageCaptureCheck(BasePresCriterion):
             result_str += (
                 'Подписи к рисункам на следующих слайдах без текста необязательны: {}'.format(
                         ', '.join(self.format_page_link(sorted(slide_with_image_only)))) + '<br>')
-        if result_str:
-            return answer(False, name_of_image_check_results(result_str, all_captions))
+        if result:
+            return answer(True, f'Пройдена! {result_str}')
         else:
-            return answer(True, 'Пройдена!')
+            return answer(False, name_of_image_check_results(f"Не пройдена! {result_str}", all_captions))

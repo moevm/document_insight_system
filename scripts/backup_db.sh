@@ -1,6 +1,6 @@
 #!/bin/bash
 
-db_name="pres-parser-db"
+db_name="dis-db"
 
 db_url="`./scripts/db/get_db_ip.sh`:27017"
 

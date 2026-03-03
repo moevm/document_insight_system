@@ -58,4 +58,4 @@ class ReportSectionComponent(BaseReportCriterion):
             return answer(True, f'Все необходимые компоненты раздела "{self.chapter}" обнаружены!')
         else:
             return answer(False,
-                          f'Не найдены следующие компоненты раздела {self.chapter}: <ul>{result_str}</ul>')
+                          f'Не найдены следующие компоненты раздела {self.chapter} (обратите внимание на требования к разделу и его составляющим): <ul>{result_str}</ul>')

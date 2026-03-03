@@ -1,6 +1,6 @@
-import pymorphy2
+import pymorphy3
 
-morph = pymorphy2.MorphAnalyzer()
+morph = pymorphy3.MorphAnalyzer()
 
 
 def answer(mod, *args):
