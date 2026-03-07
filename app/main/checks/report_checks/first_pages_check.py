@@ -3,7 +3,7 @@ from ..base_check import BaseReportCriterion, answer
 
 class ReportFirstPagesCheck(BaseReportCriterion):
     label = "Проверка наличия обязательных страниц в отчете"
-    description = 'Обязательные страницы: Титульный лист, Задание на выпускную квалификационную работу, Календарный план, Реферат, Abstract, Cодержание'
+    _description = 'Обязательные страницы: Титульный лист, Задание на выпускную квалификационную работу, Календарный план, Реферат, Abstract, Cодержание'
     id = 'first_pages_check'
     priority = True
 

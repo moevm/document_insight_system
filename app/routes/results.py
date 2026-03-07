@@ -3,6 +3,7 @@ from bson import ObjectId
 from time import time
 
 from flask import Blueprint, Response, render_template
+from flask_login import current_user, login_required
 from wsgiref.handlers import format_date_time as format_date
 
 from app.db import db_methods
@@ -16,6 +17,7 @@ logger = get_root_logger('web')
 
 
 @results_bp.route("/<string:_id>", methods=["GET"])
+@login_required
 def results_main(_id):
     try:
         oid = ObjectId(_id)
@@ -24,11 +26,15 @@ def results_main(_id):
         return render_template("./404.html")
     check = db_methods.get_check(oid)
     if check is not None:
-        # show processing time for user
-        avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
-        return render_template("./results.html", navi_upload=True, results=check,
-                               columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
-                               stats=format_check(check.pack()))
+        # show check only for author or admin or api_access_token
+        if current_user.is_admin or current_user.username == check.user or check.user == "api_access_token":
+            # show processing time for user
+            avg_process_time = None if check.is_ended else db_methods.get_average_processing_time()
+            return render_template("./results.html", navi_upload=True, results=check,
+                                columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
+                                stats=format_check(check.pack()))
+        else:
+            return "У вас нет прав на просмотр результатов чужих проверок", 403
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
