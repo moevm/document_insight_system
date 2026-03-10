@@ -32,7 +32,7 @@ TESSERACT_CONFIG = {
 @celery.task(name="tesseract_recognize", queue='tesseract-queue', bind=True, max_retries=MAX_RETRIES, soft_time_limit=TASK_SOFT_TIME_LIMIT)
 def tesseract_recognize(self, check_id, symbols_set, max_symbols_percentage, max_text_density):
     try:
-        images = db_methods.get_images(check_id)
+        images = db_methods.get_images_by_check_id(check_id)
         if images:
             for image in images:
                 image_array = np.frombuffer(image.image_data, dtype=np.uint8)
@@ -47,7 +47,8 @@ def tesseract_recognize(self, check_id, symbols_set, max_symbols_percentage, max
                 else:
                     logger.info(f"Текст для изображения с подписью '{image.caption}' пустой.")
                 try:
-                    db_methods.add_image_text(image._id, (re.sub(r'\s+', ' ', text)).strip())
+                    image.text = (re.sub(r'\s+', ' ', text)).strip()
+                    db_methods.update_image(image)
                 except Exception as e:
                     raise ValueError(f"Ошибка при сохранении текста для изображения с подписью '{image.caption}': {e}")
             try:
@@ -93,12 +94,13 @@ def callback_task(result, check_id):
 
 
 def update_ImageTextCheck(check_id, symbols_set, max_symbols_percentage, max_text_density):
-    images = db_methods.get_images(check_id)
+    images = db_methods.get_images_by_check_id(check_id)
     deny_list = []
     for image in images:
         if image.text:
             width, height = image.image_size
             text_density = calculate_text_density(image.text, width * height)
+            image.text_density = text_density
             if text_density > max_text_density:
                 deny_list.append(
                     f"Изображение с подписью '{image.caption}' имеет слишком высокую плотность текста: "
@@ -107,11 +109,13 @@ def update_ImageTextCheck(check_id, symbols_set, max_symbols_percentage, max_tex
             symbols_count = count_symbols_in_text(image.text, symbols_set)
             text_length = len(image.text)
             symbols_percentage = (symbols_count / text_length) * 100
+            image.symbols_percentage = symbols_percentage
             if symbols_percentage > max_symbols_percentage:
                 deny_list.append(
                     f"На изображении с подписью '{image.caption}' содержится слишком много неверно распознанных символов: "
                     f"{symbols_percentage:.2f}% (максимум {max_symbols_percentage:.2f}%). Это может означать, что размер шрифта слишком маленький или текст нечитаем.<br>"
                 )
+            db_methods.update_image(image)
     if deny_list:
         result = [[f'Проблемы с текстом на изображениях! <br>{"".join(deny_list)}'], 0]
     else:

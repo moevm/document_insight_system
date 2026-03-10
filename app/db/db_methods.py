@@ -1,6 +1,7 @@
 from datetime import datetime
 from os.path import basename
 
+import hashlib
 import pymongo
 from bson import ObjectId
 from gridfs import GridFSBucket, NoFile
@@ -30,13 +31,13 @@ def get_client():
     return client
 
 def get_image(image_id):
-    image = images_collection.find({'_id': image_id})
+    image = images_collection.find_one({'_id': image_id})
     if image is not None:
         return Image(image)
     else:
         return None
-
-def get_images(check_id):
+    
+def get_images_by_check_id(check_id):
     images = images_collection.find({'check_id': str(check_id)})
     if images is not None:
         image_list = []
@@ -46,14 +47,18 @@ def get_images(check_id):
     else:
         return None
 
-def save_image_to_db(check_id, image_data, caption, image_size, text=None, page=None):
+def save_image_to_db(check_id, document_id, image_data, caption, image_size, text=None, page=None, checksum=None, text_density=None, symbols_percentage=None):
     image = Image({
         'check_id': check_id,
+        'document_id': document_id,
         'image_data': image_data,
         'caption': caption,
         'image_size': image_size,
-        'text' : text,
-        'page' : page,
+        'text': text,
+        'page': page,
+        'checksum': checksum or calculate_image_checksum(image_data),
+        'text_density': text_density,
+        'symbols_percentage': symbols_percentage
     })
     result = images_collection.insert_one(image.pack())
     return result.inserted_id 
@@ -61,19 +66,14 @@ def save_image_to_db(check_id, image_data, caption, image_size, text=None, page=
 def update_image(image):
     return bool(images_collection.find_one_and_replace({'_id': image._id}, image.pack()))
 
-def add_image_text(image_id, new_text):
-    result = images_collection.update_one(
-        {'_id': image_id},
-        {'$set': {'text': new_text}}
-    )
-    return result.matched_count > 0
+def calculate_image_checksum(image_bytes):
+    return hashlib.sha256(image_bytes).hexdigest() if image_bytes else None
 
-def add_image_page(image_id, page):
-    result = images_collection.update_one(
-        {'_id': image_id},
-        {'$set': {'page': page}}
-    )
-    return result.matched_count > 0
+def is_checksum_in_db(checksum):
+    if not checksum:
+        return False
+    existing = images_collection.find_one({"checksum": checksum})
+    return existing is not None
 
 # Returns user if user was created and None if already exists
 def add_user(username, password_hash='', is_LTI=False):

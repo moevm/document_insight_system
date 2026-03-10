@@ -6,7 +6,7 @@ class ImageTextCheck(BaseReportCriterion):
     description = ''
     id = 'image_text_check'
     # Подобрать значения для symbols_set, max_symbols_percentage, max_text_density
-    def __init__(self, file_info, symbols_set=['%', '1'], max_symbols_percentage=0, max_text_density=4):
+    def __init__(self, file_info, symbols_set=list("@#$%^&*~`‘|±§№¤¢£€{¥}©®™•¶÷×"), max_symbols_percentage=5, max_text_density=4):
         super().__init__(file_info)
         self.images = self.file.images
         self.symbols_set = symbols_set

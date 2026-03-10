@@ -33,5 +33,6 @@ redis==6.1.0
 requests~=2.31.0
 scipy~=1.11.1
 urllib3~=2.0.3
-werkzeug==2.0.0opencv-python==4.5.5.64
+werkzeug==2.0.0
+opencv-python==4.5.5.64
 pytesseract==0.3.10

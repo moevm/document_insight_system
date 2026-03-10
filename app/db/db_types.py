@@ -151,26 +151,38 @@ class Check(PackableWithId):
         is_failed = none_to_false(self.is_failed)  # None for old checks => False, True->True, False->False
         return {'is_ended': is_ended, 'is_failed': is_failed}
 
-class Image(PackableWithId):
+class Image:
     def __init__(self, dictionary=None):
-        super().__init__(dictionary)
         dictionary = dictionary or {}
-        self.check_id = dictionary.get('check_id')  # Привязка к check_id
-        self.caption = dictionary.get('caption', '')  # Подпись к изображению
-        self.image_data = dictionary.get('image_data')  # Файл изображения в формате bindata
-        self.image_size = dictionary.get('image_size')  # Размер изображения в сантимерах
-        self.text = dictionary.get('text', None)
-        self.page = dictionary.get('page', None)
+        self._id: ObjectId = dictionary.get('_id', ObjectId())
+        if isinstance(self._id, str):
+            self._id = ObjectId(self._id)
+        
+        self.check_id: str = dictionary.get('check_id')
+        self.document_id: str = dictionary.get('document_id')
+        self.caption: str = dictionary.get('caption', '')
+        self.image_data: bytes = dictionary.get('image_data')
+        self.image_size: tuple[int, int] = dictionary.get('image_size')
+        self.text: str = dictionary.get('text')
+        self.page: int = dictionary.get('page')
+        self.checksum: str = dictionary.get('checksum')
+        self.text_density: float = dictionary.get('text_density')
+        self.symbols_percentage: float = dictionary.get('symbols_percentage')
 
     def pack(self):
-        package = super().pack()
-        package['check_id'] = str(self.check_id)
-        package['caption'] = self.caption
-        package['image_data'] = self.image_data
-        package['image_size'] = self.image_size
-        package['text'] = self.text
-        package['page'] = self.page
-        return package
+        return {
+            "_id": self._id,
+            "check_id": self.check_id,
+            "document_id": self.document_id,
+            "caption": self.caption,
+            "image_data": self.image_data,
+            "image_size": self.image_size,
+            "text": self.text,
+            "page": self.page,
+            "checksum": self.checksum,
+            "text_density": self.text_density,
+            "symbols_percentage": self.symbols_percentage
+        }
 
 class ParsedText(PackableWithId):
     def __init__(self, dictionary=None):

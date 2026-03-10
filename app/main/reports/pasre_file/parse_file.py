@@ -14,7 +14,8 @@ def parse_headers_and_pages_and_images(chapters, docx):
                 chapter["start_page"] = page
         for image in images:
             if image.caption in text:
-                db_methods.add_image_page(image._id, page)
+                image.page = page
+                db_methods.update_image(image)
     for chapter in chapters:
         for image in images:
             if image.caption in chapter["text"]:

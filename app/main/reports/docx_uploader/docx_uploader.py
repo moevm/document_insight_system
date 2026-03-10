@@ -243,7 +243,7 @@ class DocxUploader(DocumentUploader):
         return chapters_str
 
     def extract_images_with_captions(self, check_id):
-        from app.db.db_methods import save_image_to_db, get_images
+        from app.db.db_methods import save_image_to_db, get_images_by_check_id
         
         emu_to_cm  = 360000
         image_found = False
@@ -285,7 +285,7 @@ class DocxUploader(DocumentUploader):
                         image_found = False
                         image_data = None 
                 
-            self.images = get_images(check_id)
+            self.images = get_images_by_check_id(check_id)
                               
 
 
