@@ -18,7 +18,8 @@ class BaseCriterionPack:
 
     def init(self, file_info):
         # create criterion objects, ignore errors - validation was performed earlier
-        self.criterions, errors = init_criterions(self.raw_criterions, file_type=self.file_type, file_info=file_info)
+        file_info['file_type'] = self.file_type
+        self.criterions, errors = init_criterions(self.raw_criterions, file_info=file_info)
 
     def check(self):
         result = []

@@ -7,13 +7,13 @@ from ...reports.docx_uploader.style import Style
 
 class ReportChapters(BaseReportCriterion):
     label = "Проверка оформления заголовков отчета"
-    description = '(Шрифты, отступы и т.д.)'
+    _description = '(Шрифты, отступы и т.д.)'
     id = 'header_check'
 
     def __init__(self, file_info):
         super().__init__(file_info)
         self.headers = []
-        self.target_styles = StyleCheckSettings.VKR_CONFIG
+        self.target_styles = StyleCheckSettings.VKR_CONFIG if (self.file_type['report_type'] == 'VKR') else StyleCheckSettings.LR_CONFIG
         self.target_styles = list(map(lambda elem: {
             "style": self.construct_style_from_description(elem["style"])
         }, self.target_styles.values()))
@@ -29,7 +29,7 @@ class ReportChapters(BaseReportCriterion):
             level += 1
 
     def late_init(self):
-        self.headers = self.file.make_chapters(self.file_type['report_type'])
+        self.headers = self.file.make_chapters()#self.file_type['report_type'])
 
     @staticmethod
     def construct_style_from_description(style_dict):
@@ -57,38 +57,35 @@ class ReportChapters(BaseReportCriterion):
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         self.late_init()
         result_str = ''
-        if self.file_type['report_type'] == 'VKR':
-            if not len(self.headers):
-                return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
-            for header in self.headers:
-                marked_style = 0
-                for key in self.docx_styles.keys():
-                    if not marked_style:
-                        for style_name in self.docx_styles[key]:
-                            if header["style"].find(style_name) >= 0:
-                                if self.style_regex[key].match(header["text"]):
-                                    marked_style = 1
-                                    err = self.style_diff(header["styled_text"], self.target_styles[key]["style"])
-                                    err = list(map(lambda msg: f'Стиль "{header["style"]}": ' + msg, err))
-                                    result_str += ("<br>".join(err) + "<br>" if len(err) else "")
-                                    break
+        if not len(self.headers):
+            return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
+        for header in self.headers:
+            marked_style = 0
+            for key in self.docx_styles.keys():
                 if not marked_style:
-                    err = f"Заголовок \"{header['text']}\": "
-                    err += f'Стиль "{header["style"]}" не соответстует ни одному из стилей заголовков.'
-                    result_str += (str(err) + "<br>")
+                    for style_name in self.docx_styles[key]:
+                        if header["style"].find(style_name) >= 0:
+                            if self.style_regex[key].match(header["text"]):
+                                marked_style = 1
+                                err = self.style_diff(header["styled_text"], self.target_styles[key]["style"])
+                                err = list(map(lambda msg: f'Стиль "{header["style"]}": ' + msg, err))
+                                result_str += ("<br>".join(err) + "<br>" if len(err) else "")
+                                break
+            if not marked_style:
+                err = f"Заголовок \"{header['text']}\": "
+                err += f'Стиль "{header["style"]}" не соответствует ни одному из стилей заголовков.'
+                result_str += (str(err) + "<br>")
 
-            if not result_str:
-                return answer(True, "Форматирование заголовков соответствует требованиям.")
-            else:
-                result_string = f'Найдены ошибки в оформлении заголовков:<br>{result_str}<br>'
-                result_string += '''
-                                        Попробуйте сделать следующее:
-                                        <ul>
-                                            <li>Убедитесь в соответствии стиля заголовка требованиям к отчету по ВКР;</li>
-                                            <li>Убедитесь, что названия разделов и нумированные разделы оформлены по ГОСТу;</li>
-                                            <li>Убедитесь, что красная строка не сделана с помощью пробелов или табуляции.</li>
-                                        </ul>
-                                        '''
-                return answer(False, result_string)
+        if not result_str:
+            return answer(True, "Форматирование заголовков соответствует требованиям.")
         else:
-            return answer(False, 'Во время обработки произошла критическая ошибка')
+            result_string = f'Найдены ошибки в оформлении заголовков:<br>{result_str}<br>'
+            result_string += '''
+                                    Попробуйте сделать следующее:
+                                    <ul>
+                                        <li>Убедитесь в соответствии стиля заголовка требованиям к отчету по ВКР;</li>
+                                        <li>Убедитесь, что названия разделов и нумированные разделы оформлены по ГОСТу;</li>
+                                        <li>Убедитесь, что красная строка не сделана с помощью пробелов или табуляции.</li>
+                                    </ul>
+                                    '''
+            return answer(False, result_string)
