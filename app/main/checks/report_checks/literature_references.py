@@ -150,7 +150,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
 
                 if positions_duplicates:
                     duplicates.append((
-                        self.literature_reference_text[positions_duplicates[0]],
+                        self.literature_reference_text[positions_duplicates[0] - 1],
                         positions_duplicates
                     ))
 
