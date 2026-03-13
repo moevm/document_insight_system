@@ -16,10 +16,12 @@ class ReportTablePercentageCheck(BaseReportCriterion):
     id = 'report_table_percentage_check'
 
 
-    def __init__(self, file_info, has_application=True, max_percentage=15):
+    def __init__(self, file_info, has_application=True, max_percentage=15, max_pages_table = 2):
         super().__init__(file_info)
         self._max_percentage = max_percentage
         self._hasApplication = has_application
+        self._large_tables = []
+        self._max_pages_table = max_pages_table
 
     def get_font_size(self, run, paragraph) -> float:
         """Функция получения размера шрифта"""
@@ -104,6 +106,8 @@ class ReportTablePercentageCheck(BaseReportCriterion):
         for table_index, table in enumerate(doc_docx.tables):
             if table_index < end_index:
                 table_height = self.height_table(table)
+                if table_height > page_height * self._max_pages_table:
+                    self._large_tables.append(table_index)
                 tables_height += table_height
 
         percentage = (tables_height / total_height) * 100
@@ -141,13 +145,21 @@ class ReportTablePercentageCheck(BaseReportCriterion):
 
             percent_tables = self.get_percent_of_tables()
 
-            if percent_tables <= self._max_percentage:
+            message = ''
+
+            if percent_tables <= self._max_percentage and len(self._large_tables) == 0:
                 return answer(
                     True,
                     "Пройдена!"
                 )
+
+            elif len(self._large_tables) != 0:
+                message = (f'Есть таблицы, занимающие более {self._max_pages_table} страниц:\n'
+                           f'<ul>\n'
+                           + ''.join(f'<li>Таблица {index_table}</li>\n' for index_table in self._large_tables)
+                           + '</ul>')
             else:
-                message = (
+                message += (
                     f'Таблицы занимают {percent_tables:.1f}% документа, '
                     f'что превышает допустимые {self._max_percentage}%. '
                     'Рекомендации: \n'
@@ -158,10 +170,10 @@ class ReportTablePercentageCheck(BaseReportCriterion):
                     '</ul>'
                 )
 
-                return answer(
-                    False,
-                    message
-                )
+            return answer(
+                False,
+                message
+            )
 
         except Exception as e:
             return answer(False, f"Ошибка при проверке процентного соотношения таблиц: {str(e)}")
