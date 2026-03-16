@@ -62,20 +62,24 @@ class ReportChapters(BaseReportCriterion):
         for header in self.headers:
             marked_style = 0
             for key in self.docx_styles.keys():
-                if not marked_style:
-                    for style_name in self.docx_styles[key]:
-                        if header["style"].find(style_name) >= 0:
-                            if self.style_regex[key].match(header["text"]):
-                                marked_style = 1
-                                err = self.style_diff(header["styled_text"], self.target_styles[key]["style"])
-                                err = list(map(lambda msg: f'Стиль "{header["style"]}": ' + msg, err))
-                                result_str += ("<br>".join(err) + "<br>" if len(err) else "")
-                                break
+                if marked_style:
+                    break
+                for style_name in self.docx_styles[key]:
+                    if header["style"].find(style_name) >= 0:
+                        marked_style = 1
+                        if self.style_regex[key].match(header["text"]):
+                            err = self.style_diff(header["styled_text"], self.target_styles[key]["style"])
+                            err = list(map(lambda msg: f'Стиль "{header["style"]}": ' + msg, err))
+                            result_str += ("<br>".join(err) + "<br>" if len(err) else "")
+                        else:
+                            err = f'Заголовок "{header["text"]}": '
+                            err += "текст заголовка не соответствует требуемому формату."
+                            result_str += err + "<br>"
+                        break
             if not marked_style:
                 err = f"Заголовок \"{header['text']}\": "
                 err += f'Стиль "{header["style"]}" не соответствует ни одному из стилей заголовков.'
                 result_str += (str(err) + "<br>")
-
         if not result_str:
             return answer(True, "Форматирование заголовков соответствует требованиям.")
         else:
