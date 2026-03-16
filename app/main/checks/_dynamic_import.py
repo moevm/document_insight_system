@@ -32,7 +32,7 @@ def setup_dynamic_import(module_globals, base_class, current_file, exclude_start
         raise AttributeError(f"Module {package_name!r} has no attribute {name!r}")
 
     def __dir__():
-        return list(class_to_module.keys()) + list(module_globals.keys())
+        return list(class_to_module.keys())
 
     module_globals['__getattr__'] = __getattr__
     module_globals['__dir__'] = __dir__
