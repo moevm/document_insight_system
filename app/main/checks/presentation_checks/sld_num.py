@@ -7,7 +7,7 @@ from ..base_check import BasePresCriterion, answer
 
 class SldNumCheck(BasePresCriterion):
     label = "Количество основных слайдов"
-    description = 'Подсчет основных и запасных слайдов'
+    _description = 'Подсчет основных и запасных слайдов'
     id = 'slides_number'
 
     def __init__(self, file_info, slides_number, detect_additional=True):

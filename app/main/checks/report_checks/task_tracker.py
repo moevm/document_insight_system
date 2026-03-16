@@ -4,7 +4,7 @@ from .style_check_settings import StyleCheckSettings
 
 class ReportTaskTracker(BaseReportCriterion):
     label = "Поиск недопустимых задач"
-    description = 'Не пропускать задачи из серии "доделать, решить, описать"'
+    _description = 'Не пропускать задачи из серии "доделать, решить, описать"'
     id = 'report_task_tracker'
 
     def __init__(self, file_info, chapter='Введение', patterns=('задач', 'объект'), deny_list=['доделать', 'решить', 'описать']):
