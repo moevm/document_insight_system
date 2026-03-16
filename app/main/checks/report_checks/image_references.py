@@ -5,7 +5,7 @@ from ..base_check import BaseReportCriterion, answer
 
 class ImageReferences(BaseReportCriterion):
     label = "Проверка наличия ссылок на все рисунки"
-    description = ''
+    _description = ''
     id = 'image_references'
 
     def __init__(self, file_info, image_style="ВКР_Подпись для рисунков"):

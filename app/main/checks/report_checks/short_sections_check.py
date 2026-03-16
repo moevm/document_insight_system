@@ -8,7 +8,7 @@ from ...reports.docx_uploader.style import Style
 
 class ReportShortSectionsCheck(BaseReportCriterion):
     label = "Поиск коротких разделов в отчёте"
-    description = "Минимальное количество абзацев в разделе: 5, минимальное количество слов в абзаце: 20"
+    _description = "Минимальное количество абзацев в разделе: 5, минимальное количество слов в абзаце: 20"
     id = "short_sections_check"
 
     def __init__(self, file_info, min_section_count=5, min_section_len=20, main_heading_style="heading 2",

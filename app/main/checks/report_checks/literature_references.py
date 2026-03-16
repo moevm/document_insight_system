@@ -6,7 +6,7 @@ from collections import Counter
 
 class ReferencesToLiteratureCheck(BaseReportCriterion):
     label = "Проверка наличия ссылок на все источники"
-    description = ''
+    _description = ''
     id = 'literature_references'
 
     def __init__(self, file_info, min_ref=1, max_ref=1000, headers_map=None):
