@@ -5,7 +5,7 @@ from ..base_check import BaseReportCriterion, answer
 
 class SpellingCheck(BaseReportCriterion):
     label = "Проверка наличия орфографических ошибок в тексте."
-    description = ''
+    _description = ''
     id = 'spelling_check'
 
     def __init__(self, file_info, min_errors_count=200, max_errors_count=400):

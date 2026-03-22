@@ -34,7 +34,7 @@ SW_CONSTANTS = {
 
 class SWSectionLiteratureReferenceCheck(BaseReportCriterion):
     label = "Проверка наличия ссылок на литературу в определенных разделах"
-    description = "Проверка наличия и количества ссылок на литературу в определенных разделах"
+    _description = "Проверка наличия и количества ссылок на литературу в определенных разделах"
     id = "sw_section_lit_reference"
     priority = True
 
