@@ -2,7 +2,27 @@ from .base_criterion_pack import BaseCriterionPack
 
 BASE_PRES_CRITERION = [
     ['template_name'],
-    ['pres_aspect_ratio_check', {'correct_ratios': ['4:3', '16:9']}],
+    ['slides_number', {'slides_number': [10, 12], 'detect_additional': True}],
+    ['slides_enum'],
+    ['slides_headers'],
+    ['find_slides', {'key_slide': 'Цель и задачи'}],
+    ['find_slides', {'key_slide': 'Апробация'}],
+    ['find_on_slide', {'key_slide': ['Актуальность', 'Актуальности', 'Актуальностью']}],
+    ['find_slides', {'key_slide': 'Заключение'}],
+    ['slide_every_task', {'min_percent': 70}],
+    ['conclusion_actual', {'min_percent': 70}],
+    ['pres_right_words'],
+    ['pres_image_share'],
+    ['future_dev'],
+    ['pres_banned_words_check'],
+    ['pres_empty_slide'],
+    ['theme_in_pres_check'],
+    ['verify_git_link'],
+    ["slide_headers_duplication_check"],
+    ['pres_image_capture'],
+    ['task_tracker'],
+    ['overview_in_tasks'],
+    ['pres_was_were_check'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
@@ -32,6 +52,7 @@ BASE_REPORT_CRITERION = [
     ["empty_task_page_check"],
     ["water_in_the_text_check"],
     ["report_task_tracker"],
+    ["report_was_were_check"],
 ]
 
 DEFAULT_TYPE = 'pres'
