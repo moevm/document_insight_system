@@ -16,4 +16,3 @@ class ReportWasWereCheck(BaseReportCriterion):
             self.file, self.format_page_link
         )
         return answer(score, message)
-
