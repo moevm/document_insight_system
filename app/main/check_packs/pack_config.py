@@ -22,6 +22,7 @@ BASE_PRES_CRITERION = [
     ['pres_image_capture'],
     ['task_tracker'],
     ['overview_in_tasks'],
+    ['pres_aspect_ratio_check'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],

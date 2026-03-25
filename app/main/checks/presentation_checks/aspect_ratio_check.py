@@ -2,6 +2,7 @@ import math
 
 from ..base_check import BasePresCriterion, answer
 
+
 class Ratio:
     ASCPECT_RATIO_PRECISION = 2
 
@@ -25,20 +26,34 @@ class Ratio:
             return "0:0"
         simplified_width = self.width // gcd_value
         simplified_height = self.height // gcd_value
-        return f'{simplified_width}:{simplified_height}'
+        return f"{simplified_width}:{simplified_height}"
 
 
 class PresAspectRatioCheck(BasePresCriterion):
     label = "Проверка соотношения сторон слайда"
-    description = ""
-    id = 'pres_aspect_ratio_check'
+    id = "pres_aspect_ratio_check"
 
     def __init__(self, file_info, correct_ratios=("16:9", "4:3")):
         super().__init__(file_info)
-        self.correct_ratios = set(Ratio(*map(int, x.split(':'))) for x in correct_ratios)
+        self.correct_ratios = set(
+            Ratio(*map(int, x.split(":"))) for x in correct_ratios
+        )
 
     def __is_correct_ratio(self, aspect_ratio: Ratio):
         return aspect_ratio in self.correct_ratios
+
+    def __convert_size_to_pixels(self, size, dpi=96):
+        return math.trunc(size.inches * dpi)
+
+    def __get_correct_instruction(self, aspect_ratio):
+        correct_ratios_str = ", ".join(map(str, self.correct_ratios))
+        width = self.__convert_size_to_pixels(aspect_ratio.width)
+        height = self.__convert_size_to_pixels(aspect_ratio.height)
+        return (
+            f"Соотношение сторон слайдов ({width}x{height}) не соответствует стандарту<br/>"
+            "Рекомендации по исправлению:<br/>"
+            f"Измените соотношение сторон презентации на одно из доступных ({correct_ratios_str})"
+        )
 
     def check(self):
         width = self.file.prs.slide_width
@@ -47,8 +62,13 @@ class PresAspectRatioCheck(BasePresCriterion):
         aspect_ratio = Ratio(width, height)
 
         if self.__is_correct_ratio(aspect_ratio):
-            return answer(True, f"Соотношение сторон слайдов ({aspect_ratio}) соответствует стандарту.")
+            return answer(
+                True,
+                f"Соотношение сторон слайдов ({aspect_ratio}) соответствует стандарту.",
+            )
 
-        correct_ratios_str = ", ".join(map(str, self.correct_ratios))
-        return answer(False,
-                        f'Соотношение сторон слайдов ({aspect_ratio}) не соответствует стандарту ({correct_ratios_str}).')
+        return answer(
+            False,
+            self.__get_correct_instruction(aspect_ratio)
+        )
+
