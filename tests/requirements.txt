@@ -1,2 +1,4 @@
 selenium==4.18.0
-webdriver-manager==4.0.1 #to avoid problem with binary
+webdriver-manager==4.0.1
+pytest==7.4.3
+python-pptx==0.6.23
