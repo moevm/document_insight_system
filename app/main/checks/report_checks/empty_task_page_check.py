@@ -6,7 +6,7 @@ PAGE_NAME = "ЗАДАНИЕ НА ВЫПУСКНУЮ КВАЛИФИКАЦИОНН
 
 class EmptyTaskPageCheck(BaseReportCriterion):
     label = "Проверка на пустоту страницы с заданием"
-    description = f'Страница "{PAGE_NAME}" должна содержать текст'
+    _description = f'Страница "{PAGE_NAME}" должна содержать текст'
     id = 'empty_task_page_check'
 
     def __init__(self, file_info):

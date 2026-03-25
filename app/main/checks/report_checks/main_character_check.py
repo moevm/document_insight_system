@@ -6,7 +6,7 @@ import copy
 
 class ReportMainCharacterCheck(BaseReportCriterion):
     label = "Проверка составляющих титульного листа, задания и календарного плана"
-    description = ""
+    _description = ""
     id = "main_character_check"
     priority = True
 
