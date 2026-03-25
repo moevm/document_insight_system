@@ -50,9 +50,13 @@ class PresAspectRatioCheck(BasePresCriterion):
         width = self.__convert_size_to_pixels(aspect_ratio.width)
         height = self.__convert_size_to_pixels(aspect_ratio.height)
         return (
-            f"Соотношение сторон слайдов ({width}x{height}) не соответствует стандарту<br/>"
+            f"Соотношение сторон слайдов ({width}x{
+                height
+            }) не соответствует стандарту<br/>"
             "Рекомендации по исправлению:<br/>"
-            f"Измените соотношение сторон презентации на одно из доступных ({correct_ratios_str})"
+            f"Измените соотношение сторон презентации на одно из доступных ({
+                correct_ratios_str
+            })"
         )
 
     def check(self):
@@ -67,8 +71,4 @@ class PresAspectRatioCheck(BasePresCriterion):
                 f"Соотношение сторон слайдов ({aspect_ratio}) соответствует стандарту.",
             )
 
-        return answer(
-            False,
-            self.__get_correct_instruction(aspect_ratio)
-        )
-
+        return answer(False, self.__get_correct_instruction(aspect_ratio))
