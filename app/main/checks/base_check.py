@@ -11,7 +11,7 @@ def answer(mod, *args):
 
 
 class BaseCriterion:
-    description = None
+    _description = None
     label = None
     id = None
     priority = False  # if priority criterion is failed -> check is failed
@@ -29,6 +29,10 @@ class BaseCriterion:
         base_pdf_link = f'/get_pdf/{self.pdf_id}'
         page = lambda err: f'{base_pdf_link}#page={str(err)}'
         return [f'<a href="{page(e)}"target="_blank" rel="noopener">{str(e)}<a>' for e in error]
+    
+    @classmethod    # TODO: criteria can depend on params (from db) 
+    def description(cls, pack: str | None = None):
+        return cls._description
 
     @property
     def name(self):

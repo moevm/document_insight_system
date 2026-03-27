@@ -4,7 +4,7 @@ from ..base_check import BasePresCriterion, answer, morph
 
 class TaskTracker(BasePresCriterion):
     label = "Поиск недопустимых задач"
-    description = 'Не пропускать задачи из серии "доделать, решить, описать"'
+    _description = 'Не пропускать задачи из серии "доделать, решить, описать"'
     id = 'task_tracker'
 
     def __init__(self, file_info, goal_and_tasks='Цель и задачи', deny_list=['доделать', 'решить', 'описать']):

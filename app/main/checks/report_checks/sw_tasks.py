@@ -7,7 +7,7 @@ logger = getLogger('root')
 
 class SWTasksCheck(BaseReportCriterion):
     label = "Проверка количества задач исследования"
-    description = "Проверка количества задач исследования"
+    _description = "Проверка количества задач исследования"
     id = "sw_tasks_check"
     priority = True
 

@@ -39,6 +39,7 @@ BASE_REPORT_CRITERION = [
     ["literature_references"],
     ["image_references"],
     ["table_references"],
+    ["report_table_percentage_check"],
     ["first_pages_check"],
     ["main_character_check"],
     ["needed_headers_check"],

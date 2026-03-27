@@ -8,8 +8,8 @@ class StyleCheckSettings:
     HEADER_2_NUM_REGEX = "^[1-9][0-9]*\\.([1-9][0-9]*\\ )([\\w\\s]+)$"
     HEADER_NUM_REGEX = "^\\d.+$"
     HEADER_REGEX = "^\\D+.+$"
-    HEADER_1_REGEX = r"^([1-9][0-9]*\.([1-9][0-9]*\.)){0,1}([\w\s]+)$"
-    HEADER_2_REGEX = r"^([1-9][0-9]*\.([1-9][0-9]*\.)*){0,1}([\w\s]+)$"
+    HEADER_1_REGEX = r"^([1-9][0-9]*\.([1-9][0-9]*\.))?\s*.+$"
+    HEADER_2_REGEX = r"^([1-9][0-9]*\.([1-9][0-9]*\.)*)?\s*.+$"
     STD_BANNED_WORDS = ('мы', 'моя', 'мои', 'моё', 'наш', 'наши',
         'аттач', 'билдить', 'бинарник', 'валидный', 'дебаг', 'деплоить', 'десктопное', 'железо',
         'исходники', 'картинка', 'консольное', 'конфиг', 'кусок', 'либа', 'лог', 'мануал',
@@ -97,7 +97,7 @@ class StyleCheckSettings:
         'any_header':
         {
             "style": HEADER_2_STYLE,
-            "docx_style": ["heading 3", "heading 4"],
+            "docx_style": ["heading 2", "heading 3", "heading 4"],
             "headers": ["Цель работы", "Выполнение работы", "Выводы"],
             "unify_regex": HEADER_2_REGEX,
             "regex": HEADER_2_REGEX,
@@ -162,7 +162,7 @@ class StyleCheckSettings:
             "warned_words": STD_WARNED_WORDS
         },
     }
-    
+
     NIR3_CONFIG = {
         'any_header':
         {
