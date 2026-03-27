@@ -50,6 +50,7 @@ BASE_REPORT_CRITERION = [
     ["empty_task_page_check"],
     ["water_in_the_text_check"],
     ["report_task_tracker"],
+    ["anti_plagiarism_check"],
 ]
 
 DEFAULT_TYPE = 'pres'

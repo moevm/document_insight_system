@@ -1,6 +1,7 @@
 import re
 from ..base_check import BaseReportCriterion, answer
 
+
 class AntiPlagiarismCheck(BaseReportCriterion):
     label = "Проверка на заимствования"
     _description = ''
@@ -30,7 +31,7 @@ class AntiPlagiarismCheck(BaseReportCriterion):
         borrowed_fragments = result["fragments"]
         user = 'admin' # уточнить, как получить роль пользователя 
         if originality_percent < self.originality_threshold:
-            result_str += f"Обнаружены заимствования в тексте отчета. Уникальность работы составляет {originality_percent}%.<br><br>"   
+            result_str += f"Обнаружены заимствования в тексте отчета. Уникальность работы составляет {originality_percent}%.<br><br>"
             if user == 'admin':
                 result_str += f"Ниже приведены фраменты, содержащие заимстования.<br>"
                 for i, fragment in enumerate(borrowed_fragments, start=1):
@@ -39,11 +40,12 @@ class AntiPlagiarismCheck(BaseReportCriterion):
                         f"Совпадение {fragment['percent']}%<br>"
                         f"Текст фрагмента:<br>"
                         f"{fragment['text']}<br>"
-                        f"Подробнее: Ссылка на страницу сравнения<br><br>" # добавить реальную ссылку
+                        f"Подробнее: <a href=\"/anti_plagiarism/\" target=\"_blank\" "
+                        f"onclick=\"window.open(window.location.pathname.replace('/results/', '/anti_plagiarism/') + '#fragment-{i}', '_blank'); return false;\">перейти к сравнению</a><br><br>" # добавить реальную ссылку
                     )
             return answer(False, result_str)
         return answer(True, f"Уникальность текста {originality_percent}%. Проверка пройдена.")
-    
+
     def run_antiplagiarism(self, text):
         # вызов реального алгоритма антиплагиата
         originality = 65
