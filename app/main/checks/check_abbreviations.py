@@ -2,9 +2,54 @@ import re
 from pymorphy3 import MorphAnalyzer
 morph = MorphAnalyzer()
 
+DEBUG_MODE = False
 
-def get_unexplained_abbrev(text, title_page):
-    abbreviations = find_abbreviations(text, title_page)
+def debug_print(*args, **kwargs):
+    if DEBUG_MODE:
+        print(*args, **kwargs)
+
+def get_first_letters(phrase):
+    if not phrase:
+        return ""
+    words = phrase.split()
+    return ''.join(word[0].upper() for word in words if word)
+
+def is_abbreviation_explained(abbr: str, text: str) -> bool:
+    patterns = [
+        rf'{abbr}\s*\(([^)]+)\)',         # АААА (расшифровка)
+        rf'\(([^)]+)\)\s*{abbr}',         # (расшифровка) АААА
+        rf'{abbr}\s*[—\-]\s*([^.,;!?]+)', # АААА — расшифровка
+        rf'{abbr}\s*-\s*([^.,;!?]+)',     # АААА - расшифровка
+        rf'([^.,;!?]+)\s*[—\-]\s*{abbr}', # расшифровка — АААА  
+        rf'([^.,;!?]+)\s*-\s*{abbr}'      # расшифровка - АААА 
+    ]
+    
+    debug_print(f"Проверка аббревиатуры: {abbr}")
+    debug_print(f"Текст (первые 200 символов): {text[:200]}...")
+    
+    for pattern in patterns:
+
+        match =  re.search(pattern, text, re.IGNORECASE)
+        
+        if match:
+            explanation = match.group(1)
+            debug_print(f" Найден паттерн {pattern}")
+            debug_print(f"  Расшифровка: {explanation}")
+            
+            if correctly_explained(abbr, explanation):
+                debug_print(f"  Расшифровка корректна")
+                return True
+            else:
+                debug_print(f"  Расшифровка НЕ соответствует первым буквам")
+                debug_print(f"     Ожидалось: {abbr.upper()}")
+                debug_print(f"     Получено: {get_first_letters(explanation)}")
+    
+    debug_print(f" Расшифровка для {abbr} не найдена")
+    return False
+        
+
+def get_unexplained_abbrev(text, unverifiable_text):
+    abbreviations = find_abbreviations(text, unverifiable_text)
     
     if not abbreviations:
         return False, []
@@ -16,15 +61,15 @@ def get_unexplained_abbrev(text, title_page):
     
     return  True, unexplained_abbr
             
-def find_abbreviations(text: str, title_page: str):
+def find_abbreviations(text: str, unverifiable_text: str):
     pattern = r'\b[А-ЯA-Z]{2,5}\b'
     abbreviations = re.findall(pattern, text)
     
     common_abbr = {
         'СССР', 'РФ', 'США', 'ВКР', 'ИТ', 'ПО', 'ООО', 'ЗАО', 'ОАО', 'HTML', 'CSS', 
-        'JS', 'ЛЭТИ', 'МОЕВМ', 'ЭВМ', 'ГОСТ', 'DVD'
-         
-          'SSD', 'PC', 'HDD',
+        'JS', 'ЛЭТИ', 'МОЕВМ', 'ЭВМ', 'ГОСТ', 'DVD',
+        'ЦПУ',
+        'SSD', 'PC', 'HDD',
         'AX', 'BX', 'CX', 'DX', 'SI', 'DI', 'BP', 'SP',
         'AH', 'AL', 'BH', 'BL', 'CH', 'CL', 'DH', 'DL', 
         'CS', 'DS', 'ES', 'SS', 'FS', 'GS',
@@ -40,30 +85,18 @@ def find_abbreviations(text: str, title_page: str):
         'LAN', 'WAN', 'WLAN', 'VPN', 'ISP', 'DNS', 'DHCP', 'TCP', 'UDP', 'IP',
         'HTTP', 'HTTPS', 'FTP', 'SSH', 'SSL', 'TLS',
         'API', 'GUI', 'CLI', 'IDE', 'SDK', 'SQL', 'NoSQL', 'XML', 'JSON', 'YAML',
-        'MAC', 'IBM', 'ГОСТ', 'ООП', 'ЛР', 'КР', 'ОТЧЕТ'
+        'MAC', 'IBM', 'ГОСТ', 'ООП', 'ЛР', 'КР', 'ОТЧЕТ', 'ПЛАН', 'СЛОВА'
     }
     filtered_abbr = {abbr for abbr in abbreviations if abbr not in common_abbr \
-                     and abbr not in title_page and morph.parse(abbr.lower())[0].score != 0}
+                     and abbr not in unverifiable_text and morph.parse(abbr.lower())[0].score != 0}
     
     return list(filtered_abbr)
 
-def is_abbreviation_explained(abbr: str, text: str) -> bool:
-    patterns = [
-        rf'{abbr}\s*\(([^)]+)\)',         # АААА (расшифровка)
-        rf'\(([^)]+)\)\s*{abbr}',         # (расшифровка) АААА
-        rf'{abbr}\s*[—\-]\s*([^.,;!?]+)', # АААА — расшифровка
-        rf'{abbr}\s*-\s*([^.,;!?]+)',     # АААА - расшифровка
-        rf'([^.,;!?]+)\s*[—\-]\s*{abbr}', # расшифровка — АААА  
-        rf'([^.,;!?]+)\s*-\s*{abbr}'      # расшифровка - АААА 
-    ]
+# def is_abbreviation_explained(abbr: str, text: str) -> bool:
+
 
     
-    for pattern in patterns:
-        match =  re.search(pattern, text, re.IGNORECASE)
-        if match and correctly_explained(abbr, match.group(1)):
-            return True
-    
-    return False
+
 
 def correctly_explained(abbr, explan):
     words = explan.split()
@@ -75,14 +108,15 @@ def correctly_explained(abbr, explan):
 
     return first_letters == abbr.upper()
 
-def main_check(text: str, title_page: str):
+def main_check(text: str, unverifiable_text: str):
     try:
+        debug_print(f"unverifiable_text : {unverifiable_text}")
         continue_check = True
         res_str = ""
         if not text:
             continue_check, res_str = False, "Не удалось получить текст"
         
-        abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(text=text, title_page=title_page)
+        abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(text=text, unverifiable_text=unverifiable_text)
         
         if not abbr_is_finding:
             continue_check, res_str = False, "Аббревиатуры не найдены в представленном документе"

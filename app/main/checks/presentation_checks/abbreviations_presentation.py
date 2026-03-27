@@ -17,7 +17,7 @@ class PresAbbreviationsCheck(BasePresCriterion):
             title_page = slides_text[0]
             full_text = " ".join(slides_text)
 
-            continue_check, res_str, unexplained_abbr = main_check(text=full_text, title_page=title_page)
+            continue_check, res_str, unexplained_abbr = main_check(text=full_text, unverifiable_text=title_page)
             if not continue_check:
                 return answer(True, res_str)
             
