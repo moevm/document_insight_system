@@ -4,7 +4,6 @@ from ..check_abbreviations import main_check, forming_response
 
 class ReportAbbreviationsCheck(BaseReportCriterion):
     label = "Проверка расшифровки аббревиатур"
-    description = "Все аббревиатуры должны быть расшифрованы при первом использовании"
     id = 'report_abbreviations_check'
 
     def __init__(self, file_info):
