@@ -3,7 +3,7 @@ from ..base_check import BaseReportCriterion, answer
 
 class ReportGapsBetweenTitleAndTextCheck(BaseReportCriterion):
     label = "Проверка разрывов между заголовком и текстом"
-    description = "Не должно быть разрывов между заголовком и текстом. Когда заголовок на одной странице, а текст уже на другой."
+    _description = "Не должно быть разрывов между заголовком и текстом. Когда заголовок на одной странице, а текст уже на другой."
     id = 'report_gaps_between_title_and_text_check'
 
     def __init__(self, file_info):
