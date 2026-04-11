@@ -23,6 +23,7 @@ BASE_PRES_CRITERION = [
     ['task_tracker'],
     ['overview_in_tasks'],
     ['pres_aspect_ratio_check'],
+    ['pres_was_were_check'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
@@ -52,6 +53,7 @@ BASE_REPORT_CRITERION = [
     ["empty_task_page_check"],
     ["water_in_the_text_check"],
     ["report_task_tracker"],
+    ["report_was_were_check"],
 ]
 
 DEFAULT_TYPE = 'pres'
