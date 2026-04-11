@@ -6,7 +6,7 @@ import copy
 
 class ReportMainCharacterCheck(BaseReportCriterion):
     label = "Проверка составляющих титульного листа, задания и календарного плана"
-    description = ""
+    _description = ""
     id = "main_character_check"
     priority = True
 
@@ -82,12 +82,6 @@ class ReportMainCharacterCheck(BaseReportCriterion):
             contents.append("|".join(row_text))
         return contents
 
-    def calculate_find_value(self, table, index):
-        count = int((len(table) - index - 2) / 2)
-        if count >= 0:
-            return count
-        return 0
-
     def check_table(self, check_list, table, table_num):
         for item in check_list:
             for i, line in enumerate(table):              
@@ -105,10 +99,7 @@ class ReportMainCharacterCheck(BaseReportCriterion):
                         continue
 
                 elif item["key"] in ["Зав. кафедрой", "Консультант"] and item["found_key"] > 0:
-                    if item["key"] == "Консультант":
-                        if item["found_key"] == 1:
-                            item["find"] += self.calculate_find_value(table, i)
                     for value in item["value"]:
-                        if re.search(value, line):
+                        if "Руководитель" not in line and  re.search(value, line):  # исключаем из поиска строки с рукодителем
                             item["found_value"] += 1
                             item["logs"] += f"'{item['key']}': значение компоненты '{value}' найдено в строке '{line}' в таблице №{table_num}<br>"

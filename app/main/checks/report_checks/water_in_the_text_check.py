@@ -5,7 +5,7 @@ from .watery_phrase_settings import WateryPhrase
 
 class WaterInTheTextCheck(BaseReportCriterion):
     label = "Проверка объема воды в тексте"
-    description = ''
+    _description = ''
     id = 'water_in_the_text_check'
     # необходимо подобрать watery_phrase_threshold, long_sentence_threshold, meaningful_word_threshold, long_sentence_word_limit
     def __init__(self, file_info, watery_phrase_threshold=0.3, long_sentence_threshold=0.3, meaningful_word_threshold=0.6, long_sentence_word_limit=20):
