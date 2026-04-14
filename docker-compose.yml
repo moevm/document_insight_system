@@ -65,7 +65,7 @@ services:
     cpuset: ${CONTAINER_CPU:-0-1}
 
   mongodb:
-    image: mongo:7.0
+    image: mongo:8-noble
     restart: always
     command:
       - '--wiredTigerCacheSizeGB=${MONGODB_CACHE_SIZE:-1}'
