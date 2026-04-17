@@ -21,8 +21,9 @@ class PdfDocumentManager:
         # self.bboxes = []
         # self.only_text_on_page = {}
 
-    def get_text_on_page(self):
-        return {page_num + 1: page.get_text() for page_num, page in enumerate(self.pages)}
+    def get_text_on_page(self, until_page=None):
+        until_page = until_page or len(self.pages)
+        return {page_num + 1: page.get_text() for page_num, page in enumerate(self.pages[:until_page])}
 
     # def get_text_on_page(self):
     #     return {page + 1: self.pages[page].extract_text() for page in range(self.page_count_all)}
