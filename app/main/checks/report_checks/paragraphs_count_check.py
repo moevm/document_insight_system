@@ -6,7 +6,7 @@ class ReportParagraphsCountCheck(BaseReportCriterion):
     label = "Проверка количества абзацев в главах и их подразделах"
     _description = ""
     id = "paragraphs_count_check"
-
+    # TODO: fix (StyleCheckSettings.VKR_CONFIG were updated)
     def __init__(self, file_info, min_paragraphs_in_unnumbered_section=2, min_paragraphs_in_section=5, 
                  min_paragraphs_in_subsection=5, min_paragraphs_in_subsubsection=1, skip_sections=None):
         super().__init__(file_info)
