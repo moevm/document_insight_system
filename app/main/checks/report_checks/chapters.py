@@ -23,7 +23,7 @@ class ReportChapters(BaseReportCriterion):
         self.presets = StyleCheckSettings.CONFIGS.get(self.config)
         level = 0
         for _, format_description in self.presets.items():
-            self.docx_styles.update({level: format_description["docx_style"]})
+            self.docx_styles.update({level: { 'styles': format_description["docx_style"], 'headers': format_description['headers']}})
             pattern = re.compile(format_description["regex"])
             self.style_regex.update({level: pattern})
             level += 1
@@ -64,8 +64,15 @@ class ReportChapters(BaseReportCriterion):
             for key in self.docx_styles.keys():
                 if marked_style:
                     break
-                for style_name in self.docx_styles[key]:
+                pre_headers = self.docx_styles[key]['headers']
+                styles = self.docx_styles[key]['styles']
+                for style_name in styles:
                     if header["style"].find(style_name) >= 0:
+                        if pre_headers and (header["text"] not in pre_headers and "приложение" not in header["text"].lower()):
+                            # если для стиля есть предопределенные заголовки (= структурные части ВКР) -> проверяем
+                            # иначе идем дальше, т.к. может быть несколько стилей для одного вида заголовка (нумерованные и нет)
+                            # TODO: исправить костыль, описанный выше
+                            continue
                         marked_style = 1
                         if self.style_regex[key].match(header["text"]):
                             err = self.style_diff(header["styled_text"], self.target_styles[key]["style"])
@@ -73,7 +80,7 @@ class ReportChapters(BaseReportCriterion):
                             result_str += ("<br>".join(err) + "<br>" if len(err) else "")
                         else:
                             err = f'Заголовок "{header["text"]}": '
-                            err += "текст заголовка не соответствует требуемому формату."
+                            err += f"текст заголовка не соответствует требуемому формату ({self.style_regex[key]})."
                             result_str += err + "<br>"
                         break
             if not marked_style:
