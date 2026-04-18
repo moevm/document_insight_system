@@ -17,9 +17,15 @@ class PresImageShareCheck(BasePresCriterion):
             if len(slide.get_images()) > 0:
                 count += 1
                 buf.append(slide.get_page_number())
-        buf =  ' '.join(list(map(str,buf)))
+        buf = ' '.join(list(map(str, buf)))
         if count / len(self.file.slides) > self.limit:
-            return answer(False, f'Проверка не пройдена! Изображения в презентации занимают около {round(count / len(self.file.slides), 2)} количества всех слайдов, \
-                                        ограничение - {round(self.limit, 2)}')
+            return answer(
+                False,
+                (
+                    f'Проверка не пройдена! Изображения в презентации занимают около '
+                    f'{round(count / len(self.file.slides), 2)} количества всех слайдов, '
+                    f'ограничение - {round(self.limit, 2)}'
+                ),
+            )
         else:
-            return answer(True, f'Пройдена!')
+            return answer(True, 'Пройдена!')

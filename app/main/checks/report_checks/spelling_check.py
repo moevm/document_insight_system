@@ -27,9 +27,9 @@ class SpellingCheck(BaseReportCriterion):
                     # Сохраняем контекст ошибки.
                     context = possible_error.context
                     possible_errors_list.append(
-                        f"Ошибка находится на странице {str(page_num)}." +
-                        f"Контекст ошибки: {context}" +
-                        f"Возможные исправления: {replacements}"
+                        f"Ошибка находится на странице {str(page_num)}."
+                        + f"Контекст ошибки: {context}"
+                        + f"Возможные исправления: {replacements}"
                     )
         spell_checker.close()
         if len(possible_errors_list) <= self.min_errors_count:
@@ -38,12 +38,16 @@ class SpellingCheck(BaseReportCriterion):
         elif len(possible_errors_list) < self.max_errors_count:
             grade = (self.max_errors_count - len(possible_errors_list)) / self.min_errors_count
             result_str = '</li><li>'.join([error for error in possible_errors_list])
-            return answer(grade, 
-                          f'Частично пройдена. '
-                          f'Найдены следующие ошибки написания (общее их число - {len(possible_errors_list)}): '
-                          f'<ul><li>{result_str}</ul>')
+            return answer(
+                grade,
+                f'Частично пройдена. '
+                f'Найдены следующие ошибки написания (общее их число - {len(possible_errors_list)}): '
+                f'<ul><li>{result_str}</ul>',
+            )
         else:
             result_str = '</li><li>'.join([error for error in possible_errors_list])
-            return answer(0,
-                          f'Найдены следующие ошибки написания (общее их число - {len(possible_errors_list)}): '
-                          f'<ul><li>{result_str}</ul>')
+            return answer(
+                0,
+                f'Найдены следующие ошибки написания (общее их число - {len(possible_errors_list)}): '
+                f'<ul><li>{result_str}</ul>',
+            )

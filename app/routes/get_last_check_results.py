@@ -1,14 +1,12 @@
-import bson
-from bson import ObjectId
-
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, redirect, render_template, url_for
 from flask_login import login_required
 
 from app.db import db_methods
 from app.root_logger import get_root_logger
 
-
-get_last_check_results = Blueprint('get_last_check_results', __name__, template_folder='templates', static_folder='static')
+get_last_check_results = Blueprint(
+    'get_last_check_results', __name__, template_folder='templates', static_folder='static'
+)
 logger = get_root_logger('web')
 
 

@@ -1,6 +1,5 @@
-import os
-
 import logging
+import os
 import tempfile
 
 from main.presentations import PresentationPPTX
@@ -20,7 +19,13 @@ def parse(filepath, pdf_filepath):
                 logger.info(f"Презентация {filepath} старого формата. Временно преобразована в pptx для обработки.")
                 new_filepath = convert_to(filepath, target_format='pptx')
             file_object = PresentationPPTX(new_filepath)
-        elif tmp_filepath.endswith(('.doc', '.odt', '.docx', )):
+        elif tmp_filepath.endswith(
+            (
+                '.doc',
+                '.odt',
+                '.docx',
+            )
+        ):
             new_filepath = filepath
             if tmp_filepath.endswith(('.doc', '.odt')):
                 logger.info(f"Отчёт {filepath} старого формата. Временно преобразован в docx для обработки.")
@@ -31,7 +36,7 @@ def parse(filepath, pdf_filepath):
             docx.parse()
             file_object = docx
 
-        elif tmp_filepath.endswith('.md' ):
+        elif tmp_filepath.endswith('.md'):
             new_filepath = filepath
             doc = MdUploader(new_filepath)
             md_text = doc.upload()
@@ -45,8 +50,8 @@ def parse(filepath, pdf_filepath):
             os.remove(new_filepath)
         return file_object
     except Exception as err:
-            logger.error(err, exc_info=True)
-            return None
+        logger.error(err, exc_info=True)
+        return None
 
 
 def save_to_temp_file(file):

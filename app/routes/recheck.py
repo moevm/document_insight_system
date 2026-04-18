@@ -1,15 +1,12 @@
 from os.path import join
 
 from bson import ObjectId
-
-from flask import Blueprint, request, abort, redirect, url_for
-from flask_login import login_required, current_user
+from flask import Blueprint, abort, redirect, request, url_for
+from flask_login import current_user, login_required
 
 from app.db import db_methods
-from app.tasks import create_task
-
 from app.server_consts import UPLOAD_FOLDER
-
+from app.tasks import create_task
 
 recheck = Blueprint('recheck', __name__, template_folder='templates', static_folder='static')
 

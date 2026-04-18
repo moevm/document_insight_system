@@ -9,7 +9,7 @@ class Style:
         "line_spacing": "Межстрочный интервал",
         "first_line_indent_cm": "Красная строка, см",
         "space_after_pt": "Отступ перед абзацем, пт",
-        "space_before_pt": "Отступ после абзаца, пт"
+        "space_before_pt": "Отступ после абзаца, пт",
     }
 
     def __init__(self, run=None, par=None):
@@ -102,8 +102,9 @@ class Style:
             self.line_spacing = round(self.line_spacing * 100) / 100
 
     def set_first_line_indent_cm(self, run, par):
-        self.first_line_indent_cm = Style.resolve_style_hierarchy(None, par,
-                                                                  ["paragraph_format", "first_line_indent", "cm"])
+        self.first_line_indent_cm = Style.resolve_style_hierarchy(
+            None, par, ["paragraph_format", "first_line_indent", "cm"]
+        )
         if self.first_line_indent_cm is not None:
             self.first_line_indent_cm = round(self.first_line_indent_cm * 100) / 100
 
@@ -138,9 +139,11 @@ class Style:
                 else:
                     flag = False
                     if getattr(self, property_name):
-                        error_list.append("{0}: ожидалось \"{1}\", фактически \"{2}\"".format(
-                            Style._friendly_property_names[property_name], getattr(template_style, property_name),
-                            # "по умолчанию" if getattr(self, property_name) is None else getattr(self, property_name)
-                            getattr(self, property_name)
-                        ))
+                        error_list.append(
+                            "{0}: ожидалось \"{1}\", фактически \"{2}\"".format(
+                                Style._friendly_property_names[property_name],
+                                getattr(template_style, property_name),
+                                getattr(self, property_name),
+                            )
+                        )
         return flag

@@ -10,7 +10,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
 
     def __init__(self, file_info, banned_words=None):
         super().__init__(file_info)
-        self.banned_words = ["habr", "medium", "stackoverflow", "sky.pro", "geeksforgeeks", "wikipedia"] 
+        self.banned_words = ["habr", "medium", "stackoverflow", "sky.pro", "geeksforgeeks", "wikipedia"]
         if banned_words:
             self.banned_words += banned_words
         self.banned_words = [morph.normal_forms(word)[0] for word in self.banned_words]
@@ -31,13 +31,17 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
         if self.file_type['report_type'] == 'LR':
             list_of_literature = self.find_literature()
             if len(list_of_literature) == 0:
-                return answer(False, f"Нет списка литературы!")
+                return answer(False, "Нет списка литературы!")
             detected_words_dict = self.find_banned_words(list_of_literature)
         elif self.file_type['report_type'] == 'VKR':
             self.late_init_vkr()
             header = self.literature_header
             if not header:
-                return answer(False, f"Нет списка использованных источников!<br><br>Если в вашей работе есть список литературы, убедитесь в правильности формата заголовка ")
+                return answer(
+                    False,
+                    "Нет списка использованных источников!<br><br>"
+                    "Если в вашей работе есть список литературы, убедитесь в правильности формата заголовка ",
+                )
             if not header["child"]:
                 return answer(False, "Не найдено ни одного источника.")
             header_number = header["number"]
@@ -52,14 +56,19 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
                         else:
                             detected_words_dict[child_number] = banned_word
         else:
-            return answer(False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев')
+            return answer(
+                False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев'
+            )
         if detected_words_dict:
             result_str = ""
             for i in sorted(detected_words_dict.keys()):
                 result_str += f"Абзац {i}: {detected_words_dict[i]}.<br>"
-            return answer(False, f'Есть запрещенные слова в списке источников '
-                                 f'{self.format_page_link([self.lit_page])}:<br><br>{result_str}')
-        return answer(True, f"Пройдена!")
+            return answer(
+                False,
+                f'Есть запрещенные слова в списке источников '
+                f'{self.format_page_link([self.lit_page])}:<br><br>{result_str}',
+            )
+        return answer(True, "Пройдена!")
 
     def find_banned_words(self, list_of_literature):
         detected_words = {}
@@ -85,10 +94,12 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
                     break
         return result
 
-    def start_of_literature_chapter(self, ):
+    def start_of_literature_chapter(
+        self,
+    ):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
             text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
-            if re.fullmatch(f'{self.name_pattern}', text_string):    
+            if re.fullmatch(f'{self.name_pattern}', text_string):
                 start_index = i
         return start_index

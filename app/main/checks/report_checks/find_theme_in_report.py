@@ -1,13 +1,10 @@
-import re
 import string
 
-from ..base_check import BaseReportCriterion, answer
-
-import  string
-from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 from pymorphy3 import MorphAnalyzer
 
+from ..base_check import BaseReportCriterion, answer
 
 MORPH_ANALYZER = MorphAnalyzer()
 
@@ -17,7 +14,7 @@ class FindThemeInReport(BaseReportCriterion):
     _description = "Проверка упоминания темы в отчете"
     id = 'theme_in_report_check'
 
-    def __init__(self, file_info, limit = 40):
+    def __init__(self, file_info, limit=40):
         super().__init__(file_info)
         self.intro = {}
         self.chapters = []
@@ -48,20 +45,25 @@ class FindThemeInReport(BaseReportCriterion):
                 translator = str.maketrans('', '', string.punctuation)
                 theme_without_punct = text.translate(translator)
                 word_in_text = word_tokenize(theme_without_punct)
-                lemma_text = {MORPH_ANALYZER.parse(w)[0].normal_form for w in word_in_text if w.lower() not in stop_words}
+                lemma_text = {
+                    MORPH_ANALYZER.parse(w)[0].normal_form for w in word_in_text if w.lower() not in stop_words
+                }
                 self.full_text.update(lemma_text)
 
             intersection = lemma_theme.intersection(self.full_text)
-            value_intersection = round(len(intersection)*100//len(lemma_theme))
+            value_intersection = round(len(intersection) * 100 // len(lemma_theme))
         if value_intersection == 0:
             return answer(False, "Не пройдена! В отчете не упоминаются слова, заявленные в теме отчета.")
         elif value_intersection < self.limit:
             return answer(
-                          round(value_intersection/self.limit, 1),
-                          f"Частично пройдена! Процент упоминания темы в вашем отчете ({value_intersection} %) ниже требуемого ({self.limit} %)."
+                round(value_intersection / self.limit, 1),
+                (
+                    f"Частично пройдена! Процент упоминания темы в вашем отчете ({value_intersection} %) "
+                    f"ниже требуемого ({self.limit} %)."
+                ),
             )
         else:
-            return answer (True, f'Пройдена! Процент упоминания темы в отчете: {value_intersection} %.')
+            return answer(True, f'Пройдена! Процент упоминания темы в отчете: {value_intersection} %.')
 
     def find_theme(self):
         stop_words = set(stopwords.words("russian"))
@@ -78,6 +80,7 @@ class FindThemeInReport(BaseReportCriterion):
                     elif value in {"студент", "студентка"}:
                         end = index
                 list_theme = list_full[start:end]
-                lemma_theme = {MORPH_ANALYZER.parse(word)[0].normal_form for word in list_theme if
-                                word not in stop_words}
+                lemma_theme = {
+                    MORPH_ANALYZER.parse(word)[0].normal_form for word in list_theme if word not in stop_words
+                }
             return lemma_theme

@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, jsonify, render_template, request
+from flask_login import current_user, login_required
 
-from app.utils import format_check_for_table, checklist_filter
 from app.db import db_methods
-from flask_login import login_required, current_user
+from app.utils import checklist_filter, format_check_for_table
 
 check_list = Blueprint('check_list', __name__, template_folder='templates', static_folder='static')
+
 
 @check_list.route("/")
 @login_required
@@ -41,10 +42,7 @@ def check_list_data():
         rows, count = db_methods.get_checks_cursor(**query)
 
     # construct response
-    response = {
-        "total": count,
-        "rows": [format_check_for_table(item) for item in rows]
-    }
+    response = {"total": count, "rows": [format_check_for_table(item) for item in rows]}
 
     # return json data
     return jsonify(response)

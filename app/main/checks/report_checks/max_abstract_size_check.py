@@ -31,13 +31,15 @@ class ReportMaxSizeOfAbstractCheck(BaseReportCriterion):
     def check(self):
         self.late_init()
         if self.referat_size > self.max_size and self.abstract_size > self.max_size:
-            return answer(False,
-                          f"<br><br>Размеры разделов \"Реферат\" и \"Abstract\" превышает максимальный размер")
+            return answer(False, "<br><br>Размеры разделов \"Реферат\" и \"Abstract\" превышает максимальный размер")
         if self.referat_size > self.max_size:
-            return answer(False,
-                          f"<br><br>Размер раздела \"Реферат\" равен {self.referat_size} страницы, должен быть {self.max_size}")
+            return answer(
+                False,
+                f"<br><br>Размер раздела \"Реферат\" равен {self.referat_size} страницы, должен быть {self.max_size}",
+            )
         if self.abstract_size > self.max_size:
-            return answer(False,
-                          f"<br><br>Размер раздела \"Abstract\" равен {self.abstract_size} страницы, должен быть {self.max_size}")
-        return answer(True,
-                      f"<br><br>Размеры разделов \"Реферат\" и \"Abstract\" соответствуют шаблону")
+            return answer(
+                False,
+                f"<br><br>Размер раздела \"Abstract\" равен {self.abstract_size} страницы, должен быть {self.max_size}",
+            )
+        return answer(True, "<br><br>Размеры разделов \"Реферат\" и \"Abstract\" соответствуют шаблону")

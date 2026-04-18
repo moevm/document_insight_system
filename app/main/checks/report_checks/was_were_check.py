@@ -1,9 +1,12 @@
-from ..base_check import BaseReportCriterion, answer
 from app.utils.was_were_check import WasWereChecker
+
+from ..base_check import BaseReportCriterion, answer
 
 
 class ReportWasWereCheck(BaseReportCriterion):
-    label = "Проверка на пассивные конструкции, начинающиеся с Был/Была/Было/Были, которые можно убрать без потери смысла"
+    label = (
+        "Проверка на пассивные конструкции, начинающиеся с Был/Была/Было/Были, которые можно убрать без потери смысла"
+    )
     _description = "Предложения начинающиеся с Был/Была/Было/Были, которые можно убрать без потери смысла"
     id = "report_was_were_check"
 
@@ -12,7 +15,5 @@ class ReportWasWereCheck(BaseReportCriterion):
         self.checker = WasWereChecker(file_info, threshold)
 
     def check(self):
-        message, score = self.checker.get_result_msg_and_score(
-            self.file, self.format_page_link
-        )
+        message, score = self.checker.get_result_msg_and_score(self.file, self.format_page_link)
         return answer(score, message)

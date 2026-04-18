@@ -3,13 +3,13 @@ from functools import reduce
 
 import docx
 
+from ..document_uploader import DocumentUploader
+from ..pdf_document.pdf_document_manager import PdfDocumentManager
 from .core_properties import CoreProperties
 from .inline_shape import InlineShape
 from .paragraph import Paragraph
 from .style import Style
-from .table import Table, Cell
-from ..pdf_document.pdf_document_manager import PdfDocumentManager
-from ..document_uploader import DocumentUploader
+from .table import Cell, Table
 
 
 class DocxUploader(DocumentUploader):
@@ -56,14 +56,25 @@ class DocxUploader(DocumentUploader):
                 if style_name.find("heading") >= 0:
                     header_ind += 1
                     par_num = 0
-                    tmp_chapters.append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"].strip(),
-                                            "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind,
-                                            "child": []})
+                    tmp_chapters.append(
+                        {
+                            "style": style_name,
+                            "text": self.styled_paragraphs[par_ind]["text"].strip(),
+                            "styled_text": self.styled_paragraphs[par_ind],
+                            "number": head_par_ind,
+                            "child": [],
+                        }
+                    )
                 elif header_ind >= 0:
                     par_num += 1
                     tmp_chapters[header_ind]["child"].append(
-                        {"style": style_name, "text": self.styled_paragraphs[par_ind]["text"],
-                            "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind})
+                        {
+                            "style": style_name,
+                            "text": self.styled_paragraphs[par_ind]["text"],
+                            "styled_text": self.styled_paragraphs[par_ind],
+                            "number": head_par_ind,
+                        }
+                    )
             self.chapters = tmp_chapters
         return self.chapters
 
@@ -72,15 +83,31 @@ class DocxUploader(DocumentUploader):
             if work_type == 'VKR':
                 # find first pages
                 headers = [
-                    {"name": "Титульный лист", "marker": False, "key": "санкт-петербургский государственный",
-                     "main_character": True, "page": 0},
-                    {"name": "Задание на выпускную квалификационную работу", "marker": False, "key": "задание",
-                     "main_character": True, "page": 0},
-                    {"name": "Календарный план", "marker": False, "key": "календарный план", "main_character": True,
-                     "page": 0},
-                    {"name": "Реферат", "marker": False, "key": "реферат", "main_character": False,  "page": 0},
+                    {
+                        "name": "Титульный лист",
+                        "marker": False,
+                        "key": "санкт-петербургский государственный",
+                        "main_character": True,
+                        "page": 0,
+                    },
+                    {
+                        "name": "Задание на выпускную квалификационную работу",
+                        "marker": False,
+                        "key": "задание",
+                        "main_character": True,
+                        "page": 0,
+                    },
+                    {
+                        "name": "Календарный план",
+                        "marker": False,
+                        "key": "календарный план",
+                        "main_character": True,
+                        "page": 0,
+                    },
+                    {"name": "Реферат", "marker": False, "key": "реферат", "main_character": False, "page": 0},
                     {"name": "Abstract", "marker": False, "key": "abstract", "main_character": False, "page": 0},
-                    {"name": "Cодержание", "marker": False, "key": "содержание", "main_character": False, "page": 0}]
+                    {"name": "Cодержание", "marker": False, "key": "содержание", "main_character": False, "page": 0},
+                ]
                 for page in range(1, self.page_count if self.page_counter() < 2 * len(headers) else 2 * len(headers)):
                     page_text = (self.pdf_file.get_text_on_page()[page].split("\n")[0]).lower()
                     for i in range(len(headers)):
@@ -91,8 +118,10 @@ class DocxUploader(DocumentUploader):
                                 break
                 self.headers = headers
         return self.headers
-    
-    def get_main_headers(self, work_type): #this method helps to avoid mistake in "needed_headers_check" (because of structure checks for md)
+
+    def get_main_headers(
+        self, work_type
+    ):  # this method helps to avoid mistake in "needed_headers_check" (because of structure checks for md)
         if not self.headers_main:
             if work_type == 'VKR':
                 self.headers_main = self.make_headers(work_type)[1]['name']
@@ -123,12 +152,14 @@ class DocxUploader(DocumentUploader):
                         self.headers_page = header["page"]
                     break
         return self.headers_page
-    
+
     def find_literature_page(self, work_type):
         if not self.literature_page:
-            for k, v in self.pdf_file.text_on_page.items():
+            for _, v in self.pdf_file.text_on_page.items():
                 line = v[:40] if len(v) > 21 else v
-                if re.search('список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)', line.strip().lower()):
+                if re.search(
+                    'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)', line.strip().lower()
+                ):
                     break
                 self.literature_page += 1
         self.literature_page += 1
@@ -146,8 +177,14 @@ class DocxUploader(DocumentUploader):
         indices = self.get_paragraph_indices_by_style(styles)
         tagged_indices = [{"index": 0, "level": 0}, {"index": len(self.styled_paragraphs), "level": 0}]
         for j in range(len(indices)):
-            tagged_indices.extend(list(map(lambda index: {"index": index, "level": j + 1,
-                                                          "text": self.styled_paragraphs[index]["text"]}, indices[j])))
+            tagged_indices.extend(
+                list(
+                    map(
+                        lambda index: {"index": index, "level": j + 1, "text": self.styled_paragraphs[index]["text"]},
+                        indices[j],
+                    )
+                )
+            )
         tagged_indices.sort(key=lambda dct: dct["index"])
         return tagged_indices
 
@@ -155,10 +192,19 @@ class DocxUploader(DocumentUploader):
         indices = self.get_paragraph_indices_by_style(styles)
         tagged_indices = [{"index": 0, "level": 0}, {"index": len(self.styled_paragraphs), "level": 0}]
         for j in range(len(indices)):
-            tagged_indices.extend(list(map(lambda index: {"index": index, "level": j + 1,
-                                                          "styled_text": self.styled_paragraphs[index],
-                                                          "style": self.paragraphs[index].paragraph_style_name.lower()},
-                                           indices[j])))
+            tagged_indices.extend(
+                list(
+                    map(
+                        lambda index: {
+                            "index": index,
+                            "level": j + 1,
+                            "styled_text": self.styled_paragraphs[index],
+                            "style": self.paragraphs[index].paragraph_style_name.lower(),
+                        },
+                        indices[j],
+                    )
+                )
+            )
         tagged_indices.sort(key=lambda dct: dct["index"])
         return tagged_indices
 
@@ -184,7 +230,7 @@ class DocxUploader(DocumentUploader):
             next_par = self.styled_paragraphs[i + 1]
             if pattern.match(par["text"]):
                 skip_flag = True
-                par["text"] += ("\n" + next_par["text"])
+                par["text"] += "\n" + next_par["text"]
                 par["runs"].extend(next_par["runs"])
                 pars_to_delete.append(next_par)
                 continue
@@ -204,7 +250,7 @@ class DocxUploader(DocumentUploader):
 
     def page_counter(self):
         if not self.page_count:
-            for k, v in self.pdf_file.text_on_page.items():
+            for _, v in self.pdf_file.text_on_page.items():
                 line = v[:20] if len(v) > 21 else v
                 if re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip()):
                     break
@@ -229,9 +275,12 @@ class DocxUploader(DocumentUploader):
             print(self.paragraphs[i].to_string())
 
     def __str__(self):
-        return self.core_properties.to_string() + '\n' + '\n'.join(
-            [self.paragraphs[i].to_string() for i in range(len(self.paragraphs))])
-    
+        return (
+            self.core_properties.to_string()
+            + '\n'
+            + '\n'.join([self.paragraphs[i].to_string() for i in range(len(self.paragraphs))])
+        )
+
     def show_chapters(self, work_type):
         chapters_str = "<br>"
         for header in self.make_chapters(work_type):

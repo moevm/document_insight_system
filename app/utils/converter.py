@@ -3,7 +3,8 @@ import subprocess
 from os.path import dirname
 
 
-def run_process(cmd: str): return subprocess.run(cmd.split(' '))
+def run_process(cmd: str):
+    return subprocess.run(cmd.split(' '))
 
 
 def convert_to(filepath, target_format='pdf'):
@@ -23,5 +24,6 @@ def convert_to(filepath, target_format='pdf'):
 
 def open_file(filepath, remove=False):
     file = open(filepath, 'rb')
-    if remove: os.remove(filepath)
+    if remove:
+        os.remove(filepath)
     return file

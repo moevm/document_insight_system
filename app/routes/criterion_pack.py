@@ -1,7 +1,7 @@
 import json
 
-from flask import Blueprint, render_template, abort
-from flask_login import login_required, current_user
+from flask import Blueprint, abort, render_template
+from flask_login import current_user, login_required
 
 from app.db import db_methods
 
@@ -14,7 +14,6 @@ def criteria_pack_new():
     if not current_user.is_admin:
         abort(403)
     return render_template('./criteria_pack.html', name=current_user.name, navi_upload=True)
-
 
 
 @criterion_pack.route("/<string:name>", methods=["GET"])

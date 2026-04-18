@@ -2,8 +2,9 @@ import re
 from typing import List, Union
 
 from app.main.reports.docx_uploader.style import Style
-from .style_check_settings import StyleCheckSettings
+
 from ..base_check import BaseReportCriterion, answer
+from .style_check_settings import StyleCheckSettings
 
 
 class LRReportSectionCheck(BaseReportCriterion):
@@ -12,8 +13,12 @@ class LRReportSectionCheck(BaseReportCriterion):
     _description = ''
     id = "lr_sections_check"
 
-    def __init__(self, file_info, presets: str = 'LR_HEADERS',
-                 prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS):
+    def __init__(
+        self,
+        file_info,
+        presets: str = 'LR_HEADERS',
+        prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS,
+    ):
         super().__init__(file_info)
         presets = StyleCheckSettings.CONFIGS.get(presets)
         if prechecked_props is None:
@@ -36,10 +41,11 @@ class LRReportSectionCheck(BaseReportCriterion):
             full_style = self.construct_style_from_description(preset["style"])
             precheck_dict = {key: preset["style"].get(key) for key in self.prechecked_props}
             precheck_style = self.construct_style_from_description(precheck_dict)
-            err = self.check_marked_headers(preset["unify_regex"], preset["regex"],
-                                            precheck_style, full_style, preset["headers"])
+            err = self.check_marked_headers(
+                preset["unify_regex"], preset["regex"], precheck_style, full_style, preset["headers"]
+            )
             result = result and (len(err) == 0)
-            result_str += ("<br>".join(err) + "<br>" if len(err) else "")
+            result_str += "<br>".join(err) + "<br>" if len(err) else ""
         if len(result_str) == 0:
             result_str = "Пройдена!"
         else:
@@ -57,12 +63,12 @@ class LRReportSectionCheck(BaseReportCriterion):
             <ul>
                 <li>Выделите нужный текст и явно примените к нему недостающее форматирование;</li>
                 <li>
-                    Не пользуйтесь стандартным стилем. Настройте отдельный стиль для заголовков 
+                    Не пользуйтесь стандартным стилем. Настройте отдельный стиль для заголовков
                     (<a href="http://se.moevm.info/doku.php/courses:informatics:reportrules">инструкция</a>)
                     и примените его к проблемному заголовку.
                 </li>
             </ul>
-            Ошибки вида &laquo;ошибочная маркировка разделов&raquo; часто вызваны другими ошибками; 
+            Ошибки вида &laquo;ошибочная маркировка разделов&raquo; часто вызваны другими ошибками;
             их исправлять рекомендуется в последнюю очередь.
             '''
         return answer(result, result_str)
@@ -73,10 +79,12 @@ class LRReportSectionCheck(BaseReportCriterion):
         for run in par["runs"]:
             diff_lst = []
             run["style"].matches(template_style, diff_lst)
-            diff_lst = list(map(
-                lambda diff: f"Абзац \"{trim(par['text'], 20)}\", фрагмент \"{trim(run['text'], 20)}\": {diff}.",
-                diff_lst
-            ))
+            diff_lst = list(
+                map(
+                    lambda diff: f"Абзац \"{trim(par['text'], 20)}\", фрагмент \"{trim(run['text'], 20)}\": {diff}.",
+                    diff_lst,
+                )
+            )
             err.extend(diff_lst)
         return err
 
@@ -94,7 +102,6 @@ class LRReportSectionCheck(BaseReportCriterion):
         header_idx = 0
         found_idx = 0
         last_found = -1
-        last_punished = -1
         while True:
             if header_idx >= len(headers):
                 break
@@ -121,4 +128,4 @@ class LRReportSectionCheck(BaseReportCriterion):
 
 
 def trim(string, length):
-    return string[:length - 3] + "..." if len(string) > length else string
+    return string[: length - 3] + "..." if len(string) > length else string

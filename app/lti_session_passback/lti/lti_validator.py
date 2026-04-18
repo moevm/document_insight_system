@@ -29,8 +29,9 @@ class LTIRequestValidator(RequestValidator):
     def validate_client_key(self, client_key, request):
         return ConsumersDBManager.is_key_valid(client_key)
 
-    def validate_timestamp_and_nonce(self, client_key, timestamp, nonce, request, request_token=None,
-                                     access_token=None):
+    def validate_timestamp_and_nonce(
+        self, client_key, timestamp, nonce, request, request_token=None, access_token=None
+    ):
         if not ConsumersDBManager.has_timestamp_and_nonce(client_key, timestamp, nonce):
             ConsumersDBManager.add_timestamp_and_nonce(client_key, timestamp, nonce)
             return True

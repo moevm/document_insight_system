@@ -1,6 +1,7 @@
 import re
 
 from app.utils.parse_for_html import format_header
+
 from ..base_check import BasePresCriterion, answer
 
 
@@ -20,8 +21,9 @@ class PresEmptySlideCheck(BasePresCriterion):
         empty_pages = []
         pages_with_title = []
 
-        pages_with_images = [page for page, slide in enumerate(self.file.slides, 1)
-                             if slide.get_images() or slide.get_table()]
+        pages_with_images = [
+            page for page, slide in enumerate(self.file.slides, 1) if slide.get_images() or slide.get_table()
+        ]
 
         for page, slide in enumerate(self.file.get_text_from_slides(), 1):
             slide_string = ''.join(slide.replace("\n", " "))
@@ -37,27 +39,29 @@ class PresEmptySlideCheck(BasePresCriterion):
                     pages_with_title.append(page)
 
         if self.file.presentation_name.endswith('.ppt') or self.file.presentation_name.endswith('.pptx'):
-
             if empty_pages and not pages_with_title:
                 result_str += format_header(
-                    'Не пройдена! Обнаружены пустые слайды: {}'.format(
-                        ', '.join(self.format_page_link(empty_pages)))
+                    'Не пройдена! Обнаружены пустые слайды: {}'.format(', '.join(self.format_page_link(empty_pages)))
                 )
             if pages_with_title and not empty_pages:
                 result_str += format_header(
                     'Не пройдена! Обнаружены слайды, в которых присутствует только заголовок: {}'.format(
-                        ', '.join(self.format_page_link(pages_with_title)))
+                        ', '.join(self.format_page_link(pages_with_title))
+                    )
                 )
             if empty_pages and pages_with_title:
                 result_str += format_header(
-                    'Не пройдена! Обнаружены пустые слайды: {}, также обнаружены слайды, в которых присутствует только заголовок: {}'.format(
-                        ', '.join(self.format_page_link(empty_pages)), ', '.join(self.format_page_link(pages_with_title)))
+                    'Не пройдена! Обнаружены пустые слайды: {}, также обнаружены слайды, '
+                    'в которых присутствует только заголовок: {}'.format(
+                        ', '.join(self.format_page_link(empty_pages)),
+                        ', '.join(self.format_page_link(pages_with_title)),
+                    )
                 )
         elif self.file.presentation_name.lower().endswith('.odp'):
             if empty_pages:
                 result_str += format_header(
-                    'Не пройдена! Обнаружены пустые слайды или слайды, в которых присутствует только заголовок: {}'.format(
-                        ', '.join(self.format_page_link(empty_pages)))
+                    'Не пройдена! Обнаружены пустые слайды или слайды, в которых присутствует только заголовок: '
+                    '{}'.format(', '.join(self.format_page_link(empty_pages)))
                 )
 
         if not result_str:

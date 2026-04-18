@@ -1,12 +1,10 @@
 import bson
 from bson import ObjectId
-
-from flask import Blueprint, render_template, Response
+from flask import Blueprint, Response, render_template
 from flask_login import login_required
 
 from app.db import db_methods
 from app.root_logger import get_root_logger
-
 
 checks = Blueprint('checks', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')

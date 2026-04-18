@@ -1,7 +1,7 @@
 from bson import ObjectId
 from flask_login import UserMixin
+from main.check_packs import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE_INFO, BaseCriterionPack
 
-from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_TYPE_INFO, DEFAULT_REPORT_TYPE_INFO
 
 class Packable:
     def __init__(self, dictionary):
@@ -26,7 +26,7 @@ class User(Packable, UserMixin):
         self.file_type = dictionary.get('file_type', DEFAULT_REPORT_TYPE_INFO)
         try:
             self.criteria = dictionary.get('criteria', BASE_PACKS.get(self.file_type['type']).name)
-        except:
+        except Exception:
             self.criteria = dictionary.get('criteria', BASE_PACKS.get(self.file_type).name)
         self.is_LTI = dictionary.get('is_LTI', False)
         self.lms_user_id = dictionary.get('lms_user_id', None)
@@ -57,7 +57,8 @@ class PackableWithId(Packable):
 
     def pack(self, to_str=False):
         package = super().pack()
-        if '_id' in package: package['_id'] = self._id if not to_str else str(self._id)
+        if '_id' in package:
+            package['_id'] = self._id if not to_str else str(self._id)
         return package
 
 
@@ -132,7 +133,7 @@ class Check(PackableWithId):
         if isinstance(self.enabled_checks, (list,)):
             return self.is_passed
         # old check
-        return all([check == False or check['pass'] for check in self.enabled_checks.values()])
+        return all([check is False or check['pass'] for check in self.enabled_checks.values()])
 
     def pack(self, to_str=False):
         package = super().pack(to_str)

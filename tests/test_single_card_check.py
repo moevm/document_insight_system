@@ -1,10 +1,8 @@
-import os
-import time
 from basic_selenium_test import BasicSeleniumTest
 from selenium.webdriver.common.by import By
 
-class SingleCheckTestSelenium(BasicSeleniumTest):
 
+class SingleCheckTestSelenium(BasicSeleniumTest):
     def test_open_check_card(self):
         self.authorization()
         URL = self.get_url('/check_list')
@@ -16,4 +14,3 @@ class SingleCheckTestSelenium(BasicSeleniumTest):
         self.get_driver().get(URL)
         obj = self.get_driver().find_element(By.ID, 'results_holder')
         self.assertNotEquals(obj, None)
-    

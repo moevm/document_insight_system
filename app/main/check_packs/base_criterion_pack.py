@@ -1,14 +1,21 @@
 import logging
 import traceback
+
 from .utils import init_criterions
 
 logger = logging.getLogger('root_logger')
 
-PRIORITY_CHECK_FAILED_MSG = "<b>Данный критерий является обязательным для прохождения.<br>Результат всей проверки обнулен, но вы можете ознакомиться с результатами каждого критерия.</b><br>"
-UNEXPECTED_CHECK_FAIL_MSG = "<b>Во время проверки произошла ошибка: проверьте соответствия оформления файла шаблона (в том числе разделов и уровней заголовков), попробуйте позже или обратитесь к администратору системы.<b>"
+PRIORITY_CHECK_FAILED_MSG = (
+    "<b>Данный критерий является обязательным для прохождения.<br>"
+    "Результат всей проверки обнулен, но вы можете ознакомиться с результатами каждого критерия.</b><br>"
+)
+UNEXPECTED_CHECK_FAIL_MSG = (
+    "<b>Во время проверки произошла ошибка: проверьте соответствия оформления файла шаблона "
+    "(в том числе разделов и уровней заголовков), попробуйте позже или обратитесь к администратору системы.<b>"
+)
+
 
 class BaseCriterionPack:
-
     def __init__(self, raw_criterions, file_type, min_score=1.0, name=None, **kwargs):
         self.file_type = file_type
         self.name = name if name else self.__class__.__name__
@@ -29,18 +36,19 @@ class BaseCriterionPack:
                 criterion_check_result = criterion.check()
             except Exception as e:
                 trace_msg = traceback.format_exc()
-                err_msg = f'{criterion.id}: oшибка во время проверки: {e} ({trace_msg[len(trace_msg)//2:]})'
+                err_msg = f'{criterion.id}: oшибка во время проверки: {e} ({trace_msg[len(trace_msg) // 2 :]})'
                 logger.error(err_msg)
                 logger.error(trace_msg)
-                criterion_check_result = {'score': 0, 'verdict': [UNEXPECTED_CHECK_FAIL_MSG, f"Информация об ошибке для администратора: {err_msg}"]}
+                criterion_check_result = {
+                    'score': 0,
+                    'verdict': [UNEXPECTED_CHECK_FAIL_MSG, f"Информация об ошибке для администратора: {err_msg}"],
+                }
             if criterion.priority and not criterion_check_result['score']:
                 failed_priority_check = True
-                criterion_check_result['verdict'] = [PRIORITY_CHECK_FAILED_MSG] + list(criterion_check_result['verdict'])
-            result.append(dict(
-                id=criterion.id,
-                name=criterion.name,
-                **criterion_check_result
-            ))
+                criterion_check_result['verdict'] = [PRIORITY_CHECK_FAILED_MSG] + list(
+                    criterion_check_result['verdict']
+                )
+            result.append(dict(id=criterion.id, name=criterion.name, **criterion_check_result))
         if failed_priority_check:  # if priority criterion is failed -> check is failed
             return result, 0, False
         score = self.calc_score(result)
@@ -55,7 +63,7 @@ class BaseCriterionPack:
             'name': self.name,
             'raw_criterions': self.raw_criterions,
             'file_type': self.file_type,
-            'min_score': self.min_score
+            'min_score': self.min_score,
         }
 
     @staticmethod
@@ -64,17 +72,18 @@ class BaseCriterionPack:
 
     @staticmethod
     def calc_score(result):
-        if len(result) == 0: return 0.
-        score = 0.
+        if len(result) == 0:
+            return 0.0
+        score = 0.0
         for check in result:
             score += float(check['score'])
         return round(score / len(result), 3)
-    
+
     @staticmethod
     def get_proportion(result):
-        if len(result) == 0: return 0.
-        score = 0.
+        if len(result) == 0:
+            return 0.0
+        score = 0.0
         for check in result:
             score += float(check['score'])
         return round(score, 2), len(result)
-

@@ -1,15 +1,19 @@
-from app.utils.get_text_from_slides import get_text_from_slides
 from app.nlp.stemming import Stemming
+from app.utils.get_text_from_slides import get_text_from_slides
+
 from ..base_check import BasePresCriterion, answer, morph
+
 
 class OverviewInTasks(BasePresCriterion):
     label = "Проверка наличия обзора в числе задач"
     _description = 'В числе задач должен присутсвовать обзор/анализ предметной области'
     id = 'overview_in_tasks'
 
-    def __init__(self, file_info, goal_and_tasks='Цель и задачи', keywords=['обзор', 'анализ']):
+    def __init__(self, file_info, goal_and_tasks='Цель и задачи', keywords=None):
         super().__init__(file_info)
         self.goal_and_tasks = goal_and_tasks
+        if keywords is None:
+            keywords = ['обзор', 'анализ']
         self.keywords = [morph.parse(word)[0].normal_form for word in keywords]
 
     def check(self):

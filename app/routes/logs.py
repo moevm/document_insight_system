@@ -1,9 +1,12 @@
 import json
-from flask import Blueprint, render_template, request, jsonify
-from flask_login import current_user, login_required
-from app.root_logger import get_root_logger
 from datetime import datetime, timedelta
+
+from flask import Blueprint, jsonify, render_template, request
+from flask_login import current_user, login_required
+
 from app.db import db_methods
+from app.root_logger import get_root_logger
+
 # from app.server_consts import logger
 logs = Blueprint('logs', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')
@@ -11,6 +14,7 @@ logger = get_root_logger('web')
 
 # def get_logger():
 #     return logger
+
 
 @logs.route("/")
 @login_required
@@ -47,10 +51,7 @@ def logs_data():
         if len(f_lineno_list) == 1:
             filter_query["lineno"] = int(f_lineno_list[0])
         elif len(f_lineno_list) > 1:
-            filter_query["lineno"] = {
-                "$gte": int(f_lineno_list[0]),
-                "$lte": int(f_lineno_list[1])
-            }
+            filter_query["lineno"] = {"$gte": int(f_lineno_list[0]), "$lte": int(f_lineno_list[1])}
     except Exception as e:
         logger.warning("Can't apply lineno filter")
         logger.warning(repr(e))
@@ -60,14 +61,11 @@ def logs_data():
     try:
         if len(f_timestamp_list) == 1:
             date = datetime.strptime(f_timestamp_list[0], "%d.%m.%Y")
-            filter_query['timestamp'] = {
-                "$gte": date,
-                "$lte": date + timedelta(hours=23, minutes=59, seconds=59)
-            }
+            filter_query['timestamp'] = {"$gte": date, "$lte": date + timedelta(hours=23, minutes=59, seconds=59)}
         elif len(f_timestamp_list) > 1:
             filter_query['timestamp'] = {
                 "$gte": datetime.strptime(f_timestamp_list[0], "%d.%m.%Y"),
-                "$lte": datetime.strptime(f_timestamp_list[1], "%d.%m.%Y")
+                "$lte": datetime.strptime(f_timestamp_list[1], "%d.%m.%Y"),
             }
     except Exception as e:
         logger.warning("Can't apply timestamp filter")
@@ -92,16 +90,18 @@ def logs_data():
     # construct response
     response = {
         "total": count,
-        "rows": [{
-            "timestamp": item["timestamp"].strftime("%d.%m.%Y %H:%M:%S"),
-            "service-name": item["serviceName"],
-            "levelname": item["levelname"],
-            "message": item["message"],
-            "pathname": item["pathname"],
-            "lineno": item["lineno"]
-        } for item in rows]
+        "rows": [
+            {
+                "timestamp": item["timestamp"].strftime("%d.%m.%Y %H:%M:%S"),
+                "service-name": item["serviceName"],
+                "levelname": item["levelname"],
+                "message": item["message"],
+                "pathname": item["pathname"],
+                "lineno": item["lineno"],
+            }
+            for item in rows
+        ],
     }
 
     # return json data
     return jsonify(response)
-

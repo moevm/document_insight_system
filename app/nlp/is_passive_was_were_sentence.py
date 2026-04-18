@@ -1,6 +1,7 @@
 import re
-import pymorphy3
 import string
+
+import pymorphy3
 
 morph = pymorphy3.MorphAnalyzer()
 
@@ -29,11 +30,7 @@ def is_passive_was_were_sentece(sentence):
     second_word = clean_word(first_words[1])
 
     parsed = morph.parse(first_word)[0]
-    if (
-        parsed.normal_form == "быть"
-        and "past" in parsed.tag
-        and parsed.tag.POS == "VERB"
-    ):
+    if parsed.normal_form == "быть" and "past" in parsed.tag and parsed.tag.POS == "VERB":
         second_word_parsed = morph.parse(second_word)[0]
         return "PRTS" in second_word_parsed.tag and "pssv" in second_word_parsed.tag
     return False

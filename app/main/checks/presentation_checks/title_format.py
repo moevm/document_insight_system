@@ -18,14 +18,18 @@ class TitleFormatCheck(BasePresCriterion):
 
     def exceeded_verdict(self):
         return format_header(
-            'Превышение длины: {}'.format(', '.join(map(str, self.format_page_link(self.len_exceeded))))), \
-               format_header('Убедитесь в корректности заголовка и текста слайда')
+            'Превышение длины: {}'.format(', '.join(map(str, self.format_page_link(self.len_exceeded))))
+        ), format_header('Убедитесь в корректности заголовка и текста слайда')
 
     def empty_verdict(self):
         return format_header(
-            'Заголовки не найдены: {}'.format(', '.join(map(str, self.format_page_link(self.empty_headers))))), \
-               format_header(
-                   'Убедитесь, что слайд при наведении на него курсора имеет название, соответствующее заголовку на самом слайде.\nДля добавления заглавия в PowerPoint на вкладке Вид нажмите кнопку Режим структуры и щелкните справа от нужного слайда. Затем введите название')
+            'Заголовки не найдены: {}'.format(', '.join(map(str, self.format_page_link(self.empty_headers))))
+        ), format_header(
+            'Убедитесь, что слайд при наведении на него курсора имеет название, '
+            'соответствующее заголовку на самом слайде.\n'
+            'Для добавления заглавия в PowerPoint на вкладке Вид нажмите кнопку Режим структуры и щелкните справа '
+            'от нужного слайда. Затем введите название'
+        )
 
     def get_failing_headers(self):
         for i, title in enumerate(self.file.get_titles(), 1):
@@ -51,5 +55,4 @@ class TitleFormatCheck(BasePresCriterion):
         elif len(self.empty_headers) != 0 and len(self.len_exceeded) == 0:
             return answer(False, *self.empty_verdict())
         else:
-            return answer(False,
-                          *list(itertools.chain(self.empty_verdict(), self.exceeded_verdict())))
+            return answer(False, *list(itertools.chain(self.empty_verdict(), self.exceeded_verdict())))

@@ -22,16 +22,20 @@ def get_param(data, key):
         raise KeyError("{} doesn't include {}.".format(data, key))
 
 
-def get_title(data): return get_param(data, TITLE)
+def get_title(data):
+    return get_param(data, TITLE)
 
 
-def get_return_url(data): return get_param(data, RETURN_URL)
+def get_return_url(data):
+    return get_param(data, RETURN_URL)
 
 
-def get_username(data): return get_param(data, USERNAME)
+def get_username(data):
+    return get_param(data, USERNAME)
 
 
-def get_person_name(data): return get_param(data, PERSON_NAME)
+def get_person_name(data):
+    return get_param(data, PERSON_NAME)
 
 
 def create_consumers(consumer_dict):
@@ -46,13 +50,13 @@ def parse_consumer_info(key_str, secret_str):
     if len(keys) != len(secrets):
         raise Exception(f"len(consumer_keys) != len(consumer_secrets): '{key_str}' vs '{secret_str}'")
 
-    return {key: secret for key, secret in zip(keys, secrets)}
+    return {key: secret for key, secret in zip(keys, secrets, strict=True)}
 
 
 def get_role(data, default_role=False):
     try:
         return get_param(data, ROLES).split(',')[0] == ADMIN_ROLE
-    except:
+    except Exception:
         return default_role
 
 
@@ -60,11 +64,11 @@ def get_exc_info(data):
     task_title = get_param(data, 'resource_link_title')
     task_id = get_param(data, 'resource_link_id')
     un = f"{get_username(data)}_{get_param(data, 'tool_consumer_instance_guid')}"
-    return dict(zip(['title', 'id', 'username'], [task_title, task_id, un]))
+    return dict(zip(['title', 'id', 'username'], [task_title, task_id, un], strict=True))
 
 
 def get_custom_params(data):
-    return {key[len(CUSTOM_PARAM_PREFIX):]: data[key] for key in data if key.startswith(CUSTOM_PARAM_PREFIX)}
+    return {key[len(CUSTOM_PARAM_PREFIX) :]: data[key] for key in data if key.startswith(CUSTOM_PARAM_PREFIX)}
 
 
 def get_criteria_from_launch(data):
@@ -87,24 +91,47 @@ def extract_passback_params(data):
 
 def launch_sanity_check(custom, task_info):
     try:
-        order = ('template_name', 'slides_number', 'slides_enum', 'slides_headers', 'goals_slide',
-                 'probe_slide', 'actual_slide', 'conclusion_slide', 'slide_every_task',
-                 'conclusion_actual', 'conclusion_along')
+        order = (
+            'template_name',
+            'slides_number',
+            'slides_enum',
+            'slides_headers',
+            'goals_slide',
+            'probe_slide',
+            'actual_slide',
+            'conclusion_slide',
+            'slide_every_task',
+            'conclusion_actual',
+            'conclusion_along',
+        )
         detect_additional = custom.get('detect_additional', 'True')
         slides_number = custom.get('slides_number', 'bsc')
         eval_criteria = dict((k, eval(custom[k])) for k in order if k in custom and k != 'slides_number')
     except NameError:
         logger.warning(
             "Error in declared launch values is present in {0}(id={1}). {2}'s checks will be defaulted".format(
-                *task_info.values()))
+                *task_info.values()
+            )
+        )
         return dict()
 
     int_false_checks = ['slide_every_task', 'conclusion_actual']
     check_types = {
         **dict.fromkeys(
-            ['template_name', 'slides_enum', 'slides_headers', 'goals_slide', 'detect_additional', 'probe_slide',
-             'actual_slide', 'conclusion_slide', 'conclusion_along'], bool),
-        **dict.fromkeys(int_false_checks, (int, bool))
+            [
+                'template_name',
+                'slides_enum',
+                'slides_headers',
+                'goals_slide',
+                'detect_additional',
+                'probe_slide',
+                'actual_slide',
+                'conclusion_slide',
+                'conclusion_along',
+            ],
+            bool,
+        ),
+        **dict.fromkeys(int_false_checks, (int, bool)),
     }
 
     failed_types = [k for k, v in eval_criteria.items() if not isinstance(v, check_types[k]) and k != 'slides_number']
@@ -114,8 +141,11 @@ def launch_sanity_check(custom, task_info):
     if slides_number not in ['bsc', 'msc', 'False'] and not isinstance(eval(slides_number), (list)):
         failed_types.append('slides_number')
     else:
-        eval_criteria['slides_number'] = {'sld_num': sld_num.get(slides_number, None) or eval(slides_number),
-                                          'detect_additional': detect_additional} if slides_number != 'False' else False
+        eval_criteria['slides_number'] = (
+            {'sld_num': sld_num.get(slides_number, None) or eval(slides_number), 'detect_additional': detect_additional}
+            if slides_number != 'False'
+            else False
+        )
 
     if failed_types:
         [eval_criteria.pop(key, None) for key in failed_types]

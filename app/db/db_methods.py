@@ -7,7 +7,7 @@ from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 from utils import convert_to
 
-from .db_types import User, Presentation, Check, Consumers, Logs
+from .db_types import Check, Consumers, Logs, Presentation, User
 
 client = MongoClient("mongodb://mongodb:27017")
 db = client['dis-db']
@@ -18,8 +18,7 @@ files_info_collection = db['files']  # actually, collection for all files (pres 
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
-logs_collection = db.create_collection(
-    'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
+logs_collection = db.create_collection('logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
 
 
@@ -43,8 +42,7 @@ def add_user(username, password_hash='', is_LTI=False):
 
 # Returns user if there was user with given credentials and None if not
 def validate_user(username, password_hash):
-    user = users_collection.find_one(
-        {'username': username, 'password_hash': password_hash})
+    user = users_collection.find_one({'username': username, 'password_hash': password_hash})
     if user is not None:
         return User(user)
     else:
@@ -59,8 +57,10 @@ def get_user(username):
     else:
         return None
 
+
 def get_all_users():
     return users_collection.find()
+
 
 # Returns True if user was found and updated and false if not (username can not be changed!)
 def edit_user(user):
@@ -81,14 +81,11 @@ def delete_user(username):
 
 # Adds files with given name to given user files, updates user, returns user and files id
 def add_file_info_and_content(username, filepath, file_type, file_id=None):
-    if not file_id: file_id = ObjectId()
+    if not file_id:
+        file_id = ObjectId()
     # parsed_file's info
     filename = basename(filepath)
-    file_info = Presentation({
-        '_id': file_id,
-        'name': filename,
-        'file_type': file_type
-    })
+    file_info = Presentation({'_id': file_id, 'name': filename, 'file_type': file_type})
     file_info_id = files_info_collection.insert_one(file_info.pack()).inserted_id
     assert file_id == file_info_id, f"{file_id} -- {file_info_id}"
     # parsed_file's content in GridFS (file_id = file_info_id)
@@ -112,8 +109,7 @@ def find_presentation(user, presentation_name):
     files = []
     for presentation_id in user.files:
         files.append(get_presentation(presentation_id))
-    presentation = next(
-        (x for x in files if x.name == presentation_name), None)
+    presentation = next((x for x in files if x.name == presentation_name), None)
     if presentation is not None:
         return presentation
     else:
@@ -128,8 +124,7 @@ def delete_presentation(user, presentation_id):
         presentation = get_presentation(presentation_id)
         for check_id in presentation.checks:
             presentation, check = delete_check(presentation, check_id)
-        presentation = Presentation(
-            files_info_collection.find_one_and_delete({'_id': presentation_id}))
+        presentation = Presentation(files_info_collection.find_one_and_delete({'_id': presentation_id}))
         return user, presentation
     else:
         return user, get_presentation(presentation_id)
@@ -152,7 +147,8 @@ def write_pdf(filename, filepath):
 
 
 def add_file_to_db(filename, filepath, file_id=None):
-    if not file_id: file_id = ObjectId()
+    if not file_id:
+        file_id = ObjectId()
     fs.upload_from_stream_with_id(file_id, filename, open(filepath, 'rb'))
     return file_id
 
@@ -199,10 +195,8 @@ def find_pdf_by_file_id(file_id):
 # Deletes checks with given id, returns presentations
 def delete_check(presentation, checks_id):
     if checks_id in presentation.checks:
-        upd_presentation = files_info_collection.update_one(
-            {'_id': presentation._id}, {"$pull": {'checks': checks_id}})
-        checks = Check(
-            checks_collection.find_one_and_delete({'_id': checks_id}))
+        files_info_collection.update_one({'_id': presentation._id}, {"$pull": {'checks': checks_id}})
+        checks = Check(checks_collection.find_one_and_delete({'_id': checks_id}))
         fs.delete(checks_id)
         return presentation, checks
     else:
@@ -230,7 +224,7 @@ def set_passbacked_flag(checks_id, flag):
 def get_latest_users_check(filter=None):
     local_filter = filter
     user = local_filter.get('user')
-    username_filter = {'username': user} if user else {} 
+    username_filter = {'username': user} if user else {}
     all_users = [user['username'] for user in users_collection.find(username_filter, {'username': 1})]
     latest_checks = []
     for user in all_users:
@@ -242,9 +236,7 @@ def get_latest_users_check(filter=None):
 
 
 def get_latest_user_check_by_moodle(moodle_id):
-    return list(db.checks.find(
-        {'lms_user_id': moodle_id}
-    ).sort('_id', -1).limit(1))
+    return list(db.checks.find({'lms_user_id': moodle_id}).sort('_id', -1).limit(1))
 
 
 def get_latest_check_cursor(filter, *args, **kwargs):
@@ -265,7 +257,9 @@ def get_all_checks():
     return checks_collection.find()
 
 
-def get_checks(filter={}, latest=None, limit=10, offset=0, sort=None, order=None):
+def get_checks(filter=None, latest=None, limit=10, offset=0, sort=None, order=None):
+    if filter is None:
+        filter = {}
     if latest:
         return get_latest_check_cursor(filter, limit, offset, sort, order)
     else:
@@ -274,15 +268,17 @@ def get_checks(filter={}, latest=None, limit=10, offset=0, sort=None, order=None
 
 # get checks cursor with specified parameters
 
-def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
+
+def get_checks_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
+    if filter is None:
+        filter = {}
     sort = 'lms_passback_time' if sort == 'moodle-date' else sort
 
     count = checks_collection.count_documents(filter)
     rows = checks_collection.find(filter)
 
     if sort and order in ("asc, desc"):
-        rows = rows.sort(sort, pymongo.ASCENDING if order ==
-                                                    "asc" else pymongo.DESCENDING)
+        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
 
     rows = rows.skip(offset) if offset else rows
     rows = rows.limit(limit) if limit else rows
@@ -293,30 +289,33 @@ def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
 # get logs cursor with specified parameters
 
 
-def get_logs_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
+def get_logs_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
+    if filter is None:
+        filter = {}
     sort = 'serviceName' if sort == 'service-name' else sort
 
     count = logs_collection.count_documents(filter)
     rows = logs_collection.find(filter)
 
     if sort and order in ("asc, desc"):
-        rows = rows.sort(sort, pymongo.ASCENDING if order ==
-                                                    "asc" else pymongo.DESCENDING)
+        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
 
     rows = rows.skip(offset) if offset else rows
     rows = rows.limit(limit) if limit else rows
 
     return rows, count
 
-def get_user_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
+
+def get_user_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
+    if filter is None:
+        filter = {}
     sort = 'username' if sort == 'username' else sort
 
     count = users_collection.count_documents(filter)
     rows = users_collection.find(filter)
 
     if sort and order in ("asc, desc"):
-        rows = rows.sort(sort, pymongo.ASCENDING if order ==
-                                                    "asc" else pymongo.DESCENDING)
+        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
 
     rows = rows.skip(offset) if offset else rows
     rows = rows.limit(limit) if limit else rows
@@ -338,9 +337,8 @@ def get_check_stats(oid):
 
 # LTI
 class ConsumersDBManager:
-
     @staticmethod
-    def add_consumer(consumer_key, consumer_secret, timestamp_and_nonce=[]):
+    def add_consumer(consumer_key, consumer_secret, timestamp_and_nonce=None):
         consumer = Consumers()
         consumer.consumer_key = consumer_key
         consumer.consumer_secret = consumer_secret
@@ -378,13 +376,11 @@ class ConsumersDBManager:
     @staticmethod
     def add_timestamp_and_nonce(key, timestamp, nonce):
         upd_consumer = {"$push": {'timestamp_and_nonce': (timestamp, nonce)}}
-        consumer = consumers_collection.update_one(
-            {'consumer_key': key}, upd_consumer)
+        consumer = consumers_collection.update_one({'consumer_key': key}, upd_consumer)
         return consumer if consumer else None
 
 
-def add_log(timestamp, serviceName, levelname, levelno, message,
-            pathname, filename, funcName, lineno):
+def add_log(timestamp, serviceName, levelname, levelno, message, pathname, filename, funcName, lineno):
     args = locals()
     new_log = Logs(args)
     logs_collection.insert_one(new_log.pack())
@@ -392,6 +388,7 @@ def add_log(timestamp, serviceName, levelname, levelno, message,
 
 
 # criteria pack methods
+
 
 def get_criteria_pack(name):
     return criteria_pack_collection.find_one({'name': name})
@@ -411,25 +408,40 @@ def get_criterion_pack_list():
 
 # mapping celery_task to check
 
+
 def add_celery_task(celery_task_id, check_id):
     return celery_check_collection.insert_one(
-        {'celery_task_id': celery_task_id, 'check_id': check_id, 'started_at': datetime.now()}).inserted_id
+        {'celery_task_id': celery_task_id, 'check_id': check_id, 'started_at': datetime.now()}
+    ).inserted_id
 
 
 def mark_celery_task_as_finished(celery_task_id, finished_time=None):
     celery_task = get_celery_task(celery_task_id)
-    if not celery_task: return
-    if finished_time is None: finished_time = datetime.now()
-    return celery_check_collection.update_one({'celery_task_id': celery_task_id}, {
-        '$set': {'finished_at': finished_time,
-                 'processing_time': (finished_time - celery_task['started_at']).total_seconds()}})
+    if not celery_task:
+        return
+    if finished_time is None:
+        finished_time = datetime.now()
+    return celery_check_collection.update_one(
+        {'celery_task_id': celery_task_id},
+        {
+            '$set': {
+                'finished_at': finished_time,
+                'processing_time': (finished_time - celery_task['started_at']).total_seconds(),
+            }
+        },
+    )
+
 
 def get_average_processing_time(min_time=15.0):
     # use only success check (failed checks processing time is more bigger than normal)
-    result = list(celery_check_collection.aggregate([
-        {'$match': {'processing_time': {'$lt': 170}}},
-        {'$group': {'_id': None, 'avg_processing_time': {'$avg': "$processing_time"}}}
-    ]))
+    result = list(
+        celery_check_collection.aggregate(
+            [
+                {'$match': {'processing_time': {'$lt': 170}}},
+                {'$group': {'_id': None, 'avg_processing_time': {'$avg': "$processing_time"}}},
+            ]
+        )
+    )
     if result and result[0]['avg_processing_time']:
         result = result[0]['avg_processing_time']
         if result > min_time:

@@ -1,26 +1,42 @@
-from .style_check_settings import StyleCheckSettings
-from ..base_check import BaseReportCriterion, answer
 from ...reports.docx_uploader.style import Style
+from ..base_check import BaseReportCriterion, answer
+from .style_check_settings import StyleCheckSettings
 
 
 class ReportMainTextCheck(BaseReportCriterion):
     label = "Проверка оформления основного текста отчета"
-    _description = 'Перечень доспустимых стилей: "Основной текст; ВКР_Основной текст", "ВКР_Подпись таблицы", "ВКР_Подпись для рисунков, схем", "ВКР_Содержимое таблицы"'
+    _description = (
+        'Перечень доспустимых стилей: "Основной текст; ВКР_Основной текст", "ВКР_Подпись таблицы", '
+        '"ВКР_Подпись для рисунков, схем", "ВКР_Содержимое таблицы"'
+    )
     id = 'main_text_check'
 
-    def __init__(self, file_info,
-                 main_text_styles=["body text", "листинг", "вкр_подпись для рисунков", "вкр_подпись таблицы"],
-                 main_text_styles_names=["Основной текст;ВКР_Основной текст", "ВКР_Подпись таблицы",
-                                         "ВКР_Подпись для рисунков, схем", "ВКР_Содержимое таблицы"]):
+    def __init__(
+        self,
+        file_info,
+        main_text_styles=None,
+        main_text_styles_names=None,
+    ):
         super().__init__(file_info)
         self.headers = []
+        if main_text_styles is None:
+            main_text_styles = ["body text", "листинг", "вкр_подпись для рисунков", "вкр_подпись таблицы"]
+        if main_text_styles_names is None:
+            main_text_styles_names = [
+                "Основной текст;ВКР_Основной текст",
+                "ВКР_Подпись таблицы",
+                "ВКР_Подпись для рисунков, схем",
+                "ВКР_Содержимое таблицы",
+            ]
         self.main_text_styles = main_text_styles
         self.main_text_styles_names = main_text_styles_names
         self.target_styles = StyleCheckSettings.VKR_MAIN_TEXT_CONFIG
-        self.target_styles = list(map(lambda elem: {
-            "name": elem["name"],
-            "style": self.construct_style_from_description(elem["style"])
-        }, self.target_styles))
+        self.target_styles = list(
+            map(
+                lambda elem: {"name": elem["name"], "style": self.construct_style_from_description(elem["style"])},
+                self.target_styles,
+            )
+        )
 
     def late_init(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
@@ -37,12 +53,16 @@ class ReportMainTextCheck(BaseReportCriterion):
         for run in par["runs"]:
             diff_lst = []
             run["style"].matches(template_style, diff_lst)
-            diff_lst = list(map(
-                lambda diff: f"Абзац \"{par['text'][:17] + '...' if len(par['text']) > 20 else par['text']}\""
-                             f", фрагмент "
-                             f"\"{run['text'][:17] + '...' if len(run['text']) > 20 else run['text']}\": {diff}.",
-                diff_lst
-            ))
+            diff_lst = list(
+                map(
+                    lambda diff: (
+                        f"Абзац \"{par['text'][:17] + '...' if len(par['text']) > 20 else par['text']}\""
+                        f", фрагмент "
+                        f"\"{run['text'][:17] + '...' if len(run['text']) > 20 else run['text']}\": {diff}."
+                    ),
+                    diff_lst,
+                )
+            )
             err.extend(diff_lst)
         return err
 
@@ -52,8 +72,11 @@ class ReportMainTextCheck(BaseReportCriterion):
         self.late_init()
         result_str = ''
         if not len(self.headers):
-            return answer(False,
-                            "Не найдено ни одного заголовка, что не позволило определить разделы отчета.<br><br>Проверьте корректность использования стилей.")
+            return answer(
+                False,
+                "Не найдено ни одного заголовка, что не позволило определить разделы отчета.<br><br>"
+                "Проверьте корректность использования стилей.",
+            )
         for header in self.headers:
             if header["text"].find("ПРИЛОЖЕНИЕ") >= 0:
                 break
@@ -65,21 +88,25 @@ class ReportMainTextCheck(BaseReportCriterion):
                         marked_style = 1
                         err = self.style_diff(child["styled_text"], self.target_styles[i]["style"])
                         err = list(map(lambda msg: f'Стиль "{child["style"]}": ' + msg, err))
-                        err_string += ("<br>".join(err) + "<br>" if len(err) else "")
+                        err_string += "<br>".join(err) + "<br>" if len(err) else ""
                         break
                 if not marked_style:
                     err = f"Абзац \"{child['text'][:17] + '...' if len(child['text']) > 20 else child['text']}\": "
                     err += f'Стиль "{child["style"]}" не соответстует ни одному из стилей основного текста.'
-                    err_string += (str(err) + "<br>")
+                    err_string += str(err) + "<br>"
             if err_string:
                 result_str += f'<b>&nbsp;&nbsp;&nbsp;&nbsp;Ошибки в разделе {header["text"]}:</b><br>'
                 result_str += err_string
         if not result_str:
             return answer(True, "Форматирование текста соответствует требованиям.")
         else:
-            result_str += f'<br><br>Перечень допустимых стилей основного текста (Названия как в документе):' \
-                            f'<br><br>{"<br>".join(x for x in self.main_text_styles_names)}'
-            result_str += f'<br><br>Если в вашем документе нет какого-либо из перечисленных стилей, перенесите ' \
-                            f'текст пояснительной записки в документ с последней версией ' \
-                            f'<a href="https://drive.google.com/file/d/1KK7fZkAl9eWNzCQlIHm6S4NynwxhkuV9/view">шаблона</a>.'
+            result_str += (
+                f'<br><br>Перечень допустимых стилей основного текста (Названия как в документе):'
+                f'<br><br>{"<br>".join(x for x in self.main_text_styles_names)}'
+            )
+            result_str += (
+                '<br><br>Если в вашем документе нет какого-либо из перечисленных стилей, перенесите '
+                'текст пояснительной записки в документ с последней версией '
+                '<a href="https://drive.google.com/file/d/1KK7fZkAl9eWNzCQlIHm6S4NynwxhkuV9/view">шаблона</a>.'
+            )
             return answer(False, result_str)

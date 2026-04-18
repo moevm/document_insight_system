@@ -1,9 +1,8 @@
-
 # import pdfplumber
 import pymupdf
 
-
 from app.utils import convert_to
+
 
 class PdfDocumentManager:
     def __init__(self, path_to_file, pdf_filepath):
@@ -36,26 +35,26 @@ class PdfDocumentManager:
             page = self.pdf_file[page_num]
             images = self.pdf_file.get_page_images(page_num)
             for image in images:
-                image_coord = page.get_image_bbox(image[7], transform=0)    # might be [1.0, 1.0, -1.0, -1.0]
+                image_coord = page.get_image_bbox(image[7], transform=0)  # might be [1.0, 1.0, -1.0, -1.0]
                 image_height = image_coord[3] - image_coord[1]
                 if image_height > 0:
                     total_height += image_height
         return total_height
 
     def page_height(self, page_without_pril):
-        page = self.pdf_file[0]   # get first page as a sample
+        page = self.pdf_file[0]  # get first page as a sample
         page_rect = page.rect
         height, top_margin = page_rect.height, page_rect.y0
         bottom_margin = height - page_rect.y1
-        available_space = (height - top_margin - bottom_margin)*page_without_pril
+        available_space = (height - top_margin - bottom_margin) * page_without_pril
 
         return available_space
-    
+
     def page_rows_text(self, page_num):
         page = self.pdf_file.load_page(page_num)
         text_blocks = page.get_text("blocks")
         return text_blocks
-    
+
     # def get_only_text_on_page(self):
     #     if not self.only_text_on_page:
     #         only_text_on_page = {}

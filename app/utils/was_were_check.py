@@ -1,4 +1,5 @@
 import re
+
 from ..nlp.is_passive_was_were_sentence import is_passive_was_were_sentece
 
 
@@ -23,16 +24,10 @@ class WasWereChecker:
             display_index = index + offset_index
             if format_page_link_fn:
                 output += (
-                    f"<b>Страница {format_page_link_fn([display_index])}:</b> <br>"
-                    + "<br>".join(messages)
-                    + "<br><br>"
+                    f"<b>Страница {format_page_link_fn([display_index])}:</b> <br>" + "<br>".join(messages) + "<br><br>"
                 )
             else:
-                output += (
-                    f"<b>Страница №{display_index}:</b> <br>"
-                    + "<br>".join(messages)
-                    + "<br><br>"
-                )
+                output += f"<b>Страница №{display_index}:</b> <br>" + "<br>".join(messages) + "<br><br>"
         return output
 
     def get_was_were_sentences(self, file):
@@ -59,13 +54,9 @@ class WasWereChecker:
                         total_sentences += 1
                         if page_index not in detected:
                             detected[page_index] = []
-                        truncated_sentence = (
-                            sentence[:50] + "..." if len(sentence) > 50 else sentence
-                        )
+                        truncated_sentence = sentence[:50] + "..." if len(sentence) > 50 else sentence
                         if self.file_type == "pres":
-                            err_str = (
-                                f"Строка {non_empty_line_counter}: {truncated_sentence}"
-                            )
+                            err_str = f"Строка {non_empty_line_counter}: {truncated_sentence}"
                         elif self.file_type == "report":
                             err_str = f"Строка {line_index + 1}: {truncated_sentence}"
                         detected[page_index].append(err_str)

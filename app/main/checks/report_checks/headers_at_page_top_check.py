@@ -6,11 +6,11 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
     _description = ''
     id = "headers_at_page_top_check"
 
-    def __init__(self, file_info, headers=[]):
+    def __init__(self, file_info, headers=None):
         super().__init__(file_info)
         self.headers_page = 1
         self.chapters = []
-        self.headers = headers
+        self.headers = [] if headers is None else headers
         self.pdf = self.file.pdf_file if self.file else None
 
     def late_init_vkr(self):
@@ -47,15 +47,18 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                         break
                 if not found:
                     result = False
-                    result_str += (("<br>" if len(result_str) else "")
-                                   + f"Заголовка \"{header}\" нет в документе или он находится не в начале страницы.")
+                    result_str += (
+                        "<br>" if len(result_str) else ""
+                    ) + f"Заголовка \"{header}\" нет в документе или он находится не в начале страницы."
         elif self.file_type["report_type"] == 'VKR':
             self.late_init_vkr()
             for page_num in range(1, self.file.page_counter() + 1):
                 if not self.headers:
-                    return answer(False,
-                                  "Не найдено ни одного заголовка второго уровня.<br><br>"
-                                  "Проверьте корректность использования стилей.")
+                    return answer(
+                        False,
+                        "Не найдено ни одного заголовка второго уровня.<br><br>"
+                        "Проверьте корректность использования стилей.",
+                    )
                 collected_text = self.file.first_lines[page_num - 1]
                 for header in self.headers:
                     if not header["marker"]:
@@ -64,28 +67,34 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                             header["marker"] = 1
                             break
                         elif collected_text.find(header_text.strip()) > 0:
-                            result_str += (("<br>" if len(result_str) else "") +
-                                           f"Заголовок второго уровня \"{header['text']}\" "
-                                           f"находится не в начале страницы или пронумирован с помощью списка "
-                                           f"{self.format_page_link([page_num])}. ")
+                            result_str += (
+                                ("<br>" if len(result_str) else "") + f"Заголовок второго уровня \"{header['text']}\" "
+                                f"находится не в начале страницы или пронумирован с помощью списка "
+                                f"{self.format_page_link([page_num])}. "
+                            )
                             header["marker"] = 1
                             break
 
             for header in self.headers:
                 if not header["marker"]:
                     result = False
-                    result_str += (("<br>" if len(result_str) else "") +
-                                   f"Заголовок второго уровня \"{header['text']}\" "
-                                   f"находится не в начале страницы или занимает больше двух строк.")
+                    result_str += (
+                        ("<br>" if len(result_str) else "") + f"Заголовок второго уровня \"{header['text']}\" "
+                        f"находится не в начале страницы или занимает больше двух строк."
+                    )
         else:
-            result_str = "Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев"
+            result_str = (
+                "Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев"
+            )
             return answer(False, result_str)
 
         if not result_str:
             result_str = "Все требуемые разделы начинаются с новой страницы."
         else:
-            result_str += f"<br><br>Если сгенерированный PDF-файл {self.format_page_link([self.headers_page])} " \
-                          f"имеет проблемы с оформлением, попробуйте загрузить свой PDF."
+            result_str += (
+                f"<br><br>Если сгенерированный PDF-файл {self.format_page_link([self.headers_page])} "
+                f"имеет проблемы с оформлением, попробуйте загрузить свой PDF."
+            )
         return answer(result, result_str)
 
     def find_headers(self):

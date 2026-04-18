@@ -23,47 +23,70 @@ class TableReferences(BaseReportCriterion):
         result_str = ''
         self.late_init_vkr()
         if not len(self.headers):
-            return answer(False, "Не найдено ни одного заголовка, что не позволило определить разделы отчета.<br><br>Проверьте корректность использования стилей.")
+            return answer(
+                False,
+                "Не найдено ни одного заголовка, что не позволило определить разделы отчета.<br><br>"
+                "Проверьте корректность использования стилей.",
+            )
         number_of_tables, all_numbers = self.count_tables_vkr()
         if not number_of_tables:
-            return answer(True, f'Не найдено ни одной таблицы.<br><br>Если в вашей работе присутствуют таблицы, убедитесь, что для их подписи был '
-                                    f'использован стиль {self.table_style} и формат '
-                                    f'"Таблица <Номер таблицы> -- <Название таблицы>".')
+            return answer(
+                True,
+                f'Не найдено ни одной таблицы.<br><br>Если в вашей работе присутствуют таблицы, '
+                f'убедитесь, что для их подписи был '
+                f'использован стиль {self.table_style} и формат '
+                f'"Таблица <Номер таблицы> -- <Название таблицы>".',
+            )
         references = self.search_references()
         if len(references.symmetric_difference(all_numbers)) == 0:
-            return answer(True, f"Пройдена!")
+            return answer(True, "Пройдена!")
         elif len(references.difference(all_numbers)):
             if len(all_numbers.difference(references)) == 0:
                 references -= all_numbers
-                result_str += f'Упомянуты несуществующие таблицы: {", ".join(str(num) for num in sorted(references))} ' \
-                              f'<br> Номера таблиц: {", ".join(num for num in sorted(all_numbers))}<br><br>'
+                result_str += (
+                    f'Упомянуты несуществующие таблицы: {", ".join(str(num) for num in sorted(references))} '
+                    f'<br> Номера таблиц: {", ".join(num for num in sorted(all_numbers))}<br><br>'
+                )
             else:
                 extras = references - all_numbers
                 unnamed = all_numbers - references
-                result_str += f'Упомянуты несуществующие таблицы: {", ".join(str(num) for num in sorted(extras))} ' \
-                              f'<br> А также упомянуты не все таблицы: {", ".join(str(num) for num in sorted(unnamed))} ' \
-                              f'<br> Номера таблиц: {", ".join(num for num in sorted(all_numbers))}<br><br>'
+                result_str += (
+                    f'Упомянуты несуществующие таблицы: {", ".join(str(num) for num in sorted(extras))} '
+                    f'<br> А также упомянуты не все таблицы: {", ".join(str(num) for num in sorted(unnamed))} '
+                    f'<br> Номера таблиц: {", ".join(num for num in sorted(all_numbers))}<br><br>'
+                )
         else:
             all_numbers -= references
-            result_str = f'Упомянуты не все таблицы.<br>Список таблиц без упоминания: ' \
-                         f'{", ".join(str(num) for num in sorted(all_numbers))} <br> Номера таблиц: ' \
-                         f'{", ".join(num for num in sorted(all_numbers))}<br><br>'
-        result_str += f'''
+            result_str = (
+                f'Упомянуты не все таблицы.<br>Список таблиц без упоминания: '
+                f'{", ".join(str(num) for num in sorted(all_numbers))} <br> Номера таблиц: '
+                f'{", ".join(num for num in sorted(all_numbers))}<br><br>'
+            )
+        result_str += (
+            '''
                     Если возникли проблемы, попробуйте сделать следующее:
                     <ul>
-                        <li>Убедитесь, что для подписи таблицы используется шаблон "Таблица <Номер таблицы> -- <Название таблицы>";</li>
-                        <li>Убедитесь, что для ссылки на источник используется шаблон "таблица(в таблице) <Номер таблицы>";</li>
-                        <li>Убедитесь, что для оформления подписи таблицы был использован стиль "{self.table_style}";</li>
+                        <li>'''
+            + 'Убедитесь, что для подписи таблицы используется шаблон '
+            '"Таблица <Номер таблицы> -- <Название таблицы>";'
+            + '''</li>
+                        <li>Убедитесь, что для ссылки на источник используется шаблон '''
+            + '"таблица(в таблице) <Номер таблицы>";</li>'
+            + '''
+                        <li>'''
+            + f'Убедитесь, что для оформления подписи таблицы был использован стиль "{self.table_style}";'
+            + '''</li>
                     </ul>
                     '''
+        )
         return answer(False, result_str)
 
     def search_references(self):
         array_of_references = set()
         for i in range(0, self.last_child_number):
-            if  isinstance(self.file.paragraphs[i], str):
+            if isinstance(self.file.paragraphs[i], str):
                 detected_references = re.findall(r'таблиц[аеыу][\d .]+', self.file.paragraphs[i])
-            else:    
+            else:
                 detected_references = re.findall(r'таблиц[аеыу][\d .]+', self.file.paragraphs[i].paragraph_text)
             if detected_references:
                 for reference in detected_references:

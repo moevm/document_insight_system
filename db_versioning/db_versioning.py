@@ -1,7 +1,6 @@
 import argparse
 
 from pymongo import MongoClient
-
 from versions import LAST_VERSION, VERSIONS
 
 
@@ -24,12 +23,7 @@ class DBCollections:
         self.db_version = self.db['db_version']
 
     def get_by_name(self, name):
-        return dict(
-            users=self.users,
-            files=self.files,
-            checks=self.checks,
-            criteria_pack=self.criteria_pack
-        ).get(name)
+        return dict(users=self.users, files=self.files, checks=self.checks, criteria_pack=self.criteria_pack).get(name)
 
     def to_dict(self):
         return vars(self)

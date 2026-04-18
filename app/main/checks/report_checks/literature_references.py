@@ -1,7 +1,8 @@
 import re
-from .style_check_settings import StyleCheckSettings
-from ..base_check import BaseReportCriterion, answer
 from collections import Counter
+
+from ..base_check import BaseReportCriterion, answer
+from .style_check_settings import StyleCheckSettings
 
 
 class ReferencesToLiteratureCheck(BaseReportCriterion):
@@ -25,12 +26,20 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
         self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
         if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
-            self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['min_ref_for_literature_references_check']
-            self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['mах_ref_for_literature_references_check']
+            self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main][
+                'min_ref_for_literature_references_check'
+            ]
+            self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main][
+                'mах_ref_for_literature_references_check'
+            ]
         else:
             if 'any_header' in StyleCheckSettings.CONFIGS.get(self.config):
-                self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['min_ref_for_literature_references_check']
-                self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['mах_ref_for_literature_references_check']
+                self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header'][
+                    'min_ref_for_literature_references_check'
+                ]
+                self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header'][
+                    'mах_ref_for_literature_references_check'
+                ]
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -44,52 +53,83 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             if start_literature_par:
                 number_of_sources = self.count_sources()
             else:
-                return answer(False, f'Нет списка литературы.')
+                return answer(False, 'Нет списка литературы.')
         elif self.file_type['report_type'] == 'VKR':
             self.late_init_vkr()
             header = self.literature_header
             if not header:
-                return answer(False,
-                              f'Не найден Список использованных источников.<br><br>Если в вашей работе есть список источников, проверьте корректность использования стилей.')
+                return answer(
+                    False,
+                    'Не найден Список использованных источников.<br><br>'
+                    'Если в вашей работе есть список источников, проверьте корректность использования стилей.',
+                )
             start_literature_par = header["number"]
             number_of_sources = self.count_sources_vkr(header)
         else:
-            return answer(False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев')
+            return answer(
+                False,
+                'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев',
+            )
         if not number_of_sources:
-            return answer(False,
-                          f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
+            return answer(
+                False,
+                'В Списке использованных источников не найдено ни одного источника.<br><br>'
+                'Проверьте корректность использования нумированного списка.',
+            )
 
         duplicates = self.checking_duplicate_sources()
         references, ref_sequence = self.search_references(start_literature_par)
         all_numbers = set(range(1, number_of_sources + 1))
         if len(references.symmetric_difference(all_numbers)) == 0:
             if not self.min_ref <= number_of_sources <= self.max_ref:
-                return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть не менее {self.min_ref}.')
+                return answer(
+                    False,
+                    f'Список источников оформлен верно, однако их количество ({number_of_sources}) '
+                    f'не удовлетворяет необходимому критерию. <br> Количество источников должно быть не менее '
+                    f'{self.min_ref}.',
+                )
             elif ref_sequence:
-                result_str += f"Источники должны нумероваться в порядке упоминания в тексте. Неправильные последовательности: {'; '.join(num for num in ref_sequence)}"
+                joined = '; '.join(num for num in ref_sequence)
+                result_str += (
+                    'Источники должны нумероваться в порядке упоминания в тексте. '
+                    f'Неправильные последовательности: {joined}'
+                )
                 return answer(False, result_str)
             elif not duplicates:
-                return answer(True, f"Пройдена!")
+                return answer(True, "Пройдена!")
         elif len(references.difference(all_numbers)):
             if len(all_numbers.difference(references)) == 0:
                 references -= all_numbers
-                result_str += f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(references))} <br> Всего источников: {number_of_sources}<br><br>'
+                nums = ", ".join(str(num) for num in sorted(references))
+                result_str += (
+                    f'Упомянуты несуществующие источники: {nums} <br> Всего источников: {number_of_sources}<br><br>'
+                )
             else:
                 extras = references - all_numbers
                 unnamed = all_numbers - references
-                result_str += f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(extras))} <br> А также упомянуты не все источники: {", ".join(str(num) for num in sorted(unnamed))} <br> Всего источников: {number_of_sources}<br><br>'
+                ex = ", ".join(str(num) for num in sorted(extras))
+                un = ", ".join(str(num) for num in sorted(unnamed))
+                result_str += (
+                    f'Упомянуты несуществующие источники: {ex} <br> '
+                    f'А также упомянуты не все источники: {un} <br> '
+                    f'Всего источников: {number_of_sources}<br><br>'
+                )
         else:
             all_numbers -= references
-            result_str = f'Упомянуты не все источники из списка.<br>Список источников без упоминания: {", ".join(str(num) for num in sorted(all_numbers))} <br> Всего источников: {number_of_sources}<br><br>'
+            missing = ", ".join(str(num) for num in sorted(all_numbers))
+            result_str = (
+                f'Упомянуты не все источники из списка.<br>Список источников без упоминания: {missing} <br> '
+                f'Всего источников: {number_of_sources}<br><br>'
+            )
 
         if duplicates:
             message = ''
             for duplicate in duplicates:
-                message += f'<li>Источники с номерами: {duplicate[1]} ссылаются на один и тот же источник: {duplicate[0]};</li>\n'
-            result_str += (f'Повторяющиеся источники:'
-                           f'<ul>\n'
-                           f'{message}'
-                           f'</ul>')
+                message += (
+                    f'<li>Источники с номерами: {duplicate[1]} ссылаются на один и тот же источник: '
+                    f'{duplicate[0]};</li>\n'
+                )
+            result_str += f"Повторяющиеся источники:<ul>\n{message}</ul>"
         result_str += '''
                     Если возникли проблемы, попробуйте сделать следующее:
                     <ul>
@@ -115,7 +155,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
 
             if detected_references:
                 for reference_raw in detected_references:
-                    reference = reference_raw.replace('^', '')      # TODO: kostyl'...
+                    reference = reference_raw.replace('^', '')  # TODO: kostyl'...
                     for one_part in re.split(r'[\[\],]', reference):
                         if re.match(r'\d+[ \-]+\d+', one_part):
                             start, end = re.split(r'[ -]+', one_part)
@@ -146,16 +186,16 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         duplicates = []
         for text, count in counter.items():
             if count >= 2:
-                positions_duplicates = [i + 1 for i, text_in_ref in enumerate(self.literature_reference_text) if text == text_in_ref.lower()]
+                positions_duplicates = [
+                    i + 1 for i, text_in_ref in enumerate(self.literature_reference_text) if text == text_in_ref.lower()
+                ]
 
                 if positions_duplicates:
-                    duplicates.append((
-                        self.literature_reference_text[positions_duplicates[0] - 1],
-                        positions_duplicates
-                    ))
+                    duplicates.append(
+                        (self.literature_reference_text[positions_duplicates[0] - 1], positions_duplicates)
+                    )
 
         return duplicates
-
 
     def find_start_paragraph(self):
         start_index = 0

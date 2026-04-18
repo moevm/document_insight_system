@@ -1,9 +1,9 @@
 import re
 from typing import List, Union
 
-from .style_check_settings import StyleCheckSettings
-from ..base_check import BaseReportCriterion, answer
 from ...reports.docx_uploader.style import Style
+from ..base_check import BaseReportCriterion, answer
+from .style_check_settings import StyleCheckSettings
 
 
 class ReportShortSectionsCheck(BaseReportCriterion):
@@ -11,8 +11,14 @@ class ReportShortSectionsCheck(BaseReportCriterion):
     _description = "Минимальное количество абзацев в разделе: 5, минимальное количество слов в абзаце: 20"
     id = "short_sections_check"
 
-    def __init__(self, file_info, min_section_count=5, min_section_len=20, main_heading_style="heading 2",
-                 prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS):
+    def __init__(
+        self,
+        file_info,
+        min_section_count=5,
+        min_section_len=20,
+        main_heading_style="heading 2",
+        prechecked_props: Union[List[str], None] = StyleCheckSettings.PRECHECKED_PROPS,
+    ):
         super().__init__(file_info)
         self.cutoff_line = None
         self.main_heading_style = main_heading_style.lower()
@@ -30,11 +36,12 @@ class ReportShortSectionsCheck(BaseReportCriterion):
             style = Style()
             style.__dict__.update(prechecked_dict)
             self.styles.append(style)
+
     def late_init(self):
         self.file.parse_effective_styles()
         try:
             self.cutoff_line = self.file.pdf_file.get_text_on_page()[2].split("\n")[0]
-        except:
+        except Exception:
             self.cutoff_line = None
         for _, preset in self.presets.items():
             if preset["unify_regex"] is not None:
@@ -57,7 +64,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
             if len(tagged_indices) == 0:
                 return answer(False, "Заголовки не найдены.")
             self.calc_length(tagged_indices)
-            tagged_indices = tagged_indices[1:len(tagged_indices) - 1]
+            tagged_indices = tagged_indices[1 : len(tagged_indices) - 1]
             for elem in tagged_indices:
                 texts = []
                 for i in range(elem["index"] + 1, elem["index"] + elem["length"]):
@@ -66,26 +73,30 @@ class ReportShortSectionsCheck(BaseReportCriterion):
                 length = len(re.findall("\\w+", section_text))
                 if length < self.min_section_len:
                     result = False
-                    result_str += ("<br>" if len(result_str) else "") + \
-                                  f'Фрагмент "{self.file.styled_paragraphs[elem["index"]]["text"]}" ' \
-                                  f'похож на раздел с количеством слов' \
-                                  f' (не считая содержимого таблиц) {length} ' \
-                                  f'при минимальной рекомендуемой длине раздела в ' \
-                                  f'{self.min_section_len} слов.'
+                    result_str += (
+                        ("<br>" if len(result_str) else "")
+                        + f'Фрагмент "{self.file.styled_paragraphs[elem["index"]]["text"]}" '
+                        f'похож на раздел с количеством слов'
+                        f' (не считая содержимого таблиц) {length} '
+                        f'при минимальной рекомендуемой длине раздела в '
+                        f'{self.min_section_len} слов.'
+                    )
             if len(result_str) == 0:
                 result_str = "Все разделы достигают рекомендуемой длины."
             return answer(result, result_str)
         elif self.file_type['report_type'] == 'VKR':
             self.late_init_vkr()
             if not len(self.headers):
-                return answer(False,
-                              "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
+                return answer(
+                    False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей."
+                )
             for i in range(len(self.headers)):
                 header_text = self.headers[i]["text"].lower()
                 if header_text.find("приложение") >= 0:
                     break
-                if self.headers[i]["style"] == self.main_heading_style and not re.search(r'\d',
-                                                                                         self.headers[i]["text"]):
+                if self.headers[i]["style"] == self.main_heading_style and not re.search(
+                    r'\d', self.headers[i]["text"]
+                ):
                     section_count = len(self.headers[i]["child"])
                     j = 0
                     while section_count < self.min_section_count:
@@ -95,22 +106,25 @@ class ReportShortSectionsCheck(BaseReportCriterion):
                                 section_count += len(self.headers[i + j]["child"])
                             else:
                                 break
-                        except:
+                        except Exception:
                             break
 
                     if section_count < self.min_section_count:
                         result = False
-                        result_str += ("<br>" if len(result_str) else "") + \
-                                      f'Раздел "{self.headers[i]["text"]}" ' \
-                                      f'содержит абзацев' \
-                                      f' (не считая рисунки и таблицы) {section_count} ' \
-                                      f'при минимальной рекомендуемой длине раздела в ' \
-                                      f'{self.min_section_count} абзацев.'
+                        result_str += (
+                            ("<br>" if len(result_str) else "") + f'Раздел "{self.headers[i]["text"]}" '
+                            f'содержит абзацев'
+                            f' (не считая рисунки и таблицы) {section_count} '
+                            f'при минимальной рекомендуемой длине раздела в '
+                            f'{self.min_section_count} абзацев.'
+                        )
             if not result_str:
                 result_str = "Все обязательные разделы достигают рекомендуемой длины."
             return answer(result, result_str)
         else:
-            return answer(False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев')
+            return answer(
+                False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев'
+            )
 
     def build_header_hierarchy(self):
         cutoff_index = 0

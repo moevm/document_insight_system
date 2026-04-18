@@ -1,6 +1,7 @@
+import os
+
 from flask import request
 from flask_login import current_user
-import os
 
 from app.db import db_methods
 from app.server_consts import URL_DOMEN
@@ -13,8 +14,9 @@ def check_access_token(access_token):
 
 
 def check_export_access():
-    return check_access_token(request.args.get('access_token', None)) \
-           or (current_user.is_authenticated and current_user.is_admin)
+    return check_access_token(request.args.get('access_token', None)) or (
+        current_user.is_authenticated and current_user.is_admin
+    )
 
 
 def get_query(req):

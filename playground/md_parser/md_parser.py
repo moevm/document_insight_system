@@ -1,5 +1,7 @@
-import markdown #installation: pip install markdown
 import re
+
+import markdown  # installation: pip install markdown
+
 
 class MdParser:
     def __init__(self, path_to_md_file):
@@ -18,17 +20,17 @@ class MdParser:
             return md_text
 
     def get_html_from_md(self, md_text):
-            self.html_text = markdown.markdown(md_text)
-            self.paragraphs = self.html_text.split('\n')
+        self.html_text = markdown.markdown(md_text)
+        self.paragraphs = self.html_text.split('\n')
 
     def get_headers(self):
-        header_regex = "<h1>(.*?)<\/h1>"
+        header_regex = r"<h1>(.*?)<\/h1>"
         self.headers = re.findall(header_regex, self.html_text)
 
     def get_chapters(self):
-        chapter_regex = "<h2>(.*?)<\/h2>"
+        chapter_regex = r"<h2>(.*?)<\/h2>"
         self.chapters = re.findall(chapter_regex, self.html_text)
-    
+
     def get_chapter_with_text(self):
         text = self.html_text
         chapter_name = ''
@@ -38,15 +40,15 @@ class MdParser:
             chapter_name = chapter
             text = self.split_chapter[-1]
         self.chapter_with_text.append(chapter_name + text)
-    
+
     def get_tables_size(self):
         count_table_line = 0
         count_paragraph = len(self.paragraphs)
         for line in self.paragraphs:
             if "|" in line:
-                count_table_line +=1
-        return round(count_table_line/count_paragraph, 4)
-    
+                count_table_line += 1
+        return round(count_table_line / count_paragraph, 4)
+
     def parse_md_file(self):
         md_text = self.read_md_file()
         self.get_html_from_md(md_text)
@@ -54,7 +56,11 @@ class MdParser:
         self.get_chapters()
         self.get_chapter_with_text()
         self.get_tables_size()
-        return f"Заголовки:\n{self.headers}\n\nГлавы:\n{self.chapters}\n\nГлавы с текстом:\n{self.chapter_with_text}\n\nДоля таблиц в тексте:\n{self.get_tables_size()}"
+        return (
+            f"Заголовки:\n{self.headers}\n\nГлавы:\n{self.chapters}\n\n"
+            f"Главы с текстом:\n{self.chapter_with_text}\n\nДоля таблиц в тексте:\n{self.get_tables_size()}"
+        )
+
 
 if __name__ == "__main__":
     md_file = MdParser('playground/md_parser/example.md')

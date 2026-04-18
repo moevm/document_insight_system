@@ -1,16 +1,14 @@
-from configparser import ConfigParser
 import os
-from os.path import join, exists
+from configparser import ConfigParser
+from os.path import exists, join
 
 from celery import Celery
 from celery.signals import worker_ready
-
-from passback_grades import run_passback
 from db import db_methods
 from db.db_types import Check
 from main.checker import check
 from main.parser import parse
-from main.check_packs import BASE_PACKS
+from passback_grades import run_passback
 from root_logger import get_root_logger
 
 config = ConfigParser()
@@ -37,10 +35,12 @@ celery.conf.timezone = 'Europe/Moscow'  # todo: get from env
 @worker_ready.connect
 def at_start(sender, **k):
     from nltk import download
+
     download('stopwords')
     download('punkt')
-    
+
     from language_tool_python import LanguageTool
+
     LanguageTool('ru-RU').close()
 
 
@@ -64,8 +64,9 @@ def create_task(self, check_info):
         return updated_check.pack(to_str=True)
     except Exception as e:
         if self.request.retries == self.max_retries:
-            logger.error(f"\tДостигнуто максимальное количество попыток перезапуска. Удаление задачи из очереди",
-                         exc_info=True)
+            logger.error(
+                "\tДостигнуто максимальное количество попыток перезапуска. Удаление задачи из очереди", exc_info=True
+            )
             db_methods.mark_celery_task_as_finished(self.request.id)
             updated_check = Check(check_info)
             updated_check.is_failed = True
@@ -85,4 +86,5 @@ def passback_task():
 
 def remove_files(filepaths):
     for filepath in filepaths:
-        if exists(filepath): os.remove(filepath)
+        if exists(filepath):
+            os.remove(filepath)

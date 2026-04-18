@@ -1,6 +1,5 @@
 import bson
 from bson import ObjectId
-
 from flask import Blueprint, Response, render_template
 from flask_login import login_required
 

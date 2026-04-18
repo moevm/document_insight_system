@@ -1,10 +1,11 @@
 import json
-from flask import abort, Blueprint, render_template, request, jsonify
-from flask_login import current_user
 from functools import wraps
-from app.db.db_methods import get_all_users, get_user
-from utils import checklist_filter, format_check_for_table
+
 from db import db_methods
+from flask import Blueprint, abort, jsonify, render_template, request
+from flask_login import current_user
+
+from app.db.db_methods import get_user
 
 users = Blueprint('users', __name__, template_folder='templates', static_folder='static')
 
@@ -15,7 +16,9 @@ def admin_required(route_func):
         if current_user and current_user.is_admin:
             return route_func(*args, **kwargs)
         abort(403)
+
     return my_wrapper
+
 
 @users.route("/data")
 @admin_required
@@ -24,7 +27,7 @@ def users_data():
     try:
         filters = json.loads(filters)
         filters = filters if filters else {}
-    except Exception as e:
+    except Exception:
         # logger.warning("Can't parse filters")
         # logger.warning(repr(e))
         filters = {}
@@ -67,14 +70,16 @@ def users_data():
 
     response = {
         "total": count,
-        "rows": [{
-            "username": item["username"],
-            "name": item["name"],
-            "all_formats": item["formats"],
-            "all_criteria": item["criteria"],
-            "check_counts": len(item["files"]),
-
-        } for item in rows]
+        "rows": [
+            {
+                "username": item["username"],
+                "name": item["name"],
+                "all_formats": item["formats"],
+                "all_criteria": item["criteria"],
+                "check_counts": len(item["files"]),
+            }
+            for item in rows
+        ],
     }
     return jsonify(response)
 
@@ -83,6 +88,7 @@ def users_data():
 @admin_required
 def index():
     return render_template('user_list.html')
+
 
 @users.route('/<username>', methods=["GET"])
 @admin_required

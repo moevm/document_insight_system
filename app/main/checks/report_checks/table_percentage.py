@@ -1,13 +1,11 @@
-import fitz
-from docx import Document
 from ..base_check import BaseReportCriterion, answer
 
-default_font_size: int = 12 # Значение размера шрифта по умолчанию
-default_line_spacing: float = 1.0 # Значение межстрочного интервала по умолчанию
-chars_per_line: int = 20 # Примерное кол-во символов в строке ячейки
-cell_padding = 5 # Примерный размер отступов от границ ячейки
-row_padding = 2 # Примерное расстояние между строками таблиц
-#С данными значениями погрешность 4-5 процентов
+default_font_size: int = 12  # Значение размера шрифта по умолчанию
+default_line_spacing: float = 1.0  # Значение межстрочного интервала по умолчанию
+chars_per_line: int = 20  # Примерное кол-во символов в строке ячейки
+cell_padding = 5  # Примерный размер отступов от границ ячейки
+row_padding = 2  # Примерное расстояние между строками таблиц
+# С данными значениями погрешность 4-5 процентов
 
 
 class ReportTablePercentageCheck(BaseReportCriterion):
@@ -15,8 +13,7 @@ class ReportTablePercentageCheck(BaseReportCriterion):
     _description = 'Проверяет, что таблицы занимают не более установленного процента от объёма документа'
     id = 'report_table_percentage_check'
 
-
-    def __init__(self, file_info, has_application=True, max_percentage=15, max_pages_table = 2):
+    def __init__(self, file_info, has_application=True, max_percentage=15, max_pages_table=2):
         super().__init__(file_info)
         self._max_percentage = max_percentage
         self._hasApplication = has_application
@@ -113,25 +110,22 @@ class ReportTablePercentageCheck(BaseReportCriterion):
         percentage = (tables_height / total_height) * 100
         return percentage
 
-
     def find_table_index_after_text(self, target_text: str) -> int | None:
         """Функция находит первый индекс таблицы после target_text, если не найден, то вернет None"""
         doc_docx = self.file.file
-        for i, paragraph in enumerate(doc_docx.paragraphs):
+        for _, paragraph in enumerate(doc_docx.paragraphs):
             if target_text in paragraph.text:
-
                 para_elem = paragraph._element
                 following_tables = para_elem.xpath('./following-sibling::w:tbl')
 
                 for table_elem in following_tables:
-
                     for index, table in enumerate(doc_docx.tables):
                         if table._element == table_elem:
                             return index
 
         return None
 
-    def find_tables_indexes_between_text(self,start_text: str, end_text: str | None = None):
+    def find_tables_indexes_between_text(self, start_text: str, end_text: str | None = None):
         """Функция нахождения индексов начала и конца таблиц между двумя текстами"""
         start_index = self.find_table_index_after_text(start_text)
         end_index = self.find_table_index_after_text(end_text)
@@ -145,16 +139,15 @@ class ReportTablePercentageCheck(BaseReportCriterion):
             message = ''
 
             if percent_tables <= self._max_percentage and len(self._large_tables) == 0:
-                return answer(
-                    True,
-                    "Пройдена!"
-                )
+                return answer(True, "Пройдена!")
 
             elif len(self._large_tables) != 0:
-                message = (f'Есть таблицы, занимающие более {self._max_pages_table} страниц:\n'
-                           f'<ul>\n'
-                           + ''.join(f'<li>Таблица {index_table}</li>\n' for index_table in self._large_tables)
-                           + '</ul>')
+                message = (
+                    f'Есть таблицы, занимающие более {self._max_pages_table} страниц:\n'
+                    f'<ul>\n'
+                    + ''.join(f'<li>Таблица {index_table}</li>\n' for index_table in self._large_tables)
+                    + '</ul>'
+                )
             else:
                 message += (
                     f'Таблицы занимают {percent_tables:.1f}% документа, '
@@ -167,11 +160,7 @@ class ReportTablePercentageCheck(BaseReportCriterion):
                     '</ul>'
                 )
 
-            return answer(
-                False,
-                message
-            )
+            return answer(False, message)
 
         except Exception as e:
             return answer(False, f"Ошибка при проверке процентного соотношения таблиц: {str(e)}")
-
