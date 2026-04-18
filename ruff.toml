@@ -2,13 +2,13 @@
 # ruff check: [lint]
 
 target-version = "py312"
-line-length = 88 # Black default
+line-length = 120
 indent-width = 4
 
 [format]
-quote-style = "double"
+quote-style = "preserve"
 indent-style = "space"
-line-ending = "auto"
+line-ending = "lf"
 
 [lint]
 select = [
@@ -18,5 +18,3 @@ select = [
   "I",   # isort (import order)
   "B",   # flake8-bugbear (likely bugs / risky patterns)
 ]
-
-ignore = ["E501"] # line too long
