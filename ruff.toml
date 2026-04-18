@@ -1,5 +1,5 @@
-# `ruff format` uses: line-length, indent-width, and [format] block.
-# `ruff check` uses: [lint] block.
+# ruff format: line-length, indent-width, [format]
+# ruff check: [lint]
 
 target-version = "py312"
 line-length = 88 # Black default
@@ -17,7 +17,6 @@ select = [
   "F",   # pyflakes (unused imports/names, undefined names, etc.)
   "I",   # isort (import order)
   "B",   # flake8-bugbear (likely bugs / risky patterns)
-  "SIM", # simplify expressions
 ]
 
 ignore = ["E501"] # line too long
