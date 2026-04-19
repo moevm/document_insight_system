@@ -10,7 +10,6 @@ from db import db_methods
 from db.db_types import Check
 from main.checker import check
 from main.parser import parse
-from main.check_packs import BASE_PACKS
 from root_logger import get_root_logger
 
 config = ConfigParser()
@@ -36,15 +35,14 @@ celery.conf.timezone = 'Europe/Moscow'  # todo: get from env
 
 @worker_ready.connect
 def at_start(sender, **k):
+
     from nltk import download
-    download('stopwords')
-    download('punkt')
-    
-    from language_tool_python import LanguageTool
-    LanguageTool('ru-RU').close()
+
+    download("stopwords")
+    download("punkt")
 
 
-@celery.task(name="create_task", queue='check-solution', bind=True)
+@celery.task(name="create_task", queue="check-solution", bind=True)
 def create_task(self, check_info):
     check_obj = Check(check_info)
     check_id = str(check_obj._id)

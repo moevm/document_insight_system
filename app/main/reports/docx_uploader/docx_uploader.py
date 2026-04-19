@@ -125,7 +125,7 @@ class DocxUploader(DocumentUploader):
                     break
         return self.headers_page
     
-    def find_literature_page(self):
+    def find_literature_page(self, work_type=None):
         if not self.literature_page:
             for k, v in self.pdf_file.text_on_page.items():
                 line = v[:40] if len(v) > 21 else v
