@@ -13,6 +13,6 @@ class ReportDecimalPlacesCheck(BaseReportCriterion):
     def check(self):
         if (literature_page := self.file.find_literature_page()):
             literature_page -= 1    # page before literature
-        total_violations, detected_pages = self.checker.find_violations_in_texts(self.file.pdf_file.get_text_on_page(until_page=literature_page).items()) 
+        total_violations, detected_pages = self.checker.find_violations_in_texts(self.file.pdf_file.get_text_on_page(end_page=literature_page).items()) 
         result_str, result_score = self.checker.get_result_msg_and_score(total_violations, detected_pages, self.format_page_link)
         return answer(result_score, result_str)
