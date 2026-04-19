@@ -45,7 +45,6 @@ pack "BaseReportCriterionPackMd"
 '''
 import re
 import markdown
-from md2pdf.core import md2pdf
 import re
 from ..document_uploader import DocumentUploader
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
@@ -72,6 +71,8 @@ class MdUploader(DocumentUploader):
         self.paragraphs = self.make_paragraphs(self.html_text)
         self.parse_effective_styles()
         self.pdf_filepath = self.filepath.split('.')[0]+'.pdf'
+
+        from md2pdf.core import md2pdf  # some OS lib err on import. worked / used only in 'worker' service
         self.pdf_file = PdfDocumentManager(self.filepath, md2pdf(self.pdf_filepath, md_file_path=self.filepath))
     
     def make_paragraphs(self, html_text):
@@ -100,7 +101,7 @@ class MdUploader(DocumentUploader):
 
     def get_main_headers(self, work_type):
         if not self.headers_main:
-            header_main_regex = "<h1>(.*?)<\/h1>"
+            header_main_regex = r"<h1>(.*?)<\/h1>"
             self.headers_main = re.findall(header_main_regex, self.html_text)[0]
         return self.headers_main
 
