@@ -2,6 +2,7 @@ import logging
 import sys
 from datetime import datetime
 
+from check_log_context import current_check_id, current_check_stage
 from db.db_methods import add_log
 
 
@@ -22,7 +23,9 @@ class MongoDBLoggingHandler(logging.StreamHandler):
                 pathname=record.pathname,
                 filename=record.filename,
                 funcName=record.funcName,
-                lineno=record.lineno)
+                lineno=record.lineno,
+                check_id=current_check_id.get(),
+                stage=current_check_stage.get())
 
 
 def get_logging_stdout_handler():
