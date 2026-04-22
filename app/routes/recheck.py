@@ -32,7 +32,7 @@ def recheck_main(check_id):
     check.is_ended = False
     db_methods.update_check(check)
     task_chain = chain(
-        convert_check_file_to_pdf.s(check.pack(to_str=True), filepath),
+        convert_check_file_to_pdf.s(check.pack(to_str=True), filepath, rewrite=True),
         create_task.s()
     )
     task = task_chain.apply_async()

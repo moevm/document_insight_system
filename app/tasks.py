@@ -78,11 +78,11 @@ def create_task(self, check_info):
 
 
 @celery.task(name="convert_to_pdf", queue="convert-pdf", bind=True, retry_kwargs={'max_retries': 3})
-def convert_check_file_to_pdf(self, check_obj, filepath):
+def convert_check_file_to_pdf(self, check_obj, filepath, rewrite=False):
     try:
         filename = check_obj['filename']
         pdf_id = check_obj['conv_pdf_fs_id']
-        db_methods.write_pdf(filename, filepath, pdf_id)
+        db_methods.write_pdf(filename, filepath, pdf_id, rewrite=rewrite)
         return check_obj
     except Exception as e:
         logger.error(
