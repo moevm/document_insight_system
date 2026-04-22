@@ -11,15 +11,11 @@ jobs:
 
       - name: Build system images (non-pulling)
         run: |
-          # build base image
-          docker build -f Dockerfile_base -t dvivanov/dis-base:v0.3 .
-      - name: Build docker-compose
-        run: |
           cp .env_example .env
-          docker compose build
+          make build-all
       - name: Run docker-compose
         run: |
-          docker compose up -d
+          make full-up-d
           sleep 10
       - name: Run tests
         run: |

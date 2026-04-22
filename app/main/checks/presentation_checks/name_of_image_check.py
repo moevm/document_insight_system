@@ -3,7 +3,7 @@ from utils import name_of_image_check_results
 
 class PresImageCaptureCheck(BasePresCriterion):
     label = "Проверка наличия подписи к рисункам"
-    description = 'Подписи к рисункам должны содержать слово "Рисунок". Подпись к рисункам на слайдах без текста необязательна'
+    _description = 'Подписи к рисункам должны содержать слово "Рисунок". Подпись к рисункам на слайдах без текста необязательна'
     id = 'pres_image_capture'
 
     def __init__(self, file_info):

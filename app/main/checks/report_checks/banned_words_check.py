@@ -5,7 +5,7 @@ from ..base_check import BaseReportCriterion, answer, morph
 
 class ReportBannedWordsCheck(BaseReportCriterion):
     label = "Проверка наличия запретных слов в тексте отчёта"
-    description = 'Запрещено упоминание определенных "опасных" слов'
+    _description = 'Запрещено упоминание определенных "опасных" слов'
     id = 'banned_words_check'
 
     def __init__(self, file_info, headers_map=None):

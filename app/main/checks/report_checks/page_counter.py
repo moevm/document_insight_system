@@ -3,7 +3,7 @@ from ..base_check import BaseReportCriterion, answer
 
 class ReportPageCounter(BaseReportCriterion):
     label = "Проверка количества страниц в файле"
-    description = 'Количество страниц должно быть в допустимых рамках, не считая "Приложения"'
+    _description = 'Количество страниц должно быть в допустимых рамках, не считая "Приложения"'
     id = 'page_counter'
     priority = True
 

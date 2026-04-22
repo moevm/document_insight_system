@@ -15,7 +15,6 @@ from flask import (Flask, Response, abort, jsonify, redirect, render_template,
                    request, url_for)
 from flask_login import (LoginManager, current_user, login_required,
                          login_user, logout_user)
-from flask_recaptcha import ReCaptcha
 
 import servants.user as user
 from app.utils import format_check_for_table, check_file
@@ -59,7 +58,6 @@ logger = get_root_logger('web')
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./templates/")
 app.config.from_pyfile('settings.py')
-app.recaptcha = ReCaptcha(app=app)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['CELERY_RESULT_BACKEND'] = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
