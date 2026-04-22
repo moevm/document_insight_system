@@ -1,0 +1,20 @@
+# ruff format: line-length, indent-width, [format]
+# ruff check: [lint]
+
+target-version = "py312"
+line-length = 120
+indent-width = 4
+
+[format]
+quote-style = "preserve"
+indent-style = "space"
+line-ending = "lf"
+
+[lint]
+select = [
+  "E",   # pycodestyle errors (PEP8)
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes (unused imports/names, undefined names, etc.)
+  "I",   # isort (import order)
+  "B",   # flake8-bugbear (likely bugs / risky patterns)
+]
