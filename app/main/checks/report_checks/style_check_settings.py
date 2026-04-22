@@ -5,7 +5,7 @@ class StyleCheckSettings:
     APPENDIX_UNIFY_REGEX = r"(?i)^приложение \w$"
     APPENDIX_REGEX = r"(?i)^ПРИЛОЖЕНИЕ (\w)\n(.+)"
     HEADER_1_NUM_REGEX = r"^([1-9][0-9]*\ )([\w\s])+$"
-    HEADER_2_NUM_REGEX = r"^[1-9][0-9]*\.([1-9][0-9]*\ )([\w\s]+)$"
+    HEADER_2_NUM_REGEX = r"^[1-9][0-9]*\.([1-9][0-9]*\.)* ([\w\s]+)$"
     HEADER_NUM_REGEX = r"^\d.+$"
     HEADER_REGEX = r"^\D+.+$"
     HEADER_1_REGEX = r"^([1-9][0-9]*\.([1-9][0-9]*\.))?\s*.+$"
