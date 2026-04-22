@@ -1,0 +1,18 @@
+services:
+  languagetool:
+    image: erikvl87/languagetool
+    environment:
+      - langtool_cacheSize=5000
+      - langtool_pipelineCaching=True
+      - langtool_maxCheckThreads=4
+      - langtool_maxSpellingSuggestions=2
+      - langtool_premiumAlways=True  
+      - langtool_disabledRuleIds=WHITESPACE_RULE,COMMA_PARENTHESIS_WHITESPACE,UPPERCASE_SENTENCE_START,Hyphen_and_spaces,RU_UNPAIRED_BRACKETS,WORD_REPEAT_RULE,DotOrCase,EAdj_NN_number_2_4
+      - langtool_redisHost=redis
+      - langtool_redisUseSSL=False
+      - Java_Xms=512m
+      - Java_Xmx=1g
+    logging:
+      driver: none
+    cpuset: ${CONTAINER_CPU:-0}
+
