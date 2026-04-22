@@ -28,7 +28,7 @@ class TableReferences(BaseReportCriterion):
         if not number_of_tables:
             return answer(True, f'Не найдено ни одной таблицы.<br><br>Если в вашей работе присутствуют таблицы, убедитесь, что для их подписи был '
                                     f'использован стиль {self.table_style} и формат '
-                                    f'"Таблица <Номер таблицы> -- <Название таблицы>".')
+                                    f'"Таблица <Номер таблицы> — <Название таблицы>".')
         references = self.search_references()
         if len(references.symmetric_difference(all_numbers)) == 0:
             return answer(True, f"Пройдена!")
