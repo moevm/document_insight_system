@@ -32,7 +32,7 @@ class ReportHeaders2ReferencesCheck(BaseReportCriterion):
                 header_text = header["text"].lower()
                 if contain_references(header_text):
                     break
-                elif !contain_references(header_text):
+                elif not contain_references(header_text):
                     result_str += (("<br>" if len(result_str) else "") +
                                    f"Заголовок второго уровня \"{header['text']}\" "
                                    f"содержит ссылки. ")
