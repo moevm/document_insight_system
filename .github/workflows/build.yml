@@ -16,7 +16,7 @@ jobs:
       - name: Run docker-compose
         run: |
           make full-up-d
-          sleep 10
+          sleep 20
       - name: Run tests
         run: |
           curl http://localhost:8080
