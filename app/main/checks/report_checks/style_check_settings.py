@@ -139,7 +139,7 @@ class StyleCheckSettings:
             "docx_style": ["heading 3", "heading 4"],
             "headers": [],
             "unify_regex": None,
-            "regex": HEADER_2_NUM_REGEX,
+            "regex": HEADER_2_REGEX,
         }
     }
 
