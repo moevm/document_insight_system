@@ -23,7 +23,7 @@ class ReportTaskTracker(BaseReportCriterion):
         self.late_init()
         tasks = self.find_tasks()
         if not tasks:
-            return answer(False, f'Раздел "{self.chapter}" не обнаружен!')
+            return answer(False, f'В разделе "{self.chapter}" не обнаружены задачи!')
         word_in_docs = []
         for task in tasks:
             for word in task:
@@ -35,17 +35,18 @@ class ReportTaskTracker(BaseReportCriterion):
         else:
             return answer(True, 'Задачи сформулированы корректно!')
 
-    def find_tasks(self):
+    def find_tasks(self):  # TODO: fix problem w/sequences
         intro = None
         tasks = []
         for header in self.chapters:
             if header["text"].lower().find(self.chapter.lower()) >= 0:
                 intro = header
+                break
         if intro:
             coef = float('inf')
             for i in range(len(intro["child"])):
                 text = intro["child"][i]["text"].lower()
-                if self.patterns[1] in text:
+                if tasks and self.patterns[1] in text:
                     return tasks
                 if self.patterns[0] in text:
                     coef= i
