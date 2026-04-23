@@ -4,7 +4,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 class StyleCheckSettings:
     APPENDIX_UNIFY_REGEX = r"(?i)^приложение \w$"
     APPENDIX_REGEX = r"(?i)^ПРИЛОЖЕНИЕ (\w)\n(.+)"
-    HEADER_1_NUM_REGEX = r"^([1-9][0-9]*\ )([\w\s])+$"
+    HEADER_1_NUM_REGEX = r"^([1-9][0-9]*)\s*.+$"  # r"^([1-9][0-9]*\ )([\w\s])+$"
     HEADER_2_NUM_REGEX = r"^[1-9][0-9]*\.([1-9][0-9]*\.)* ([\w\s]+)$"
     HEADER_NUM_REGEX = r"^\d.+$"
     HEADER_REGEX = r"^\D+.+$"
