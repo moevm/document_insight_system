@@ -1,31 +1,75 @@
 from datetime import datetime
 from os.path import basename
 
+import hashlib
 import pymongo
 from bson import ObjectId
 from gridfs import GridFSBucket, NoFile
 from pymongo import MongoClient
 from utils import convert_to
 
-from .db_types import User, Presentation, Check, Consumers, Logs
+from .db_types import User, Presentation, Check, Consumers, Logs, Image
 
 client = MongoClient("mongodb://mongodb:27017")
 db = client['dis-db']
 fs = GridFSBucket(db)
 
 users_collection = db['users']
-files_info_collection = db['files']  # actually, collection for all files (pres and reports)
+files_info_collection = db['presentations']  # actually, collection for all files (pres and reports)
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
+parsed_texts_collection = db['parsed_texts']
 logs_collection = db.create_collection(
     'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
+celery_tesseract_collection = db['celery_tesseract']
+images_collection = db['images']  # коллекция для хранения изображений
 
 
 def get_client():
     return client
 
+def get_image(image_id):
+    image = images_collection.find({'_id': image_id})
+    if image is not None:
+        return Image(image)
+    else:
+        return None
+
+def get_images(check_id):
+    images = images_collection.find({'check_id': str(check_id)})
+    if images is not None:
+        image_list = []
+        for img in images:
+            image_list.append(Image(img))
+        return image_list
+    else:
+        return None
+
+def save_image_to_db(check_id, image_data, caption, image_size, text=None, page=None):
+    image = Image({
+        'check_id': check_id,
+        'image_data': image_data,
+        'caption': caption,
+        'image_size': image_size,
+        'text' : text,
+        'page' : page,
+    })
+    result = images_collection.insert_one(image.pack())
+    return result.inserted_id 
+
+def update_image(image):
+    return bool(images_collection.find_one_and_replace({'_id': image._id}, image.pack()))
+
+def calculate_image_checksum(image_bytes):
+    return hashlib.sha256(image_bytes).hexdigest() if image_bytes else None
+
+def is_checksum_in_db(checksum):
+    if not checksum:
+        return False
+    existing = images_collection.find_one({"checksum": checksum})
+    return existing is not None
 
 # Returns user if user was created and None if already exists
 def add_user(username, password_hash='', is_LTI=False):
@@ -145,6 +189,12 @@ def add_check(file_id, check):
 def update_check(check):
     return bool(checks_collection.find_one_and_replace({'_id': check._id}, check.pack()))
 
+def add_parsed_text(check_id, parsed_text):
+    result = parsed_texts_collection.update_one({'filename': parsed_text.filename}, {'$set': parsed_text.pack()}, upsert=True)
+    if result.upserted_id: parsed_texts_id = result.upserted_id
+    else: parsed_texts_id = parsed_texts_collection.find_one({'filename': parsed_text.filename})['_id']
+    files_info_collection.update_one({'_id': check_id}, {"$push": {'parsed_texts': parsed_texts_id}})
+    return parsed_texts_id
 
 def write_pdf(filename, filepath):
     converted_filepath = convert_to(filepath, target_format='pdf')
