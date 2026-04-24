@@ -4,7 +4,9 @@ from ..check_abbreviations import main_check, forming_response
 
 class ReportAbbreviationsCheck(BaseReportCriterion):
     label = "Проверка расшифровки аббревиатур"
-    _description = "Аббревиатуры в тексте должны быть расшифрованы при первом использовании."
+    _description = (
+        "Аббревиатуры в тексте должны быть расшифрованы при первом использовании."
+    )
     id = "report_abbreviations_check"
     warning = True
 
@@ -15,10 +17,16 @@ class ReportAbbreviationsCheck(BaseReportCriterion):
         try:
             text = self._get_document_text()
 
-            headings = ["СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ", "ПРИЛОЖЕНИЕ", "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ"]
+            headings = [
+                "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ",
+                "ПРИЛОЖЕНИЕ",
+                "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ",
+            ]
             unverifiable_text = self._get_unverifiable_text(headings)
 
-            continue_check, res_str, unexplained_abbr = main_check(text=text, unverifiable_text=unverifiable_text)
+            continue_check, res_str, unexplained_abbr = main_check(
+                text=text, unverifiable_text=unverifiable_text
+            )
             if not continue_check:
                 return answer(True, res_str)
 
@@ -33,7 +41,9 @@ class ReportAbbreviationsCheck(BaseReportCriterion):
 
             if not unexplained_abbr_with_page:
                 return answer(True, "Все аббревиатуры правильно расшифрованы")
-            result_str = forming_response(unexplained_abbr_with_page, lambda pages: self.format_page_link(pages))
+            result_str = forming_response(
+                unexplained_abbr_with_page, lambda pages: self.format_page_link(pages)
+            )
             return answer(False, result_str)
             # return answer(True, f"self.file.make_chapters(self.file_type['report_type']):\n {self.file.make_chapters(self.file_type['report_type'])}")
 
@@ -83,5 +93,7 @@ class ReportAbbreviationsCheck(BaseReportCriterion):
         return title_page
 
     def _get_unverifiable_text(self, unverifiable_headings):
-        unverifiable_text = self._get_text_title_page() + self._get_text_into_sections(unverifiable_headings)
+        unverifiable_text = self._get_text_title_page() + self._get_text_into_sections(
+            unverifiable_headings
+        )
         return unverifiable_text

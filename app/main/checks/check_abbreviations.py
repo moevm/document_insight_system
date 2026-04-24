@@ -1,9 +1,23 @@
 import re
 from pymorphy3 import MorphAnalyzer
+import json
+from pathlib import Path
 
 morph = MorphAnalyzer()
 
 DEBUG_MODE = False
+
+
+def load_abbreviations():
+    config_path = config_path = (
+        Path(__file__).parent.parent / "configs" / "config_abbreviations.json"
+    )
+    with open(config_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+        return set(data.get("common_abbr"))
+
+
+COMMON_ABBR = load_abbreviations()
 
 
 def debug_print(*args, **kwargs):
@@ -70,35 +84,15 @@ def find_abbreviations(text: str, unverifiable_text: str):
     pattern = r"\b[А-ЯA-Z]{2,5}\b"
     abbreviations = re.findall(pattern, text)
 
-    common_abbr = {
-        'СССР', 'РФ', 'США', 'ВКР', 'ИТ', 'ПО', 'ООО', 'ЗАО', 'ОАО', 'HTML', 'CSS', 
-        'JS', 'ЛЭТИ', 'МОЕВМ', 'ЭВМ', 'ГОСТ', 'DVD',
-        'ЦПУ',
-        'SSD', 'PC', 'HDD',
-        'AX', 'BX', 'CX', 'DX', 'SI', 'DI', 'BP', 'SP',
-        'AH', 'AL', 'BH', 'BL', 'CH', 'CL', 'DH', 'DL', 
-        'CS', 'DS', 'ES', 'SS', 'FS', 'GS',
-        'IP', 'EIP', 'RIP', 'URL',
-        'CF', 'PF', 'AF', 'ZF', 'SF', 'TF', 'IF', 'DF', 'OF',
-        'EAX', 'EBX', 'ECX', 'EDX', 'ESI', 'EDI', 'EBP', 'ESP',
-        'RAX', 'RBX', 'RCX', 'RDX', 'RSI', 'RDI', 'RBP', 'RSP',
-        'DOS', 'OS', 'BIOS', 'UEFI', 'MBR', 'GPT',
-        'ASCII', 'UTF', 'UNICODE', 'ANSI',
-        'ЭВМ', 'МОЭВМ',
-        'CPU', 'GPU', 'APU', 'RAM', 'ROM', 'PROM', 'EPROM', 'EEPROM',
-        'USB', 'SATA', 'PCI', 'PCIe', 'AGP', 'ISA', 'VGA', 'HDMI', 'DP',
-        'LAN', 'WAN', 'WLAN', 'VPN', 'ISP', 'DNS', 'DHCP', 'TCP', 'UDP', 'IP',
-        'HTTP', 'HTTPS', 'FTP', 'SSH', 'SSL', 'TLS',
-        'API', 'GUI', 'CLI', 'IDE', 'SDK', 'SQL', 'NoSQL', 'XML', 'JSON', 'YAML',
-        'MAC', 'IBM', 'ГОСТ', 'ООП', 'ЛР', 'КР', 'ОТЧЕТ', 'ПЛАН', 'СЛОВА'
+    filtered_abbr = {
+        abbr
+        for abbr in abbreviations
+        if abbr not in COMMON_ABBR
+        and abbr not in unverifiable_text
+        and morph.parse(abbr.lower())[0].score != 0
     }
-    filtered_abbr = {abbr for abbr in abbreviations if abbr not in common_abbr \
-                     and abbr not in unverifiable_text and morph.parse(abbr.lower())[0].score != 0}
 
     return list(filtered_abbr)
-
-
-# def is_abbreviation_explained(abbr: str, text: str) -> bool:
 
 
 def correctly_explained(abbr, explan):
@@ -120,10 +114,15 @@ def main_check(text: str, unverifiable_text: str):
         if not text:
             continue_check, res_str = False, "Не удалось получить текст"
 
-        abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(text=text, unverifiable_text=unverifiable_text)
+        abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(
+            text=text, unverifiable_text=unverifiable_text
+        )
 
         if not abbr_is_finding:
-            continue_check, res_str = False, "Аббревиатуры не найдены в представленном документе"
+            continue_check, res_str = (
+                False,
+                "Аббревиатуры не найдены в представленном документе",
+            )
 
         if not unexplained_abbr:
             continue_check, res_str = False, "Все аббревиатуры правильно расшифрованы"
