@@ -35,6 +35,12 @@ def logs_data():
     if f_service_name := filters.get("service-name", None):
         filter_query["serviceName"] = {"$regex": f_service_name}
 
+    if f_check_id := filters.get("check_id", None):
+        filter_query["check_id"] = {"$regex": f_check_id}
+
+    if f_stage := filters.get("stage", None):
+        filter_query["stage"] = {"$regex": f_stage}
+
     if f_levelname := filters.get("levelname", None):
         filter_query["levelname"] = {"$regex": f_levelname}
 
@@ -94,6 +100,8 @@ def logs_data():
         "total": count,
         "rows": [{
             "timestamp": item["timestamp"].strftime("%d.%m.%Y %H:%M:%S"),
+            "check_id": item.get("check_id", None),
+            "stage": item.get("stage", None),
             "service-name": item["serviceName"],
             "levelname": item["levelname"],
             "message": item["message"],
