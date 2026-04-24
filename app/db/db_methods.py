@@ -3,8 +3,8 @@ from os.path import basename
 
 import pymongo
 from bson import ObjectId
-from gridfs import GridFSBucket, NoFile
-from pymongo import MongoClient
+from gridfs import GridFSBucket, NoFile, errors as gridfs_errors
+from pymongo import MongoClient, errors as pymongo_errors
 from utils import convert_to
 
 from .db_types import User, Presentation, Check, Consumers, Logs
@@ -146,15 +146,33 @@ def update_check(check):
     return bool(checks_collection.find_one_and_replace({'_id': check._id}, check.pack()))
 
 
-def write_pdf(filename, filepath):
-    converted_filepath = convert_to(filepath, target_format='pdf')
-    return add_file_to_db(filename, converted_filepath)
-
-
-def add_file_to_db(filename, filepath, file_id=None):
+def get_pdf_id(file_id=None):
     if not file_id: file_id = ObjectId()
-    fs.upload_from_stream_with_id(file_id, filename, open(filepath, 'rb'))
     return file_id
+
+
+def write_pdf(filename, filepath, file_id=None, rewrite=False):
+    converted_filepath = convert_to(filepath, target_format="pdf")
+    return add_file_to_db(filename, converted_filepath, file_id, rewrite=rewrite)
+
+
+def add_file_to_db(filename, filepath, file_id=None, rewrite=False):
+    def write_file(filename, filepath, file_id):
+        with open(filepath, "rb") as file:
+            fs.upload_from_stream_with_id(file_id, filename, file)
+
+    if not file_id:
+        file_id = ObjectId()
+    elif type(file_id) is str:
+        file_id = ObjectId(file_id)
+    try:
+        write_file(filename, filepath, file_id)
+    except (pymongo_errors.DuplicateKeyError, gridfs_errors.FileExists) as exc:
+        if rewrite:
+            fs.delete(file_id)
+            write_file(filename, filepath, file_id)
+            return file_id
+        raise exc
 
 
 def write_file_from_db_file(file_id, abs_filepath):

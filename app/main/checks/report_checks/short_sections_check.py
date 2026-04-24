@@ -8,7 +8,7 @@ from ...reports.docx_uploader.style import Style
 
 class ReportShortSectionsCheck(BaseReportCriterion):
     label = "Поиск коротких разделов в отчёте"
-    description = "Минимальное количество абзацев в разделе: 5, минимальное количество слов в абзаце: 20"
+    _description = "Минимальное количество абзацев в разделе: 5, минимальное количество слов в абзаце: 20"
     id = "short_sections_check"
 
     def __init__(self, file_info, min_section_count=5, min_section_len=20, main_heading_style="heading 2",
@@ -48,6 +48,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         result = True
         result_str = ""
+        # TODO: проверить совместимость / дублируемость LR и VKR
         if self.file_type['report_type'] == 'LR':
             self.late_init()
             if self.cutoff_line is None:
@@ -109,7 +110,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
                 result_str = "Все обязательные разделы достигают рекомендуемой длины."
             return answer(result, result_str)
         else:
-            return answer(False, 'Во время обработки произошла критическая ошибка')
+            return answer(False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев')
 
     def build_header_hierarchy(self):
         cutoff_index = 0

@@ -14,7 +14,7 @@ from ..base_check import BasePresCriterion, answer
 
 class PresVerifyGitLinkCheck(BasePresCriterion):
     label = "Проверка действительности ссылки на github"
-    description = ''
+    _description = ''
     id = 'verify_git_link'
 
     def __init__(self, file_info, deep_check=False):

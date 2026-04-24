@@ -8,7 +8,7 @@ from collections import Counter
 
 class ReferencesToLiteratureCheck(BaseReportCriterion):
     label = "Проверка наличия ссылок на все источники"
-    description = ''
+    _description = ''
     id = 'literature_references'
 
     def __init__(self, file_info, min_ref=1, max_ref=1000, max_count_domains = 5,headers_map=None):
@@ -43,6 +43,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         number_of_sources = 0
         start_literature_par = 0
         result_str = ''
+        # TODO: проверить совместимость / дублируемость LR и VKR
         if self.file_type['report_type'] == 'LR':
             start_literature_par = self.find_start_paragraph()
             if start_literature_par:
@@ -58,7 +59,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             start_literature_par = header["number"]
             number_of_sources = self.count_sources_vkr(header)
         else:
-            return answer(False, 'Во время обработки произошла критическая ошибка')
+            return answer(False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев')
         if not number_of_sources:
             return answer(False,
                           f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
@@ -117,27 +118,46 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                     '''
         return answer(False, result_str)
 
+    def get_text_in_table(self, index_table: int) -> str:
+        """Функция получения всего текста из таблицы"""
+        text = ''
+        for cell in self.file.tables[index_table]._cells:
+            if cell.text.strip():
+                text += cell.text.strip()
+        return text
+
+    def search_references_in_text(self, text: str, prev_ref, array_of_references, ref_sequence) -> int:
+        """Функция поиска ссылок в переданном тексте"""
+        reg_exp = r'\[[\^]{0,1}[\d \-,]+\]'
+        detected_references = re.findall(reg_exp, text)
+        if detected_references:
+            for reference_raw in detected_references:
+                reference = reference_raw.replace('^', '')  # TODO: kostyl'...
+                for one_part in re.split(r'[\[\],]', reference):
+                    if re.match(r'\d+[ \-]+\d+', one_part):
+                        start, end = re.split(r'[ -]+', one_part)
+                        for k in range(int(start), int(end) + 1):
+                            prev_ref = self.add_references(k, prev_ref, array_of_references, ref_sequence)
+                    elif one_part != '':
+                        prev_ref = self.add_references(int(one_part), prev_ref, array_of_references, ref_sequence)
+        return prev_ref
+
     def search_references(self, start_par):
+        """Функция поиска ссылок в документе"""
         prev_ref = 0
         ref_sequence = []
         array_of_references = set()
-        reg_exp = r'\[[\^]{0,1}[\d \-,]+\]'  # md can use [^5] format for hyperlink
         for i in range(0, start_par):
-            if isinstance(self.file.paragraphs[i], str):
-                detected_references = re.findall(reg_exp, self.file.paragraphs[i])
-            else:
-                detected_references = re.findall(reg_exp, self.file.paragraphs[i].paragraph_text)
+            paragraph_text = self.file.paragraphs[i] if isinstance(self.file.paragraphs[i], str) else self.file.paragraphs[i].paragraph_text
+            match = re.search(r'Таблица ([.\d]+)', paragraph_text)
+            table_text = ''
+            if match:
+                index_table = int(match.group(1)) - 1
+                table_text = self.get_text_in_table(index_table)
 
-            if detected_references:
-                for reference_raw in detected_references:
-                    reference = reference_raw.replace('^', '')      # TODO: kostyl'...
-                    for one_part in re.split(r'[\[\],]', reference):
-                        if re.match(r'\d+[ \-]+\d+', one_part):
-                            start, end = re.split(r'[ -]+', one_part)
-                            for k in range(int(start), int(end) + 1):
-                                prev_ref = self.add_references(k, prev_ref, array_of_references, ref_sequence)
-                        elif one_part != '':
-                            prev_ref = self.add_references(int(one_part), prev_ref, array_of_references, ref_sequence)
+            paragraph_text += table_text
+            prev_ref = self.search_references_in_text(paragraph_text, prev_ref, array_of_references, ref_sequence)
+
         if ref_sequence:
             if ref_sequence[0][1] == '0':
                 ref_sequence[0] = ref_sequence[0].replace('[0],', '')

@@ -10,13 +10,13 @@ from db import db_methods
 from db.db_types import Check
 from main.checker import check
 from main.parser import parse
-from main.check_packs import BASE_PACKS
 from root_logger import get_root_logger
 
 config = ConfigParser()
 config.read('app/config.ini')
 
 TASK_RETRY_COUNTDOWN = 60  # default = 3 * 60
+MAX_TASK_RETRIES = 3
 logger = get_root_logger('tasks')
 
 FILES_FOLDER = '/usr/src/project/files'
@@ -36,15 +36,14 @@ celery.conf.timezone = 'Europe/Moscow'  # todo: get from env
 
 @worker_ready.connect
 def at_start(sender, **k):
+
     from nltk import download
-    download('stopwords')
-    download('punkt')
-    
-    from language_tool_python import LanguageTool
-    LanguageTool('ru-RU').close()
+
+    download("stopwords")
+    download("punkt")
 
 
-@celery.task(name="create_task", queue='check-solution', bind=True)
+@celery.task(name="create_task", queue="check-solution", bind=True)
 def create_task(self, check_info):
     check_obj = Check(check_info)
     check_id = str(check_obj._id)
@@ -63,7 +62,7 @@ def create_task(self, check_info):
 
         return updated_check.pack(to_str=True)
     except Exception as e:
-        if self.request.retries == self.max_retries:
+        if self.request.retries == MAX_TASK_RETRIES:
             logger.error(f"\tДостигнуто максимальное количество попыток перезапуска. Удаление задачи из очереди",
                          exc_info=True)
             db_methods.mark_celery_task_as_finished(self.request.id)
@@ -76,6 +75,21 @@ def create_task(self, check_info):
             return 'Not OK, error: {}'.format(e)
         logger.error(f"\tПри обработке произошла ошибка: {e}. Попытка повторного запуска", exc_info=True)
         self.retry(countdown=TASK_RETRY_COUNTDOWN)  # Retry the task, adding it to the back of the queue.
+
+
+@celery.task(name="convert_to_pdf", queue="convert-pdf", bind=True, retry_kwargs={'max_retries': 3})
+def convert_check_file_to_pdf(self, check_obj, filepath, rewrite=False):
+    try:
+        filename = check_obj['filename']
+        pdf_id = check_obj['conv_pdf_fs_id']
+        db_methods.write_pdf(filename, filepath, pdf_id, rewrite=rewrite)
+        return check_obj
+    except Exception as e:
+        logger.error(
+            f"При конвертации файла произошла ошибка: {e}. Следующая попытка через {TASK_RETRY_COUNTDOWN}",
+            exc_info=True,
+        )
+        raise self.retry(countdown=TASK_RETRY_COUNTDOWN)
 
 
 @celery.task(name="passback-task", queue='passback-grade')

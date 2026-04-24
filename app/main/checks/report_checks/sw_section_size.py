@@ -34,7 +34,7 @@ SW_CONSTANTS = {
 
 class SWSectionSizeCheck(BaseReportCriterion):
     label = "Проверка объема определенных разделов"
-    description = "Проверка объема определенных разделов по количеству предложений и количеству слов"
+    _description = "Проверка объема определенных разделов по количеству предложений и количеству слов"
     id = "sw_sections_size_check"
     priority = True
 
