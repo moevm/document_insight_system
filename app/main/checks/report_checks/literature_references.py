@@ -1,4 +1,6 @@
 import re
+from http.cookiejar import domain_match
+
 from .style_check_settings import StyleCheckSettings
 from ..base_check import BaseReportCriterion, answer
 from collections import Counter
@@ -12,6 +14,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     def __init__(self, file_info, min_ref=1, max_ref=1000, max_count_domains = 5,headers_map=None):
         super().__init__(file_info)
         self.headers = []
+        self.domain_pattern = r'(?:https?|ftp)?://([^/\s?#]+)'
         self.literature_header = None
         self.literature_reference_text = []
         self.literature_domains = []
@@ -60,7 +63,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             return answer(False,
                           f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
 
-        duplicates_ref = self.checking_duplicate_sources(self.literature_reference_text, 2)
+        duplicates_ref = self.checking_duplicate_sources(self.literature_reference_text)
         duplicates_domains = self.checking_duplicate_sources(self.literature_domains, self.max_count_domains)
         references, ref_sequence = self.search_references(start_literature_par)
         all_numbers = set(range(1, number_of_sources + 1))
@@ -151,22 +154,16 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         array_of_references.add(k)
         return prev_ref
 
-    def checking_duplicate_sources(self, sources: list[str], max_count: int) -> list:
+    def checking_duplicate_sources(self, sources: list, max_count: int=2) -> list:
         """Функция нахождения дубликатов в определенных позициях"""
-        counter = Counter([text.lower() for text in sources])
+        domain_to_numbers = {}
 
-        duplicates = []
-        for text, count in counter.items():
-            if count >= max_count and text != '':
-                positions_duplicates = [i + 1 for i, text_in_ref in enumerate(sources) if text == text_in_ref.lower()]
+        for number, domain in sources:
+            if domain not in domain_to_numbers:
+                domain_to_numbers[domain] = []
+            domain_to_numbers[domain].append(number)
 
-                if positions_duplicates:
-                    duplicates.append((
-                        sources[positions_duplicates[0]],
-                        positions_duplicates
-                    ))
-
-        return duplicates
+        return [(domain, numbers) for domain, numbers in domain_to_numbers.items() if len(numbers) >= max_count]
 
 
     def find_start_paragraph(self):
@@ -178,15 +175,6 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 break
         return start_index
 
-    def find_domains(self, sources: str):
-        pattern = r'(?:https?|ftp)?://([^/\s?#]+)'
-        match = re.search(pattern, sources, re.IGNORECASE)
-        if match and match.group(1):
-            self.literature_domains.append(match.group(1))
-        else:
-            self.literature_domains.append('') #чтобы можно было определить номер
-
-
     def count_sources_vkr(self, header):
         literature_counter = 0
         if not len(header["child"]):
@@ -196,8 +184,12 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 break
             # if re.search(f"дата обращения", child["text"].lower()):
             literature_counter += 1
-            self.literature_reference_text.append(child["text"])
-            self.find_domains(child["text"])
+            self.literature_reference_text.append((literature_counter, child["text"]))
+            domain_match = re.search(self.domain_pattern, child["text"], re.IGNORECASE)
+
+            if domain_match and domain_match.group(1):
+                self.literature_domains.append((literature_counter, domain_match.group(1)))
+
         return literature_counter
 
     def count_sources(self):
@@ -221,8 +213,11 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             for ind in range(first_string + 1, last_string):
                 if re.match(f"{literature_counter + 1}.", one_page[ind]):
                     literature_counter += 1
-                    self.literature_reference_text.append(one_page[ind])
-                    self.find_domains(one_page[ind])
+                    self.literature_reference_text.append((literature_counter, one_page[ind]))
+                    domain_match = re.search(self.domain_pattern, one_page[ind])
+                    if domain_match and domain_match.group(1):
+                        self.literature_domains.append((literature_counter, domain_match.group(1)))
+
         return literature_counter
 
     def search_literature_start_pdf(self):
