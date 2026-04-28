@@ -4,7 +4,7 @@ import numpy as np
 
 class ImageQualityCheck(BaseReportCriterion):
     label = "Проверка качества изображений"
-    description = ''
+    _description = ''
     id = 'image_quality_check'
     # необходимо подобрать min_laplacian и min_entropy
     def __init__(self, file_info, min_laplacian=100, min_entropy=1):

@@ -47,7 +47,7 @@ def get_images_by_check_id(check_id):
     else:
         return None
 
-def save_image_to_db(check_id, document_id, image_data, caption, image_size, text=None, page=None, checksum=None, text_density=None, symbols_percentage=None):
+def save_image_to_db(check_id, image_data, caption, image_size, document_id=None, text=None, page=None, checksum=None, text_density=None, symbols_percentage=None):
     image = Image({
         'check_id': check_id,
         'document_id': document_id,

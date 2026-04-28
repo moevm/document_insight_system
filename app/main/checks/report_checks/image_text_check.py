@@ -3,7 +3,7 @@ from ..base_check import BaseReportCriterion, answer
 
 class ImageTextCheck(BaseReportCriterion):
     label = "Проверка текста, считанного с изображений"
-    description = ''
+    _description = ''
     id = 'image_text_check'
     # Подобрать значения для symbols_set, max_symbols_percentage, max_text_density
     def __init__(self, file_info, symbols_set=list("@#$%^&*~`‘|±§№¤¢£€{¥}©®™•¶÷×"), max_symbols_percentage=5, max_text_density=4):
