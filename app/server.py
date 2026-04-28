@@ -51,6 +51,7 @@ from routes.get_last_check_results import get_last_check_results
 from routes.version import version
 from routes.capacity import capacity
 from routes.profile import profile
+from routes.anti_plagiarism import anti_plagiarism
 
 from server_consts import UPLOAD_FOLDER
 
@@ -87,6 +88,7 @@ app.register_blueprint(get_last_check_results, url_prefix='/get_last_check_resul
 app.register_blueprint(version, url_prefix='/version')
 app.register_blueprint(capacity, url_prefix='/capacity')
 app.register_blueprint(profile, url_prefix='/profile')
+app.register_blueprint(anti_plagiarism, url_prefix='/anti_plagiarism')
 
 app.logger.addHandler(get_logging_stdout_handler())
 app.logger.propagate = False
