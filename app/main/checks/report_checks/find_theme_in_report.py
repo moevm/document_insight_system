@@ -42,16 +42,17 @@ class FindThemeInReport(BaseReportCriterion):
                     par = intro_par['text'].lower()
                     self.text_par.append(par)
         lemma_theme = self.find_theme()
+        value_intersection = 0
+        if lemma_theme:
+            for text in self.text_par:
+                translator = str.maketrans('', '', string.punctuation)
+                theme_without_punct = text.translate(translator)
+                word_in_text = word_tokenize(theme_without_punct)
+                lemma_text = {MORPH_ANALYZER.parse(w)[0].normal_form for w in word_in_text if w.lower() not in stop_words}
+                self.full_text.update(lemma_text)
 
-        for text in self.text_par:
-            translator = str.maketrans('', '', string.punctuation)
-            theme_without_punct = text.translate(translator)
-            word_in_text = word_tokenize(theme_without_punct)
-            lemma_text = {MORPH_ANALYZER.parse(w)[0].normal_form for w in word_in_text if w.lower() not in stop_words}
-            self.full_text.update(lemma_text)
-
-        intersection = lemma_theme.intersection(self.full_text)
-        value_intersection = round(len(intersection)*100//len(lemma_theme))
+            intersection = lemma_theme.intersection(self.full_text)
+            value_intersection = round(len(intersection)*100//len(lemma_theme))
         if value_intersection == 0:
             return answer(False, "Не пройдена! В отчете не упоминаются слова, заявленные в теме отчета.")
         elif value_intersection < self.limit:
