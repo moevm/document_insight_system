@@ -42,7 +42,6 @@ class WasWereChecker:
             lines = re.split(r"\n", page_text)
             non_empty_line_counter = 0
             for line_index, line in enumerate(lines):
-                print(line_index, line)
                 line = line.strip()
                 if not line:
                     continue

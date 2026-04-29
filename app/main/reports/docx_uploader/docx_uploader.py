@@ -23,7 +23,8 @@ class DocxUploader(DocumentUploader):
         self.file = None
         self.special_paragraph_indices = {}
         self.headers_page = 0
-        self.page_count = 0
+        self.page_count = 0     # без приложений
+        self.literature_page = 0
 
     def upload(self, file, pdf_filepath=''):
         self.file = docx.Document(file)
@@ -125,14 +126,14 @@ class DocxUploader(DocumentUploader):
                     break
         return self.headers_page
     
-    def find_literature_page(self, work_type):
+    def find_literature_page(self, work_type=None):
         if not self.literature_page:
             for k, v in self.pdf_file.text_on_page.items():
                 line = v[:40] if len(v) > 21 else v
                 if re.search('список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)', line.strip().lower()):
                     break
                 self.literature_page += 1
-        self.literature_page += 1
+            self.literature_page += 1
         return self.literature_page
 
     def find_literature_vkr(self, work_type):

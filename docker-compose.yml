@@ -1,7 +1,10 @@
 services:
   web:
-    build: .
-    image: document_insight_system_image
+    build:
+      context: .
+      args:
+        - VERSION=${IMAGE_VERSION}
+    image: dis:web-image-${IMAGE_VERSION}
     restart: always
     ports:
       - "${WEB_PORT:-8080}:8080"
@@ -22,7 +25,12 @@ services:
     cpuset: ${CONTAINER_CPU:-0-1}
 
   worker:
-    image: document_insight_system_image
+    build:
+      context: .
+      dockerfile: Dockerfile_worker
+      args:
+        - VERSION=${IMAGE_VERSION}
+    image: dis:worker-image-${IMAGE_VERSION}
     restart: always
     command: celery --app=app.tasks.celery worker -n celery@worker --beat -Q ${CELERY_QUERIES} --loglevel=info
     environment:
@@ -33,14 +41,13 @@ services:
       - mongodb
     volumes:
       - files:/usr/src/project/files/
-      - language_tool_cache:/root/.cache/language_tool_python/
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     cpuset: ${CONTAINER_CPU:-0-1}
     mem_limit: ${WORKER_MEMORY:-1G}
 
   worker-dashboard:
-    image: document_insight_system_image
+    image: dis:worker-image-${IMAGE_VERSION}
     command: celery --broker=${REDIS_URL} flower --port=${FLOWER_PORT} --url_prefix=${FLOWER_PREFIX} --basic_auth=${FLOWER_AUTH} --persistent=True
     ports:
       - "${FLOWER_PORT}:5555"
@@ -92,6 +99,5 @@ services:
 
 volumes:
   flower_data:
-  language_tool_cache:
   files:
   redis_data:
