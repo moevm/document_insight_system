@@ -1,13 +1,14 @@
 from datetime import datetime
 from os.path import basename
 
+import hashlib
 import pymongo
 from bson import ObjectId
 from gridfs import GridFSBucket, NoFile, errors as gridfs_errors
 from pymongo import MongoClient, errors as pymongo_errors
 from utils import convert_to
 
-from .db_types import User, Presentation, Check, Consumers, Logs
+from .db_types import User, Presentation, Check, Consumers, Logs, Image
 
 client = MongoClient("mongodb://mongodb:27017")
 db = client['dis-db']
@@ -18,14 +19,61 @@ files_info_collection = db['files']  # actually, collection for all files (pres 
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
+parsed_texts_collection = db['parsed_texts']
 logs_collection = db.create_collection(
     'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
+celery_tesseract_collection = db['celery_tesseract']
+images_collection = db['images']  # коллекция для хранения изображений
 
 
 def get_client():
     return client
 
+def get_image(image_id):
+    image = images_collection.find_one({'_id': image_id})
+    if image is not None:
+        return Image(image)
+    else:
+        return None
+    
+def get_images_by_check_id(check_id):
+    images = images_collection.find({'check_id': str(check_id)})
+    if images is not None:
+        image_list = []
+        for img in images:
+            image_list.append(Image(img))
+        return image_list
+    else:
+        return None
+
+def save_image_to_db(check_id, image_data, caption, image_size, document_id=None, text=None, page=None, checksum=None, text_density=None, symbols_percentage=None):
+    image = Image({
+        'check_id': check_id,
+        'document_id': document_id,
+        'image_data': image_data,
+        'caption': caption,
+        'image_size': image_size,
+        'text': text,
+        'page': page,
+        'checksum': checksum or calculate_image_checksum(image_data),
+        'text_density': text_density,
+        'symbols_percentage': symbols_percentage
+    })
+    result = images_collection.insert_one(image.pack())
+    return result.inserted_id 
+
+def update_image(image):
+    return bool(images_collection.find_one_and_replace({'_id': image._id}, image.pack()))
+
+def calculate_image_checksum(image_bytes):
+    return hashlib.sha256(image_bytes).hexdigest() if image_bytes else None
+
+def is_checksum_in_db(checksum):
+    if not checksum:
+        return False
+    existing = images_collection.find_one({"checksum": checksum})
+    return existing is not None
 
 # Returns user if user was created and None if already exists
 def add_user(username, password_hash='', is_LTI=False):
@@ -145,6 +193,12 @@ def add_check(file_id, check):
 def update_check(check):
     return bool(checks_collection.find_one_and_replace({'_id': check._id}, check.pack()))
 
+def add_parsed_text(check_id, parsed_text):
+    result = parsed_texts_collection.update_one({'filename': parsed_text.filename}, {'$set': parsed_text.pack()}, upsert=True)
+    if result.upserted_id: parsed_texts_id = result.upserted_id
+    else: parsed_texts_id = parsed_texts_collection.find_one({'filename': parsed_text.filename})['_id']
+    files_info_collection.update_one({'_id': check_id}, {"$push": {'parsed_texts': parsed_texts_id}})
+    return parsed_texts_id
 
 def get_pdf_id(file_id=None):
     if not file_id: file_id = ObjectId()
@@ -462,3 +516,40 @@ def get_celery_task(celery_task_id):
 
 def get_celery_task_by_check(check_id):
     return celery_check_collection.find_one({'check_id': check_id})
+
+
+def get_celery_task_status_by_check(check_id):
+    celery_task = get_celery_task_by_check(check_id)
+    if celery_task and 'finished_at' in celery_task:
+        return True
+    return False
+
+
+def add_celery_tesseract_task(celery_tesseract_task_id, check_id):
+    return celery_tesseract_collection.insert_one(
+        {'celery_tesseract_task_id': celery_tesseract_task_id, 'check_id': check_id, 'started_at': datetime.now()}).inserted_id
+    
+    
+def get_celery_tesseract_task_status_by_check(check_id):
+    celery_tesseract_task = get_celery_tesseract_task_by_check(check_id)
+    if celery_tesseract_task and 'finished_at' in celery_tesseract_task:
+        return True
+    return False
+
+
+def mark_celery_tesseract_task_as_finished_by_check(check_id, tesseract_result, finished_time=None):
+    celery_tesseract_task = get_celery_tesseract_task_by_check(check_id)
+    if not celery_tesseract_task: return
+    if finished_time is None: finished_time = datetime.now()
+    return celery_tesseract_collection.update_one({'check_id': check_id}, {
+        '$set': {'finished_at': finished_time,
+                 'tesseract_result': tesseract_result,
+                 'processing_time': (finished_time - celery_tesseract_task['started_at']).total_seconds()}})
+
+
+def get_celery_tesseract_task(celery_tesseract_task_id):
+    return celery_tesseract_collection.find_one({'celery_tesseract_task_id': celery_tesseract_task_id})
+
+
+def get_celery_tesseract_task_by_check(check_id):
+    return celery_tesseract_collection.find_one({'check_id': check_id})

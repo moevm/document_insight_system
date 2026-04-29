@@ -150,3 +150,43 @@ class Check(PackableWithId):
         is_ended = none_to_true(self.is_ended)  # None for old checks => True, True->True, False->False
         is_failed = none_to_false(self.is_failed)  # None for old checks => False, True->True, False->False
         return {'is_ended': is_ended, 'is_failed': is_failed}
+
+class Image:
+    def __init__(self, dictionary=None):
+        dictionary = dictionary or {}
+        self._id: ObjectId = dictionary.get('_id', ObjectId())
+        if isinstance(self._id, str):
+            self._id = ObjectId(self._id)
+        
+        self.check_id: str = dictionary.get('check_id')
+        self.document_id: str = dictionary.get('document_id')
+        self.caption: str = dictionary.get('caption', '')
+        self.image_data: bytes = dictionary.get('image_data')
+        self.image_size: tuple[int, int] = dictionary.get('image_size')
+        self.text: str = dictionary.get('text')
+        self.page: int = dictionary.get('page')
+        self.checksum: str = dictionary.get('checksum')
+        self.text_density: float = dictionary.get('text_density')
+        self.symbols_percentage: float = dictionary.get('symbols_percentage')
+
+    def pack(self):
+        return {
+            "_id": self._id,
+            "check_id": self.check_id,
+            "document_id": self.document_id,
+            "caption": self.caption,
+            "image_data": self.image_data,
+            "image_size": self.image_size,
+            "text": self.text,
+            "page": self.page,
+            "checksum": self.checksum,
+            "text_density": self.text_density,
+            "symbols_percentage": self.symbols_percentage
+        }
+
+class ParsedText(PackableWithId):
+    def __init__(self, dictionary=None):
+        super().__init__(dictionary)
+        dictionary = dictionary or {}
+        self.filename = dictionary.get('filename', '')
+        self.parsed_chapters = dictionary.get('parsed_chapters', [])

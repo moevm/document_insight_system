@@ -9,4 +9,5 @@ ENV LANG=en_US.UTF-8
 ENV TZ=Europe/Moscow
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-RUN apt update && apt install -y g++ gcc libreoffice-writer libreoffice-impress default-jre libreoffice-java-common
+
+RUN apt update && apt install -y g++ gcc libreoffice-writer libreoffice-impress default-jre libreoffice-java-common tesseract-ocr tesseract-ocr-rus
