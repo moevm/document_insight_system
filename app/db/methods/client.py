@@ -3,7 +3,7 @@ from pymongo import MongoClient
 
 
 client = MongoClient("mongodb://mongodb:27017")
-db = client['pres-parser-db']
+db = client['dis-db']
 fs = GridFSBucket(db)
 
 

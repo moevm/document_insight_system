@@ -5,7 +5,7 @@ db = get_db()
 fs = get_fs()
 
 users_collection = db['users']
-files_info_collection = db['presentations']  # actually, collection for all files (pres and reports)
+files_info_collection = db['files']  # actually, collection for all files (pres and reports)
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']

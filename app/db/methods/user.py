@@ -47,7 +47,7 @@ def get_all_users():
 
 def delete_user(username):
     user = get_user(username)
-    for presentation_id in user.presentations:
+    for presentation_id in user.files:
         user, presentation = delete_presentation(user, presentation_id)
     user = User(users_collection.find_one_and_delete({'username': username}))
     return user

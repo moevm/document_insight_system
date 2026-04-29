@@ -11,6 +11,7 @@ from main.checker import check
 from main.parser import parse
 from root_logger import get_root_logger
 from app.db.methods import check as check_methods
+from app.db.methods import file as file_methods
 from app.db.methods import celery_check as celery_check_methods
 
 config = ConfigParser()
@@ -83,7 +84,7 @@ def convert_check_file_to_pdf(self, check_obj, filepath, rewrite=False):
     try:
         filename = check_obj['filename']
         pdf_id = check_obj['conv_pdf_fs_id']
-        db_methods.write_pdf(filename, filepath, pdf_id, rewrite=rewrite)
+        file_methods.write_pdf(filename, filepath, pdf_id, rewrite=rewrite)
         return check_obj
     except Exception as e:
         logger.error(

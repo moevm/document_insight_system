@@ -2,8 +2,8 @@ from app.db.db_main import get_files_info_collection, get_users_collection
 from app.db.methods.client import get_client, get_db, get_fs
 from os.path import basename
 from bson import ObjectId
-from gridfs import NoFile
-
+from gridfs import NoFile, errors as gridfs_errors
+from pymongo import errors as pymongo_errors
 from app.utils.converter import convert_to
 
 from app.db.types.Presentation import Presentation
@@ -34,36 +34,36 @@ def add_file_info_and_content(username, filepath, file_type, file_id=None):
     # parsed_file's content in GridFS (file_id = file_info_id)
     add_file_to_db(filename, filepath, file_info_id)
     # add parsed_file to user info
-    users_collection.update_one({'username': username}, {"$push": {'presentations': file_info_id}})
+    users_collection.update_one({'username': username}, {"$push": {'files': file_info_id}})
     return file_info_id
 
 
 # Returns presentations with given id or None
-def get_presentation(presentation_id):
-    file = files_info_collection.find_one({'_id': presentation_id})
+def get_presentation(file_id):
+    file = files_info_collection.find_one({'_id': file_id})
     if file is not None:
         return Presentation(file)
     else:
         return None
 
 
-# Returns presentations of given user with given id or None
+# Returns files of given user with given id or None
 def find_presentation(user, presentation_name):
-    presentations = []
-    for presentation_id in user.presentations:
-        presentations.append(get_presentation(presentation_id))
+    files = []
+    for presentation_id in user.files:
+        files.append(get_presentation(presentation_id))
     presentation = next(
-        (x for x in presentations if x.name == presentation_name), None)
+        (x for x in files if x.name == presentation_name), None)
     if presentation is not None:
         return presentation
     else:
         return None
 
 
-# Deletes presentations with given id, deleting also its checks, returns presentations
+# Deletes files with given id, deleting also its checks, returns files
 def delete_presentation(user, presentation_id):
-    if presentation_id in user.presentations:
-        user.presentations.remove(presentation_id)
+    if presentation_id in user.files:
+        user.files.remove(presentation_id)
         edit_user(user)
         presentation = get_presentation(presentation_id)
         for check_id in presentation.checks:
@@ -75,16 +75,35 @@ def delete_presentation(user, presentation_id):
         return user, get_presentation(presentation_id)
 
 
-def write_pdf(filename, filepath):
-    converted_filepath = convert_to(filepath, target_format='pdf')
-    return add_file_to_db(filename, converted_filepath)
+def get_pdf_id(file_id=None):
+    if not file_id: file_id = ObjectId()
+    return file_id
 
 
-def add_file_to_db(filename, filepath, file_id=None):
+def write_pdf(filename, filepath, file_id=None, rewrite=False):
+    converted_filepath = convert_to(filepath, target_format="pdf")
+    return add_file_to_db(filename, converted_filepath, file_id, rewrite=rewrite)
+
+
+
+def add_file_to_db(filename, filepath, file_id=None, rewrite=False):
+    def write_file(filename, filepath, file_id):
+        with open(filepath, "rb") as file:
+            fs.upload_from_stream_with_id(file_id, filename, file)
+
     if not file_id:
         file_id = ObjectId()
-    fs.upload_from_stream_with_id(file_id, filename, open(filepath, 'rb'))
-    return file_id
+    elif type(file_id) is str:
+        file_id = ObjectId(file_id)
+    try:
+        write_file(filename, filepath, file_id)
+        return file_id
+    except (pymongo_errors.DuplicateKeyError, gridfs_errors.FileExists) as exc:
+        if rewrite:
+            fs.delete(file_id)
+            write_file(filename, filepath, file_id)
+            return file_id
+        raise exc
 
 
 def write_file_from_db_file(file_id, abs_filepath):

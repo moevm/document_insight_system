@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from app.db.types.Packable import Packable
 from app.main.check_packs import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO
 
-# You shouldn't create this or change username and presentations explicitly
+# You shouldn't create this or change username and files explicitly
 
 class User(Packable, UserMixin):
     def __init__(self, dictionary=None):
@@ -12,7 +12,7 @@ class User(Packable, UserMixin):
         self.username = dictionary.get('username', '')
         self.name = dictionary.get('name', '')
         self.password_hash = dictionary.get('password_hash', '')
-        self.presentations = dictionary.get('presentations', [])
+        self.files = dictionary.get('files', [])
         self.file_type = dictionary.get('file_type', DEFAULT_REPORT_TYPE_INFO)
         try:
             self.criteria = dictionary.get('criteria', BASE_PACKS.get(self.file_type['type']).name)
