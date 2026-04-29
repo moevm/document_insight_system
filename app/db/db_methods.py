@@ -167,6 +167,7 @@ def add_file_to_db(filename, filepath, file_id=None, rewrite=False):
         file_id = ObjectId(file_id)
     try:
         write_file(filename, filepath, file_id)
+        return file_id
     except (pymongo_errors.DuplicateKeyError, gridfs_errors.FileExists) as exc:
         if rewrite:
             fs.delete(file_id)
