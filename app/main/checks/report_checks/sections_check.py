@@ -9,7 +9,7 @@ from ..base_check import BaseReportCriterion, answer
 class LRReportSectionCheck(BaseReportCriterion):
     # TODO: DEPRECATED
     label = "Проверка соответствия заголовков разделов требуемым стилям"
-    description = ''
+    _description = ''
     id = "lr_sections_check"
 
     def __init__(self, file_info, presets: str = 'LR_HEADERS',
@@ -32,7 +32,7 @@ class LRReportSectionCheck(BaseReportCriterion):
         self.file.parse_effective_styles()
         result = True
         result_str = ""
-        for preset in self.presets:
+        for _, preset in self.presets.items():
             full_style = self.construct_style_from_description(preset["style"])
             precheck_dict = {key: preset["style"].get(key) for key in self.prechecked_props}
             precheck_style = self.construct_style_from_description(precheck_dict)

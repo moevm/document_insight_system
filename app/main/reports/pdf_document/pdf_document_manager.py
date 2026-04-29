@@ -1,6 +1,6 @@
 
 # import pdfplumber
-import fitz
+import pymupdf
 
 
 from app.utils import convert_to
@@ -9,10 +9,10 @@ class PdfDocumentManager:
     def __init__(self, path_to_file, pdf_filepath):
         if not pdf_filepath:
             # self.pdf_file = pdfplumber.open(convert_to(path_to_file, target_format='pdf'))
-            self.pdf_file = fitz.open(convert_to(path_to_file, target_format='pdf'))
+            self.pdf_file = pymupdf.open(convert_to(path_to_file, target_format='pdf'))
         else:
             # self.pdf_file = pdfplumber.open(pdf_filepath)
-            self.pdf_file = fitz.open(pdf_filepath)
+            self.pdf_file = pymupdf.open(pdf_filepath)
         self.pages = [self.pdf_file.load_page(page_num) for page_num in range(self.pdf_file.page_count)]
         self.page_count_all = self.pdf_file.page_count
         # self.page_count = len(self.pages)
@@ -21,8 +21,10 @@ class PdfDocumentManager:
         # self.bboxes = []
         # self.only_text_on_page = {}
 
-    def get_text_on_page(self):
-        return {page_num + 1: page.get_text() for page_num, page in enumerate(self.pages)}
+    def get_text_on_page(self, start_page=None, end_page=None):
+        start_page = start_page or 0
+        end_page = end_page or len(self.pages)
+        return {page_num + 1: page.get_text() for page_num, page in enumerate(self.pages[start_page:end_page])}
 
     # def get_text_on_page(self):
     #     return {page + 1: self.pages[page].extract_text() for page in range(self.page_count_all)}
@@ -34,7 +36,7 @@ class PdfDocumentManager:
         total_height = 0
         for page_num in range(page_without_pril):
             page = self.pdf_file[page_num]
-            images = self.pdf_file.get_page_images(page)
+            images = self.pdf_file.get_page_images(page_num)
             for image in images:
                 image_coord = page.get_image_bbox(image[7], transform=0)    # might be [1.0, 1.0, -1.0, -1.0]
                 image_height = image_coord[3] - image_coord[1]
@@ -50,7 +52,12 @@ class PdfDocumentManager:
         available_space = (height - top_margin - bottom_margin)*page_without_pril
 
         return available_space
-
+    
+    def page_rows_text(self, page_num):
+        page = self.pdf_file.load_page(page_num)
+        text_blocks = page.get_text("blocks")
+        return text_blocks
+    
     # def get_only_text_on_page(self):
     #     if not self.only_text_on_page:
     #         only_text_on_page = {}

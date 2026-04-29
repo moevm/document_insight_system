@@ -1,15 +1,9 @@
-from .find_def_sld import FindDefSld
-from .find_tasks import FindTasks
-from .further_dev import FurtherDev
-from .search_keyword import SearchKeyWord
-from .sld_enum import SldEnumCheck
-from .sld_num import SldNumCheck
-from .sld_similarity import SldSimilarity
-from .template_name import PresTemplateNameCheck
-from .title_format import TitleFormatCheck
-from .pres_right_words import PresRightWordsCheck
-from .image_share import PresImageShareCheck
-from .banned_words import PresBannedWordsCheck
-from .find_theme_in_pres import FindThemeInPres
-from .verify_git_link import PresVerifyGitLinkCheck
-from .empty_slide_check import PresEmptySlideCheck
+from .._dynamic_import import setup_dynamic_import
+from ..base_check import BaseCriterion
+
+
+__all__ = setup_dynamic_import(
+    module_globals=globals(),
+    base_class=BaseCriterion,
+    current_file=__file__
+)

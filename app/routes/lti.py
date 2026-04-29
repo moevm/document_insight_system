@@ -14,8 +14,7 @@ from app.server_consts import ALLOWED_EXTENSIONS
 lti = Blueprint('lti', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')
 
-
-@lti.route('/lti', methods=['POST'])
+@lti.route('/', methods=['POST'])
 def lti_main():
     if check_request(request):
         temporary_user_params = request.form
@@ -68,7 +67,6 @@ def lti_main():
         edit_user(lti_user)
 
         login_user(lti_user)
-        return redirect(url_for('upload'))
+        return redirect(url_for('upload.upload_main'))
     else:
         abort(403)
-        

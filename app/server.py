@@ -2,8 +2,8 @@ import os
 from sys import argv
 from flask import (Flask, redirect, render_template,
                    request, url_for)
-from flask_login import (LoginManager, current_user, login_user)
-from flask_recaptcha import ReCaptcha
+from flask_login import (LoginManager, current_user, login_required,
+                         login_user, logout_user)
 
 import servants.user as servants_user
 from app.db.methods.user import get_user
@@ -22,7 +22,7 @@ from routes.user import user_blueprint
 from routes.tasks import tasks
 from routes.upload import upload
 from routes.recheck import recheck
-from routes.results import results
+from routes.results import results_bp
 from routes.api import api
 from routes.criterion_pack import criterion_pack
 from routes.criterion_packs import criterion_packs
@@ -40,11 +40,12 @@ logger = get_root_logger('web')
 
 app = Flask(__name__, static_folder="./../src/", template_folder="./templates/")
 app.config.from_pyfile('settings.py')
-app.recaptcha = ReCaptcha(app=app)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['CELERY_RESULT_BACKEND'] = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
 app.config['CELERY_BROKER_URL'] = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
+app.config['LINK_FOR_BUGS_REPORT'] = os.environ.get("LINK_FOR_BUGS_REPORT", f"")
+app.config['SUPPORT_MAIL'] = os.environ.get("SUPPORT_MAIL", f"support@moevm.info")
 
 app.register_blueprint(admin, url_prefix='/admin')
 app.register_blueprint(users, url_prefix='/users')
@@ -57,7 +58,7 @@ app.register_blueprint(user_blueprint, url_prefix='/user')
 app.register_blueprint(tasks, url_prefix='/tasks')
 app.register_blueprint(upload, url_prefix='/upload')
 app.register_blueprint(recheck, url_prefix='/recheck')
-app.register_blueprint(results, url_prefix='/results')
+app.register_blueprint(results_bp, url_prefix='/results')
 app.register_blueprint(api, url_prefix='/api')
 app.register_blueprint(criterion_pack, url_prefix='/criterion_pack')
 app.register_blueprint(criterion_packs, url_prefix='/criterion_packs')
@@ -119,7 +120,6 @@ def default():
         return redirect(url_for("upload.upload_main"))
     else:
         return render_template("intro_page.html")
-
 
 # Disable caching:
 

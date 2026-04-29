@@ -43,9 +43,8 @@ pack "BaseReportCriterionPackMd"
     ]
 ]
 '''
-
+import re
 import markdown
-from md2pdf.core import md2pdf
 import re
 from ..document_uploader import DocumentUploader
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
@@ -58,6 +57,9 @@ class MdUploader(DocumentUploader):
         self.headers_main = ''
         self.html_text = ''
         self.headers_page = 1
+        self.str_chapters = None
+        self.tree_chapters = None
+
 
     def upload(self):
         with open(self.filepath, "r", encoding="utf-8") as f:
@@ -69,11 +71,13 @@ class MdUploader(DocumentUploader):
         self.paragraphs = self.make_paragraphs(self.html_text)
         self.parse_effective_styles()
         self.pdf_filepath = self.filepath.split('.')[0]+'.pdf'
+
+        from md2pdf.core import md2pdf  # some OS lib err on import. worked / used only in 'worker' service
         self.pdf_file = PdfDocumentManager(self.filepath, md2pdf(self.pdf_filepath, md_file_path=self.filepath))
     
     def make_paragraphs(self, html_text):
         html_text = html_text.replace("<li>", "").replace("</li>", "").replace("</ol>", "").replace("<ol>", "")
-        self.paragraphs = html_text.split('\n')
+        self.paragraphs = [paragraph for paragraph in html_text.split('\n') if paragraph.strip()]
         return self.paragraphs
 
     def page_counter(self): # we need this just to find a last page and make link to the literature in banned_words_in_literature 
@@ -97,7 +101,7 @@ class MdUploader(DocumentUploader):
 
     def get_main_headers(self, work_type):
         if not self.headers_main:
-            header_main_regex = "<h1>(.*?)<\/h1>"
+            header_main_regex = r"<h1>(.*?)<\/h1>"
             self.headers_main = re.findall(header_main_regex, self.html_text)[0]
         return self.headers_main
 
@@ -105,6 +109,8 @@ class MdUploader(DocumentUploader):
         for par in self.paragraphs:
             if len(par.strip()) > 0:
                 paragraph = {"text": par, "runs": []}
+                if '<h1>' in paragraph["text"]:
+                    paragraph["runs"].append({"text": par, "style": "heading 1"})
                 if '<h2>' in paragraph["text"]:
                     paragraph["runs"].append({"text": par, "style": "heading 2"})
                 elif '<h3>' in paragraph["text"]:
@@ -121,7 +127,6 @@ class MdUploader(DocumentUploader):
                 else:
                     paragraph["runs"].append({"text": par, "style": 'body text'})           
                 self.styled_paragraphs.append(paragraph)
-            
         return self.styled_paragraphs  
 
     def make_chapters(self, work_type):
@@ -149,6 +154,44 @@ class MdUploader(DocumentUploader):
                                 "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind})    
         return self.chapters   
     
+    def chapters_to_str(self):
+        if self.str_chapters: return self.str_chapters
+        result = []
+        for chapter in self.chapters:
+            result.append({
+                "style": chapter['style'],
+                "name": re.sub(r"<[\/\w]*>", "", chapter['text']),
+                "text": "".join(re.sub(r"<[\/\w]*>", "", child['text']) for child in chapter['child'])
+            })
+        self.str_chapters = result
+        return result
+    
+    def build_chapter_tree(self, chapters):
+        if self.tree_chapters: return self.tree_chapters
+        tree = []
+        stack = [tree]
+        
+        for chapter in chapters:
+            level = int(chapter['style'].split(' ')[-1])-1
+            
+            while len(stack) > level:
+                stack.pop()
+                
+            parent = stack[-1] if stack else []
+            new_chapter = {
+                'name': chapter['name'],
+                'text': chapter['text'],
+                'children': []
+            }
+            
+            parent.append(new_chapter)
+            stack.append(new_chapter['children'])
+            
+            chapter['node'] = new_chapter
+        
+        self.tree_chapters = tree
+        return tree
+    
     def get_tables_size(self):
         count_table_line = 0
         count_paragraph = len(self.paragraphs)
@@ -161,7 +204,7 @@ class MdUploader(DocumentUploader):
         if not self.literature_header:
             for header in self.make_chapters(work_type):
                 header_text = header["text"].lower()
-                if header_text.find('список литературы') >= 0:
+                if header_text.find('Список использованных источников'.lower()) >= 0:
                     self.literature_header = header
         return self.literature_header
     
@@ -174,7 +217,7 @@ class MdUploader(DocumentUploader):
     def parse_md_file(self):
         md_text = self.upload()
         self.parse(md_text)
-        self.get_main_headers()
+        self.get_main_headers(work_type="VKR")
         self.make_chapters(work_type="VKR")
         self.find_literature_vkr(work_type="VKR")
         return f"Заголовки:\n{self.headers_main}\n\nГлавы\n{self.chapters}\n\nСписок литературы:\n\n{self.literature_header}"

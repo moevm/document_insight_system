@@ -22,7 +22,8 @@ class DocxUploader(DocumentUploader):
         self.file = None
         self.special_paragraph_indices = {}
         self.headers_page = 0
-        self.page_count = 0
+        self.page_count = 0     # без приложений
+        self.literature_page = 0
 
     def upload(self, file, pdf_filepath=''):
         self.file = docx.Document(file)
@@ -43,28 +44,27 @@ class DocxUploader(DocumentUploader):
                 tmp_paragraphs.append(Paragraph(paragraphs[i]))
         return tmp_paragraphs
 
-    def make_chapters(self, work_type):
+    def make_chapters(self, work_type='VKR'):
         if not self.chapters:
             tmp_chapters = []
-            if work_type == 'VKR':
-                # find headers
-                header_ind = -1
-                par_num = 0
-                head_par_ind = -1
-                for par_ind in range(len(self.styled_paragraphs)):
-                    head_par_ind += 1
-                    style_name = self.paragraphs[par_ind].paragraph_style_name.lower()
-                    if style_name.find("heading") >= 0:
-                        header_ind += 1
-                        par_num = 0
-                        tmp_chapters.append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"].strip(),
-                                             "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind,
-                                             "child": []})
-                    elif header_ind >= 0:
-                        par_num += 1
-                        tmp_chapters[header_ind]["child"].append(
-                            {"style": style_name, "text": self.styled_paragraphs[par_ind]["text"],
-                             "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind})
+            # find headers
+            header_ind = -1
+            par_num = 0
+            head_par_ind = -1
+            for par_ind in range(len(self.styled_paragraphs)):
+                head_par_ind += 1
+                style_name = self.paragraphs[par_ind].paragraph_style_name.lower()
+                if style_name.find("heading") >= 0:
+                    header_ind += 1
+                    par_num = 0
+                    tmp_chapters.append({"style": style_name, "text": self.styled_paragraphs[par_ind]["text"].strip(),
+                                            "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind,
+                                            "child": []})
+                elif header_ind >= 0:
+                    par_num += 1
+                    tmp_chapters[header_ind]["child"].append(
+                        {"style": style_name, "text": self.styled_paragraphs[par_ind]["text"],
+                            "styled_text": self.styled_paragraphs[par_ind], "number": head_par_ind})
             self.chapters = tmp_chapters
         return self.chapters
 
@@ -125,14 +125,14 @@ class DocxUploader(DocumentUploader):
                     break
         return self.headers_page
     
-    def find_literature_page(self, work_type):
+    def find_literature_page(self, work_type=None):
         if not self.literature_page:
             for k, v in self.pdf_file.text_on_page.items():
                 line = v[:40] if len(v) > 21 else v
                 if re.search('список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)', line.strip().lower()):
                     break
                 self.literature_page += 1
-        self.literature_page += 1
+            self.literature_page += 1
         return self.literature_page
 
     def find_literature_vkr(self, work_type):

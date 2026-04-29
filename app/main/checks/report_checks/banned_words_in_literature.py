@@ -5,14 +5,17 @@ from ..base_check import BaseReportCriterion, answer, morph
 
 class BannedWordsInLiteratureCheck(BaseReportCriterion):
     label = "Проверка наличия запрещенных слов в списке литературы"
-    description = 'Запрещено упоминание слова "wikipedia"'
+    _description = 'Проверка наличия запрещенных слов, например: '
     id = 'banned_words_in_literature'
-
-    def __init__(self, file_info, banned_words=["wikipedia"]):
+    banned_words = ["habr", "medium", "stackoverflow", "sky.pro", "geeksforgeeks", "wikipedia"] 
+    
+    def __init__(self, file_info, banned_words=None):
         super().__init__(file_info)
+        if banned_words:
+            self.banned_words += banned_words
+        self.banned_words = [morph.normal_forms(word)[0] for word in self.banned_words]
         self.headers_page = 1
         self.literature_header = []
-        self.banned_words = [morph.normal_forms(word)[0] for word in banned_words]
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
 
     def late_init_vkr(self):
@@ -24,6 +27,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         detected_words_dict = {}
+        # TODO: проверить совместимость / дублируемость LR и VKR
         if self.file_type['report_type'] == 'LR':
             list_of_literature = self.find_literature()
             if len(list_of_literature) == 0:
@@ -33,7 +37,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
             self.late_init_vkr()
             header = self.literature_header
             if not header:
-                return answer(True, f"Нет списка использованных источников!<br><br>Если в вашей работе есть список литературы, убедитесь в правильности формата заголовка ")
+                return answer(False, f"Нет списка использованных источников!<br><br>Если в вашей работе есть список литературы, убедитесь в правильности формата заголовка ")
             if not header["child"]:
                 return answer(False, "Не найдено ни одного источника.")
             header_number = header["number"]
@@ -48,7 +52,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
                         else:
                             detected_words_dict[child_number] = banned_word
         else:
-            return answer(False, 'Во время обработки произошла критическая ошибка')
+            return answer(False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев')
         if detected_words_dict:
             result_str = ""
             for i in sorted(detected_words_dict.keys()):
@@ -88,3 +92,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
             if re.fullmatch(f'{self.name_pattern}', text_string):    
                 start_index = i
         return start_index
+
+    @classmethod
+    def description(cls, pack: str | None = None):
+        return cls._description + ','.join(cls.banned_words)

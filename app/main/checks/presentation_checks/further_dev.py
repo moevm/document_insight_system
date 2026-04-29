@@ -8,7 +8,7 @@ from ..base_check import BasePresCriterion, answer
 
 class FurtherDev(BasePresCriterion):
     label = "Наличие направлений дальнейшего развития"
-    description = 'Поиск направления развития в разделе "Заключение"'
+    _description = 'Поиск направления развития в разделе "Заключение"'
     id = 'future_dev'
 
     def __init__(self, file_info, conclusion='Заключение'):
@@ -25,8 +25,4 @@ class FurtherDev(BasePresCriterion):
         if stemming.find_further_development:
             return answer(True, 'Направления развития найдены')
         else:
-            return answer(False, 'Направления развития не найдены в заключении. Попробуйте обозначить их более явной формулировкой.')
-        #results = check_similarity(goals, conclusions)
-
-        #return answer(results[1].get('found_dev'),
-        #              format_header(results[1].get('dev_sentence')), *concl_sld['verdict'])
+            return answer(False, 'Направления развития не найдены в заключении. Попробуйте обозначить их более явной формулировкой, например: "Направления дальнейших исследований"')

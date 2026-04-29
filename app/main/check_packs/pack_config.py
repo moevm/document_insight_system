@@ -18,6 +18,12 @@ BASE_PRES_CRITERION = [
     ['pres_empty_slide'],
     ['theme_in_pres_check'],
     ['verify_git_link'],
+    ["slide_headers_duplication_check"],
+    ['pres_image_capture'],
+    ['task_tracker'],
+    ['overview_in_tasks'],
+    ['pres_aspect_ratio_check'],
+    ['pres_was_were_check'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
@@ -34,6 +40,7 @@ BASE_REPORT_CRITERION = [
     ["literature_references"],
     ["image_references"],
     ["table_references"],
+    ["report_table_percentage_check"],
     ["first_pages_check"],
     ["main_character_check"],
     ["needed_headers_check"],
@@ -43,6 +50,10 @@ BASE_REPORT_CRITERION = [
     ["spelling_check"],
     ["max_abstract_size_check"],
     ["theme_in_report_check"],
+    ["empty_task_page_check"],
+    ["water_in_the_text_check"],
+    ["report_task_tracker"],
+    ["report_was_were_check"],
 ]
 
 DEFAULT_TYPE = 'pres'

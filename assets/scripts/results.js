@@ -88,6 +88,10 @@ $(function(){
                 canvas = document.getElementById('the-canvas');
                 ctx = canvas.getContext('2d');
             
+                ctx.font = "20px Times New Roman";
+                ctx.textAlign = "center";
+                ctx.fillText("Конвертация файла в PDF...", canvas.width / 2, canvas.height / 2);
+
                 pdfjsLib
                     .getDocument(href)
                     .promise.then(pdfDoc_ => {
@@ -143,3 +147,36 @@ $(function(){
         recheckStatus()
     }
 });
+
+document.querySelectorAll('.toggleresult').forEach(item => {
+    item.addEventListener('click', event => {
+        const nextRow = item.parentNode.nextElementSibling;
+        if (nextRow.classList.contains('hidden')) {
+            nextRow.classList.remove('hidden');
+            nextRow.classList.add('visible');
+        } else {
+            nextRow.classList.add('hidden');
+            nextRow.classList.remove('visible');
+        }
+    });
+});
+
+const toggleButtonResult = document.getElementById('toggleButtonResult');
+if (toggleButtonResult) {
+    toggleButtonResult.addEventListener('click', () => {
+        const button = document.getElementById('toggleButtonResult');
+        if (button.innerHTML.trim() === '<i class="bi bi-chevron-double-down"></i>') {
+            button.innerHTML = '<i class="bi bi-chevron-double-up"></i>';
+            document.querySelectorAll('.hidden').forEach(row => {
+                row.classList.remove('hidden');
+                row.classList.add('visible');
+            });
+        } else {
+            button.innerHTML = '<i class="bi bi-chevron-double-down"></i>';
+            document.querySelectorAll('.visible').forEach(row => {
+                row.classList.remove('visible');
+                row.classList.add('hidden');
+            });
+        }
+    });
+}

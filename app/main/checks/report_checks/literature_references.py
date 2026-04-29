@@ -1,24 +1,36 @@
 import re
-
+from .style_check_settings import StyleCheckSettings
 from ..base_check import BaseReportCriterion, answer
+from collections import Counter
 
 
 class ReferencesToLiteratureCheck(BaseReportCriterion):
     label = "Проверка наличия ссылок на все источники"
-    description = ''
+    _description = ''
     id = 'literature_references'
 
-    def __init__(self, file_info, min_ref=1, max_ref=1000):
+    def __init__(self, file_info, min_ref=1, max_ref=1000, headers_map=None):
         super().__init__(file_info)
         self.headers = []
-        self.literature_header = []
+        self.literature_header = None
+        self.literature_reference_text = []
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
-        self.min_ref = min_ref
-        self.max_ref = max_ref
+        if headers_map:
+            self.config = headers_map
+        else:
+            self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
 
     def late_init_vkr(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
+        self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
         self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
+        if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
+            self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['min_ref_for_literature_references_check']
+            self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['mах_ref_for_literature_references_check']
+        else:
+            if 'any_header' in StyleCheckSettings.CONFIGS.get(self.config):
+                self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['min_ref_for_literature_references_check']
+                self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['mах_ref_for_literature_references_check']
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -26,6 +38,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         number_of_sources = 0
         start_literature_par = 0
         result_str = ''
+        # TODO: проверить совместимость / дублируемость LR и VKR
         if self.file_type['report_type'] == 'LR':
             start_literature_par = self.find_start_paragraph()
             if start_literature_par:
@@ -36,23 +49,26 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             self.late_init_vkr()
             header = self.literature_header
             if not header:
-                return answer(True,
+                return answer(False,
                               f'Не найден Список использованных источников.<br><br>Если в вашей работе есть список источников, проверьте корректность использования стилей.')
             start_literature_par = header["number"]
             number_of_sources = self.count_sources_vkr(header)
         else:
-            return answer(False, 'Во время обработки произошла критическая ошибка')
+            return answer(False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев')
         if not number_of_sources:
             return answer(False,
                           f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
-        references = self.search_references(start_literature_par)
-        all_numbers = set()
-        for i in range(1, number_of_sources + 1):
-            all_numbers.add(i)
+
+        duplicates = self.checking_duplicate_sources()
+        references, ref_sequence = self.search_references(start_literature_par)
+        all_numbers = set(range(1, number_of_sources + 1))
         if len(references.symmetric_difference(all_numbers)) == 0:
             if not self.min_ref <= number_of_sources <= self.max_ref:
-                return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть от {self.min_ref} до {self.max_ref}.')
-            else:
+                return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть не менее {self.min_ref}.')
+            elif ref_sequence:
+                result_str += f"Источники должны нумероваться в порядке упоминания в тексте. Неправильные последовательности: {'; '.join(num for num in ref_sequence)}"
+                return answer(False, result_str)
+            elif not duplicates:
                 return answer(True, f"Пройдена!")
         elif len(references.difference(all_numbers)):
             if len(all_numbers.difference(references)) == 0:
@@ -65,39 +81,106 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         else:
             all_numbers -= references
             result_str = f'Упомянуты не все источники из списка.<br>Список источников без упоминания: {", ".join(str(num) for num in sorted(all_numbers))} <br> Всего источников: {number_of_sources}<br><br>'
+
+        if duplicates:
+            message = ''
+            for duplicate in duplicates:
+                message += f'<li>Источники с номерами: {duplicate[1]} ссылаются на один и тот же источник: {duplicate[0]};</li>\n'
+            result_str += (f'Повторяющиеся источники:'
+                           f'<ul>\n'
+                           f'{message}'
+                           f'</ul>')
         result_str += '''
                     Если возникли проблемы, попробуйте сделать следующее:
                     <ul>
-                        <li>Убедитесь, что для ссылки на источник используются квадратные скобки;</li>
-                        <li>Убедитесь, что для оформления списка литературы был использован нумированный список;</li>
+                        <li>Убедитесь, что для ссылки на источник используются квадратные скобки (т.е. [1], [2-4]).</li>
+                        <li>Убедитесь, что для оформления списка литературы был использован нумированный список.</li>
                         <li>Убедитесь, что после и перед нумированным списком отсутствуют непустые абзацы.</li>
+                        <li>Убедитесь, что один источник не разбит на две строки клавишей "Enter".</li>
+                        <li>Убедитесь, что источники не дублируются.</li>
                     </ul>
                     '''
         return answer(False, result_str)
 
+    def get_text_in_table(self, index_table: int) -> str:
+        """Функция получения всего текста из таблицы"""
+        text = ''
+        for cell in self.file.tables[index_table]._cells:
+            if cell.text.strip():
+                text += cell.text.strip()
+        return text
+
+    def search_references_in_text(self, text: str, prev_ref, array_of_references, ref_sequence) -> int:
+        """Функция поиска ссылок в переданном тексте"""
+        reg_exp = r'\[[\^]{0,1}[\d \-,]+\]'
+        detected_references = re.findall(reg_exp, text)
+        if detected_references:
+            for reference_raw in detected_references:
+                reference = reference_raw.replace('^', '')  # TODO: kostyl'...
+                for one_part in re.split(r'[\[\],]', reference):
+                    if re.match(r'\d+[ \-]+\d+', one_part):
+                        start, end = re.split(r'[ -]+', one_part)
+                        for k in range(int(start), int(end) + 1):
+                            prev_ref = self.add_references(k, prev_ref, array_of_references, ref_sequence)
+                    elif one_part != '':
+                        prev_ref = self.add_references(int(one_part), prev_ref, array_of_references, ref_sequence)
+        return prev_ref
+
     def search_references(self, start_par):
+        """Функция поиска ссылок в документе"""
+        prev_ref = 0
+        ref_sequence = []
         array_of_references = set()
         for i in range(0, start_par):
-            if isinstance(self.file.paragraphs[i], str):
-                detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i])
-            else:
-                detected_references = re.findall(r'\[[\d \-,]+\]', self.file.paragraphs[i].paragraph_text)
-            if detected_references:
-                for reference in detected_references:
-                    for one_part in re.split(r'[\[\],]', reference):
-                        if re.match(r'\d+[ \-]+\d+', one_part):
-                            start, end = re.split(r'[ -]+', one_part)
-                            for k in range(int(start), int(end) + 1):
-                                array_of_references.add(k)
-                        elif one_part != '':
-                            array_of_references.add(int(one_part))
-        return array_of_references
+            paragraph_text = self.file.paragraphs[i] if isinstance(self.file.paragraphs[i], str) else self.file.paragraphs[i].paragraph_text
+            match = re.search(r'Таблица ([.\d]+)', paragraph_text)
+            table_text = ''
+            if match:
+                index_table = int(match.group(1)) - 1
+                table_text = self.get_text_in_table(index_table)
+
+            paragraph_text += table_text
+            prev_ref = self.search_references_in_text(paragraph_text, prev_ref, array_of_references, ref_sequence)
+
+        if ref_sequence:
+            if ref_sequence[0][1] == '0':
+                ref_sequence[0] = ref_sequence[0].replace('[0],', '')
+        return array_of_references, ref_sequence
+
+    def add_references(self, k, prev_ref, array_of_references, ref_sequence):
+        if k not in array_of_references:
+            if k - prev_ref != 1:
+                ref_sequence.append(f'[{prev_ref}], [{k}]')
+            prev_ref = k
+        else:
+            if k - prev_ref == 1:
+                prev_ref = k
+        array_of_references.add(k)
+        return prev_ref
+
+    def checking_duplicate_sources(self) -> list:
+        """Функция нахождения дубликатов в источниках"""
+        counter = Counter([text.lower() for text in self.literature_reference_text])
+
+        duplicates = []
+        for text, count in counter.items():
+            if count >= 2:
+                positions_duplicates = [i + 1 for i, text_in_ref in enumerate(self.literature_reference_text) if text == text_in_ref.lower()]
+
+                if positions_duplicates:
+                    duplicates.append((
+                        self.literature_reference_text[positions_duplicates[0] - 1],
+                        positions_duplicates
+                    ))
+
+        return duplicates
+
 
     def find_start_paragraph(self):
         start_index = 0
         for i in range(len(self.file.paragraphs)):
             text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
-            if re.fullmatch(f'{self.name_pattern}', text_string):    
+            if re.fullmatch(f'{self.name_pattern}', text_string):
                 start_index = i
                 break
         return start_index
@@ -111,6 +194,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 break
             # if re.search(f"дата обращения", child["text"].lower()):
             literature_counter += 1
+            self.literature_reference_text.append(child["text"])
         return literature_counter
 
     def count_sources(self):
@@ -134,6 +218,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             for ind in range(first_string + 1, last_string):
                 if re.match(f"{literature_counter + 1}.", one_page[ind]):
                     literature_counter += 1
+                    self.literature_reference_text.append(one_page[ind])
         return literature_counter
 
     def search_literature_start_pdf(self):

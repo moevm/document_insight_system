@@ -1,15 +1,16 @@
-version: '2'
-
 services:
   web:
-    build: .
-    image: document_insight_system_image
+    build:
+      context: .
+      args:
+        - VERSION=${IMAGE_VERSION}
+    image: dis:web-image-${IMAGE_VERSION}
     restart: always
     ports:
       - "${WEB_PORT:-8080}:8080"
     depends_on:
       - mongodb
-      - worker
+      - redis
     env_file:
       - .env
     environment:
@@ -18,13 +19,18 @@ services:
       - CELERY_BROKER_URL=${REDIS_URL}
       - CELERY_RESULT_BACKEND=${REDIS_URL}
     volumes:
-      - presentation_files:/usr/src/project/files/
+      - files:/usr/src/project/files/
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     cpuset: ${CONTAINER_CPU:-0-1}
 
   worker:
-    image: document_insight_system_image
+    build:
+      context: .
+      dockerfile: Dockerfile_worker
+      args:
+        - VERSION=${IMAGE_VERSION}
+    image: dis:worker-image-${IMAGE_VERSION}
     restart: always
     command: celery --app=app.tasks.celery worker -n celery@worker --beat -Q ${CELERY_QUERIES} --loglevel=info
     environment:
@@ -34,15 +40,14 @@ services:
       - redis
       - mongodb
     volumes:
-      - presentation_files:/usr/src/project/files/
-      - language_tool_cache:/root/.cache/language_tool_python/
+      - files:/usr/src/project/files/
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     cpuset: ${CONTAINER_CPU:-0-1}
     mem_limit: ${WORKER_MEMORY:-1G}
 
   worker-dashboard:
-    image: document_insight_system_image
+    image: dis:worker-image-${IMAGE_VERSION}
     command: celery --broker=${REDIS_URL} flower --port=${FLOWER_PORT} --url_prefix=${FLOWER_PREFIX} --basic_auth=${FLOWER_AUTH} --persistent=True
     ports:
       - "${FLOWER_PORT}:5555"
@@ -67,16 +72,15 @@ services:
     cpuset: ${CONTAINER_CPU:-0-1}
 
   mongodb:
-    image: mongo:4.0.17-xenial
+    image: mongo:8-noble
     restart: always
     command:
       - '--wiredTigerCacheSizeGB=${MONGODB_CACHE_SIZE:-1}'
     volumes:
-      - ../slides_checker_mongo_data:/data/db
+      - ../dis_mongo_data:/data/db
     cpuset: ${CONTAINER_CPU:-0-1}
 
 volumes:
   flower_data:
-  language_tool_cache:
-  presentation_files:
+  files:
   redis_data:
