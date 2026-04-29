@@ -10,18 +10,19 @@ class ReportMainCharacterCheck(BaseReportCriterion):
     id = "main_character_check"
     priority = True
 
-    def __init__(self, file_info, tables_count_to_verify=8):
+    def __init__(self, file_info, tables_count_to_verify=8, edu_degree='bsc'):
         super().__init__(file_info)
         self.headers = []
         self.first_check_list = None
         self.second_check_list = None
         self.tables_count_to_verify = tables_count_to_verify
+        self.edu_degree = edu_degree
 
     def late_init(self):
         self.headers = self.file.make_headers(self.file_type["report_type"])
 
     def check(self):
-        self.first_check_list = copy.deepcopy(ReportMainPageSetting.FIRST_TABLE)
+        self.first_check_list = copy.deepcopy(ReportMainPageSetting.get_first_table(self.edu_degree))
         self.second_check_list = copy.deepcopy(ReportMainPageSetting.SECOND_TABLE)
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")

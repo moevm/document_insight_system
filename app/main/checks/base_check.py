@@ -14,7 +14,8 @@ class BaseCriterion:
     _description = None
     label = None
     id = None
-    priority = False  # if priority criterion is failed -> check is failed
+    priority = False    # if priority criterion is failed -> check is failed
+    warning = False     # warning priority doesn't effect to result score
 
     def __init__(self, file_info):
         self.file = file_info.get('file')
