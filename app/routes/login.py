@@ -12,4 +12,3 @@ def login_main():
     elif request.method == "POST":
         u = user.login(request.json)
         return u.username if u is not None and login_user(u, remember=True) else ""
-

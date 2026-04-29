@@ -1,4 +1,4 @@
-from db.db_methods import ConsumersDBManager
+from app.db.types.ConsumerDBManager import ConsumersDBManager
 from lti.contrib.flask import FlaskToolProvider
 from utils.mock_lti_auth import mock_lti_auth
 

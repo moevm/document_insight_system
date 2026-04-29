@@ -2,7 +2,7 @@ import logging
 import sys
 from datetime import datetime
 
-from db.db_methods import add_log
+from db.methods.log import add_log
 
 
 class MongoDBLoggingHandler(logging.StreamHandler):

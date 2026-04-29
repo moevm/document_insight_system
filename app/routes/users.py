@@ -2,9 +2,8 @@ import json
 from flask import abort, Blueprint, render_template, request, jsonify
 from flask_login import current_user
 from functools import wraps
-from app.db.db_methods import get_all_users, get_user
+from app.db.methods.user import get_user, get_user_cursor
 from utils import checklist_filter, format_check_for_table
-from db import db_methods
 
 users = Blueprint('users', __name__, template_folder='templates', static_folder='static')
 
@@ -16,6 +15,7 @@ def admin_required(route_func):
             return route_func(*args, **kwargs)
         abort(403)
     return my_wrapper
+
 
 @users.route("/data")
 @admin_required
@@ -63,7 +63,7 @@ def users_data():
     order = request.args.get("order", "")
     order = 'username' if not order else order
 
-    rows, count = db_methods.get_user_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+    rows, count = get_user_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
 
     response = {
         "total": count,
@@ -83,6 +83,7 @@ def users_data():
 @admin_required
 def index():
     return render_template('user_list.html')
+
 
 @users.route('/<username>', methods=["GET"])
 @admin_required
