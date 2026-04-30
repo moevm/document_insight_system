@@ -11,7 +11,7 @@ class ReportStyleCheck(BaseReportCriterion):
 
     default_key_properties = ("font_name", "alignment")
 
-    def __init__(self, file_info, header_styles=None, target_styles=None, key_properties=None, skip_first_page=True):
+    def __init__(self, file_info, header_styles=None, target_styles=None, key_properties=None, skip_first_page=True, max_percent=20.0):
         super().__init__(file_info)
         self.skip_first_page = skip_first_page
         if target_styles is None:
@@ -41,6 +41,7 @@ class ReportStyleCheck(BaseReportCriterion):
         else:
             self.key_properties = key_properties
         self.header_indices = set()
+        self.max_percent = max_percent
 
     def late_init(self):
         self.file.parse_effective_styles()
@@ -106,31 +107,62 @@ class ReportStyleCheck(BaseReportCriterion):
             base_index = self.get_index_after_skip()
         if base_index is None:
             return answer(True, "Нечего проверять: отчёт содержит не более одной непустой страницы.")
-        result = True
+
         result_str = ""
+
+        total_chars = 0
+        non_compliant_chars = 0
+
         valid_key_properties = tuple(
             map(lambda s: self.get_style_properties(s["style"]), self.target_styles))
+
         for i in range(base_index, len(self.file.styled_paragraphs)):
             if i in self.header_indices:
                 continue
+
             par = self.file.styled_paragraphs[i]
+            par_text = par["text"]
+            total_chars += len(par_text)
+
             cur_key_property = None
             for run in par["runs"]:
                 cur_key_property = self.get_style_properties(run["style"])
                 if cur_key_property in valid_key_properties:
                     break
+
             if cur_key_property not in valid_key_properties:
+                non_compliant_chars += len(par_text)
                 result = False
                 result_str += "<br>" if len(result_str) else ""
                 result_str += f'{",".join([Style._friendly_property_names[key] for key in self.key_properties])} в абзаце' \
-                              f' "{par["text"][:17] + "..." if len(par["text"]) > 20 else par["text"]}" ' \
+                              f' "{par_text[:17] + "..." if len(par_text) > 20 else par_text}" ' \
                               f'не соответствует ни одному из допустимых стилей текста.'
             else:
                 checked_style = self.get_style_by_key_property(cur_key_property)
                 err = self.style_diff(par, checked_style["style"])
                 result = result and len(err) == 0
+
+                if len(err) > 0:
+                    for run in par["runs"]:
+                        diff_lst = []
+                        run["style"].matches(checked_style["style"], diff_lst)
+                        if diff_lst:
+                            non_compliant_chars += len(run["text"])
+
                 err = list(map(lambda msg: f'Стиль "{checked_style["name"]}": ' + msg, err))
                 result_str += ("<br>".join(err) + "<br>" if len(err) else "")
+
+        if total_chars > 0:
+            result_percent = (non_compliant_chars / total_chars) * 100
+        else:
+            result_percent = 0
+
         if len(result_str) == 0:
-            result_str = "Форматирование текста соответствует требованиям."
-        return answer(result, result_str)
+            result_str = f"Проверка пройдена!"
+        elif result_percent < self.max_percent:
+            result_str = f"<b>Процент текста, не соответствующего стилям: {result_percent:.1f}%</b><br><br>" + result_str
+            return answer(result_percent / 100, result_str)
+        else:
+            result_str = f"<b>Процент текста, не соответствующего стилям: {result_percent:.1f}%, что превышает допущенный {self.max_percent}%</b><br><br>" + result_str
+
+        return answer(False, result_str)
