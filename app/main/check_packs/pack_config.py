@@ -22,6 +22,7 @@ BASE_PRES_CRITERION = [
     ['pres_image_capture'],
     ['task_tracker'],
     ['overview_in_tasks'],
+    ['pres_abbreviations_check'],
     ['pres_aspect_ratio_check'],
     ['pres_was_were_check'],
 ]
@@ -53,6 +54,7 @@ BASE_REPORT_CRITERION = [
     ["empty_task_page_check"],
     ["water_in_the_text_check"],
     ["report_task_tracker"],
+    ["report_abbreviations_check"],
     ["report_was_were_check"],
 ]
 
