@@ -84,6 +84,8 @@ class Logs(Packable):
         self.filename = dictionary.get('filename', None)
         self.funcName = dictionary.get('funcName', None)
         self.lineno = dictionary.get('lineno', None)
+        self.check_id = dictionary.get('check_id', None)
+        self.stage = dictionary.get('stage', None)
 
 
 class Check(PackableWithId):

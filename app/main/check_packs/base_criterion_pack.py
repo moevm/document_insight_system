@@ -1,5 +1,6 @@
 import logging
 import traceback
+from check_log_context import current_check_stage
 from .utils import init_criterions
 
 logger = logging.getLogger('root_logger')
@@ -27,6 +28,7 @@ class BaseCriterionPack:
         result = []
         failed_priority_check = False
         for criterion in self.criterions:
+            current_check_stage.set(criterion.id)
             try:
                 criterion_check_result = criterion.check()
             except Exception as e:
