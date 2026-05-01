@@ -72,3 +72,48 @@ def api_criteria_pack():
         'min_score': min_score
     })
     return {'data': f"Набор '{pack_name}' сохранен", 'time': datetime.now()}, 200
+
+
+@api.route("/results/logs/<string:_id>", methods=["GET"])
+@login_required
+def api_result_logs(_id):
+    try:
+        oid = ObjectId(_id)
+    except bson.errors.InvalidId:
+        abort(404)
+
+    check = db_methods.get_check(oid)
+    if check is None:
+        abort(404)
+
+    if not (current_user.is_admin or current_user.username == check.user or check.user == "api_access_token"):
+        abort(403)
+
+    limit = request.args.get("limit", "")
+    limit = int(limit) if str(limit).isnumeric() else 50
+    limit = min(max(limit, 1), 200)
+
+    offset = request.args.get("offset", "")
+    offset = int(offset) if str(offset).isnumeric() else 0
+    offset = max(offset, 0)
+
+    only_levels = request.args.get("levels", "")
+    levels = [lvl.strip().upper() for lvl in only_levels.split(",") if lvl.strip()]
+
+    filter_query = {"check_id": str(oid)}
+    if levels:
+        filter_query["levelname"] = {"$in": levels}
+
+    rows, count = db_methods.get_logs_cursor(filter=filter_query, limit=limit, offset=offset, sort="timestamp", order="desc")
+    return {
+        "total": count,
+        "rows": [{
+            "timestamp": item["timestamp"].strftime("%d.%m.%Y %H:%M:%S"),
+            "stage": item.get("stage", None),
+            "service-name": item["serviceName"],
+            "levelname": item["levelname"],
+            "message": item["message"],
+            "pathname": item["pathname"],
+            "lineno": item["lineno"],
+        } for item in rows],
+    }
