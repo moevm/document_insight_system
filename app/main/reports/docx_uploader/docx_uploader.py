@@ -242,6 +242,58 @@ class DocxUploader(DocumentUploader):
                 chapters_str += "&nbsp;&nbsp;&nbsp;&nbsp;" + header["text"] + "<br>"
         return chapters_str
 
+    def extract_images_with_captions(self, check_id):
+        from app.db.db_methods import save_image_to_db
+
+        image_found = False
+        image_data = None
+
+        # Проход по всем параграфам документа
+        for i, paragraph in enumerate(self.file.paragraphs):
+            # Проверяем, есть ли в параграфе встроенные объекты
+            for run in paragraph.runs:
+                if "graphic" in run._element.xml:  # может быть изображение
+
+                    # Извлечение бинарных данных изображения
+                    image_streams = run._element.findall('.//a:blip', namespaces={
+                        'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'})
+                    for image_stream in image_streams:
+                        embed_id = image_stream.get(
+                            '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed')
+                        if embed_id:
+                            image_found = True
+                            image_data = self.file.part.related_parts[embed_id].blob
+
+                # Если мы уже нашли изображение, ищем следующий непустой параграф для подписи
+                if image_found:
+                    # Переход к следующему параграфу
+                    next_paragraph_index = i + 1
+
+                    # Проверяем, есть ли следующий параграф
+                    if next_paragraph_index < len(self.file.paragraphs):
+                        while next_paragraph_index < len(self.file.paragraphs):
+                            next_paragraph = self.file.paragraphs[next_paragraph_index]
+                            next_paragraph_text = next_paragraph.text.strip()
+
+                            # Проверка, не содержит ли следующий параграф также изображение
+                            contains_image = any(
+                                "graphic" in run._element.xml for run in next_paragraph.runs
+                            )
+
+                            # Если параграф не содержит изображения и текст не пуст, то это подпись
+                            if not contains_image and next_paragraph_text:
+                                # Сохраняем изображение и его подпись
+                                save_image_to_db(check_id, image_data, next_paragraph_text)
+                                break
+                            else:
+                                save_image_to_db(check_id, image_data, "picture without caption")
+                                break
+                    else:
+                        save_image_to_db(check_id, image_data, "picture without caption")
+
+                    image_found = False  # Сброс флага, чтобы искать следующее изображение
+                    image_data = None  # Очистка данных изображения
+
 
 def main(args):
     file = args.file
