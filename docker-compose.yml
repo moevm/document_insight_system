@@ -31,6 +31,7 @@ services:
       args:
         - VERSION=${IMAGE_VERSION}
     image: dis:worker-image-${IMAGE_VERSION}
+    init: true
     restart: always
     command: celery --app=app.tasks.celery worker -n celery@worker --beat -Q ${CELERY_QUERIES} --loglevel=info
     environment:

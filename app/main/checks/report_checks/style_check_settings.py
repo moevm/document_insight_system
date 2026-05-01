@@ -97,7 +97,7 @@ class StyleCheckSettings:
         'any_header':
         {
             "style": HEADER_2_STYLE,
-            "docx_style": ["heading 2", "heading 3", "heading 4"],
+            "docx_style": ["heading 3"],
             "headers": ["Цель работы", "Выполнение работы", "Выводы"],
             "unify_regex": HEADER_2_REGEX,
             "regex": HEADER_2_REGEX,
@@ -107,7 +107,14 @@ class StyleCheckSettings:
             'max_count_for_banned_words_check': 6,
             'min_ref_for_literature_references_check': STD_MIN_LIT_REF,
             'mах_ref_for_literature_references_check': STD_MAX_LIT_REF
-        }
+        },
+        '1/2_header': {
+            "style": HEADER_2_REGEX,
+            "docx_style": ["heading 3", "heading 4"], 
+            "headers": [],
+            "unify_regex": None,
+            "regex": HEADER_2_REGEX,
+        },
     }
 
     VKR_CONFIG = {
