@@ -1,6 +1,7 @@
 from configparser import ConfigParser
+import logging.config
 import os
-from os.path import join, exists
+from os.path import dirname, join, exists
 
 from celery import Celery
 from celery.signals import worker_ready
@@ -18,6 +19,11 @@ config.read('app/config.ini')
 
 TASK_RETRY_COUNTDOWN = 60  # default = 3 * 60
 MAX_TASK_RETRIES = 3
+
+log_conf = join(dirname(__file__), 'logging.conf')
+if os.path.isfile(log_conf):
+    logging.config.fileConfig(log_conf, disable_existing_loggers=False)
+
 logger = get_root_logger('tasks')
 
 FILES_FOLDER = '/usr/src/project/files'

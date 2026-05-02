@@ -1,11 +1,12 @@
 import json
+import logging.config
 import os
 import shutil
 import tempfile
 from datetime import datetime, timedelta
-from os.path import join
-from sys import argv
 from io import StringIO
+from os.path import dirname, join
+from sys import argv
 
 import bson
 import pandas as pd
@@ -24,7 +25,7 @@ from lti_session_passback.lti import utils
 from lti_session_passback.lti.check_request import check_request
 from main.check_packs import BASE_PACKS, BaseCriterionPack, DEFAULT_REPORT_TYPE_INFO, DEFAULT_TYPE, REPORT_TYPES, \
     init_criterions, BASE_PRES_CRITERION, BASE_REPORT_CRITERION
-from root_logger import get_logging_stdout_handler, get_root_logger
+from root_logger import get_root_logger
 from servants import pre_luncher
 from tasks import create_task
 from utils import checklist_filter, decorator_assertion, get_file_len, format_check
@@ -53,6 +54,10 @@ from routes.capacity import capacity
 from routes.profile import profile
 
 from server_consts import UPLOAD_FOLDER
+
+log_conf = join(dirname(__file__), 'logging.conf')
+if os.path.isfile(log_conf):
+    logging.config.fileConfig(log_conf, disable_existing_loggers=False)
 
 logger = get_root_logger('web')
 
@@ -88,8 +93,7 @@ app.register_blueprint(version, url_prefix='/version')
 app.register_blueprint(capacity, url_prefix='/capacity')
 app.register_blueprint(profile, url_prefix='/profile')
 
-app.logger.addHandler(get_logging_stdout_handler())
-app.logger.propagate = False
+app.logger.propagate = True
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.init_app(app)

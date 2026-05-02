@@ -28,20 +28,25 @@ class MongoDBLoggingHandler(logging.StreamHandler):
                 stage=current_check_stage.get())
 
 
-def get_logging_stdout_handler():
-    logging_stdout_handler = logging.StreamHandler(sys.stdout)
-    logging_stdout_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('[%(asctime)s] {%(filename)s:%(funcName)s:%(lineno)d} %(levelname)s - %(message)s',
-                                  '%y-%m-%d %H:%M:%S')
-    logging_stdout_handler.setFormatter(formatter)
-    return logging_stdout_handler
-
-
 def get_root_logger(service_name):
     root_logger = logging.getLogger('root_logger')
     root_logger.handlers.clear()
     root_logger.setLevel(logging.DEBUG)
-    root_logger.addHandler(get_logging_stdout_handler())
-    root_logger.addHandler(MongoDBLoggingHandler(service_name))
+
+    line_formatter = None
+    for handler in logging.getLogger().handlers:
+        if handler.formatter is not None:
+            line_formatter = handler.formatter
+            break
+    if line_formatter is None:
+        line_formatter = logging.Formatter()
+
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setLevel(logging.INFO)
+    stdout_handler.setFormatter(line_formatter)
+    mongo_handler = MongoDBLoggingHandler(service_name)
+    mongo_handler.setFormatter(line_formatter)
+    root_logger.addHandler(stdout_handler)
+    root_logger.addHandler(mongo_handler)
     root_logger.propagate = False
     return root_logger
