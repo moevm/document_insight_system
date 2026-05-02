@@ -1,8 +1,25 @@
+import logging
 from contextlib import contextmanager
 from contextvars import ContextVar
 
 current_check_id = ContextVar('current_check_id', default=None)
 current_check_stage = ContextVar('current_check_stage', default=None)
+
+
+class CheckContextFormatter(logging.Formatter):
+    def format(self, record):
+        line = super().format(record)
+        cid = current_check_id.get()
+        stage = current_check_stage.get()
+
+        prefix_parts = []
+        if cid is not None:
+            prefix_parts.append(f'check_id={cid}')
+        if stage is not None:
+            prefix_parts.append(f'stage={stage}')
+        if not prefix_parts:
+            return line
+        return f"[{' '.join(prefix_parts)}] {line}"
 
 
 @contextmanager
