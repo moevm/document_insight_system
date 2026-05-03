@@ -9,8 +9,8 @@ DEBUG_MODE = False
 
 
 def load_abbreviations():
-    config_path = config_path = (
-        Path(__file__).parent.parent / "configs" / "config_abbreviations.json"
+    config_path = (
+        Path(__file__).parent.parent.parent / "configs" / "config_abbreviations.json"
     )
     with open(config_path, "r", encoding="utf-8") as f:
         data = json.load(f)
