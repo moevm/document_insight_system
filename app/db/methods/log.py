@@ -11,7 +11,7 @@ logs_collection = get_logs_collection()
 
 
 def add_log(timestamp, serviceName, levelname, levelno, message,
-            pathname, filename, funcName, lineno):
+            pathname, filename, funcName, lineno, check_id=None, stage=None):
     args = locals()
     new_log = Logs(args)
     logs_collection.insert_one(new_log.pack())
