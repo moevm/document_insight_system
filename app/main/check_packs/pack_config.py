@@ -54,6 +54,7 @@ BASE_REPORT_CRITERION = [
     ["water_in_the_text_check"],
     ["report_task_tracker"],
     ["report_was_were_check"],
+    ["references_in_chapter_check"],
 ]
 
 DEFAULT_TYPE = 'pres'
