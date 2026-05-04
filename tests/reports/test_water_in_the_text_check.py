@@ -3,6 +3,7 @@ import pytest
 
 from app.main.checks.report_checks.water_in_the_text_check import WaterInTheTextCheck
 from main.checks.report_checks.watery_phrase_settings import WateryPhrase
+from tests.util import create_report_file_info
 
 
 class TestWaterInTheTextCheck:
@@ -48,11 +49,11 @@ class TestWaterInTheTextCheck:
 
     def test_05_valid_report(self, reports_fixture_dir):
         report_path = reports_fixture_dir / "water_in_the_text" / "valid.docx"
-        checker = WaterInTheTextCheck(report_path)
+        checker = WaterInTheTextCheck(create_report_file_info(report_path))
         result = checker.check()
 
-        assert result.status is True
-        assert result.result_str == "Пройдена!"
+        assert result["score"] == 1.0
+        assert result["verdict"][0] == "Пройдена!"
 
 
 

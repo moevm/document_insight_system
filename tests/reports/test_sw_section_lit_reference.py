@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 import pytest
 from app.main.checks.report_checks.sw_section_lit_reference import SWSectionLiteratureReferenceCheck
+from tests.util import create_report_file_info
 
 class TestSWSectionLiteratureReferenceCheck:
 
@@ -11,29 +12,29 @@ class TestSWSectionLiteratureReferenceCheck:
         checker = SWSectionLiteratureReferenceCheck(mock_file_info, "SW_KEY_QUESTIONS_SECTIONS")
         return checker
 
-    def test_01_valid_references_count(selfs, reports_fixture_dir):
-        report_path = reports_fixture_dir / "sw_section_lit_ref" / "valid.docx"
-        checker = SWSectionLiteratureReferenceCheck(report_path, "SW_KEY_QUESTIONS_SECTIONS")
+    def test_01_valid_references_count(self, reports_fixture_dir):
+        report_path = reports_fixture_dir / "sw_section_lit_ref" / "valid.md"
+        checker = SWSectionLiteratureReferenceCheck(create_report_file_info(report_path), "SW_KEY_QUESTIONS_SECTIONS")
         result = checker.check()
 
-        assert result.status is True
-        assert result.result_str == "Проверка пройдена!"
+        assert result["score"] == 1.0
+        assert result["verdict"][0] == "Проверка пройдена!"
 
-    def test_02_less_references_count(selfs, reports_fixture_dir):
-        report_path = reports_fixture_dir / "sw_section_lit_ref" / "les_references.docx"
-        checker = SWSectionLiteratureReferenceCheck(report_path, "SW_KEY_QUESTIONS_SECTIONS")
+    def test_02_less_references_count(self, reports_fixture_dir):
+        report_path = reports_fixture_dir / "sw_section_lit_ref" / "les_references.md"
+        checker = SWSectionLiteratureReferenceCheck(create_report_file_info(report_path), "SW_KEY_QUESTIONS_SECTIONS")
         result = checker.check()
 
-        assert result.status is False
-        assert "содержит недостаточное количество ссылок" in result.result_str
+        assert result["score"] == 0.0
+        assert "содержит недостаточное количество ссылок" in result["verdict"][0]
 
-    def test_03_chapter_and_subchapter(selfs, reports_fixture_dir):
-        report_path = reports_fixture_dir / "sw_section_lit_ref" / "subchapter.docx"
-        checker = SWSectionLiteratureReferenceCheck(report_path, "SW_ANALOGS_SECTIONS")
+    def test_03_chapter_and_subchapter(self, reports_fixture_dir):
+        report_path = reports_fixture_dir / "sw_section_lit_ref" / "subchapter.md"
+        checker = SWSectionLiteratureReferenceCheck(create_report_file_info(report_path), "SW_ANALOGS_SECTIONS")
         result = checker.check()
 
-        assert result.status is False
-        assert "Каждый из подразделов" in result.result_str
+        assert result["score"] == 0.0
+        assert "Каждый из подразделов" in result["verdict"][0]
 
     def test_04_search_references_format(self, checker):
         test_text = """
