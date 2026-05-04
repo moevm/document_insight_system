@@ -15,17 +15,19 @@ class MongoDBLoggingHandler(logging.StreamHandler):
     def emit(self, record):
         if not record.msg:
             return
-        add_log(timestamp=datetime.now(),
-                serviceName=self.service_name,
-                levelname=record.levelname,
-                levelno=record.levelno,
-                message=self.format(record),
-                pathname=record.pathname,
-                filename=record.filename,
-                funcName=record.funcName,
-                lineno=record.lineno,
-                check_id=current_check_id.get(),
-                stage=current_check_stage.get())
+        add_log(
+            timestamp=datetime.now(),
+            serviceName=self.service_name,
+            levelname=record.levelname,
+            levelno=record.levelno,
+            message=self.format(record),
+            pathname=record.pathname,
+            filename=record.filename,
+            funcName=record.funcName,
+            lineno=record.lineno,
+            check_id=current_check_id.get(),
+            stage=current_check_stage.get(),
+        )
 
 
 def get_root_logger(service_name):

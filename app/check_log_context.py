@@ -19,7 +19,7 @@ class CheckContextFormatter(logging.Formatter):
             prefix_parts.append(f'stage={stage}')
         if not prefix_parts:
             return line
-        return f"[{' '.join(prefix_parts)}] {line}"
+        return f"{line} [{' '.join(prefix_parts)}]"
 
 
 @contextmanager
