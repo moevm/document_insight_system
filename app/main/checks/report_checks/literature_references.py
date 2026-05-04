@@ -1,4 +1,6 @@
 import re
+from http.cookiejar import domain_match
+
 from .style_check_settings import StyleCheckSettings
 from ..base_check import BaseReportCriterion, answer
 from collections import Counter
@@ -9,11 +11,14 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     _description = ''
     id = 'literature_references'
 
-    def __init__(self, file_info, min_ref=1, max_ref=1000, headers_map=None):
+    def __init__(self, file_info, min_ref=1, max_ref=1000, max_count_domains = 5,headers_map=None):
         super().__init__(file_info)
         self.headers = []
+        self.domain_pattern = r'(?:https?|ftp)?://([^/\s?#]+)'
         self.literature_header = None
         self.literature_reference_text = []
+        self.literature_domains = []
+        self.max_count_domains = max_count_domains
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
         if headers_map:
             self.config = headers_map
@@ -59,7 +64,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             return answer(False,
                           f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
 
-        duplicates = self.checking_duplicate_sources()
+        duplicates_ref = self.checking_duplicate_sources(self.literature_reference_text)
+        duplicates_domains = self.checking_duplicate_sources(self.literature_domains, self.max_count_domains)
         references, ref_sequence = self.search_references(start_literature_par)
         all_numbers = set(range(1, number_of_sources + 1))
         if len(references.symmetric_difference(all_numbers)) == 0:
@@ -68,7 +74,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             elif ref_sequence:
                 result_str += f"Источники должны нумероваться в порядке упоминания в тексте. Неправильные последовательности: {'; '.join(num for num in ref_sequence)}"
                 return answer(False, result_str)
-            elif not duplicates:
+            elif not duplicates_ref and not duplicates_domains:
                 return answer(True, f"Пройдена!")
         elif len(references.difference(all_numbers)):
             if len(all_numbers.difference(references)) == 0:
@@ -82,14 +88,24 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             all_numbers -= references
             result_str = f'Упомянуты не все источники из списка.<br>Список источников без упоминания: {", ".join(str(num) for num in sorted(all_numbers))} <br> Всего источников: {number_of_sources}<br><br>'
 
-        if duplicates:
+        if duplicates_ref:
             message = ''
-            for duplicate in duplicates:
+            for duplicate in duplicates_ref:
                 message += f'<li>Источники с номерами: {duplicate[1]} ссылаются на один и тот же источник: {duplicate[0]};</li>\n'
             result_str += (f'Повторяющиеся источники:'
                            f'<ul>\n'
                            f'{message}'
                            f'</ul>')
+
+        if duplicates_domains:
+            message = ''
+            for duplicate in duplicates_domains:
+                message += f'<li>Источники с номерами: {duplicate[1]} ссылаются на один и тот же домен: {duplicate[0]};</li>\n'
+            result_str += (f'Повторяющиеся домены, максимум на один домен могут ссылаться не более {self.max_count_domains} источников:'
+                           f'<ul>\n'
+                           f'{message}'
+                           f'</ul>')
+
         result_str += '''
                     Если возникли проблемы, попробуйте сделать следующее:
                     <ul>
@@ -158,22 +174,16 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         array_of_references.add(k)
         return prev_ref
 
-    def checking_duplicate_sources(self) -> list:
-        """Функция нахождения дубликатов в источниках"""
-        counter = Counter([text.lower() for text in self.literature_reference_text])
+    def checking_duplicate_sources(self, sources: list, max_count: int=2) -> list:
+        """Функция нахождения дубликатов в определенных позициях"""
+        domain_to_numbers = {}
 
-        duplicates = []
-        for text, count in counter.items():
-            if count >= 2:
-                positions_duplicates = [i + 1 for i, text_in_ref in enumerate(self.literature_reference_text) if text == text_in_ref.lower()]
+        for number, domain in sources:
+            if domain not in domain_to_numbers:
+                domain_to_numbers[domain] = []
+            domain_to_numbers[domain].append(number)
 
-                if positions_duplicates:
-                    duplicates.append((
-                        self.literature_reference_text[positions_duplicates[0] - 1],
-                        positions_duplicates
-                    ))
-
-        return duplicates
+        return [(domain, numbers) for domain, numbers in domain_to_numbers.items() if len(numbers) >= max_count]
 
 
     def find_start_paragraph(self):
@@ -194,7 +204,12 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 break
             # if re.search(f"дата обращения", child["text"].lower()):
             literature_counter += 1
-            self.literature_reference_text.append(child["text"])
+            self.literature_reference_text.append((literature_counter, child["text"]))
+            domain_match = re.search(self.domain_pattern, child["text"], re.IGNORECASE)
+
+            if domain_match and domain_match.group(1):
+                self.literature_domains.append((literature_counter, domain_match.group(1)))
+
         return literature_counter
 
     def count_sources(self):
@@ -218,7 +233,11 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             for ind in range(first_string + 1, last_string):
                 if re.match(f"{literature_counter + 1}.", one_page[ind]):
                     literature_counter += 1
-                    self.literature_reference_text.append(one_page[ind])
+                    self.literature_reference_text.append((literature_counter, one_page[ind]))
+                    domain_match = re.search(self.domain_pattern, one_page[ind])
+                    if domain_match and domain_match.group(1):
+                        self.literature_domains.append((literature_counter, domain_match.group(1)))
+
         return literature_counter
 
     def search_literature_start_pdf(self):
