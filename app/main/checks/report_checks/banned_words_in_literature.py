@@ -39,7 +39,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
             if not header:
                 return answer(
                     False,
-                    "Нет списка использованных источников!<br><br>Если в вашей работе есть список литературы, "\
+                    "Нет списка использованных источников!<br><br>Если в вашей работе есть список литературы, "
                     "убедитесь в правильности формата заголовка ",
                 )
             if not header["child"]:

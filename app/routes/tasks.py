@@ -46,8 +46,10 @@ def run_task():
             logger.info('Пользователь загрузил файл с ошибочным расширением: pdf_' + pdf_file_check_response)
             return "pdf_" + pdf_file_check_response
 
-        logger.info(f"Запуск обработки файла {file.filename} пользователя {current_user.username}" \
-                    f" с критериями {current_user.criteria}")
+        logger.info(
+            f"Запуск обработки файла {file.filename} пользователя {current_user.username}"
+            f" с критериями {current_user.criteria}"
+        )
 
     # save to file on disk for future checking
     file_id = ObjectId()
@@ -61,8 +63,10 @@ def run_task():
         if get_file_len(pdf_file) * 2 + file_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
             logger.critical('Storage overload has occured')
             return 'storage_overload'
-        logger.info(f"Запуск обработки файла {pdf_file.filename} пользователя {current_user.username}" \
-                    f" с критериями {current_user.criteria}")
+        logger.info(
+            f"Запуск обработки файла {pdf_file.filename} пользователя {current_user.username}"
+            f" с критериями {current_user.criteria}"
+        )
         filenamepdf, extension = pdf_file.filename.rsplit('.', 1)
         filepathpdf = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
         pdf_file.save(filepathpdf)

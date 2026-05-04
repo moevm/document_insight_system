@@ -8,8 +8,10 @@ CUR_YEAR = datetime.now().year
 
 class PresTemplateNameCheck(BasePresCriterion):
     label = "Проверка соответствия названия файла шаблону"
-    _description = 'Проверка соответствия названия файла шаблону: "<год>ВКР<номер_студ_билета>ФАМИЛИЯ_презентация", '\
-                        f'например - "{CUR_YEAR}ВКР111111ИВАНОВ_презентация"'
+    _description = (
+        'Проверка соответствия названия файла шаблону: "<год>ВКР<номер_студ_билета>ФАМИЛИЯ_презентация", '
+        f'например - "{CUR_YEAR}ВКР111111ИВАНОВ_презентация"'
+    )
     id = 'template_name'
 
     def __init__(self, file_info, regex=f"{CUR_YEAR}" + "ВКР[0-9]{6}([А-ЯЁ]+)_(презентация|ПРЕЗЕНТАЦИЯ)"):
@@ -23,6 +25,6 @@ class PresTemplateNameCheck(BasePresCriterion):
         else:
             return answer(
                 False,
-                f'Название файла "<i>{self.filename}</i>" не соответствует шаблону. '\
+                f'Название файла "<i>{self.filename}</i>" не соответствует шаблону. '
                 f'Допустимые форматы:<br>   {CUR_YEAR}ВКР111111ИВАНОВ_презентация',
             )

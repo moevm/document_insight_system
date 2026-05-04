@@ -25,16 +25,16 @@ class TableReferences(BaseReportCriterion):
         if not len(self.headers):
             return answer(
                 False,
-                "Не найдено ни одного заголовка, что не позволило определить разделы отчета."\
-                    "<br><br>Проверьте корректность использования стилей.",
+                "Не найдено ни одного заголовка, что не позволило определить разделы отчета."
+                "<br><br>Проверьте корректность использования стилей.",
             )
         number_of_tables, all_numbers = self.count_tables_vkr()
         if not number_of_tables:
             return answer(
                 True,
-                f'Не найдено ни одной таблицы.<br><br>Если в вашей работе присутствуют таблицы, убедитесь, '\
-                    f'что для их подписи был использован стиль {self.table_style} и формат ' \
-                    f'"Таблица <Номер таблицы> — <Название таблицы>".',
+                f'Не найдено ни одной таблицы.<br><br>Если в вашей работе присутствуют таблицы, убедитесь, '
+                f'что для их подписи был использован стиль {self.table_style} и формат '
+                f'"Таблица <Номер таблицы> — <Название таблицы>".',
             )
         references = self.search_references()
         if len(references.symmetric_difference(all_numbers)) == 0:

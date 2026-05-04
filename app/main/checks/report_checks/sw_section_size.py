@@ -49,9 +49,9 @@ class SWSectionSizeCheck(BaseReportCriterion):
         feedback = ""
         if not all(r['sentences'] for r in result.values()):
             feedback += (
-                "<br>Размер следующих разделов не удовлетворяет требованиям <strong>по количеству предложений</strong>"\
-                    " (считается по знаку препинания 'точка') - помните, что часть разделов явлются словосочетаниями, "\
-                    "а не полным текстом: <br>  - "
+                "<br>Размер следующих разделов не удовлетворяет требованиям <strong>по количеству предложений</strong>"
+                " (считается по знаку препинания 'точка') - помните, что часть разделов явлются словосочетаниями, "
+                "а не полным текстом: <br>  - "
                 + '<br>  - '.join(
                     f"'{chapter}' - должен быть не более {self.sections[chapter]['sentences']}"
                     for chapter, check in result.items()
@@ -60,8 +60,8 @@ class SWSectionSizeCheck(BaseReportCriterion):
             )
         if not all(r['words'] for r in result.values()):
             feedback += (
-                "<br>Размер следующих разделов не удовлетворяет требованиям <strong>по количеству слов</strong>"\
-                    " (попробуйте подобрать более ёмкие и короткие формулировки): <br>  - "
+                "<br>Размер следующих разделов не удовлетворяет требованиям <strong>по количеству слов</strong>"
+                " (попробуйте подобрать более ёмкие и короткие формулировки): <br>  - "
                 + '<br>  - '.join(
                     f"'{chapter}' - должен быть не более {self.sections[chapter]['words']}"
                     for chapter, check in result.items()

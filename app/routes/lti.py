@@ -32,7 +32,7 @@ def lti_main():
         if not criterion_pack_info:
             default_criterion_pack = BASE_PACKS.get(DEFAULT_TYPE).name
             logger.error(
-                f"Ошибка при lti-авторизации. Несуществующий набор {custom_criterion_pack} пользователя {username}."\
+                f"Ошибка при lti-авторизации. Несуществующий набор {custom_criterion_pack} пользователя {username}."
                 f" Установлен набор по умолчанию: {default_criterion_pack}"
             )
             logger.debug(f"lti-параметры: {temporary_user_params}")

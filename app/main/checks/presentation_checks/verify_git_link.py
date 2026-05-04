@@ -77,8 +77,10 @@ class PresVerifyGitLinkCheck(BasePresCriterion):
                 except (requests.exceptions.SSLError, requests.exceptions.ConnectionError):
                     self.wrong_repo_ref.append(i[0])
         if self.wrong_repo_ref:
-            string_result += " <br> Найдены несуществующие или закрытые репозитории: "\
+            string_result += (
+                " <br> Найдены несуществующие или закрытые репозитории: "
                 f"{', '.join([repr(repo) for repo in self.wrong_repo_ref])}"
+            )
             check_result = False
         if self.empty_repo_ref:
             string_result += (

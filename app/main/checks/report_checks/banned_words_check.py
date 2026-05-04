@@ -82,9 +82,11 @@ class ReportBannedWordsCheck(BaseReportCriterion):
             result_str = 'Пройдена!'
 
         if len(warned_counter['detected_lines']):
-            result_str += '<br><br>Обнаружены потенциально опасные слова (не влияют на результат проверки)!<br>'\
-                            'Обратите внимание, что их использование возможно только в подтвержденных случаях:'\
-                            f'{"; ".join(self.warned_words)}<br><br>'
+            result_str += (
+                '<br><br>Обнаружены потенциально опасные слова (не влияют на результат проверки)!<br>'
+                'Обратите внимание, что их использование возможно только в подтвержденных случаях:'
+                f'{"; ".join(self.warned_words)}<br><br>'
+            )
             for k, _ in warned_counter['detected_lines'].items():
                 result_str += f'Страница №{k}:<br>{"<br>".join(warned_counter['detected_lines'][k])}<br><br>'
 

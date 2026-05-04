@@ -12,8 +12,10 @@ MORPH_ANALYZER = MorphAnalyzer()
 
 class FindThemeInPres(BasePresCriterion):
     label = "Проверка упоминания темы в заголовках презентации"
-    _description = 'Проверка упоминания темы в заголовках презентации, не включая титульный слайд, '\
-                        'слайды "Цели и задачи", "Заключение"'
+    _description = (
+        'Проверка упоминания темы в заголовках презентации, не включая титульный слайд, '
+        'слайды "Цели и задачи", "Заключение"'
+    )
     id = 'theme_in_pres_check'
 
     def __init__(self, file_info, skip_slides_nums=(1,), skip_slides_titles=("Заключение",), limit=60):
@@ -59,7 +61,7 @@ class FindThemeInPres(BasePresCriterion):
         elif value_intersection < self.limit:
             return answer(
                 round(value_intersection / self.limit, 1),
-                f"Частично пройдена! Процент упоминания темы в вашей презентации ({value_intersection} %)"\
+                f"Частично пройдена! Процент упоминания темы в вашей презентации ({value_intersection} %)"
                 f"ниже требуемого ({self.limit} %).",
             )
         else:

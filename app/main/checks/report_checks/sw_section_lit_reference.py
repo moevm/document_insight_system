@@ -33,7 +33,7 @@ class SWSectionLiteratureReferenceCheck(BaseReportCriterion):
     def check(self):
         self.file.make_chapters('VKR')
         chapters = self.file.chapters_to_str()
-        _ = self.file.build_chapter_tree(chapters)      # TODO: use tree
+        _ = self.file.build_chapter_tree(chapters)  # TODO: use tree
         result = dict.fromkeys(self.sections.keys(), None)
         feedback = ""
 
@@ -56,8 +56,8 @@ class SWSectionLiteratureReferenceCheck(BaseReportCriterion):
                 result[chapter['name']] = {"count": verify_count_references}
                 if not verify_count_references:
                     feedback += (
-                        f"<br> Раздел '{chapter['name']}' содержит недостаточное количество ссылок на источники. "\
-                        f"Сейчас их {main_chapter_references}, должно быть не менее "\
+                        f"<br> Раздел '{chapter['name']}' содержит недостаточное количество ссылок на источники. "
+                        f"Сейчас их {main_chapter_references}, должно быть не менее "
                         f"{self.sections[chapter['name']]['count']}"
                     )
 
@@ -69,9 +69,9 @@ class SWSectionLiteratureReferenceCheck(BaseReportCriterion):
                     result[chapter['name']]['subchapters'] = verify_subchapter_references
                     if not verify_subchapter_references:
                         feedback += (
-                            f"<br> Каждый из подразделов (уровень вложенности +1) раздела '{chapter['name']}'"\
-                            f"должен содержать не менее {self.sections[chapter['name']]['subchapters']} "\
-                            f"ссылок на источники. Сейчас их: "\
+                            f"<br> Каждый из подразделов (уровень вложенности +1) раздела '{chapter['name']}'"
+                            f"должен содержать не менее {self.sections[chapter['name']]['subchapters']} "
+                            f"ссылок на источники. Сейчас их: "
                             f"{', '.join(sc['name'] + ' - ' + str(sc['count']) for sc in subchapter_result)}"
                         )
         if feedback:

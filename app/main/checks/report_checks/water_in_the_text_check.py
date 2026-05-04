@@ -44,17 +44,23 @@ class WaterInTheTextCheck(BaseReportCriterion):
             text = self.get_chapter_text(chapter)
             words = self.get_words(text)
             if self.watery_phrase_density(text, words) > self.watery_phrase_threshold:
-                result_str += f"В разделе '{chapter['text']}' содержится более {self.watery_phrase_threshold * 100}% "\
+                result_str += (
+                    f"В разделе '{chapter['text']}' содержится более {self.watery_phrase_threshold * 100}% "
                     "'водянистых' фраз. Попробуйте уменьшить количество водянистых слов и фраз.<br>"
+                )
 
             if self.long_sentences_density(text) > self.long_sentence_threshold:
-                result_str += f"В разделе '{chapter['text']}' более {self.long_sentence_threshold * 100}% предложений "\
+                result_str += (
+                    f"В разделе '{chapter['text']}' более {self.long_sentence_threshold * 100}% предложений "
                     f"длиннее {self.long_sentence_word_limit} слов. Используйте более короткие предложения.<br>"
+                )
 
             if self.meaningful_word_density(words) < self.meaningful_word_threshold:
-                result_str += f"В разделе '{chapter['text']}' доля значимых слов составляет менее "\
-                    f"{self.meaningful_word_threshold * 100}% от общего количества слов. "\
+                result_str += (
+                    f"В разделе '{chapter['text']}' доля значимых слов составляет менее "
+                    f"{self.meaningful_word_threshold * 100}% от общего количества слов. "
                     "Уменьшите количество вспомогательных частей речи.<br>"
+                )
         if not result_str:
             return answer(True, "Пройдена!")
         result_str = (

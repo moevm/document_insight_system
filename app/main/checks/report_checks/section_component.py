@@ -63,6 +63,6 @@ class ReportSectionComponent(BaseReportCriterion):
         else:
             return answer(
                 False,
-                f'Не найдены следующие компоненты раздела {self.chapter}'\
+                f'Не найдены следующие компоненты раздела {self.chapter}'
                 f'(обратите внимание на требования к разделу и его составляющим): <ul>{result_str}</ul>',
             )

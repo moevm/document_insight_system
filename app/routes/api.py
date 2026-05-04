@@ -67,8 +67,10 @@ def api_criteria_pack():
         )
     inited, err = init_criterions(raw_criterions, file_info={"file_type": file_type_info})
     if len(raw_criterions) != len(inited) or err:
-        msg = f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. "\
+        msg = (
+            f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. "
             f"Успешно инициализированные: {inited}. Возникшие ошибки: {err}."
+        )
         return {'data': msg, 'time': datetime.now()}, 400
     # if ok - save to DB
     criteria_pack_methods.save_criteria_pack(

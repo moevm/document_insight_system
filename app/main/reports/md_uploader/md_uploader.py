@@ -234,8 +234,10 @@ class MdUploader(DocumentUploader):
         self.get_main_headers(work_type="VKR")
         self.make_chapters(work_type="VKR")
         self.find_literature_vkr(work_type="VKR")
-        return f"Заголовки:\n{self.headers_main}\n\nГлавы\n{self.chapters}\n\n"\
+        return (
+            f"Заголовки:\n{self.headers_main}\n\nГлавы\n{self.chapters}\n\n"
             f"Список литературы:\n\n{self.literature_header}"
+        )
 
     def show_chapters(self, work_type):
         chapters_str = ""
