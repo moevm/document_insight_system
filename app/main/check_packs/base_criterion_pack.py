@@ -1,17 +1,20 @@
 import logging
 import traceback
+
 from check_log_context import current_check_stage
+
 from .utils import init_criterions
 
 logger = logging.getLogger('root_logger')
 
-WARNING_CHECK_FAILED_MSG = "Данный критерий является необязательным для прохождения и не влияет на результат проверки.<br>"
-PRIORITY_CHECK_FAILED_MSG = "<b>Данный критерий является обязательным для прохождения.<br>Результат всей проверки обнулен, но вы можете ознакомиться с результатами каждого критерия.</b><br>"
-UNEXPECTED_CHECK_FAIL_MSG = "<b>Во время проверки произошла ошибка: проверьте соответствия оформления файла шаблона (в том числе разделов и уровней заголовков), попробуйте позже или обратитесь к администратору системы.<b>"
+WARNING_CHECK_FAILED_MSG = (
+    "Данный критерий является необязательным для прохождения и не влияет на результат проверки.<br>"  # noqa: E501
+)
+PRIORITY_CHECK_FAILED_MSG = "<b>Данный критерий является обязательным для прохождения.<br>Результат всей проверки обнулен, но вы можете ознакомиться с результатами каждого критерия.</b><br>"  # noqa: E501
+UNEXPECTED_CHECK_FAIL_MSG = "<b>Во время проверки произошла ошибка: проверьте соответствия оформления файла шаблона (в том числе разделов и уровней заголовков), попробуйте позже или обратитесь к администратору системы.<b>"  # noqa: E501
 
 
 class BaseCriterionPack:
-
     def __init__(self, raw_criterions, file_type, min_score=1.0, name=None, **kwargs):
         self.file_type = file_type
         self.name = name if name else self.__class__.__name__
@@ -33,21 +36,22 @@ class BaseCriterionPack:
                 criterion_check_result = criterion.check()
             except Exception as e:
                 trace_msg = traceback.format_exc()
-                err_msg = f'{criterion.id}: oшибка во время проверки: {e} ({trace_msg[len(trace_msg)//2:]})'
+                err_msg = f'{criterion.id}: oшибка во время проверки: {e} ({trace_msg[len(trace_msg) // 2 :]})'
                 logger.error(err_msg)
                 logger.error(trace_msg)
-                criterion_check_result = {'score': 0, 'verdict': [UNEXPECTED_CHECK_FAIL_MSG, f"Информация об ошибке для администратора: {err_msg}"]}
+                criterion_check_result = {
+                    'score': 0,
+                    'verdict': [UNEXPECTED_CHECK_FAIL_MSG, f"Информация об ошибке для администратора: {err_msg}"],
+                }
             if criterion.priority and not criterion_check_result['score']:
                 failed_priority_check = True
-                criterion_check_result['verdict'] = [PRIORITY_CHECK_FAILED_MSG] + list(criterion_check_result['verdict'])
+                criterion_check_result['verdict'] = [PRIORITY_CHECK_FAILED_MSG] + list(
+                    criterion_check_result['verdict']
+                )
             if criterion.warning:
                 criterion_check_result['verdict'] = [WARNING_CHECK_FAILED_MSG] + list(criterion_check_result['verdict'])
                 criterion_check_result['warning'] = True
-            result.append(dict(
-                id=criterion.id,
-                name=criterion.name,
-                **criterion_check_result
-            ))
+            result.append(dict(id=criterion.id, name=criterion.name, **criterion_check_result))
         if failed_priority_check:  # if priority criterion is failed -> check is failed
             return result, 0, False
         score = self.calc_score(result)
@@ -62,7 +66,7 @@ class BaseCriterionPack:
             'name': self.name,
             'raw_criterions': self.raw_criterions,
             'file_type': self.file_type,
-            'min_score': self.min_score
+            'min_score': self.min_score,
         }
 
     @staticmethod
@@ -72,22 +76,22 @@ class BaseCriterionPack:
     @staticmethod
     def calc_score(result):
         if not result:
-            return 0.
-        score = 0.
-        result = list(filter(lambda x: 'warning' not in x, result))     # dont calc warning checks
+            return 0.0
+        score = 0.0
+        result = list(filter(lambda x: 'warning' not in x, result))  # dont calc warning checks
         for check in result:
             score += float(check['score'])
         if not score or not result:
-            return 0.
+            return 0.0
         return round(score / len(result), 3)
 
     @staticmethod
     def get_proportion(result):
         if not result:
-            return 0.
-        score = 0.
-        result = list(filter(lambda x: 'warning' not in x, result))     # dont calc warning checks
-        score = 0.
+            return 0.0
+        score = 0.0
+        result = list(filter(lambda x: 'warning' not in x, result))  # dont calc warning checks
+        score = 0.0
         for check in result:
             score += float(check['score'])
         return round(score, 2), len(result)

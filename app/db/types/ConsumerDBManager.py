@@ -1,6 +1,4 @@
 from app.db.methods.client import get_db, get_fs
-
-
 from app.db.types.Consumers import Consumers
 
 db = get_db()
@@ -11,9 +9,8 @@ consumers_collection = db['consumers']
 
 # LTI
 class ConsumersDBManager:
-
     @staticmethod
-    def add_consumer(consumer_key, consumer_secret, timestamp_and_nonce=[]):
+    def add_consumer(consumer_key, consumer_secret, timestamp_and_nonce=None):
         consumer = Consumers()
         consumer.consumer_key = consumer_key
         consumer.consumer_secret = consumer_secret
@@ -51,6 +48,5 @@ class ConsumersDBManager:
     @staticmethod
     def add_timestamp_and_nonce(key, timestamp, nonce):
         upd_consumer = {"$push": {'timestamp_and_nonce': (timestamp, nonce)}}
-        consumer = consumers_collection.update_one(
-            {'consumer_key': key}, upd_consumer)
+        consumer = consumers_collection.update_one({'consumer_key': key}, upd_consumer)
         return consumer if consumer else None

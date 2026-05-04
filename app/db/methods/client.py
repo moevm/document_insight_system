@@ -1,6 +1,5 @@
-from gridfs import GridFSBucket, NoFile
+from gridfs import GridFSBucket
 from pymongo import MongoClient
-
 
 client = MongoClient("mongodb://mongodb:27017")
 db = client['dis-db']

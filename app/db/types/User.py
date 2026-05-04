@@ -5,6 +5,7 @@ from app.main.check_packs import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO
 
 # You shouldn't create this or change username and files explicitly
 
+
 class User(Packable, UserMixin):
     def __init__(self, dictionary=None):
         super().__init__(dictionary)
@@ -16,7 +17,7 @@ class User(Packable, UserMixin):
         self.file_type = dictionary.get('file_type', DEFAULT_REPORT_TYPE_INFO)
         try:
             self.criteria = dictionary.get('criteria', BASE_PACKS.get(self.file_type['type']).name)
-        except:
+        except Exception:
             self.criteria = dictionary.get('criteria', BASE_PACKS.get(self.file_type).name)
         self.is_LTI = dictionary.get('is_LTI', False)
         self.lms_user_id = dictionary.get('lms_user_id', None)
