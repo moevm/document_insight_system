@@ -1,52 +1,40 @@
-import json
 import logging.config
 import os
-import shutil
-import tempfile
-from datetime import datetime, timedelta
-from io import StringIO
 from os.path import dirname, join
 from sys import argv
 
-import bson
-import pandas as pd
-from bson import ObjectId
-from celery.result import AsyncResult
-from flask import (Flask, Response, abort, jsonify, redirect, render_template,
-                        request, url_for)
-from flask_login import (LoginManager, current_user, login_required,
-                         login_user, logout_user)
-
 import servants.user as servants_user
-from app.db.methods.user import get_user
+from flask import Flask, redirect, render_template, request, url_for
+from flask_login import LoginManager, current_user, login_user
 from lti_session_passback.lti import utils
 from root_logger import get_root_logger
-from servants import pre_luncher
-from utils import decorator_assertion
 from routes.admin import admin
-from routes.users import users
+from routes.api import api
+from routes.capacity import capacity
 from routes.check_list import check_list
 from routes.checks import checks
-from routes.logs import logs
-from routes.lti import lti
-from routes.login import login
-from routes.user import user_blueprint
-from routes.tasks import tasks
-from routes.upload import upload
-from routes.recheck import recheck
-from routes.results import results_bp
-from routes.api import api
 from routes.criterion_pack import criterion_pack
 from routes.criterion_packs import criterion_packs
 from routes.get_csv import get_csv
-from routes.get_zip import get_zip
-from routes.get_pdf import get_pdf
 from routes.get_last_check_results import get_last_check_results
-from routes.version import version
-from routes.capacity import capacity
+from routes.get_pdf import get_pdf
+from routes.get_zip import get_zip
+from routes.login import login
+from routes.logs import logs
+from routes.lti import lti
 from routes.profile import profile
-
+from routes.recheck import recheck
+from routes.results import results_bp
+from routes.tasks import tasks
+from routes.upload import upload
+from routes.user import user_blueprint
+from routes.users import users
+from routes.version import version
+from servants import pre_luncher
 from server_consts import UPLOAD_FOLDER
+from utils import decorator_assertion
+
+from app.db.methods.user import get_user
 
 log_conf = join(dirname(__file__), 'logging.conf')
 if os.path.isfile(log_conf):
@@ -96,6 +84,7 @@ login_manager.init_app(app)
 def load_user(user_id):
     return get_user(user_id)
 
+
 # User chapters req handlers:
 
 
@@ -110,12 +99,14 @@ def signup():
 
 # Handle exceptions
 
+
 @app.errorhandler(413)
 def request_entity_too_large(error=None):
     return 'File exceeded the upload limit', 413
 
 
 # Redirection:
+
 
 @login_manager.unauthorized_handler
 def unauthorized_callback():
@@ -136,7 +127,9 @@ def default():
     else:
         return render_template("intro_page.html")
 
+
 # Disable caching:
+
 
 @app.after_request
 def add_header(r):
@@ -174,7 +167,14 @@ if __name__ == '__main__':
         app.wsgi_app = ReverseProxied(app.wsgi_app)
         port = 8080
         ip = '0.0.0.0'
-        logger.info("Сервер запущен по адресу http://" + str(ip) + ':' + str(port) + " в " +
-                    ("отладочном" if DEBUG else "рабочем") + " режиме")
+        logger.info(
+            "Сервер запущен по адресу http://"
+            + str(ip)
+            + ':'
+            + str(port)
+            + " в "
+            + ("отладочном" if DEBUG else "рабочем")
+            + " режиме"
+        )
         utils.create_consumers(app.config['LTI_CONSUMERS'])
         app.run(debug=DEBUG, host=ip, port=8080, use_reloader=True)

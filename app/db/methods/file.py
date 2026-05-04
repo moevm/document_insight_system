@@ -1,14 +1,16 @@
-from app.db.db_main import get_files_info_collection, get_users_collection
-from app.db.methods.client import get_client, get_db, get_fs
 from os.path import basename
-from bson import ObjectId
-from gridfs import NoFile, errors as gridfs_errors
-from pymongo import errors as pymongo_errors
-from app.utils.converter import convert_to
 
-from app.db.types.Presentation import Presentation
-from app.db.methods.edit_user import edit_user
+from bson import ObjectId
+from gridfs import NoFile
+from gridfs import errors as gridfs_errors
+from pymongo import errors as pymongo_errors
+
+from app.db.db_main import get_files_info_collection, get_users_collection
 from app.db.methods.check import delete_check
+from app.db.methods.client import get_client, get_db, get_fs
+from app.db.methods.edit_user import edit_user
+from app.db.types.Presentation import Presentation
+from app.utils.converter import convert_to
 
 client = get_client()
 db = get_db()
@@ -24,11 +26,7 @@ def add_file_info_and_content(username, filepath, file_type, file_id=None):
         file_id = ObjectId()
     # parsed_file's info
     filename = basename(filepath)
-    file_info = Presentation({
-        '_id': file_id,
-        'name': filename,
-        'file_type': file_type
-    })
+    file_info = Presentation({'_id': file_id, 'name': filename, 'file_type': file_type})
     file_info_id = files_info_collection.insert_one(file_info.pack()).inserted_id
     assert file_id == file_info_id, f"{file_id} -- {file_info_id}"
     # parsed_file's content in GridFS (file_id = file_info_id)
@@ -52,8 +50,7 @@ def find_presentation(user, presentation_name):
     files = []
     for presentation_id in user.files:
         files.append(get_presentation(presentation_id))
-    presentation = next(
-        (x for x in files if x.name == presentation_name), None)
+    presentation = next((x for x in files if x.name == presentation_name), None)
     if presentation is not None:
         return presentation
     else:
@@ -68,22 +65,21 @@ def delete_presentation(user, presentation_id):
         presentation = get_presentation(presentation_id)
         for check_id in presentation.checks:
             presentation, check = delete_check(presentation, check_id)
-        presentation = Presentation(
-            files_info_collection.find_one_and_delete({'_id': presentation_id}))
+        presentation = Presentation(files_info_collection.find_one_and_delete({'_id': presentation_id}))
         return user, presentation
     else:
         return user, get_presentation(presentation_id)
 
 
 def get_pdf_id(file_id=None):
-    if not file_id: file_id = ObjectId()
+    if not file_id:
+        file_id = ObjectId()
     return file_id
 
 
 def write_pdf(filename, filepath, file_id=None, rewrite=False):
     converted_filepath = convert_to(filepath, target_format="pdf")
     return add_file_to_db(filename, converted_filepath, file_id, rewrite=rewrite)
-
 
 
 def add_file_to_db(filename, filepath, file_id=None, rewrite=False):

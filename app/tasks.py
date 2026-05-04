@@ -1,20 +1,20 @@
-from configparser import ConfigParser
 import logging.config
 import os
-from os.path import dirname, join, exists
+from configparser import ConfigParser
+from os.path import dirname, exists, join
 
 from celery import Celery
 from celery.signals import worker_ready
-
-from passback_grades import run_passback
+from check_log_context import check_log_context, current_check_stage
 from db.types.Check import Check
 from main.checker import check
 from main.parser import parse
-from check_log_context import check_log_context, current_check_stage
+from passback_grades import run_passback
 from root_logger import get_root_logger
+
+from app.db.methods import celery_check as celery_check_methods
 from app.db.methods import check as check_methods
 from app.db.methods import file as file_methods
-from app.db.methods import celery_check as celery_check_methods
 
 config = ConfigParser()
 config.read('app/config.ini')
@@ -69,7 +69,7 @@ def create_task(self, check_info):
             current_check_stage.set("check")
             logger.info("Пайплайн проверки: парсинг завершён, запуск критериев")
             updated_check = check(parsed, check_obj)
-            current_check_stage.set("persist") 
+            current_check_stage.set("persist")
             logger.info("Пайплайн проверки: критерии завершены, сохранение результата")
             updated_check.is_ended = True
             updated_check.is_failed = False
@@ -80,8 +80,10 @@ def create_task(self, check_info):
         except Exception as e:
             current_check_stage.set("error")
             if self.request.retries == MAX_TASK_RETRIES:
-                logger.error(f"\tДостигнуто максимальное количество попыток перезапуска. Удаление задачи из очереди",
-                             exc_info=True)
+                logger.error(
+                    "\tДостигнуто максимальное количество попыток перезапуска. Удаление задачи из очереди",
+                    exc_info=True,
+                )
                 celery_check_methods.mark_celery_task_as_finished(self.request.id)
                 updated_check = Check(check_info)
                 updated_check.is_failed = True
@@ -108,7 +110,7 @@ def convert_check_file_to_pdf(self, check_obj, filepath, rewrite=False):
             f"При конвертации файла произошла ошибка: {e}. Следующая попытка через {TASK_RETRY_COUNTDOWN}",
             exc_info=True,
         )
-        raise self.retry(countdown=TASK_RETRY_COUNTDOWN)
+        raise self.retry(countdown=TASK_RETRY_COUNTDOWN) from e
 
 
 @celery.task(name="passback-task", queue='passback-grade')
@@ -118,4 +120,5 @@ def passback_task():
 
 def remove_files(filepaths):
     for filepath in filepaths:
-        if exists(filepath): os.remove(filepath)
+        if exists(filepath):
+            os.remove(filepath)

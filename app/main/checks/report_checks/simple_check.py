@@ -13,4 +13,4 @@ class ReportSimpleCheck(BaseReportCriterion):
         if self.file.paragraphs:
             return answer(True, "Пройдена!")
         else:
-            return answer(False, f'В файле нет текста.')
+            return answer(False, 'В файле нет текста.')

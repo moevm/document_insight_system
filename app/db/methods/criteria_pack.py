@@ -3,7 +3,6 @@ from datetime import datetime
 from app.db.db_main import get_criteria_pack_collection
 from app.db.methods.client import get_db, get_fs
 
-
 db = get_db()
 fs = get_fs()
 

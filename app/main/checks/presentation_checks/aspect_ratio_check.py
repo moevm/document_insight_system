@@ -35,9 +35,7 @@ class PresAspectRatioCheck(BasePresCriterion):
 
     def __init__(self, file_info, correct_ratios=("16:9", "4:3")):
         super().__init__(file_info)
-        self.correct_ratios = set(
-            Ratio(*map(int, x.split(":"))) for x in correct_ratios
-        )
+        self.correct_ratios = set(Ratio(*map(int, x.split(":"))) for x in correct_ratios)
 
     def __is_correct_ratio(self, aspect_ratio: Ratio):
         return aspect_ratio in self.correct_ratios
@@ -50,13 +48,9 @@ class PresAspectRatioCheck(BasePresCriterion):
         width = self.__convert_size_to_pixels(aspect_ratio.width)
         height = self.__convert_size_to_pixels(aspect_ratio.height)
         return (
-            f"Соотношение сторон слайдов ({width}x{
-                height
-            }) не соответствует стандарту<br/>"
+            f"Соотношение сторон слайдов ({width}x{height}) не соответствует стандарту<br/>"
             "Рекомендации по исправлению:<br/>"
-            f"Измените соотношение сторон презентации на одно из доступных ({
-                correct_ratios_str
-            })"
+            f"Измените соотношение сторон презентации на одно из доступных ({correct_ratios_str})"
         )
 
     def check(self):

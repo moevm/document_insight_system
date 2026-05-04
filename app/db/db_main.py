@@ -9,8 +9,7 @@ files_info_collection = db['files']  # actually, collection for all files (pres 
 checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
-logs_collection = db.create_collection(
-    'logs', capped=True, size=5242880) if not db['logs'] else db['logs']
+logs_collection = db.create_collection('logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
 
 
