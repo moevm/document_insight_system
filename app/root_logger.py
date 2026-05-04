@@ -3,7 +3,7 @@ import sys
 from datetime import datetime
 
 from check_log_context import current_check_id, current_check_stage
-from db.db_methods import add_log
+from db.methods.log import add_log
 
 
 class MongoDBLoggingHandler(logging.StreamHandler):

@@ -2,7 +2,7 @@ from flask import request
 from flask_login import current_user
 import os
 
-from app.db import db_methods
+from app.db.methods import check as check_methods
 from app.server_consts import URL_DOMEN
 from app.utils import checklist_filter, format_check_for_table
 
@@ -32,5 +32,5 @@ def get_query(req):
 
 
 def get_stats():
-    rows, _ = db_methods.get_checks(**get_query(request))
+    rows, _ = check_methods.get_checks(**get_query(request))
     return [format_check_for_table(item, set_link=URL_DOMEN) for item in rows]
