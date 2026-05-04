@@ -6,7 +6,8 @@ from flask import Blueprint, abort, request
 from flask_login import login_required, current_user
 
 from datetime import datetime
-from app.db import db_methods
+from app.db.methods import check as check_methods
+from app.db.methods import criteria_pack as criteria_pack_methods
 from app.root_logger import get_root_logger
 from app.main.check_packs import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO, REPORT_TYPES, init_criterions
 
@@ -22,7 +23,7 @@ def ready_result(_id):
     except bson.errors.InvalidId:
         logger.error('_id exception:', exc_info=True)
         return {}
-    check = db_methods.get_check(oid)
+    check = check_methods.get_check(oid)
     if check is not None:
         return {"is_ended": check.is_ended}
 
@@ -65,7 +66,7 @@ def api_criteria_pack():
         msg = f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. Успешно инициализированные: {inited}. Возникшие ошибки: {err}."
         return {'data': msg, 'time': datetime.now()}, 400
     # if ok - save to DB
-    db_methods.save_criteria_pack({
+    criteria_pack_methods.save_criteria_pack({
         'name': pack_name,
         'raw_criterions': raw_criterions,
         'file_type': file_type_info,
