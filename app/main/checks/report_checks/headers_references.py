@@ -9,13 +9,13 @@ class ReportHeadersReferencesCheck(BaseReportCriterion):
         super().__init__(file_info)
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
         self.headers = self.find_headers()
-        self.optional_headers == False
+        self.optional_headers = False
 
     def check(self):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         if self.file_type['report_type'] == 'LR':
-            self.optional_headers == True
+            self.optional_headers = True
         elif self.file_type['report_type'] != 'VKR':
             return answer(False, "Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев")
 
@@ -26,7 +26,7 @@ class ReportHeadersReferencesCheck(BaseReportCriterion):
         result = True
         result_str = ""
 
-        for header in self.headers():
+        for header in self.headers:
             header_text = header["text"].lower()
             if self.contain_references(header_text):
                 #добавить номер страницы
