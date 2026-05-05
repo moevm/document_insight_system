@@ -3,7 +3,7 @@ from ..base_check import BaseReportCriterion, answer
 
 class ReportHeadersAtPageTopCheck(BaseReportCriterion):
     label = "Проверка расположения разделов второго уровня с новой страницы"
-    description = ''
+    _description = ''
     id = "headers_at_page_top_check"
 
     def __init__(self, file_info, headers=[]):

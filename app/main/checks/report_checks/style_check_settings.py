@@ -2,14 +2,14 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 
 class StyleCheckSettings:
-    APPENDIX_UNIFY_REGEX = "(?i)^приложение \\w$"
-    APPENDIX_REGEX = "(?i)^ПРИЛОЖЕНИЕ (\\w)\\n(.+)"
-    HEADER_1_NUM_REGEX = "^([1-9][0-9]*\\ )([\\w\\s])+$"
-    HEADER_2_NUM_REGEX = "^[1-9][0-9]*\\.([1-9][0-9]*\\ )([\\w\\s]+)$"
-    HEADER_NUM_REGEX = "^\\d.+$"
-    HEADER_REGEX = "^\\D+.+$"
-    HEADER_1_REGEX = r"^([1-9][0-9]*\.([1-9][0-9]*\.)){0,1}([\w\s]+)$"
-    HEADER_2_REGEX = r"^([1-9][0-9]*\.([1-9][0-9]*\.)*){0,1}([\w\s]+)$"
+    APPENDIX_UNIFY_REGEX = r"(?i)^приложение \w$"
+    APPENDIX_REGEX = r"(?i)^ПРИЛОЖЕНИЕ (\w)\n(.+)"
+    HEADER_1_NUM_REGEX = r"^([1-9][0-9]*)\s*.+$"  # r"^([1-9][0-9]*\ )([\w\s])+$"
+    HEADER_2_NUM_REGEX = r"^[1-9][0-9]*\.([1-9][0-9]*\.)* ([\w\s]+)$"
+    HEADER_NUM_REGEX = r"^\d.+$"
+    HEADER_REGEX = r"^\D+.+$"
+    HEADER_1_REGEX = r"^([1-9][0-9]*\.([1-9][0-9]*\.))?\s*.+$"
+    HEADER_2_REGEX = r"^([1-9][0-9]*\.([1-9][0-9]*\.)*)?\s*.+$"
     STD_BANNED_WORDS = ('мы', 'моя', 'мои', 'моё', 'наш', 'наши',
         'аттач', 'билдить', 'бинарник', 'валидный', 'дебаг', 'деплоить', 'десктопное', 'железо',
         'исходники', 'картинка', 'консольное', 'конфиг', 'кусок', 'либа', 'лог', 'мануал',
@@ -97,7 +97,7 @@ class StyleCheckSettings:
         'any_header':
         {
             "style": HEADER_2_STYLE,
-            "docx_style": ["heading 3", "heading 4"],
+            "docx_style": ["heading 3"],
             "headers": ["Цель работы", "Выполнение работы", "Выводы"],
             "unify_regex": HEADER_2_REGEX,
             "regex": HEADER_2_REGEX,
@@ -107,7 +107,14 @@ class StyleCheckSettings:
             'max_count_for_banned_words_check': 6,
             'min_ref_for_literature_references_check': STD_MIN_LIT_REF,
             'mах_ref_for_literature_references_check': STD_MAX_LIT_REF
-        }
+        },
+        '1/2_header': {
+            "style": HEADER_2_REGEX,
+            "docx_style": ["heading 3", "heading 4"], 
+            "headers": [],
+            "unify_regex": None,
+            "regex": HEADER_2_REGEX,
+        },
     }
 
     VKR_CONFIG = {
@@ -115,7 +122,7 @@ class StyleCheckSettings:
         {
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
-            "headers": ["ВВЕДЕНИЕ", "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
+            "headers": ["ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ", "ВВЕДЕНИЕ", "ЗАКЛЮЧЕНИЕ", "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"],
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
@@ -125,13 +132,21 @@ class StyleCheckSettings:
             'min_ref_for_literature_references_check': STD_MIN_LIT_REF,
             'mах_ref_for_literature_references_check': STD_MAX_LIT_REF
         },
-        'second_header':
+        'first_header':
         {
             "style": HEADER_1_NUM_STYLE,
-            "docx_style": ["heading 2", "heading 3", "heading 4"],  # TODO: rm 'heading 2'?
+            "docx_style": ["heading 2"], 
             "headers": [],
             "unify_regex": None,
-            "regex": HEADER_NUM_REGEX,
+            "regex": HEADER_1_NUM_REGEX,
+        },
+        'second_header':
+        {
+            "style": HEADER_2_NUM_STYLE,
+            "docx_style": ["heading 3", "heading 4"],
+            "headers": [],
+            "unify_regex": None,
+            "regex": HEADER_2_REGEX,
         }
     }
 
@@ -162,7 +177,7 @@ class StyleCheckSettings:
             "warned_words": STD_WARNED_WORDS
         },
     }
-    
+
     NIR3_CONFIG = {
         'any_header':
         {

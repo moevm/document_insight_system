@@ -22,6 +22,8 @@ BASE_PRES_CRITERION = [
     ['pres_image_capture'],
     ['task_tracker'],
     ['overview_in_tasks'],
+    ['pres_aspect_ratio_check'],
+    ['pres_was_were_check'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
@@ -38,6 +40,7 @@ BASE_REPORT_CRITERION = [
     ["literature_references"],
     ["image_references"],
     ["table_references"],
+    ["report_table_percentage_check"],
     ["first_pages_check"],
     ["main_character_check"],
     ["needed_headers_check"],
@@ -50,7 +53,11 @@ BASE_REPORT_CRITERION = [
     ["empty_task_page_check"],
     ["water_in_the_text_check"],
     ["report_task_tracker"],
+<<<<<<< 768_content_objects_3level
     ["report_3_level_in_content_check"],
+=======
+    ["report_was_were_check"],
+>>>>>>> master
 ]
 
 DEFAULT_TYPE = 'pres'

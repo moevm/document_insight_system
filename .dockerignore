@@ -1,2 +1,11 @@
 /src
 /node_modules
+
+.venv
+.git
+.github
+playground
+
+
+
+lt_docker

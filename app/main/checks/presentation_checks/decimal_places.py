@@ -3,7 +3,7 @@ from ..base_check import BasePresCriterion, answer
 
 class PresDecimalPlacesCheck(BasePresCriterion):
     label = 'Проверка на избыточное количество десятичных знаков'
-    description = 'Проверка на избыточное количество десятичных знаков в числах'
+    _description = 'Проверка на избыточное количество десятичных знаков в числах'
     id = 'decimal_places_check'
 
     def __init__(self, file_info, max_decimal_places=2, max_violations=3):

@@ -4,7 +4,7 @@ from ..base_check import BasePresCriterion, answer, morph
 
 class OverviewInTasks(BasePresCriterion):
     label = "Проверка наличия обзора в числе задач"
-    description = 'В числе задач должен присутсвовать обзор/анализ предметной области'
+    _description = 'В числе задач должен присутсвовать обзор/анализ предметной области'
     id = 'overview_in_tasks'
 
     def __init__(self, file_info, goal_and_tasks='Цель и задачи', keywords=['обзор', 'анализ']):

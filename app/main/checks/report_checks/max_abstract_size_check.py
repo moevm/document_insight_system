@@ -3,7 +3,7 @@ from ..base_check import BaseReportCriterion, answer
 
 class ReportMaxSizeOfAbstractCheck(BaseReportCriterion):
     label = "Максимальный размер раздела Реферат в ВКР"
-    description = "Максимальный размер раздела Реферат в ВКР (1 стр.)"
+    _description = "Максимальный размер раздела Реферат в ВКР (1 стр.)"
     id = "max_abstract_size_check"
 
     def __init__(self, file_info, max_size=1):

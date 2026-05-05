@@ -4,8 +4,10 @@ from .utils import init_criterions
 
 logger = logging.getLogger('root_logger')
 
+WARNING_CHECK_FAILED_MSG = "Данный критерий является необязательным для прохождения и не влияет на результат проверки.<br>"
 PRIORITY_CHECK_FAILED_MSG = "<b>Данный критерий является обязательным для прохождения.<br>Результат всей проверки обнулен, но вы можете ознакомиться с результатами каждого критерия.</b><br>"
 UNEXPECTED_CHECK_FAIL_MSG = "<b>Во время проверки произошла ошибка: проверьте соответствия оформления файла шаблона (в том числе разделов и уровней заголовков), попробуйте позже или обратитесь к администратору системы.<b>"
+
 
 class BaseCriterionPack:
 
@@ -36,6 +38,9 @@ class BaseCriterionPack:
             if criterion.priority and not criterion_check_result['score']:
                 failed_priority_check = True
                 criterion_check_result['verdict'] = [PRIORITY_CHECK_FAILED_MSG] + list(criterion_check_result['verdict'])
+            if criterion.warning:
+                criterion_check_result['verdict'] = [WARNING_CHECK_FAILED_MSG] + list(criterion_check_result['verdict'])
+                criterion_check_result['warning'] = True
             result.append(dict(
                 id=criterion.id,
                 name=criterion.name,
@@ -64,17 +69,23 @@ class BaseCriterionPack:
 
     @staticmethod
     def calc_score(result):
-        if len(result) == 0: return 0.
+        if not result:
+            return 0.
         score = 0.
+        result = list(filter(lambda x: 'warning' not in x, result))     # dont calc warning checks
         for check in result:
             score += float(check['score'])
+        if not score or not result:
+            return 0.
         return round(score / len(result), 3)
-    
+
     @staticmethod
     def get_proportion(result):
-        if len(result) == 0: return 0.
+        if not result:
+            return 0.
+        score = 0.
+        result = list(filter(lambda x: 'warning' not in x, result))     # dont calc warning checks
         score = 0.
         for check in result:
             score += float(check['score'])
         return round(score, 2), len(result)
-

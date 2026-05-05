@@ -1,5 +1,4 @@
 import os
-from root_logger import get_root_logger
 
 UPLOAD_FOLDER = '/usr/src/project/files'
 ALLOWED_EXTENSIONS = {

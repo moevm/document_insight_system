@@ -9,10 +9,18 @@ def get_filtered_module_members(module):
         inspect.getmembers(module)
     )
 
+class CriteriaInfo(dict):
+    def __init__(self, data):
+        super().__init__(data)
+        self.cls = data['class']
+
+    def description(self, pack=None):
+        return self.cls.description(pack)
+
 
 CRITERIA_INFO = {
-    'pres': {cls.id: {'class': cls, 'name': name, 'label': cls.label, 'description': cls.description} for name, cls in get_filtered_module_members(presentation_checks)},
-    'report': {cls.id: {'class': cls, 'name': name, 'label': cls.label, 'description': cls.description} for name, cls in get_filtered_module_members(report_checks)}
+    'pres': {cls.id: CriteriaInfo({'class': cls, 'name': name, 'label': cls.label}) for name, cls in get_filtered_module_members(presentation_checks)},
+    'report': {cls.id: CriteriaInfo({'class': cls, 'name': name, 'label': cls.label}) for name, cls in get_filtered_module_members(report_checks)}
 }
 
 AVAILABLE_CHECKS = {

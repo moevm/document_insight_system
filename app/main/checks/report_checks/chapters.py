@@ -7,7 +7,7 @@ from ...reports.docx_uploader.style import Style
 
 class ReportChapters(BaseReportCriterion):
     label = "Проверка оформления заголовков отчета"
-    description = '(Шрифты, отступы и т.д.)'
+    _description = '(Шрифты, отступы и т.д.)'
     id = 'header_check'
 
     def __init__(self, file_info):
@@ -23,7 +23,7 @@ class ReportChapters(BaseReportCriterion):
         self.presets = StyleCheckSettings.CONFIGS.get(self.config)
         level = 0
         for _, format_description in self.presets.items():
-            self.docx_styles.update({level: format_description["docx_style"]})
+            self.docx_styles.update({level: { 'styles': format_description["docx_style"], 'headers': format_description['headers']}})
             pattern = re.compile(format_description["regex"])
             self.style_regex.update({level: pattern})
             level += 1
@@ -62,20 +62,31 @@ class ReportChapters(BaseReportCriterion):
         for header in self.headers:
             marked_style = 0
             for key in self.docx_styles.keys():
-                if not marked_style:
-                    for style_name in self.docx_styles[key]:
-                        if header["style"].find(style_name) >= 0:
-                            if self.style_regex[key].match(header["text"]):
-                                marked_style = 1
-                                err = self.style_diff(header["styled_text"], self.target_styles[key]["style"])
-                                err = list(map(lambda msg: f'Стиль "{header["style"]}": ' + msg, err))
-                                result_str += ("<br>".join(err) + "<br>" if len(err) else "")
-                                break
+                if marked_style:
+                    break
+                pre_headers = self.docx_styles[key]['headers']
+                styles = self.docx_styles[key]['styles']
+                for style_name in styles:
+                    if header["style"].find(style_name) >= 0:
+                        if pre_headers and (header["text"] not in pre_headers and "приложение" not in header["text"].lower()):
+                            # если для стиля есть предопределенные заголовки (= структурные части ВКР) -> проверяем
+                            # иначе идем дальше, т.к. может быть несколько стилей для одного вида заголовка (нумерованные и нет)
+                            # TODO: исправить костыль, описанный выше
+                            continue
+                        marked_style = 1
+                        if self.style_regex[key].match(header["text"]):
+                            err = self.style_diff(header["styled_text"], self.target_styles[key]["style"])
+                            err = list(map(lambda msg: f'Стиль "{header["style"]}": ' + msg, err))
+                            result_str += ("<br>".join(err) + "<br>" if len(err) else "")
+                        else:
+                            err = f'Заголовок "{header["text"]}": '
+                            err += f"текст заголовка не соответствует требуемому формату ({self.style_regex[key]})."
+                            result_str += err + "<br>"
+                        break
             if not marked_style:
                 err = f"Заголовок \"{header['text']}\": "
                 err += f'Стиль "{header["style"]}" не соответствует ни одному из стилей заголовков.'
                 result_str += (str(err) + "<br>")
-
         if not result_str:
             return answer(True, "Форматирование заголовков соответствует требованиям.")
         else:
