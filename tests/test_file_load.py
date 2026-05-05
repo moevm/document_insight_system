@@ -1,11 +1,12 @@
 import time
+
 from basic_selenium_test import BasicSeleniumTest
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+
 
 class FileLoadTestSelenium(BasicSeleniumTest):
-
     def upload_file(self, report_ext):
         report = report_ext
         form_for_load = self.get_driver().find_element(By.ID, 'upload_file')
@@ -24,12 +25,11 @@ class FileLoadTestSelenium(BasicSeleniumTest):
                     if obj is not None:
                         self.assertNotEquals(obj, None)
                         return
-                except:
+                except Exception:
                     continue
             self.fail('element is not found')
         else:
             self.fail("file didn't upload")
-
 
     def check_pack(self):
         self.authorization()
@@ -44,14 +44,14 @@ class FileLoadTestSelenium(BasicSeleniumTest):
         if obj == 'BaseReportCriterionPack':
             self.upload_file(self.param[3])
         else:
-            self.skipTest("Current criteria pack is not for report") 
+            self.skipTest("Current criteria pack is not for report")
 
     def test_report_load_doc(self):
         obj = self.check_pack()
         if obj == 'BaseReportCriterionPack':
             self.upload_file(self.param[4])
         else:
-            self.skipTest("Current criteria pack is not for report")     
+            self.skipTest("Current criteria pack is not for report")
 
     def test_report_load_pres(self):
         obj = self.check_pack()

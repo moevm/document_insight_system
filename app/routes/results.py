@@ -1,18 +1,16 @@
-import bson
-from bson import ObjectId
 from time import time
-
-from flask import Blueprint, Response, render_template
-from flask_login import current_user, login_required
 from wsgiref.handlers import format_date_time as format_date
 
-from app.db.methods import check as check_methods
+import bson
+from bson import ObjectId
+from flask import Blueprint, Response, render_template
+from flask_login import current_user, login_required
+
 from app.db.methods import celery_check as celery_check_methods
-
-from app.utils import format_check
+from app.db.methods import check as check_methods
 from app.root_logger import get_root_logger
-
 from app.server_consts import TABLE_COLUMNS
+from app.utils import format_check
 
 results_bp = Blueprint('results', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')
@@ -48,9 +46,14 @@ def results_main(_id):
         ):
             # show processing time for user
             avg_process_time = None if check.is_ended else celery_check_methods.get_average_processing_time()
-            return render_template("./results.html", navi_upload=True, results=check,
-                                columns=TABLE_COLUMNS, avg_process_time=avg_process_time,
-                                stats=format_check(check.pack()))
+            return render_template(
+                "./results.html",
+                navi_upload=True,
+                results=check,
+                columns=TABLE_COLUMNS,
+                avg_process_time=avg_process_time,
+                stats=format_check(check.pack()),
+            )
         else:
             return "У вас нет прав на просмотр результатов чужих проверок", 403
     else:
@@ -75,14 +78,18 @@ def results_svg(_id):
                 <text xml:space="preserve" text-anchor="start" font-size="20" id="result" y="25" x="110" stroke-width="0" stroke="#000" fill="#000000">{result_proportion[0]}/{result_proportion[1]}</text>
                 <text xml:space="preserve" text-anchor="start" font-size="20" id="result_msg" y="25" x="200" stroke-width="0" stroke="#000" fill="#{'00FF00' if check.is_passed else 'FF0000'}">{'' if check.is_passed else 'не '}пройдена</text>
             </svg>
-            """
+            """  # noqa: E501
         else:
-            svg_text = f"""
+            svg_text = """
             <svg width="350" height="45" style="background-color: white" xmlns="http://www.w3.org/2000/svg">
                 <text xml:space="preserve" text-anchor="start" font-size="20" id="title" y="25" x="10" stroke-width="0" stroke="#000" fill="#000000">Работа проверяется</text>
             </svg>
-            """
-        return Response(svg_text, headers=[("Cache-Control", "no-cache"), ('Expires', format_date(time()-3600))], mimetype='image/svg+xml')
+            """  # noqa: E501
+        return Response(
+            svg_text,
+            headers=[("Cache-Control", "no-cache"), ('Expires', format_date(time() - 3600))],
+            mimetype='image/svg+xml',
+        )
     else:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return "No such check", 404

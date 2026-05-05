@@ -1,5 +1,5 @@
-from .style_check_settings import StyleCheckSettings
 from ..base_check import BaseReportCriterion, answer
+from .style_check_settings import StyleCheckSettings
 
 
 class ReportNeededHeadersCheck(BaseReportCriterion):
@@ -36,7 +36,10 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         self.late_init()
         if not self.patterns:
-            return answer(False, "Не удалось сформировать требуемые заголовки исходя из названия работы. Проверьте наименование работы.")
+            return answer(
+                False,
+                "Не удалось сформировать требуемые заголовки исходя из названия работы. Проверьте наименование работы.",
+            )
         result_string = ''
         patterns = []
         for pattern in self.patterns:
@@ -55,9 +58,11 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
                 result_string += '<li>' + pattern["pattern"] + '</li>'
 
         if not result_string:
-            result_str = f'Все необходимые заголовки обнаружены!'
-            result_str += f'<br><br><b>Ниже представлена иерархия обработанных заголовков, ' \
-                        f'сравните с Содержанием {self.format_page_link([self.headers_page])}:</b>'
+            result_str = 'Все необходимые заголовки обнаружены!'
+            result_str += (
+                f'<br><br><b>Ниже представлена иерархия обработанных заголовков, '
+                f'сравните с Содержанием {self.format_page_link([self.headers_page])}:</b>'
+            )
             result_str += self.chapters_str
             result_str += '<br>Если список не точный, убедитесь, что для каждого заголовка указан верный стиль.'
             return answer(True, result_str)
@@ -71,8 +76,10 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
                             <li>Убедитесь, что заголовок состоит из одного абзаца.</li>
                         </ul>
                         '''
-            result_str += f'<br><br><b>Ниже представлена иерархия обработанных заголовков, ' \
-                        f'сравните с Содержанием {self.format_page_link([self.headers_page])}:</b>'
+            result_str += (
+                f'<br><br><b>Ниже представлена иерархия обработанных заголовков, '
+                f'сравните с Содержанием {self.format_page_link([self.headers_page])}:</b>'
+            )
             result_str += self.chapters_str
             result_str += '<br>Если список не точный, убедитесь, что для каждого заголовка указан верный стиль.'
             return answer(False, result_str)
