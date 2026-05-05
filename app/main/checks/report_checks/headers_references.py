@@ -27,12 +27,15 @@ class ReportHeadersReferencesCheck(BaseReportCriterion):
         result_str = ""
 
         for header in self.headers:
-            header_text = header["text"].lower()
-            if self.contain_references(header_text):
-                #добавить номер страницы
-                result_str += (("<br>" if len(result_str) else "") +
-                                   f"Заголовок\"{header['text']}\" "
-                                   f"содержит ссылки. ")
+            if self.contain_references(header['text']):
+                if header['page'] != -1:
+                    result_str += (("<br>" if len(result_str) else "") +
+                                    f"Заголовок\"{header['text']}\" на {header['page']} странице "
+                                    f"содержит ссылки. ")
+                else:
+                    result_str += (("<br>" if len(result_str) else "") +
+                                    f"Заголовок\"{header['text']}\" "
+                                    f"содержит ссылки. ")
 
         if not result_str:
             result_str = "В заголовках нет ссылок"
@@ -47,8 +50,15 @@ class ReportHeadersReferencesCheck(BaseReportCriterion):
     def find_headers(self):
         headers = []
         for header in self.chapters:
-            #добавить поиск страницы
-            headers.append({"text": header["text"]})
+            headers.append({'text': header['text'], 'page': -1})
+
+        #номер страницы только для тех заголовков, у которых он явно указан
+        main_headers = self.file.make_headers(self.file_type['report_type'])
+        for main_header in main_headers:
+            for header in headers:
+                if main_header['name'] == header['text']:
+                    header['page'] = main_header['page']
+
         return headers
 
     def contain_references(self, header_text):
