@@ -1,5 +1,5 @@
-from ..base_check import BaseReportCriterion, answer
 import re
+from ..base_check import BaseReportCriterion, answer
 
 
 class ReportСhaptersLevel3ContentCheck(BaseReportCriterion):
@@ -41,7 +41,8 @@ class ReportСhaptersLevel3ContentCheck(BaseReportCriterion):
             if not bool_end_content_find:
                 return answer(
                     False,
-                    "Не найдено заголовка 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' (заголовок второго уровня), который должен идти сразу после раздела 'Содержание'",
+                    "Не найдено заголовка 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' (заголовок второго уровня),"
+                    "который должен идти сразу после раздела 'Содержание'",
                 )
 
             if failed_str:
