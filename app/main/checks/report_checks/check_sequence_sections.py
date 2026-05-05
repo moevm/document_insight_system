@@ -1,56 +1,97 @@
-
 from ..base_check import BaseReportCriterion, answer
 
 
 class ReportSequenceSectionsCheck(BaseReportCriterion):
     label = "Проверка последовательности разделов"
-    description = "Структура работы не правильна: до раздела 'ВВЕДЕНИЕ' должны быть в определенном порядке разделы:" \
-    "'ЗАДАНИЕ НА ВЫПУСКНУЮ КВАЛИФИКАЦИОННУЮ РАБОТУ' (заголовок первого уровня)" \
-    "'КАЛЕНДАРНЫЙ ПЛАН ВЫПОЛНЕНИЯ ВЫПУСКНОЙ КВАЛИФИКАЦИОННОЙ РАБОТЫ' (заголовок первого уровня)" \
-    "'РЕФЕРАТ' (заголовок первого уровня)" \
-    "'ABSTRACT' (заголовок первого уровня)" \
-    "'СОДЕРЖАНИЕ' (заголовок второго уровня)" \
-    " 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' (заголовок второго уровня)"
-    id = 'report_sequence_sections_check'
+    _description = (
+        "Структура работы не правильна: до раздела 'ВВЕДЕНИЕ' (заголовок второго уровня) должны быть в определенном порядке разделы:"
+        "ЗАДАНИЕ"
+        "календарный план"
+        "РЕФЕРАТ"
+        "ABSTRACT"
+        "СОДЕРЖАНИЕ"
+        "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ (заголовок второго уровня)"
+    )
+    id = "report_sequence_sections_check"
 
     def __init__(self, file_info):
         super().__init__(file_info)
 
     def check(self):
         try:
-            headers = self.file.make_chapters(self.file_type['report_type'])
-            # return answer(True, f"{headers}")
-            if not headers:
-                return answer(False, "Не найдено ни одного заголовка.")
+            paragraphs = self.file.paragraphs
 
-            flag_intro, struct_label = get_header_1_2_level(headers, [])
+            required_sections = [
+                "ЗАДАНИЕ",
+                "календарный план",
+                "РЕФЕРАТ",
+                "ABSTRACT",
+                "СОДЕРЖАНИЕ",
+                "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ",
+            ]
 
-            if not flag_intro:
-                return answer(False, "Не найдено раздела 'ВВЕДЕНИЕ'/'ВСТУПЛЕНИЕ'")
+            found_sections = []
+            intro_found = False
 
-            if " ".join(struct_label) != "ЗАДАНИЕ НА ВЫПУСКНУЮ КВАЛИФИКАЦИОННУЮ РАБОТУ КАЛЕНДАРНЫЙ ПЛАН ВЫПОЛНЕНИЯ ВЫПУСКНОЙ КВАЛИФИКАЦИОННОЙ РАБОТЫ" \
-            " РЕФЕРАТ ABSTRACT СОДЕРЖАНИЕ ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ":
-                return answer(False, f"Ваша структура работы не соотвествует требуемой: {'\n'.join(struct_label)}")
-                
+            for paragraph in paragraphs:
+                if not paragraph.paragraph_text:
+                    continue
 
-            return answer(True, "Проверка последовательности разделов до раздела 'ВВЕДЕНИЕ' пройдена")
+                text = paragraph.paragraph_text.strip()
+                style = str(paragraph.paragraph_style_name).lower()
+
+                if "ВВЕДЕНИЕ" in text:
+                    if "heading 2" not in style:
+                        return answer(
+                            False,
+                            "Раздел 'ВВЕДЕНИЕ' должен быть оформлен стилем 'Заголовок 2'",
+                        )
+                    intro_found = True
+                    break
+
+                if "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ" in text:
+                    if "heading 2" not in style:
+                        return answer(
+                            False,
+                            "Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен стилем 'Заголовок 2'",
+                        )
+                    found_sections.append("ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ")
+                    continue
+
+                for section in required_sections:
+                    if section in text:
+                        if "heading" in style:
+                            return answer(
+                                False,
+                                f"Раздел '{section}' не должен быть оформлен как заголовок",
+                            )
+                        found_sections.append(section)
+                        break
+
+            if not intro_found:
+                return answer(
+                    False,
+                    "Не найден раздел 'ВВЕДЕНИЕ' (должен быть заголовком второго уровня)",
+                )
+
+            if (
+                " ".join(found_sections)
+                != "ЗАДАНИЕ календарный план РЕФЕРАТ ABSTRACT СОДЕРЖАНИЕ ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ"
+            ):
+                result_str = (
+                    f"Ваша структура работы не соотвествует требуемой!"
+                    f"<br>Ваша структура: <br>   {'<br>'.join(found_sections)}"
+                    f"<br>Требуемая структура: <br>   {'<br>'.join(required_sections)}"
+                )
+                return answer(False, result_str)
+
+            return answer(
+                True,
+                "Проверка последовательности разделов до раздела 'ВВЕДЕНИЕ' пройдена",
+            )
 
         except Exception as e:
-            return answer(False, f"Ошибка про проверке последовательности разделов до раздела 'ВВЕДЕНИЕ'/'ВСТУПЛЕНИЕ': {str(e)}, {self.file.make_chapters(self.file_type['report_type'])}")
-
-
-def get_header_1_2_level(headers, struct_label):
-    for header in headers:
-        style = header.get('style', '').lower()
-        
-        if style != "heading 1" and style != "heading 2" :
-            continue
-
-        name_label = header['text'].strip().upper()
-        
-        if name_label in ["ВВЕДЕНИЕ", "ВСТУПЛЕНИЕ"]:
-            return True, struct_label
-        
-        struct_label.append(name_label.upper())
-    
-    return False, struct_label
+            return answer(
+                False,
+                f"Ошибка про проверке последовательности разделов до раздела 'ВВЕДЕНИЕ': {str(e)}, {self.file.make_chapters(self.file_type['report_type'])}",
+            )
