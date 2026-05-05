@@ -5,7 +5,7 @@ from ..base_check import BaseReportCriterion, answer
 
 class TableReferences(BaseReportCriterion):
     label = "Проверка наличия ссылок на все таблицы"
-    description = ""
+    _description = ""
     id = 'table_references'
 
     def __init__(self, file_info, table_style="ВКР_Подпись таблицы"):
@@ -21,17 +21,14 @@ class TableReferences(BaseReportCriterion):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         result_str = ''
-        if self.file_type['report_type'] == 'VKR':
-            self.late_init_vkr()
-            if not len(self.headers):
-                return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
-            number_of_tables, all_numbers = self.count_tables_vkr()
-            if not number_of_tables:
-                return answer(True, f'Не найдено ни одной таблицы.<br><br>Если в вашей работе присутствуют таблицы, убедитесь, что для их подписи был '
-                                     f'использован стиль {self.table_style} и формат '
-                                     f'"Таблица <Номер таблицы> -- <Название таблицы>".')
-        else:
-            return answer(False, 'Во время обработки произошла критическая ошибка')
+        self.late_init_vkr()
+        if not len(self.headers):
+            return answer(False, "Не найдено ни одного заголовка, что не позволило определить разделы отчета.<br><br>Проверьте корректность использования стилей.")
+        number_of_tables, all_numbers = self.count_tables_vkr()
+        if not number_of_tables:
+            return answer(True, f'Не найдено ни одной таблицы.<br><br>Если в вашей работе присутствуют таблицы, убедитесь, что для их подписи был '
+                                    f'использован стиль {self.table_style} и формат '
+                                    f'"Таблица <Номер таблицы> — <Название таблицы>".')
         references = self.search_references()
         if len(references.symmetric_difference(all_numbers)) == 0:
             return answer(True, f"Пройдена!")

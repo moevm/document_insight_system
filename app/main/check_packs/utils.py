@@ -6,11 +6,12 @@ from ..checks import AVAILABLE_CHECKS
 logger = getLogger('root_logger')
 
 
-def init_criterions(criterions, file_type, file_info={}):
+def init_criterions(criterions, file_info):
     """
     criterions = [[criterion_id, criterion_params], ...]  # criterion_params is dict
     """
     try:
+        file_type = file_info['file_type']
         existing_criterions = AVAILABLE_CHECKS.get(file_type['type'], {})
         errors = []
         initialized_checks = []

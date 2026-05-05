@@ -1,6 +1,6 @@
 import logging
 
-from db.db_methods import ConsumersDBManager
+from app.db.types.ConsumerDBManager import ConsumersDBManager
 from main.checks_config.parser import sld_num
 
 logger = logging.getLogger('root_logger')

@@ -2,7 +2,7 @@ from ..base_check import BaseReportCriterion, answer
 
 class ReportImageShareCheck(BaseReportCriterion):
     label = "Проверка доли объема отчёта, приходящейся на изображения"
-    description = 'Доля изображений (не включая "Приложение") не должна превышать 0,9'
+    _description = 'Доля изображений (не включая "Приложение") не должна превышать 0,9'
     id = 'image_share_check'
 
     def __init__(self, file_info, limit=0.3):

@@ -30,9 +30,6 @@ except Exception as error:
 # setup variables
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '')
 
-RECAPTCHA_ENABLED = True
-RECAPTCHA_SITE_KEY = os.environ.get('RECAPTCHA_SITE_KEY', '')
-RECAPTCHA_SECRET_KEY = os.environ.get('RECAPTCHA_SECRET_KEY', '')
 
 SECRET_KEY = os.environ.get('SECRET_KEY', '')
 SIGNUP_PAGE_ENABLED = os.environ.get('SIGNUP_PAGE_ENABLED', 'True') == 'True'

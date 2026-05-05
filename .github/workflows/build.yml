@@ -11,17 +11,16 @@ jobs:
 
       - name: Build system images (non-pulling)
         run: |
-          # build base image
-          docker build -f Dockerfile_base -t dvivanov/dis-base:v0.3 .
-      - name: Build docker-compose
-        run: |
           cp .env_example .env
-          docker compose build
+          make build-all
       - name: Run docker-compose
         run: |
-          docker compose up -d
-          sleep 10
+          make full-up-d
+          sleep 20
       - name: Run tests
         run: |
           curl http://localhost:8080
           curl http://localhost:5555
+      - name: Check logs 
+        run: docker compose -f docker-compose.yml -f lt_docker/docker-compose.yaml -f docker-compose-selenium.yml logs
+        if: always()

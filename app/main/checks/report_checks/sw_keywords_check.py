@@ -11,7 +11,7 @@ MORPH_ANALYZER = MorphAnalyzer()
 
 class SWKeywordsCheck(BaseReportCriterion):
     label = 'Проверка наличия раздела "Ключевые слова" и упоминание их в тексте'
-    description = 'Раздел идет сразу после названия работы и содержит не менее трех ключевых слов. Слова упоминаются в тексте'
+    _description = 'Раздел идет сразу после названия работы и содержит не менее трех ключевых слов. Слова упоминаются в тексте'
     id = 'sw_keywords_check'
 
     def __init__(self, file_info, min_key_words = 3):

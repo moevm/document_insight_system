@@ -3,7 +3,7 @@ from ..base_check import BasePresCriterion, answer, morph
 
 
 class PresBannedWordsCheck(BasePresCriterion):
-    description = ''
+    _description = ''
     label = "Проверка наличия запретных слов в презентации"
     id = 'pres_banned_words_check'
 

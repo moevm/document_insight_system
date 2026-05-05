@@ -6,22 +6,23 @@ import copy
 
 class ReportMainCharacterCheck(BaseReportCriterion):
     label = "Проверка составляющих титульного листа, задания и календарного плана"
-    description = ""
+    _description = ""
     id = "main_character_check"
     priority = True
 
-    def __init__(self, file_info, tables_count_to_verify=8):
+    def __init__(self, file_info, tables_count_to_verify=8, edu_degree='bsc'):
         super().__init__(file_info)
         self.headers = []
         self.first_check_list = None
         self.second_check_list = None
         self.tables_count_to_verify = tables_count_to_verify
+        self.edu_degree = edu_degree
 
     def late_init(self):
         self.headers = self.file.make_headers(self.file_type["report_type"])
 
     def check(self):
-        self.first_check_list = copy.deepcopy(ReportMainPageSetting.FIRST_TABLE)
+        self.first_check_list = copy.deepcopy(ReportMainPageSetting.get_first_table(self.edu_degree))
         self.second_check_list = copy.deepcopy(ReportMainPageSetting.SECOND_TABLE)
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
@@ -82,12 +83,6 @@ class ReportMainCharacterCheck(BaseReportCriterion):
             contents.append("|".join(row_text))
         return contents
 
-    def calculate_find_value(self, table, index):
-        count = int((len(table) - index - 2) / 2)
-        if count >= 0:
-            return count
-        return 0
-
     def check_table(self, check_list, table, table_num):
         for item in check_list:
             for i, line in enumerate(table):              
@@ -105,10 +100,7 @@ class ReportMainCharacterCheck(BaseReportCriterion):
                         continue
 
                 elif item["key"] in ["Зав. кафедрой", "Консультант"] and item["found_key"] > 0:
-                    if item["key"] == "Консультант":
-                        if item["found_key"] == 1:
-                            item["find"] += self.calculate_find_value(table, i)
                     for value in item["value"]:
-                        if re.search(value, line):
+                        if "Руководитель" not in line and  re.search(value, line):  # исключаем из поиска строки с рукодителем
                             item["found_value"] += 1
                             item["logs"] += f"'{item['key']}': значение компоненты '{value}' найдено в строке '{line}' в таблице №{table_num}<br>"

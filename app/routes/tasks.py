@@ -1,5 +1,6 @@
 from os.path import join
 from bson import ObjectId
+from celery import chain
 from celery.result import AsyncResult
 
 from flask import Blueprint, request, current_app, jsonify
@@ -8,11 +9,13 @@ from app.root_logger import get_root_logger
 
 from app.routes.utils import check_access_token
 from app.utils import get_file_len, check_file
-from app.db import db_methods
-from app.db.db_types import Check
+from app.db.methods import file as file_methods
+from app.db.methods import check as check_methods
+from app.db.methods import celery_check as celery_check_methods
+from app.db.types.Check import Check
 
 from app.server_consts import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
-from app.tasks import create_task
+from app.tasks import create_task, convert_check_file_to_pdf
 
 tasks = Blueprint('tasks', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')
@@ -30,7 +33,7 @@ def run_task():
     if not file:
         logger.critical("request doesn't include file")
         return "request doesn't include file"
-    if get_file_len(file) * 2 + db_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
+    if get_file_len(file) * 2 + file_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
         return 'storage_overload'
     file_check_response = check_file(file, extension, ALLOWED_EXTENSIONS[file_ext_type], check_mime=True)
@@ -53,10 +56,11 @@ def run_task():
     filepath = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
     file.save(filepath)
     # add file and file's info to db
-    file_id = db_methods.add_file_info_and_content(current_user.username, filepath, file_type, file_id)
+    file_id = file_methods.add_file_info_and_content(current_user.username, filepath, file_type, file_id)
     # use pdf from response or convert to pdf and save on disk and db
+    need_convert_pdf = False
     if current_user.two_files and pdf_file:
-        if get_file_len(pdf_file) * 2 + db_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
+        if get_file_len(pdf_file) * 2 + file_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
             logger.critical('Storage overload has occured')
             return 'storage_overload'
         logger.info(
@@ -64,9 +68,12 @@ def run_task():
         filenamepdf, extension = pdf_file.filename.rsplit('.', 1)
         filepathpdf = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
         pdf_file.save(filepathpdf)
-        converted_id = db_methods.add_file_to_db(filenamepdf, filepathpdf)
+        converted_id = file_methods.add_file_to_db(filenamepdf, filepathpdf)
     else:
-        converted_id = db_methods.write_pdf(filename, filepath)
+        logger.info(f"Конвертация файла '{file.filename}' в pdf будет запущена в порядке очереди.")
+        converted_id = str(ObjectId())
+        need_convert_pdf = True
+
     check = Check({
         '_id': file_id,
         'conv_pdf_fs_id': converted_id,
@@ -81,9 +88,19 @@ def run_task():
         'is_failed': False,
         'params_for_passback': current_user.params_for_passback
     })
-    db_methods.add_check(file_id, check)  # add check for parsed_file to db
-    task = create_task.delay(check.pack(to_str=True))  # add check to queue
-    db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
+
+    check_methods.add_check(file_id, check)  # add check for parsed_file to db
+
+    if need_convert_pdf:
+        task_chain = chain(
+            convert_check_file_to_pdf.s(check.pack(to_str=True), filepath),
+            create_task.s()
+        )
+    else:
+        task_chain = chain(create_task.s(check.pack(to_str=True)))
+
+    task = task_chain.apply_async()
+    celery_check_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
     return {'task_id': task.id, 'check_id': str(file_id)}
 
 
@@ -105,7 +122,7 @@ def run_md_task_by_api():
     if not file:
         logger.critical("request doesn't include file")
         return "request doesn't include file"
-    if get_file_len(file) * 2 + db_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
+    if get_file_len(file) * 2 + file_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
         return 'storage_overload'
     file_check_response = check_file(file, extension, ALLOWED_EXTENSIONS[file_ext_type], check_mime=True)
@@ -122,10 +139,11 @@ def run_md_task_by_api():
     filepath = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
     file.save(filepath)
     # add file and file's info to db
-    file_id = db_methods.add_file_info_and_content("api_access_token", filepath, file_type, file_id)
+    file_id = file_methods.add_file_info_and_content("api_access_token", filepath, file_type, file_id)
     # convert to pdf and save on disk and db
-    converted_id = db_methods.write_pdf(filename, filepath)
-    
+    logger.info(f"Конвертация файла '{file.filename}' в pdf будет запущена в порядке очереди.")
+    converted_id = str(ObjectId())
+
     check = Check({
         '_id': file_id,
         'conv_pdf_fs_id': converted_id,
@@ -140,13 +158,20 @@ def run_md_task_by_api():
         'is_failed': False,
         'params_for_passback': None
     })
-    db_methods.add_check(file_id, check)  # add check for parsed_file to db
-    task = create_task.delay(check.pack(to_str=True))  # add check to queue
-    db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
+    check_methods.add_check(file_id, check)  # add check for parsed_file to db
+
+    task_chain = chain(
+        convert_check_file_to_pdf.s(check.pack(to_str=True), filepath),
+        create_task.s()
+    )
+    task = task_chain.apply_async()
+    celery_check_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
+
     if full_response:
         return {'task_id': task.id, 'check_id': str(file_id)}
     else:
         return str(file_id)
+
 
 @tasks.route("/<task_id>", methods=["GET"])
 @login_required

@@ -3,7 +3,7 @@ from ..base_check import BasePresCriterion, answer
 
 class SlideHeadersDuplicationCheck(BasePresCriterion):
     label = 'Заголовки слайдов не дублируются'
-    description = 'Проверка на дублируемость заголовков слайдов'
+    _description = 'Проверка на дублируемость заголовков слайдов'
     id = 'slide_headers_duplication_check'
 
     def __init__(self, file_info):

@@ -5,12 +5,11 @@ docx2python~=2.0.4
 filetype==1.2.0
 Flask==2.0.3
 flask-login==0.5.0
-flask-recaptcha==0.4.2
 flask-security==3.0.0
 flower==1.2.0
 fsspec==2022.2.0
 jinja2==3.0.0
-language-tool-python==2.8.1
+language-tool-python==3.3.0
 lti==0.9.5
 lxml~=4.9.2
 markdown==3.4.4
@@ -18,10 +17,9 @@ md2pdf==1.0.1
 nltk==3.6.6
 numpy==1.26.4
 oauthlib~=3.1.0
-odfpy==1.4.1
-odfpy==1.4.1
-pandas~=2.0.3
-pdfplumber==0.6.1
+#odfpy==1.4.1
+pandas==3.0.0
+#pdfplumber==0.6.1
 PyMuPDF==1.26.6
 PyPDF2~=3.0.1
 pymongo==3.11.1

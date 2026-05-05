@@ -8,7 +8,7 @@ from ..base_check import BasePresCriterion, answer
 
 class FurtherDev(BasePresCriterion):
     label = "Наличие направлений дальнейшего развития"
-    description = 'Поиск направления развития в разделе "Заключение"'
+    _description = 'Поиск направления развития в разделе "Заключение"'
     id = 'future_dev'
 
     def __init__(self, file_info, conclusion='Заключение'):
