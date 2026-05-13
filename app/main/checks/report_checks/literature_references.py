@@ -146,6 +146,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         prev_ref = 0
         ref_sequence = []
         array_of_references = set()
+        index_table = -1
         for i in range(0, start_par):
             paragraph_text = (
                 self.file.paragraphs[i]
@@ -155,7 +156,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             match = re.search(r'Таблица ([.\d]+)', paragraph_text)
             table_text = ''
             if match:
-                index_table = int(match.group(1)) - 1
+                index_table += 1    # int(match.group(1)) - 1       # TODO: fix logic
                 table_text = self.get_text_in_table(index_table)
 
             paragraph_text += table_text
