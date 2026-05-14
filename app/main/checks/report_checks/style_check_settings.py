@@ -214,6 +214,25 @@ class StyleCheckSettings:
         },
     }
 
+    IND_PRAC_CONFIG = {
+        'any_header': {
+            "style": HEADER_1_STYLE,
+            "docx_style": ["heading 2"],
+            "headers": [
+                "ВВЕДЕНИЕ",
+                "ПОСТАНОВКА ЗАДАЧИ",
+                "РЕЗУЛЬТАТЫ РАБОТЫ",
+                "ИСПОЛЬЗУЕМЫЕ ТЕХНОЛОГИИ",
+                "ОТЗЫВ РУКОВОДИТЕЛЯ",
+                "ЗАКЛЮЧЕНИЕ",
+            ],
+            "unify_regex": None,
+            "regex": HEADER_REGEX,
+            "banned_words": STD_BANNED_WORDS,
+            "warned_words": STD_WARNED_WORDS,
+        },
+    }
+
     NIR1_CONFIG = {
         'any_header': {
             "style": HEADER_1_STYLE,
@@ -393,6 +412,7 @@ class StyleCheckSettings:
         'LR_MAIN_TEXT': LR_MAIN_TEXT_CONFIG,
         'VKR_HEADERS': VKR_CONFIG,
         'VKR_MAIN_TEXT': VKR_MAIN_TEXT_CONFIG,
+        'IND_PRAC_CONFIG': IND_PRAC_CONFIG,
         'NIR_HEADERS': NIR2_CONFIG,
         'NIR1_HEADERS': NIR1_CONFIG,
         'NIR2_HEADERS': NIR2_CONFIG,
