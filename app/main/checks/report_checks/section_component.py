@@ -133,4 +133,4 @@ class ReportSectionComponent(BaseReportCriterion):
         if errors:
             return answer(False, '<br>'.join(errors))
         else:
-            return answer(True, f'Все необходимые компоненты раздела "{self.chapter}" обнаружены и правильно отформатированы!')           )
+            return answer(True, f'Все необходимые компоненты раздела "{self.chapter}" обнаружены и правильно отформатированы!')
