@@ -61,10 +61,7 @@ class ReportGapsBetweenTitleAndTextCheck(BaseReportCriterion):
                         Все заголовки и следующий за ними текст находятся на одной странице.",
                 )
 
-            pages_str = "<br>   ".join(
-                f"{info['header']} (стр. {info['page_num']})<br>"
-                for info in fail_headers_info
-            )
+            pages_str = "<br>   ".join(f"{info['header']} (стр. {info['page_num']})<br>" for info in fail_headers_info)
 
             return answer(
                 False,
