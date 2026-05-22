@@ -1,5 +1,5 @@
 from ..base_check import BasePresCriterion, answer
-from ..check_abbreviations import main_check, forming_response
+from ..check_abbreviations import forming_response, main_check
 
 
 class PresAbbreviationsCheck(BasePresCriterion):

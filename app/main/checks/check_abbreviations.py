@@ -1,7 +1,8 @@
-import re
-from pymorphy3 import MorphAnalyzer
 import json
+import re
 from pathlib import Path
+
+from pymorphy3 import MorphAnalyzer
 
 morph = MorphAnalyzer()
 
@@ -52,10 +53,10 @@ def is_abbreviation_explained(abbr: str, text: str) -> bool:
             debug_print(f"  Расшифровка: {explanation}")
 
             if correctly_explained(abbr, explanation):
-                debug_print(f"  Расшифровка корректна")
+                debug_print("  Расшифровка корректна")
                 return True
             else:
-                debug_print(f"  Расшифровка НЕ соответствует первым буквам")
+                debug_print("  Расшифровка НЕ соответствует первым буквам")
                 debug_print(f"     Ожидалось: {abbr.upper()}")
                 debug_print(f"     Получено: {get_first_letters(explanation)}")
 

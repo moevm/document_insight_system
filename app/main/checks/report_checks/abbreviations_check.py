@@ -1,5 +1,5 @@
 from ..base_check import BaseReportCriterion, answer
-from ..check_abbreviations import main_check, forming_response
+from ..check_abbreviations import forming_response, main_check
 
 
 class ReportAbbreviationsCheck(BaseReportCriterion):
@@ -39,7 +39,6 @@ class ReportAbbreviationsCheck(BaseReportCriterion):
                 return answer(True, "Все аббревиатуры правильно расшифрованы")
             result_str = forming_response(unexplained_abbr_with_page, lambda pages: self.format_page_link(pages))
             return answer(False, result_str)
-            # return answer(True, f"self.file.make_chapters(self.file_type['report_type']):\n {self.file.make_chapters(self.file_type['report_type'])}")
 
         except Exception as e:
             return answer(False, f"Ошибка при проверке аббревиатур: {str(e)}")
