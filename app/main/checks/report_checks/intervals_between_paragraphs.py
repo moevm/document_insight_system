@@ -17,35 +17,18 @@ class ReportIntervalsParagraphsCheck(BaseReportCriterion):
             problematic_paragraphs = []
 
             for i, paragraph in enumerate(self.file.paragraphs):
-
-                if (
-                    not paragraph.paragraph_text
-                    or "heading" in paragraph.paragraph_style_name
-                ):
+                if not paragraph.paragraph_text or "heading" in paragraph.paragraph_style_name:
                     continue
 
                 if (
-                    (
-                        paragraph.paragraph_space_after is not None
-                        and paragraph.paragraph_space_after != 0
-                    )
-                    or (
-                        paragraph.paragraph_space_before is not None
-                        and paragraph.paragraph_space_before != 0
-                    )
-                    or (
-                        paragraph.paragraph_line_spacing is not None
-                        and paragraph.paragraph_line_spacing != 1.5
-                    )
+                    (paragraph.paragraph_space_after is not None and paragraph.paragraph_space_after != 0)
+                    or (paragraph.paragraph_space_before is not None and paragraph.paragraph_space_before != 0)
+                    or (paragraph.paragraph_line_spacing is not None and paragraph.paragraph_line_spacing != 1.5)
                 ):
-
                     preview_paragraph = paragraph.paragraph_text[:40].strip()
-                    problematic_paragraphs.append(
-                        {"preview": preview_paragraph, "number_paragraph": i}
-                    )
+                    problematic_paragraphs.append({"preview": preview_paragraph, "number_paragraph": i})
 
             if problematic_paragraphs:
-
                 details = "<br>".join(
                     [
                         f"абзац (до первых 40 символов): {par['preview']} - номер параграфа: {par['number_paragraph']}"
