@@ -9,9 +9,7 @@ DEBUG_MODE = False
 
 
 def load_abbreviations():
-    config_path = (
-        Path(__file__).parent.parent.parent / "configs" / "config_abbreviations.json"
-    )
+    config_path = Path(__file__).parent.parent.parent / "configs" / "config_abbreviations.json"
     with open(config_path, "r", encoding="utf-8") as f:
         data = json.load(f)
         return set(data.get("common_abbr"))
@@ -46,7 +44,6 @@ def is_abbreviation_explained(abbr: str, text: str) -> bool:
     debug_print(f"Текст (первые 200 символов): {text[:200]}...")
 
     for pattern in patterns:
-
         match = re.search(pattern, text, re.IGNORECASE)
 
         if match:
@@ -87,9 +84,7 @@ def find_abbreviations(text: str, unverifiable_text: str):
     filtered_abbr = {
         abbr
         for abbr in abbreviations
-        if abbr not in COMMON_ABBR
-        and abbr not in unverifiable_text
-        and morph.parse(abbr.lower())[0].score != 0
+        if abbr not in COMMON_ABBR and abbr not in unverifiable_text and morph.parse(abbr.lower())[0].score != 0
     }
 
     return list(filtered_abbr)
@@ -114,9 +109,7 @@ def main_check(text: str, unverifiable_text: str):
         if not text:
             continue_check, res_str = False, "Не удалось получить текст"
 
-        abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(
-            text=text, unverifiable_text=unverifiable_text
-        )
+        abbr_is_finding, unexplained_abbr = get_unexplained_abbrev(text=text, unverifiable_text=unverifiable_text)
 
         if not abbr_is_finding:
             continue_check, res_str = (
