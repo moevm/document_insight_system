@@ -3,12 +3,13 @@ import subprocess
 from os.path import dirname
 
 
-def run_process(cmd: str): return subprocess.run(cmd.split(' '))
+def run_process(cmd: str):
+    return subprocess.run(cmd.split(' '))
 
 
 def convert_to(filepath, target_format='pdf'):
     new_filename, outdir = None, dirname(filepath)
-    convert_cmd = {
+    convert_cmd = "timeout 3m " + {
         'pdf': f"soffice --headless --convert-to pdf --outdir {outdir} {filepath}",
         'docx': f"soffice --headless --convert-to docx --outdir {outdir} {filepath}",
         'pptx': f"soffice --headless --convert-to pptx --outdir {outdir} {filepath}",
@@ -23,5 +24,6 @@ def convert_to(filepath, target_format='pdf'):
 
 def open_file(filepath, remove=False):
     file = open(filepath, 'rb')
-    if remove: os.remove(filepath)
+    if remove:
+        os.remove(filepath)
     return file

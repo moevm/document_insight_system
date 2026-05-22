@@ -42,10 +42,10 @@ build: build-web build-worker
 build-all: build-base build
 
 up:
-	docker compose -f docker-compose.yaml up ;
+	docker compose -f docker-compose.yml up ;
 
 up-d:
-	docker compose -f docker-compose.yaml up -d ;
+	docker compose -f docker-compose.yml up -d ;
 
 full-up:
 	docker compose -f docker-compose.yml -f lt_docker/docker-compose.yaml up ;

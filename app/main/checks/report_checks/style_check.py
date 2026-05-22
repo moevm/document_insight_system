@@ -1,6 +1,6 @@
-from .style_check_settings import StyleCheckSettings
-from ..base_check import BaseReportCriterion, answer
 from ...reports.docx_uploader.style import Style
+from ..base_check import BaseReportCriterion, answer
+from .style_check_settings import StyleCheckSettings
 
 
 class ReportStyleCheck(BaseReportCriterion):
@@ -18,11 +18,12 @@ class ReportStyleCheck(BaseReportCriterion):
             self.target_styles = StyleCheckSettings.LR_MAIN_TEXT_CONFIG
         else:
             self.target_styles = target_styles
-        self.target_styles = list(map(lambda elem: {
-            "name": elem["name"],
-            "style": self.construct_style_from_description(elem["style"])
-        },
-                                      self.target_styles))
+        self.target_styles = list(
+            map(
+                lambda elem: {"name": elem["name"], "style": self.construct_style_from_description(elem["style"])},
+                self.target_styles,
+            )
+        )
         if header_styles is None:
             self.header_styles = []
             for _, style_dict in StyleCheckSettings.LR_CONFIG.items():
@@ -68,12 +69,16 @@ class ReportStyleCheck(BaseReportCriterion):
         for run in par["runs"]:
             diff_lst = []
             run["style"].matches(template_style, diff_lst)
-            diff_lst = list(map(
-                lambda diff: f"Абзац \"{par['text'][:17] + '...' if len(par['text']) > 20 else par['text']}\""
-                             f", фрагмент "
-                             f"\"{run['text'][:17] + '...' if len(run['text']) > 20 else run['text']}\": {diff}.",
-                diff_lst
-            ))
+            diff_lst = list(
+                map(
+                    lambda diff: (
+                        f"Абзац \"{par['text'][:17] + '...' if len(par['text']) > 20 else par['text']}\""
+                        f", фрагмент "
+                        f"\"{run['text'][:17] + '...' if len(run['text']) > 20 else run['text']}\": {diff}."
+                    ),
+                    diff_lst,
+                )
+            )
             err.extend(diff_lst)
         return err
 
@@ -108,8 +113,7 @@ class ReportStyleCheck(BaseReportCriterion):
             return answer(True, "Нечего проверять: отчёт содержит не более одной непустой страницы.")
         result = True
         result_str = ""
-        valid_key_properties = tuple(
-            map(lambda s: self.get_style_properties(s["style"]), self.target_styles))
+        valid_key_properties = tuple(map(lambda s: self.get_style_properties(s["style"]), self.target_styles))
         for i in range(base_index, len(self.file.styled_paragraphs)):
             if i in self.header_indices:
                 continue
@@ -122,15 +126,17 @@ class ReportStyleCheck(BaseReportCriterion):
             if cur_key_property not in valid_key_properties:
                 result = False
                 result_str += "<br>" if len(result_str) else ""
-                result_str += f'{",".join([Style._friendly_property_names[key] for key in self.key_properties])} в абзаце' \
-                              f' "{par["text"][:17] + "..." if len(par["text"]) > 20 else par["text"]}" ' \
-                              f'не соответствует ни одному из допустимых стилей текста.'
+                result_str += (
+                    f'{",".join([Style._friendly_property_names[key] for key in self.key_properties])} в абзаце'
+                    f' "{par["text"][:17] + "..." if len(par["text"]) > 20 else par["text"]}" '
+                    f'не соответствует ни одному из допустимых стилей текста.'
+                )
             else:
                 checked_style = self.get_style_by_key_property(cur_key_property)
                 err = self.style_diff(par, checked_style["style"])
                 result = result and len(err) == 0
                 err = list(map(lambda msg: f'Стиль "{checked_style["name"]}": ' + msg, err))
-                result_str += ("<br>".join(err) + "<br>" if len(err) else "")
+                result_str += "<br>".join(err) + "<br>" if len(err) else ""
         if len(result_str) == 0:
             result_str = "Форматирование текста соответствует требованиям."
         return answer(result, result_str)
