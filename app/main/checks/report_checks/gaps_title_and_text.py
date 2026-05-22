@@ -38,7 +38,7 @@ class ReportGapsBetweenTitleAndTextCheck(BaseReportCriterion):
                 while current_header_idx < len(headers_info):
                     header_info = headers_info[current_header_idx]
 
-                    if header_info.get("header_is_found") == True:
+                    if header_info.get("header_is_found"):
                         current_header_idx += 1
                         continue
 
@@ -57,7 +57,8 @@ class ReportGapsBetweenTitleAndTextCheck(BaseReportCriterion):
             if len(fail_headers_info) == 0:
                 return answer(
                     True,
-                    "Проверка разрывов между заголовком и текстом пройдена! Все заголовки и следующий за ними текст находятся на одной странице.",
+                    "Проверка разрывов между заголовком и текстом пройдена! \
+                        Все заголовки и следующий за ними текст находятся на одной странице.",
                 )
 
             pages_str = "<br>   ".join(
