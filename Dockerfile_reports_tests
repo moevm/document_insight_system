@@ -1,0 +1,35 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/usr/src/project:/usr/src/project/app
+
+WORKDIR /usr/src/project
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libcairo2 \
+        libgdk-pixbuf-2.0-0 \
+        libgirepository-1.0-1 \
+        libglib2.0-0 \
+        libpango-1.0-0 \
+        libpangoft2-1.0-0 \
+        libreoffice \
+        shared-mime-info \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt \
+    && python -m nltk.downloader punkt stopwords
+
+COPY app/main ./app/main
+COPY app/nlp ./app/nlp
+COPY app/utils ./app/utils
+
+COPY tests/__init__.py ./tests/__init__.py
+COPY tests/conftest.py ./tests/conftest.py
+COPY tests/util ./tests/util
+COPY tests/reports ./tests/reports
+COPY tests/fixtures/reports ./tests/fixtures/reports
+
+CMD ["pytest", "tests/reports", "-v"]

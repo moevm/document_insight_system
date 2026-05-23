@@ -1,12 +1,12 @@
 import pytest
 
-from app.main.checks.report_checks.template_name import ReportTemplateNameCheck
+from app.main.checks.report_checks.template_name import CUR_YEAR, ReportTemplateNameCheck
 
 
 class TestReportTemplateNameCheck:
 
     def test_01_valid_filename(self, reports_fixture_dir):
-        filename =  "valid.docx"
+        filename =  f"{CUR_YEAR}ВКР111111ИВАНОВ.docx"
         file_info = {
             'file': None,
             'filename': filename,
