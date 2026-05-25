@@ -29,7 +29,7 @@ class PresEmptySlideCheck(BasePresCriterion):
             slide_string = ''.join(slide.replace("\n", " "))
             slide_without_page = re.sub(r'\d+(?=\s*$)', '', slide_string)
             full_pages[str(page)] = ''.join(char for char in slide_without_page.strip() if char.isprintable())
-            if not full_pages[str(page)]:
+            if not full_pages[str(page)] and page not in pages_with_images:
                 empty_pages.append(page)
 
         for page, slide in enumerate(self.file.get_titles(), 1):
