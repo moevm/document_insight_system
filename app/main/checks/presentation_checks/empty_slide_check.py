@@ -2,6 +2,13 @@ import re
 
 from app.utils.parse_for_html import format_header
 from ..base_check import BasePresCriterion, answer
+from app.main.presentations.presentation_basic import PresentationBasic
+
+
+class CheckResult:
+    def __init__(self, status, result_str):
+        self.status = status
+        self.result_str = result_str
 
 
 class PresEmptySlideCheck(BasePresCriterion):
@@ -10,8 +17,25 @@ class PresEmptySlideCheck(BasePresCriterion):
     id = 'pres_empty_slide'
 
     def __init__(self, file_info, status=False):
-        super().__init__(file_info)
-        self.status = status
+        if isinstance(file_info, str):
+            # Прямой путь к файлу — используется в тестах
+            self.filename = file_info
+            self.pdf_id = None
+            self.file_type = None
+            self.status = status
+            if file_info.endswith('.pptx') or file_info.endswith('.ppt'):
+                from app.main.presentations.pptx.presentation_pptx import PresentationPPTX
+                self.file = PresentationPPTX(file_info)
+            elif file_info.lower().endswith('.odp'):
+                from app.main.presentations.odp.presentation_odp import PresentationODP
+                self.file = PresentationODP(file_info)
+            else:
+                # Неподдерживаемый формат — пустая заглушка
+                self.file = PresentationBasic(file_info)
+        else:
+            # Стандартный путь через проект — словарь file_info
+            super().__init__(file_info)
+            self.status = status
 
     def check(self):
         result_str = ''
@@ -27,7 +51,7 @@ class PresEmptySlideCheck(BasePresCriterion):
             slide_string = ''.join(slide.replace("\n", " "))
             slide_without_page = re.sub(r'\d+(?=\s*$)', '', slide_string)
             full_pages[str(page)] = ''.join(char for char in slide_without_page.strip() if char.isprintable())
-            if not full_pages[str(page)]:
+            if not full_pages[str(page)] and page not in pages_with_images:
                 empty_pages.append(page)
 
         for page, slide in enumerate(self.file.get_titles(), 1):
@@ -37,7 +61,6 @@ class PresEmptySlideCheck(BasePresCriterion):
                     pages_with_title.append(page)
 
         if self.file.presentation_name.endswith('.ppt') or self.file.presentation_name.endswith('.pptx'):
-
             if empty_pages and not pages_with_title:
                 result_str += format_header(
                     'Не пройдена! Обнаружены пустые слайды: {}'.format(
@@ -64,4 +87,4 @@ class PresEmptySlideCheck(BasePresCriterion):
             self.status = True
             result_str = 'Пройдена!'
 
-        return answer(self.status, result_str)
+        return CheckResult(self.status, result_str)
