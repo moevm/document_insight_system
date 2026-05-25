@@ -1,0 +1,90 @@
+import re
+
+from app.utils.parse_for_html import format_header
+from ..base_check import BasePresCriterion, answer
+from app.main.presentations.presentation_basic import PresentationBasic
+
+
+class CheckResult:
+    def __init__(self, status, result_str):
+        self.status = status
+        self.result_str = result_str
+
+
+class PresEmptySlideCheck(BasePresCriterion):
+    label = "Проверка наличия пустых слайдов в презентации"
+    _description = ""
+    id = 'pres_empty_slide'
+
+    def __init__(self, file_info, status=False):
+        if isinstance(file_info, str):
+            # Прямой путь к файлу — используется в тестах
+            self.filename = file_info
+            self.pdf_id = None
+            self.file_type = None
+            self.status = status
+            if file_info.endswith('.pptx') or file_info.endswith('.ppt'):
+                from app.main.presentations.pptx.presentation_pptx import PresentationPPTX
+                self.file = PresentationPPTX(file_info)
+            elif file_info.lower().endswith('.odp'):
+                from app.main.presentations.odp.presentation_odp import PresentationODP
+                self.file = PresentationODP(file_info)
+            else:
+                # Неподдерживаемый формат — пустая заглушка
+                self.file = PresentationBasic(file_info)
+        else:
+            # Стандартный путь через проект — словарь file_info
+            super().__init__(file_info)
+            self.status = status
+
+    def check(self):
+        result_str = ''
+        page_titles = {}
+        full_pages = {}
+        empty_pages = []
+        pages_with_title = []
+
+        pages_with_images = [page for page, slide in enumerate(self.file.slides, 1)
+                             if slide.get_images() or slide.get_table()]
+
+        for page, slide in enumerate(self.file.get_text_from_slides(), 1):
+            slide_string = ''.join(slide.replace("\n", " "))
+            slide_without_page = re.sub(r'\d+(?=\s*$)', '', slide_string)
+            full_pages[str(page)] = ''.join(char for char in slide_without_page.strip() if char.isprintable())
+            if not full_pages[str(page)] and page not in pages_with_images:
+                empty_pages.append(page)
+
+        for page, slide in enumerate(self.file.get_titles(), 1):
+            page_titles[str(page)] = slide
+            if slide != "Запасные слайды":
+                if slide == full_pages[str(page)] and page not in pages_with_images and page not in empty_pages:
+                    pages_with_title.append(page)
+
+        if self.file.presentation_name.endswith('.ppt') or self.file.presentation_name.endswith('.pptx'):
+            if empty_pages and not pages_with_title:
+                result_str += format_header(
+                    'Не пройдена! Обнаружены пустые слайды: {}'.format(
+                        ', '.join(self.format_page_link(empty_pages)))
+                )
+            if pages_with_title and not empty_pages:
+                result_str += format_header(
+                    'Не пройдена! Обнаружены слайды, в которых присутствует только заголовок: {}'.format(
+                        ', '.join(self.format_page_link(pages_with_title)))
+                )
+            if empty_pages and pages_with_title:
+                result_str += format_header(
+                    'Не пройдена! Обнаружены пустые слайды: {}, также обнаружены слайды, в которых присутствует только заголовок: {}'.format(
+                        ', '.join(self.format_page_link(empty_pages)), ', '.join(self.format_page_link(pages_with_title)))
+                )
+        elif self.file.presentation_name.lower().endswith('.odp'):
+            if empty_pages:
+                result_str += format_header(
+                    'Не пройдена! Обнаружены пустые слайды или слайды, в которых присутствует только заголовок: {}'.format(
+                        ', '.join(self.format_page_link(empty_pages)))
+                )
+
+        if not result_str:
+            self.status = True
+            result_str = 'Пройдена!'
+
+        return CheckResult(self.status, result_str)
