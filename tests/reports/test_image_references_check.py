@@ -17,3 +17,13 @@ class TestImageReferencesCheck:
         file_info['file'].pdf_file.pdf_file.get_page_images = MagicMock(return_value=[1, 2])
         result = checker.check()
         assert result["score"] == 0.0
+        assert "Упомянуты не все рисунки" in result["verdict"][0]
+
+    def test_03_non_existent_reference(self, reports_fixture_dir):
+        file_info = create_report_file_info(reports_fixture_dir / "image_references" / "valid.md")
+        file_info['file'].paragraphs = ["Reference to рис. 99.", "But no image."]
+        file_info['file'].make_chapters = lambda t: [{"child": [{"style": "вкр_подпись для рисунков", "text": "Рисунок 1", "number": 1}]}]
+        checker = ImageReferences(file_info, image_style="вкр_подпись для рисунков")
+        result = checker.check()
+        assert result["score"] == 0.0
+        assert "несуществующие рисунки" in result["verdict"][0]

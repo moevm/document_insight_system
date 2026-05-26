@@ -14,3 +14,25 @@ class TestReportPageCounterCheck:
         checker = ReportPageCounter(file_info, min_number=10, max_number=100)
         result = checker.check()
         assert result["score"] == 0.0
+        assert "Неверное количество страниц" in result["verdict"][0]
+
+    def test_03_boundary_min(self, reports_fixture_dir):
+        file_info = create_report_file_info(reports_fixture_dir / "page_counter" / "valid.md")
+        file_info['file'].page_counter = lambda: 10
+        checker = ReportPageCounter(file_info, min_number=10, max_number=100)
+        result = checker.check()
+        assert result["score"] == 1.0
+
+    def test_04_boundary_max(self, reports_fixture_dir):
+        file_info = create_report_file_info(reports_fixture_dir / "page_counter" / "valid.md")
+        file_info['file'].page_counter = lambda: 100
+        checker = ReportPageCounter(file_info, min_number=10, max_number=100)
+        result = checker.check()
+        assert result["score"] == 1.0
+
+    def test_05_just_over_max(self, reports_fixture_dir):
+        file_info = create_report_file_info(reports_fixture_dir / "page_counter" / "valid.md")
+        file_info['file'].page_counter = lambda: 101
+        checker = ReportPageCounter(file_info, min_number=10, max_number=100)
+        result = checker.check()
+        assert result["score"] == 0.0

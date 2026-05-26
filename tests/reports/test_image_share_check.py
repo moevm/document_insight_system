@@ -19,3 +19,4 @@ class TestReportImageShareCheck:
         file_info['file'].pdf_file.page_height = MagicMock(return_value=1000)
         result = checker.check()
         assert result["score"] == 0.0
+        assert "документа без учета приложения" in result["verdict"][0]
