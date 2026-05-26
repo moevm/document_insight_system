@@ -41,7 +41,7 @@ class TestReportBannedWordsCheck:
         from app.main.checks.report_checks.style_check_settings import StyleCheckSettings
         orig_words = StyleCheckSettings.CONFIGS['VKR_HEADERS']['any_header']['warned_words']
         StyleCheckSettings.CONFIGS['VKR_HEADERS']['any_header']['warned_words'] = ('warnword',)
-        
+
         try:
             file_info = create_report_file_info(reports_fixture_dir / "banned_words_check" / "valid.md")
             checker = ReportBannedWordsCheck(file_info)
