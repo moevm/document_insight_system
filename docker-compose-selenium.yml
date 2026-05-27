@@ -27,10 +27,7 @@ services:
       context: .
       dockerfile: Dockerfile_selenium
     environment:
-      - LOGIN=admin
-      - PASSWORD=${ADMIN_PASSWORD}
+      - PASSWORD=admin
     depends_on:
-      - web
       - chrome-node
       - selenium-hub
-    network_mode: service:web
