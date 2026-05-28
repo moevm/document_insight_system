@@ -17,8 +17,10 @@ RUN apt update && apt install -y \
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir pytest pytest-mock pytest-cov pytest-xdist
+RUN pip install --no-cache-dir pytest pytest-mock pytest-cov pytest-xdist pytest-html
 
 COPY . .
 
-CMD ["pytest", "-n", "auto", "tests/reports/"]
+RUN mkdir -p test_results
+
+CMD ["pytest", "-n", "auto", "--html=test_results/report.html", "--self-contained-html", "tests/reports/"]
