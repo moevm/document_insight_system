@@ -10,12 +10,14 @@ class ReportMainCharacterCheck(BaseReportCriterion):
     _description = ""
     id = "main_character_check"
     priority = True
+    calendar_plan_table_marker = "Наименование работ"
 
     def __init__(self, file_info, tables_count_to_verify=8, edu_degree='bsc'):
         super().__init__(file_info)
         self.headers = []
         self.first_check_list = None
         self.second_check_list = None
+        self.calendar_plan_check_list = None
         self.tables_count_to_verify = tables_count_to_verify
         self.edu_degree = edu_degree
 
@@ -25,6 +27,7 @@ class ReportMainCharacterCheck(BaseReportCriterion):
     def check(self):
         self.first_check_list = copy.deepcopy(ReportMainPageSetting.get_first_table(self.edu_degree))
         self.second_check_list = copy.deepcopy(ReportMainPageSetting.SECOND_TABLE)
+        self.calendar_plan_check_list = copy.deepcopy(ReportMainPageSetting.CALENDAR_PLAN_TABLE)
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         if self.tables_count_to_verify > len(self.file.tables):
@@ -33,6 +36,7 @@ class ReportMainCharacterCheck(BaseReportCriterion):
                 f"Количество таблиц на страницах титульного листа, задания и календарного плана должно быть не меньше {self.tables_count_to_verify}",  # noqa: E501
             )
         self.late_init()
+        calendar_table_index = self.find_calendar_plan_table_index()
         result_str = ""
         pages = []
         for header in self.headers:
@@ -43,9 +47,11 @@ class ReportMainCharacterCheck(BaseReportCriterion):
             extract_table = self.extract_table_contents(table)
             self.check_table(self.first_check_list, extract_table, i + 1)
             self.check_table(self.second_check_list, extract_table, i + 1)
+            if i == calendar_table_index:
+                self.check_table(self.calendar_plan_check_list, extract_table, i + 1)
         links = self.format_page_link(pages)
         result_score = 1.0
-        check_result = self.first_check_list + self.second_check_list
+        check_result = self.first_check_list + self.second_check_list + self.calendar_plan_check_list
         penalty_score = 1 / len(check_result)
         for res in check_result:
             if res["found_key"] > 1 and res["key"] == "Консультант":
@@ -71,6 +77,16 @@ class ReportMainCharacterCheck(BaseReportCriterion):
                 '<br>Для магистров: <a href="https://drive.google.com/drive/folders/1KOoXzKv4Wf-XyGzOf1X8gN256sgame1D">Формы бланков для магистров</a>.'  # noqa: E501
             )
             return answer(result_score, result_str)
+
+    def find_calendar_plan_table_index(self):
+        for i in range(self.tables_count_to_verify):
+            rows = self.extract_table_contents(self.file.tables[i])
+            if not rows:
+                continue
+            columns = rows[0].split("|")
+            if len(columns) >= 2 and self.calendar_plan_table_marker in columns[1]:
+                return i
+        return None
 
     def extract_table_contents(self, table):
         contents = []
