@@ -156,7 +156,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             match = re.search(r'Таблица ([.\d]+)', paragraph_text)
             table_text = ''
             if match:
-                index_table += 1    # int(match.group(1)) - 1       # TODO: fix logic
+                index_table += 1  # int(match.group(1)) - 1       # TODO: fix logic
                 table_text = self.get_text_in_table(index_table)
 
             paragraph_text += table_text
