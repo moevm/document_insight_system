@@ -1,6 +1,6 @@
-import pkgutil
 import importlib
 import inspect
+import pkgutil
 from pathlib import Path
 
 
@@ -10,7 +10,7 @@ def setup_dynamic_import(module_globals, base_class, current_file, exclude_start
     class_to_module = {}
     class_cache = {}
 
-    for (_, module_name, _) in pkgutil.iter_modules([str(package_path)]):
+    for _, module_name, _ in pkgutil.iter_modules([str(package_path)]):
         if module_name.startswith(exclude_startswith):
             continue
 

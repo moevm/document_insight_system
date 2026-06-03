@@ -1,12 +1,18 @@
 import itertools
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize, sent_tokenize
-from pymorphy3 import MorphAnalyzer
 
+from nltk.corpus import stopwords
+from nltk.tokenize import sent_tokenize, word_tokenize
+from pymorphy3 import MorphAnalyzer
 
 MORPH_ANALYZER = MorphAnalyzer()
 TASKS = 'задачи:'
-FURTHER_DEVELOPMENT_KEYWORDS = tuple(map(lambda x: MORPH_ANALYZER.parse(x.lower())[0].normal_form, ('направления', 'дальнейшие', 'улучшения', 'исследования')))
+FURTHER_DEVELOPMENT_KEYWORDS = tuple(
+    map(
+        lambda x: MORPH_ANALYZER.parse(x.lower())[0].normal_form,
+        ('направления', 'дальнейшие', 'улучшения', 'исследования'),
+    )
+)
+
 
 class Stemming:
     def __init__(self):

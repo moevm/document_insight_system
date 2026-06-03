@@ -7,6 +7,37 @@
 
 {% block main %}
         <div class="holder" id="results_holder">
+        <div class="d-flex justify-content-end mt-2">
+            <button id="enable-debug-logs" type="button" class="btn btn-sm btn-outline-secondary">
+                Тех. логи
+            </button>
+        </div>
+        <div id="check-diagnostics" class="alert alert-warning mt-3" style="display:none;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between">
+                <div class="mb-2">
+                    <b>Ошибка в проверке.</b>
+                    <span class="ml-2"><b>Стадия:</b> <span id="diag-stage">—</span></span>
+                </div>
+                <button id="toggle-logs" type="button" class="btn btn-sm btn-outline-dark mb-2">
+                    Показать логи
+                </button>
+            </div>
+
+            <div class="mt-1"><b>Последняя ошибка:</b></div>
+            <pre id="diag-last-error" class="bg-light border rounded p-2 mt-1 mb-0"
+                 style="max-height: 220px; overflow:auto; white-space:pre-wrap;"></pre>
+
+            <div id="logs-panel" style="display:none;" class="mt-2">
+                <div class="d-flex align-items-center justify-content-between">
+                    <b>Логи этой проверки</b>
+                    <button id="logs-more" type="button" class="btn btn-sm btn-outline-secondary">
+                        Показать ещё
+                    </button>
+                </div>
+                <pre id="logs-text" class="bg-light border rounded p-2 mt-2 mb-0"
+                     style="max-height:300px; overflow:auto; white-space:pre-wrap;"></pre>
+            </div>
+        </div>
         <h3 id="results_title" class="texteous ins" style="text-align: center;">
             {% if results.is_ended %}
                 {% if results.is_failed %}
