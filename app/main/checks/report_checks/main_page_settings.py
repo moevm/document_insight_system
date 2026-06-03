@@ -77,6 +77,19 @@ class ReportMainPageSetting:
             "logs": "",
         },
     ]
+    CALENDAR_PLAN_TABLE = [
+        {
+            "key": "Предзащита",
+            "found_value": 0,
+            "found_key": 0,
+            "find": 1,
+            "value": [
+                #  |ДД.ММ| в правой колонке, например |01.05| после склейки
+                r"\|((0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2]))(\||$)",
+            ],
+            "logs": "",
+        },
+    ]
 
     @classmethod
     def get_first_table(cls, edu_degree='bsc'):
