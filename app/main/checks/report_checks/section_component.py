@@ -1,5 +1,6 @@
 from ..base_check import BaseReportCriterion, answer
 from .style_check_settings import StyleCheckSettings
+from .section_check_config import SECTION_CONFIG  
 
 
 class ReportSectionComponent(BaseReportCriterion):
@@ -14,26 +15,27 @@ class ReportSectionComponent(BaseReportCriterion):
         super().__init__(file_info)
         self.intro = {}
         
-        #больше компонент
-        if patterns is None:
-            patterns = [
-                'актуальность',
-                'объект исследования', 
-                'предмет исследования',
-                'цель работы',
-                'задачи',
-                'практическая значимость'
-            ]
+        #конфиг
+        chapter_lower = chapter.lower()
         
-        #нет проверки на жирность 
+        if chapter_lower in SECTION_CONFIG:
+            section_config = SECTION_CONFIG[chapter_lower]
+        else:
+            section_config = SECTION_CONFIG['default']
+        
+
+        if patterns is None:
+            patterns = section_config['patterns']
+        
         if bold_check_exceptions is None:
-            bold_check_exceptions = ['актуальность']
+            bold_check_exceptions = section_config['bold_check_exceptions']
+        
         self.bold_check_exceptions = [txt.lower() for txt in bold_check_exceptions]
         
+
         if headers_map:
             self.config = headers_map
             self.chapter = ''
-            patterns = ('цель', 'задач')
         else:
             self.chapter = chapter
             
@@ -54,9 +56,7 @@ class ReportSectionComponent(BaseReportCriterion):
                 self.chapter = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]["header_for_report_section_component"]
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
 
-
     def _is_text_bold_in_paragraph(self, paragraph, search_text):
-        '''конкретный текст выделен жирным в параграфе'''
         for run in paragraph.get('runs', []):
             run_text = run['text'].lower()
             if search_text.lower() in run_text:
@@ -67,7 +67,6 @@ class ReportSectionComponent(BaseReportCriterion):
         return False
 
     def _check_bold_formatting(self, pattern):
-        '''название компоненты выделено жирным'''
         text_to_check = pattern['text'].lower()
         
         if text_to_check in self.bold_check_exceptions:
@@ -90,7 +89,6 @@ class ReportSectionComponent(BaseReportCriterion):
         if not self.chapter:
             return answer(True, f'Данная проверка не предусмотрена для работы с темой "{self.headers_main}"')
         
-        #выделяем введение
         self.intro = {}
         for intro in self.chapters:
             header = intro["text"].lower()
@@ -105,7 +103,7 @@ class ReportSectionComponent(BaseReportCriterion):
         for intro_par in self.intro["child"]:
             par = intro_par["text"].lower()
             for i in range(len(self.patterns)):
-                if self.patterns[i]["marker"] == 0:  # ещё не найден
+                if self.patterns[i]["marker"] == 0: #ещё не найден
                     if par.find(self.patterns[i]["text"]) >= 0:
                         self.patterns[i]["marker"] = 1
                         self.patterns[i]["paragraph_index"] = intro_par["number"]
