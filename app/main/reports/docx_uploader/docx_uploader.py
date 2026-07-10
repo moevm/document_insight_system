@@ -255,7 +255,7 @@ class DocxUploader(DocumentUploader):
                 line = v[:20] if len(v) > 21 else v
                 match = re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip())
                 if match:
-                    remaining_text = line[match.end():]
+                    remaining_text = line[match.end() :]
                     match_ellipsis = re.match(r'\.{2,}\s*', remaining_text.lstrip())
                     if not match_ellipsis:
                         break
