@@ -1,12 +1,11 @@
-from gridfs import NoFile
 from datetime import datetime
 
 import pymongo
+from gridfs import NoFile
 
-from app.db.db_main import get_checks_collection, get_users_collection, get_files_info_collection
+from app.db.db_main import get_checks_collection, get_files_info_collection, get_users_collection
 from app.db.methods.client import get_db, get_fs
 from app.db.types.Check import Check
-
 
 db = get_db()
 fs = get_fs()
@@ -37,6 +36,7 @@ def get_check(checks_id):
 
 # Returns presentations parsed_file with given id or None
 
+
 def get_checks_pdf(checks_id):
     checks = checks_collection.find_one({'_id': checks_id})
     pdf_id = checks.get('conv_pdf_fs_id')
@@ -48,10 +48,8 @@ def get_checks_pdf(checks_id):
 
 def delete_check(presentation, checks_id):
     if checks_id in presentation.checks:
-        upd_presentation = files_info_collection.update_one(
-            {'_id': presentation._id}, {"$pull": {'checks': checks_id}})
-        checks = Check(
-            checks_collection.find_one_and_delete({'_id': checks_id}))
+        files_info_collection.update_one({'_id': presentation._id}, {"$pull": {'checks': checks_id}})
+        checks = Check(checks_collection.find_one_and_delete({'_id': checks_id}))
         fs.delete(checks_id)
         return presentation, checks
     else:
@@ -91,9 +89,7 @@ def get_latest_users_check(filter=None):
 
 
 def get_latest_user_check_by_moodle(moodle_id):
-    return list(db.checks.find(
-        {'lms_user_id': moodle_id}
-    ).sort('_id', -1).limit(1))
+    return list(db.checks.find({'lms_user_id': moodle_id}).sort('_id', -1).limit(1))
 
 
 def get_latest_check_cursor(filter, *args, **kwargs):
@@ -104,22 +100,23 @@ def get_all_checks():
     return checks_collection.find()
 
 
-def get_checks(filter={}, latest=None, limit=10, offset=0, sort=None, order=None):
+def get_checks(filter=None, latest=None, limit=10, offset=0, sort=None, order=None):
+    filter = filter or {}
     if latest:
         return get_latest_check_cursor(filter, limit, offset, sort, order)
     else:
         return get_checks_cursor(filter, limit, offset, sort, order)
 
 
-def get_checks_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
+def get_checks_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
+    filter = filter or {}
     sort = 'lms_passback_time' if sort == 'moodle-date' else sort
 
     count = checks_collection.count_documents(filter)
     rows = checks_collection.find(filter)
 
     if sort and order in ("asc, desc"):
-        rows = rows.sort(sort, pymongo.ASCENDING if order ==
-                                                    "asc" else pymongo.DESCENDING)
+        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
 
     rows = rows.skip(offset) if offset else rows
     rows = rows.limit(limit) if limit else rows
@@ -136,11 +133,3 @@ def get_user_checks(login):
 
 def get_check_stats(oid):
     return checks_collection.find_one({'_id': oid})
-
-
-
-
-
-
-
-

@@ -1,5 +1,5 @@
 from app.db.types.PackableWithId import PackableWithId
-from app.main.check_packs import DEFAULT_TYPE_INFO, BASE_PACKS, BaseCriterionPack
+from app.main.check_packs import BASE_PACKS, DEFAULT_TYPE_INFO, BaseCriterionPack
 
 
 class Check(PackableWithId):
@@ -48,7 +48,7 @@ class Check(PackableWithId):
         if isinstance(self.enabled_checks, (list,)):
             return self.is_passed
         # old check
-        return all([check == False or check['pass'] for check in self.enabled_checks.values()])
+        return all([not check or check['pass'] for check in self.enabled_checks.values()])
 
     def pack(self, to_str=False):
         package = super().pack(to_str)
