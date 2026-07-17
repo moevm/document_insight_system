@@ -253,8 +253,12 @@ class DocxUploader(DocumentUploader):
         if not self.page_count:
             for _, v in self.pdf_file.text_on_page.items():
                 line = v[:20] if len(v) > 21 else v
-                if re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip()):
-                    break
+                match = re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip())
+                if match:
+                    remaining_text = line[match.end() :]
+                    match_ellipsis = re.match(r'\.{2,}\s*', remaining_text.lstrip())
+                    if not match_ellipsis:
+                        break
                 self.page_count += 1
                 line = ''
                 lines = v.split("\n")
