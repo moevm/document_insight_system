@@ -1,24 +1,31 @@
-from configparser import ConfigParser
+import logging.config
 import os
-from os.path import join, exists
+from configparser import ConfigParser
+from os.path import dirname, exists, join
 
 from celery import Celery
 from celery.signals import worker_ready
-
-from passback_grades import run_passback
+from check_log_context import check_log_context, current_check_stage
 from db.types.Check import Check
 from main.checker import check
 from main.parser import parse
+from passback_grades import run_passback
 from root_logger import get_root_logger
+
+from app.db.methods import celery_check as celery_check_methods
 from app.db.methods import check as check_methods
 from app.db.methods import file as file_methods
-from app.db.methods import celery_check as celery_check_methods
 
 config = ConfigParser()
 config.read('app/config.ini')
 
 TASK_RETRY_COUNTDOWN = 60  # default = 3 * 60
 MAX_TASK_RETRIES = 3
+
+log_conf = join(dirname(__file__), 'logging.conf')
+if os.path.isfile(log_conf):
+    logging.config.fileConfig(log_conf, disable_existing_loggers=False)
+
 logger = get_root_logger('tasks')
 
 FILES_FOLDER = '/usr/src/project/files'
@@ -52,31 +59,43 @@ def create_task(self, check_info):
     # get check files filepath
     original_filepath = join(FILES_FOLDER, f"{check_id}.{check_obj.filename.rsplit('.', 1)[-1]}")
     pdf_filepath = join(FILES_FOLDER, f"{check_id}.pdf")
-    try:
-        updated_check = check(parse(original_filepath, pdf_filepath), check_obj)
-        updated_check.is_ended = True
-        updated_check.is_failed = False
-        check_methods.update_check(updated_check)  # save to db
-        celery_check_methods.mark_celery_task_as_finished(self.request.id)
-
-        # remove files from FILES_FOLDER after checking
-        remove_files((original_filepath, pdf_filepath))
-
-        return updated_check.pack(to_str=True)
-    except Exception as e:
-        if self.request.retries == MAX_TASK_RETRIES:
-            logger.error(f"\tДостигнуто максимальное количество попыток перезапуска. Удаление задачи из очереди",
-                         exc_info=True)
-            celery_check_methods.mark_celery_task_as_finished(self.request.id)
-            updated_check = Check(check_info)
-            updated_check.is_failed = True
+    with check_log_context(check_id):
+        paths = (original_filepath, pdf_filepath)
+        remove_uploaded_files = False
+        try:
+            current_check_stage.set("parse")
+            logger.info("Пайплайн проверки: начало парсинга файла")
+            parsed = parse(original_filepath, pdf_filepath)
+            current_check_stage.set("check")
+            logger.info("Пайплайн проверки: парсинг завершён, запуск критериев")
+            updated_check = check(parsed, check_obj)
+            current_check_stage.set("persist")
+            logger.info("Пайплайн проверки: критерии завершены, сохранение результата")
             updated_check.is_ended = True
+            updated_check.is_failed = False
             check_methods.update_check(updated_check)  # save to db
-            # remove files from FILES_FOLDER after checking
-            remove_files((original_filepath, pdf_filepath))
-            return 'Not OK, error: {}'.format(e)
-        logger.error(f"\tПри обработке произошла ошибка: {e}. Попытка повторного запуска", exc_info=True)
-        self.retry(countdown=TASK_RETRY_COUNTDOWN)  # Retry the task, adding it to the back of the queue.
+            celery_check_methods.mark_celery_task_as_finished(self.request.id)
+            remove_uploaded_files = True
+            return updated_check.pack(to_str=True)
+        except Exception as e:
+            current_check_stage.set("error")
+            if self.request.retries == MAX_TASK_RETRIES:
+                logger.error(
+                    "\tДостигнуто максимальное количество попыток перезапуска. Удаление задачи из очереди",
+                    exc_info=True,
+                )
+                celery_check_methods.mark_celery_task_as_finished(self.request.id)
+                updated_check = Check(check_info)
+                updated_check.is_failed = True
+                updated_check.is_ended = True
+                check_methods.update_check(updated_check)  # save to db
+                remove_uploaded_files = True
+                return 'Not OK, error: {}'.format(e)
+            logger.error(f"\tПри обработке произошла ошибка: {e}. Попытка повторного запуска", exc_info=True)
+            self.retry(countdown=TASK_RETRY_COUNTDOWN)  # Retry the task, adding it to the back of the queue.
+        finally:
+            if remove_uploaded_files:
+                remove_files(paths)
 
 
 @celery.task(name="convert_to_pdf", queue="convert-pdf", bind=True, retry_kwargs={'max_retries': 3})
@@ -91,7 +110,7 @@ def convert_check_file_to_pdf(self, check_obj, filepath, rewrite=False):
             f"При конвертации файла произошла ошибка: {e}. Следующая попытка через {TASK_RETRY_COUNTDOWN}",
             exc_info=True,
         )
-        raise self.retry(countdown=TASK_RETRY_COUNTDOWN)
+        raise self.retry(countdown=TASK_RETRY_COUNTDOWN) from e
 
 
 @celery.task(name="passback-task", queue='passback-grade')
@@ -101,4 +120,5 @@ def passback_task():
 
 def remove_files(filepaths):
     for filepath in filepaths:
-        if exists(filepath): os.remove(filepath)
+        if exists(filepath):
+            os.remove(filepath)

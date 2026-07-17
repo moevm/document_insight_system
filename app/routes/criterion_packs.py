@@ -1,8 +1,7 @@
-from flask import Blueprint, render_template, abort
-from flask_login import login_required, current_user
+from flask import Blueprint, abort, render_template
+from flask_login import current_user, login_required
 
 from app.db.methods import criteria_pack as criteria_pack_methods
-
 
 criterion_packs = Blueprint('criterion_packs', __name__, template_folder='templates', static_folder='static')
 

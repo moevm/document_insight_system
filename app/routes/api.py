@@ -1,16 +1,15 @@
 import json
+from datetime import datetime
+
 import bson
 from bson import ObjectId
-
 from flask import Blueprint, abort, request
-from flask_login import login_required, current_user
+from flask_login import current_user, login_required
 
-from datetime import datetime
 from app.db.methods import check as check_methods
 from app.db.methods import criteria_pack as criteria_pack_methods
-from app.root_logger import get_root_logger
 from app.main.check_packs import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO, REPORT_TYPES, init_criterions
-
+from app.root_logger import get_root_logger
 
 api = Blueprint('api', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')
@@ -43,33 +42,88 @@ def api_criteria_pack():
     # weak validation
     try:
         raw_criterions = json.loads(raw_criterions)
-    except:
-        msg = f"Ошибка при парсинге критериев {raw_criterions} для набора {pack_name} от пользователя {current_user.name}"
+    except Exception:
+        msg = (
+            f"Ошибка при парсинге критериев {raw_criterions} для набора {pack_name} от пользователя {current_user.name}"
+        )
         logger.info(msg)
         return msg, 400
     raw_criterions = raw_criterions if type(raw_criterions) is list else None
     file_type = file_type if file_type in BASE_PACKS.keys() else None
     min_score = min_score if min_score and (0 <= min_score <= 1) else None
     if not (raw_criterions and file_type and min_score):
-        msg = f"Конфигурация набора критериев должна содержать список критериев (непустой список в формате JSON)," \
-              f"тип файла (один из {list(BASE_PACKS.keys())})," \
-              f"пороговый балл (0<=x<=1). Получено: {form_data}, после обработки: file_type - {file_type}," \
-              f"min_score - {min_score}, raw_criterions - {raw_criterions}"
+        msg = (
+            f"Конфигурация набора критериев должна содержать список критериев (непустой список в формате JSON),"
+            f"тип файла (один из {list(BASE_PACKS.keys())}),"
+            f"пороговый балл (0<=x<=1). Получено: {form_data}, после обработки: file_type - {file_type},"
+            f"min_score - {min_score}, raw_criterions - {raw_criterions}"
+        )
         return {'data': msg, 'time': datetime.now()}, 400
     #  testing pack initialization
     file_type_info = {'type': file_type}
     if file_type == DEFAULT_REPORT_TYPE_INFO['type']:
-        file_type_info['report_type'] = report_type if report_type in REPORT_TYPES else DEFAULT_REPORT_TYPE_INFO[
-            'report_type']
+        file_type_info['report_type'] = (
+            report_type if report_type in REPORT_TYPES else DEFAULT_REPORT_TYPE_INFO['report_type']
+        )
     inited, err = init_criterions(raw_criterions, file_info={"file_type": file_type_info})
     if len(raw_criterions) != len(inited) or err:
-        msg = f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. Успешно инициализированные: {inited}. Возникшие ошибки: {err}."
+        msg = (
+            f"При инициализации набора {pack_name} возникли ошибки. JSON-конфигурация: '{raw_criterions}'. "
+            f"Успешно инициализированные: {inited}. Возникшие ошибки: {err}."
+        )
         return {'data': msg, 'time': datetime.now()}, 400
     # if ok - save to DB
-    criteria_pack_methods.save_criteria_pack({
-        'name': pack_name,
-        'raw_criterions': raw_criterions,
-        'file_type': file_type_info,
-        'min_score': min_score
-    })
+    criteria_pack_methods.save_criteria_pack(
+        {'name': pack_name, 'raw_criterions': raw_criterions, 'file_type': file_type_info, 'min_score': min_score}
+    )
     return {'data': f"Набор '{pack_name}' сохранен", 'time': datetime.now()}, 200
+
+
+@api.route("/results/logs/<string:_id>", methods=["GET"])
+@login_required
+def api_result_logs(_id):
+    try:
+        oid = ObjectId(_id)
+    except bson.errors.InvalidId:
+        abort(404)
+
+    check = check_methods.get_check(oid)
+    if check is None:
+        abort(404)
+
+    if not (current_user.is_admin or current_user.username == check.user or check.user == "api_access_token"):
+        abort(403)
+
+    limit = request.args.get("limit", "")
+    limit = int(limit) if str(limit).isnumeric() else 50
+    limit = min(max(limit, 1), 200)
+
+    offset = request.args.get("offset", "")
+    offset = int(offset) if str(offset).isnumeric() else 0
+    offset = max(offset, 0)
+
+    only_levels = request.args.get("levels", "")
+    levels = [lvl.strip().upper() for lvl in only_levels.split(",") if lvl.strip()]
+
+    filter_query = {"check_id": str(oid)}
+    if levels:
+        filter_query["levelname"] = {"$in": levels}
+
+    rows, count = check_methods.get_logs_cursor(
+        filter=filter_query, limit=limit, offset=offset, sort="timestamp", order="desc"
+    )
+    return {
+        "total": count,
+        "rows": [
+            {
+                "timestamp": item["timestamp"].strftime("%d.%m.%Y %H:%M:%S"),
+                "stage": item.get("stage", None),
+                "service-name": item["serviceName"],
+                "levelname": item["levelname"],
+                "message": item["message"],
+                "pathname": item["pathname"],
+                "lineno": item["lineno"],
+            }
+            for item in rows
+        ],
+    }

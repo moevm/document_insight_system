@@ -2,9 +2,8 @@ import pymongo
 
 from app.db.db_main import get_users_collection
 from app.db.methods.client import get_db
-from app.db.types.User import User
-
 from app.db.methods.file import delete_presentation
+from app.db.types.User import User
 
 db = get_db()
 
@@ -25,8 +24,7 @@ def add_user(username, password_hash='', is_LTI=False):
 
 
 def validate_user(username, password_hash):
-    user = users_collection.find_one(
-        {'username': username, 'password_hash': password_hash})
+    user = users_collection.find_one({'username': username, 'password_hash': password_hash})
     if user is not None:
         return User(user)
     else:
@@ -53,20 +51,21 @@ def delete_user(username):
     return user
 
 
-def get_user_cursor(filter={}, limit=10, offset=0, sort=None, order=None):
+def get_user_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
+    filter = filter or {}
     sort = 'username' if sort == 'username' else sort
-
     count = users_collection.count_documents(filter)
     rows = users_collection.find(filter)
 
     if sort and order in ("asc, desc"):
-        rows = rows.sort(sort, pymongo.ASCENDING if order ==
-                                                    "asc" else pymongo.DESCENDING)
+        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
 
     rows = rows.skip(offset) if offset else rows
     rows = rows.limit(limit) if limit else rows
 
     return rows, count
+
+
 #
 # def edit_user(user):
 #     if users_collection.find_one_and_replace({'username': user.username}, user.pack()) is not None:
