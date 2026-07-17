@@ -1,0 +1,25 @@
+{
+  "common_abbr": [
+    "СССР", "РФ", "США", "ВКР", "ИТ", "ПО", "ООО", "ЗАО", "ОАО", "HTML", "CSS", 
+    "JS", "ЛЭТИ", "МОЕВМ", "ЭВМ", "ГОСТ", "DVD", "ИИ", "ОБЗОР", 
+    "ООП", "ЛР", "КР", "ОТЧЕТ", "ПЛАН", "СЛОВА", "ЦПУ", "МБ", "ОЗУ", "КБ",
+    "SSD", "PC", "HDD",
+    "AX", "BX", "CX", "DX", "SI", "DI", "BP", "SP",
+    "AH", "AL", "BH", "BL", "CH", "CL", "DH", "DL", 
+    "CS", "DS", "ES", "SS", "FS", "GS",
+    "IP", "EIP", "RIP", "URL",
+    "CF", "PF", "AF", "ZF", "SF", "TF", "IF", "DF", "OF",
+    "EAX", "EBX", "ECX", "EDX", "ESI", "EDI", "EBP", "ESP",
+    "RAX", "RBX", "RCX", "RDX", "RSI", "RDI", "RBP", "RSP",
+    "DOS", "OS", "BIOS", "UEFI", "MBR", "GPT",
+    "ASCII", "UTF", "UNICODE", "ANSI",
+    "ЭВМ", "МОЭВМ",
+    "CPU", "GPU", "APU", "RAM", "ROM", "PROM", "EPROM", "EEPROM",
+    "USB", "SATA", "PCI", "PCIe", "AGP", "ISA", "VGA", "HDMI", "DP",
+    "LAN", "WAN", "WLAN", "VPN", "ISP", "DNS", "DHCP", "TCP", "UDP", "IP",
+    "HTTP", "HTTPS", "FTP", "SSH", "SSL", "TLS", "XP", "ELF", "ACM", "IEEE", "UX",
+    "API", "GUI", "CLI", "IDE", "SDK", "SQL", "NoSQL", "XML", "JSON", "YAML",
+    "MAC", "IBM", "CERF", "LTR", "RTL", "FPS", "SHA", "AR", "EN", "RU", 
+    "CREAT", "FIFO", "RSS", "UML", "UI", "GB", "IJGBL"
+  ]
+}
