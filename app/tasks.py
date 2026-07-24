@@ -5,16 +5,20 @@ from os.path import dirname, exists, join
 
 from celery import Celery
 from celery.signals import worker_ready
+
 from check_log_context import check_log_context, current_check_stage
 from db.types.Check import Check
 from main.checker import check
 from main.parser import parse
+from main.reports.pasre_file import parse_file
 from passback_grades import run_passback
 from root_logger import get_root_logger
 
 from app.db.methods import celery_check as celery_check_methods
 from app.db.methods import check as check_methods
 from app.db.methods import file as file_methods
+from app.db.methods import parsed_text as parsed_text_methods
+from app.db.types.ParsedText import ParsedText
 
 config = ConfigParser()
 config.read('app/config.ini')
@@ -65,7 +69,14 @@ def create_task(self, check_info):
         try:
             current_check_stage.set("parse")
             logger.info("Пайплайн проверки: начало парсинга файла")
-            parsed = parse(original_filepath, pdf_filepath)
+            parsed = parse(original_filepath, pdf_filepath, check_id)
+            if hasattr(parsed, 'make_chapters'):
+                parsed.make_chapters(check_obj.file_type['report_type'])
+                parsed.make_headers(check_obj.file_type['report_type'])
+                chapters = parse_file.parse_chapters(parsed)
+                parsed_text = ParsedText({'filename': check_info['filename']})
+                parsed_text.parsed_chapters = parse_file.parse_headers_and_pages_and_images(chapters, parsed)
+                parsed_text_methods.add_parsed_text(check_obj._id, parsed_text)
             current_check_stage.set("check")
             logger.info("Пайплайн проверки: парсинг завершён, запуск критериев")
             updated_check = check(parsed, check_obj)
