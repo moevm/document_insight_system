@@ -1,12 +1,13 @@
 from app.nlp.find_tasks_on_slides import find_tasks_on_slides
 from app.utils.get_text_from_slides import get_text_from_slides
 from app.utils.parse_for_html import find_tasks_on_slides_feedback
+
 from ..base_check import BasePresCriterion, answer
 
 
 class FindTasks(BasePresCriterion):
     label = "Наличие слайдов, посвященных задачам"
-    description = 'Проверка на наличие слайдов'
+    _description = 'Проверка на наличие слайдов'
     id = 'slide_every_task'
 
     def __init__(self, file_info, min_percent=50, keyword='Цель и задачи'):

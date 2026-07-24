@@ -3,7 +3,7 @@ from ..base_check import BasePresCriterion, answer
 
 class PresImageShareCheck(BasePresCriterion):
     label = "Проверка доли объема презентации, приходящейся на изображения"
-    description = 'Доля изображений не должна превышать 0,9'
+    _description = 'Доля изображений не должна превышать 0,9'
     id = 'pres_image_share'
 
     def __init__(self, file_info, limit=0.9):
@@ -17,10 +17,13 @@ class PresImageShareCheck(BasePresCriterion):
             if len(slide.get_images()) > 0:
                 count += 1
                 buf.append(slide.get_page_number())
-        buf =  ' '.join(list(map(str,buf)))
+        buf = ' '.join(list(map(str, buf)))
         if count / len(self.file.slides) > self.limit:
-            return answer(False, f'Проверка не пройдена! Изображения в презентации занимают около {round(count / len(self.file.slides), 2)} количества всех слайдов, \
-                                        ограничение - {round(self.limit, 2)}')
+            return answer(
+                False,
+                'Проверка не пройдена! Изображения в презентации занимают около '
+                f'{round(count / len(self.file.slides), 2)} количества всех слайдов, \
+                                        ограничение - {round(self.limit, 2)}',
+            )
         else:
-            return answer(True, f'Пройдена!')
-        return answer(False, 'Во время обработки произошла критическая ошибка')
+            return answer(True, 'Пройдена!')

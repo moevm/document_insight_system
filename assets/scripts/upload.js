@@ -44,9 +44,6 @@ const showBdOverwhelmedMessage = () => {
     alert('База данных перегружена (недостаточно места для загрузки новых файлов). Свяжитесь с администратором');
 }
 
-const showRecaptchaMessage = () => {
-    alert('Пройдите recaptcha, чтобы продолжить!');
-}
 
 const resetFileUpload = () => {
     pdf_uploaded = false;
@@ -138,10 +135,6 @@ async function upload() {
     }
     formData.append("file", file);
     formData.append("file_type", file_type);
-    if ($('div.g-recaptcha').length) {
-        let response = grecaptcha.getResponse();
-        formData.append("g-recaptcha-response", response);
-    }
 
     const bar = $("#uploading_progress");
     $("#uploading_progress_holder").css("display", "block");
@@ -154,7 +147,7 @@ async function upload() {
         method: "POST",
         body: formData
     };
-    const response_text = await (await fetch("/upload", post_data)).text();
+    const response_text = await (await fetch("/upload/", post_data)).text();
     console.log("Answer:", response_text);
     bar.css("width", "100%").attr('aria-valuenow', 100);
     console.log(file);
@@ -198,12 +191,8 @@ async function upload() {
 }
 
 upload_button.click(async () => {
-    if ($('div.g-recaptcha').length && grecaptcha.getResponse().length === 0) {
-        showRecaptchaMessage();
-    } else {
-        upload_button.prop("disabled", true);
-        await upload();
-    }
+    upload_button.prop("disabled", true);
+    await upload();
 });
 
 function toggleTable(tableId) {

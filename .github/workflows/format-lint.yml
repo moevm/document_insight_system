@@ -1,0 +1,23 @@
+name: Format and lint
+
+on: pull_request
+
+jobs:
+  format-and-lint:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Check formatting (ruff format, ruff.toml rules)
+        run: ruff format --check .
+
+      - name: Lint (ruff check, ruff.toml rules)
+        run: ruff check .

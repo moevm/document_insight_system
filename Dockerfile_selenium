@@ -14,4 +14,4 @@ COPY tests/requirements.txt tests/requirements.txt
 RUN pip install -r tests/requirements.txt
 COPY tests ./tests
 
-ENTRYPOINT python3 tests/main.py --login ${LOGIN} --password ${PASSWORD}
+ENTRYPOINT sleep 30 && python3 tests/main.py --login ${LOGIN} --password ${PASSWORD}

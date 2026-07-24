@@ -1,4 +1,4 @@
-import {collect_values_if_possible, hash} from "./main";
+import {collect_values_if_possible, hash} from "./general";
 
 import '../styles/signup.css';
 
@@ -27,5 +27,5 @@ $("#signup_button").click(async () => {
     const name = await (await fetch("/signup", post_data)).text();
     console.log("User " + name + " was" + (name === "" ? " not" : "") + " signed up");
     if (name === "") $("#login_text_field").toggleClass("is-invalid", true);
-    else window.location.href = "/upload";
+    else window.location.href = "/upload/";
 });

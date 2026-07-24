@@ -5,10 +5,10 @@ from ..base_check import BaseReportCriterion, answer
 
 class ReportRightWordsCheck(BaseReportCriterion):
     label = "Проверка наличия определенных (правильных) слов в тексте отчёта"
-    description = 'Определенное слово: "цель"'
+    _description = ''
     id = 'right_words_check'
 
-    def __init__(self, file_info, patterns=["цел[ьией]"]):
+    def __init__(self, file_info, patterns=("цел[ьией]",)):
         super().__init__(file_info)
         self.patterns = dict.fromkeys(patterns, False)
 
@@ -21,12 +21,13 @@ class ReportRightWordsCheck(BaseReportCriterion):
                 if re.search(pattern, lower_text):
                     self.patterns[pattern] = True
         result_score = 0
-        if all(value == True for value in self.patterns.values()):
+        if all(value for value in self.patterns.values()):
             result_score = 1
         if result_score:
             return answer(result_score, "Пройдена!")
         else:
             result_str = '</li><li>'.join([k for k, v in self.patterns.items() if not v])
-            return answer(result_score,
-                          f'Не найдены слова, соответствующие следующим регулярным выражениям: '
-                          f'<ul><li>{result_str}</ul>')
+            return answer(
+                result_score,
+                f'Не найдены слова, соответствующие следующим регулярным выражениям: <ul><li>{result_str}</ul>',
+            )

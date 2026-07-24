@@ -1,11 +1,11 @@
-from ..base_check import BaseReportCriterion, answer
-
 import app.nlp.text_similarity as ts
+
+from ..base_check import BaseReportCriterion, answer
 
 
 class CompareTasksAndContentCheck(BaseReportCriterion):
     label = "Проверка соответствия задач и содержания"
-    description = "Степень раскрытия задач в содержании"
+    _description = "Степень раскрытия задач в содержании"
     id = 'compare_tasks_and_content_check'
 
     def __init__(self, file_info):
@@ -21,15 +21,7 @@ class CompareTasksAndContentCheck(BaseReportCriterion):
 
     def late_init(self):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
-        self.weights = {
-            "ВВЕДЕНИЕ": 1,
-            "1": 2,
-            "2": 2,
-            "3": 5,
-            "4": 2,
-            "5": 1,
-            "ЗАКЛЮЧЕНИЕ": 1
-        }
+        self.weights = {"ВВЕДЕНИЕ": 1, "1": 2, "2": 2, "3": 5, "4": 2, "5": 1, "ЗАКЛЮЧЕНИЕ": 1}
         self.all_to_pass = 0.15
         self.specific_to_pass = 0.05
         self.to_ignore = ["СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ", "ПРИЛОЖЕНИЕ"]
@@ -49,13 +41,17 @@ class CompareTasksAndContentCheck(BaseReportCriterion):
                     if child["text"].lower().find("объект") >= 0 and child["text"].lower().find("исследования") > 0:
                         if not possible_tasks:
                             return answer(False, "В введении не найдены задачи работы")
-                        tasks = header["child"][max(possible_tasks) + 1:i]
+                        tasks = header["child"][max(possible_tasks) + 1 : i]
                         while len(tasks) <= self.minimum_tasks:
                             try:
                                 possible_tasks.remove(max(possible_tasks))
-                                tasks = header["child"][max(possible_tasks) + 1:i]
-                            except:
-                                return answer(False, f"В введении меньше {self.minimum_tasks} задач, что меньше необходимого минимума")
+                                tasks = header["child"][max(possible_tasks) + 1 : i]
+                            except Exception as exc:
+                                print(exc)
+                                return answer(
+                                    False,
+                                    f"В введении меньше {self.minimum_tasks} задач, что меньше необходимого минимума",
+                                )
                         self.tasks = [task["text"] for task in tasks]
                         break
             if any(ignore_phrase in header["text"] for ignore_phrase in self.to_ignore):
@@ -76,7 +72,10 @@ class CompareTasksAndContentCheck(BaseReportCriterion):
             all_tasks_result[k] = round(all_tasks_result[k] / max_result, 3)
         avg = round(sum(all_tasks_result.values()) / len(all_tasks_result.values()), 3)
         if avg < self.all_to_pass:
-            return answer(False, f"Задачи недостаточно раскрыты в содержании (нужно {self.all_to_pass * 100}%, набрано {avg * 100}%)")
+            return answer(
+                False,
+                f"Задачи недостаточно раскрыты в содержании (нужно {self.all_to_pass * 100}%, набрано {avg * 100}%)",
+            )
         result += f"<br><b>Задачи раскрыты на {avg * 100}%</b><br>"
         for task in self.tasks:
             cur_task = NLPProcessor.calculate_cosine_similarity(task, self.chapters)
@@ -92,13 +91,16 @@ class CompareTasksAndContentCheck(BaseReportCriterion):
             specific_avg = round(specific_avg, 3)
             if specific_avg < self.specific_to_pass:
                 return answer(False, f"<br>Задача \"{task}\" недостаточно раскрыта<br>")
-            result += f"<br><b>Задача \"{task}\" раскрыта на {round(specific_avg * 100, 2)}%</b><br><br>Задачу \"{task}\" наиболее раскрывают разделы: <br>"
+            result += f"<br><b>Задача \"{task}\" раскрыта на {round(specific_avg * 100, 2)}%</b>"\
+                "<br><br>Задачу \"{task}\" наиболее раскрывают разделы: <br>"
             for i, key in enumerate(sorted_chapters.keys()):
                 if i >= 3:
                     break
-                result += f"<br>\"{key}\", {round(self.__output(sorted_chapters[key], sum(sorted_chapters.values())), 3)}% текста раскрывают задачу<br>"
+                result += f"<br>\"{key}\", "\
+                    "{round(self.__output(sorted_chapters[key], sum(sorted_chapters.values())), 3)}"\
+                    "% текста раскрывают задачу<br>"
         all_tasks_result = dict(sorted(all_tasks_result.items(), key=lambda item: item[1], reverse=True))
-        result += f"<br><b>Разделы, наименее раскрывающие задачи:</b><br>"
+        result += "<br><b>Разделы, наименее раскрывающие задачи:</b><br>"
         for i, key in enumerate(all_tasks_result.keys()):
             if i < len(all_tasks_result.keys()) - 5:
                 continue

@@ -1,0 +1,48 @@
+from flask import Blueprint, jsonify, render_template, request
+from flask_login import current_user, login_required
+
+from app.db.methods import check as check_methods
+from app.utils import checklist_filter, format_check_for_table
+
+check_list = Blueprint('check_list', __name__, template_folder='templates', static_folder='static')
+
+
+@check_list.route("/")
+@login_required
+def check_list_main():
+    return render_template("./check_list.html", name=current_user.name, navi_upload=True)
+
+
+@check_list.route("/data")
+@login_required
+def check_list_data():
+    data = request.args.copy()
+    filter_query = checklist_filter(data)
+    # parse and validate rest query
+    limit = data.get("limit", '')
+    limit = int(limit) if limit.isdigit() else 10
+
+    offset = data.get("offset", '')
+    offset = int(offset) if offset.isdigit() else 0
+
+    sort = data.get("sort")
+    sort = 'upload-date' if not sort else sort
+
+    order = data.get("order")
+    order = 'desc' if not order else order
+
+    sort = "_id" if sort == "upload-date" else sort
+
+    query = dict(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+
+    if data.get("latest"):
+        rows, count = check_methods.get_latest_check_cursor(**query)
+    else:
+        # get data and records count
+        rows, count = check_methods.get_checks_cursor(**query)
+
+    # construct response
+    response = {"total": count, "rows": [format_check_for_table(item) for item in rows]}
+
+    # return json data
+    return jsonify(response)

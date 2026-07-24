@@ -18,6 +18,13 @@ BASE_PRES_CRITERION = [
     ['pres_empty_slide'],
     ['theme_in_pres_check'],
     ['verify_git_link'],
+    ["slide_headers_duplication_check"],
+    ['pres_image_capture'],
+    ['task_tracker'],
+    ['overview_in_tasks'],
+    ['pres_abbreviations_check'],
+    ['pres_aspect_ratio_check'],
+    ['pres_was_were_check'],
 ]
 BASE_REPORT_CRITERION = [
     ["simple_check"],
@@ -34,6 +41,7 @@ BASE_REPORT_CRITERION = [
     ["literature_references"],
     ["image_references"],
     ["table_references"],
+    ["report_table_percentage_check"],
     ["first_pages_check"],
     ["main_character_check"],
     ["needed_headers_check"],
@@ -45,6 +53,11 @@ BASE_REPORT_CRITERION = [
     ["theme_in_report_check"],
     ["compare_goal_and_content_check"],
     ["compare_tasks_and_content_check"],
+    ["empty_task_page_check"],
+    ["water_in_the_text_check"],
+    ["report_task_tracker"],
+    ["report_abbreviations_check"],
+    ["report_was_were_check"],
 ]
 
 DEFAULT_TYPE = 'pres'
@@ -54,8 +67,10 @@ DEFAULT_PRES_TYPE_INFO = {'type': 'pres'}
 DEFAULT_TYPE_INFO = DEFAULT_PRES_TYPE_INFO
 
 BASE_PACKS = {
-    'pres': BaseCriterionPack(BASE_PRES_CRITERION, DEFAULT_PRES_TYPE_INFO, min_score=1.0,
-                              name="BasePresentationCriterionPack"),
-    'report': BaseCriterionPack(BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, min_score=1.0,
-                                name="BaseReportCriterionPack")
+    'pres': BaseCriterionPack(
+        BASE_PRES_CRITERION, DEFAULT_PRES_TYPE_INFO, min_score=1.0, name="BasePresentationCriterionPack"
+    ),
+    'report': BaseCriterionPack(
+        BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, min_score=1.0, name="BaseReportCriterionPack"
+    ),
 }

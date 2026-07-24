@@ -3,7 +3,7 @@
 {% if not current_user.is_anonymous %}
     <div class="col-sm-4 col-md-3 col-lg-2 my-auto">
         {% if navi_upload %}
-            <a class="header-linked text-center" href="/upload" id="upload_ref_link">Загрузить новый файл</a>
+            <a class="header-linked text-center" href="/upload/" id="upload_ref_link">Загрузить новый файл</a>
         {% endif %}
     </div>
 
@@ -17,6 +17,7 @@
                 <a class="dropdown-item" href="/criterion_packs">Наборы критериев</a>
                 <a class="dropdown-item" href="/logs">Логи</a>
                 <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/admin">Список админ-страниц</a>
                 <a class="dropdown-item" href="/monitoring/" target="_blank" rel="noopener noreferrer">Celery</a>
                 <a class="dropdown-item" href="/version" target="_blank" rel="noopener noreferrer">Version</a>
             {% endif %}

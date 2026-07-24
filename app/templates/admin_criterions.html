@@ -6,7 +6,6 @@
 
 {% block main %}
 
-<div class="header row">{% include "header.html" %}</div>
 <div class="holder row" id="results_holder">
     <h3 id="results_title" class="texteous ins">
         Набор доступных критериев:
@@ -27,7 +26,7 @@
             <tr>
                 {% for type, criterion_info in table_criteria.items() %}
                 {% for criterion_id, info in criterion_info.items() %}
-                {% if info['description']%}
+                {% if info.description('ALL') %}
                     <td class="toggle raw-button"><i class="bi bi-chevron-double-down"></td>
                 {% else %}
                     <td class="ins"> </td>
@@ -38,8 +37,8 @@
                 <td class="ins">{{ type }}</td>
             </tr>
             <tr class="hidden">
-                {% if info['description'] %}
-                    <td colspan="5">{{ info['description'] }}</td>
+                {% if info.description('ALL') %}
+                    <td colspan="5">{{ info.description('ALL') }}</td>
                 {% endif %}
             </tr>
                 {% endfor %}
@@ -47,6 +46,7 @@
         </tbody>
     </table>
 </div>
+<script src={{ url_for("static", filename="admin_criterions.js") }}></script>
 
 
 

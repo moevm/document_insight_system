@@ -25,7 +25,6 @@
             border: 1px solid #a1a1a1;
         }
     </style>
-    <div class="header row">{% include 'header.html' %}</div>
     <div class="holder row">
         <div class="container-fluid table-responsive-xl">
             <table id="check-list-table" class="table bg-white"
@@ -69,9 +68,10 @@
         </div>
     </div>
 {% endblock main %}
-
 {% block script %}
     <script>
         var is_admin = "{{current_user.is_admin}}" == "True"
     </script>
+<script src={{ url_for("static", filename="check_list.js") }}></script>
 {% endblock %}
+

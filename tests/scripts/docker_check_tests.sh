@@ -1,7 +1,7 @@
 # !/bin/bash
 
 service="selenium-tests"
-container_id=$(docker-compose -f docker-compose.yml -f docker-compose-selenium.yml ps -q $service)
+container_id=$(docker compose -f docker-compose.yml -f docker-compose-selenium.yml ps -q $service)
 
 if [ -z "$container_id" ]; then
     echo "Контейнер сервиса $service не найден."
@@ -17,11 +17,11 @@ echo "tests are finished"
 
 EXIT_CODE=$(docker inspect "$container_id" --format='{{.State.ExitCode}}')
 echo "tests logs:"
-docker-compose -f docker-compose.yml -f docker-compose-selenium.yml logs selenium-tests
+docker compose -f docker-compose.yml -f docker-compose-selenium.yml logs selenium-tests
 echo "web logs:"
-docker-compose logs web
+docker compose logs web
 echo "worker logs:"
-docker-compose logs worker
+docker compose logs worker
 
 if [ "$EXIT_CODE" -eq 0 ]; then
     echo "tests finished with code $EXIT_CODE (OK)"

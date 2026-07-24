@@ -6,6 +6,7 @@ class SlideBasic:
         self.dimensions = [-1, -1]
         self.images = []
         self.table = []
+        self.captions = []
 
     def get_title(self):
         return self.title
@@ -15,12 +16,15 @@ class SlideBasic:
 
     def get_page_number(self):
         return self.page_number
-        
+
     def get_images(self):
         return self.images
 
     def get_table(self):
         return self.table
+
+    def get_captions(self):
+        return self.captions
 
     def __str__(self):
         return f"\tTitle: {self.title}.\n\tText: {self.text}.\n\tPage_num: {self.page_number}"

@@ -1,3 +1,4 @@
+import string
 from collections import defaultdict
 
 import nltk
@@ -6,7 +7,6 @@ from nltk import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 from nltk.util import ngrams
-import string
 
 
 class NLPProcessor:
