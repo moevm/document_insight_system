@@ -1,6 +1,5 @@
-import os
-
 import logging
+import os
 import tempfile
 
 from main.presentations import PresentationPPTX
@@ -11,8 +10,7 @@ from utils import convert_to
 
 logger = logging.getLogger('root_logger')
 
-def parse(filepath, pdf_filepath, check_id):
-
+def parse(filepath, pdf_filepath, check_id=None):
     tmp_filepath = filepath.lower()
     try:
         if tmp_filepath.endswith(('.odp', '.ppt', '.pptx')):
@@ -20,13 +18,16 @@ def parse(filepath, pdf_filepath, check_id):
             if tmp_filepath.endswith(('.odp', '.ppt')):
                 logger.info(f"Презентация {filepath} старого формата. Временно преобразована в pptx для обработки.")
                 new_filepath = convert_to(filepath, target_format='pptx')
-
-            presentation = PresentationPPTX(new_filepath)
-            presentation.extract_images_with_captions(check_id)
-            file_object = presentation
-
-
-        elif tmp_filepath.endswith(('.doc', '.odt', '.docx', )):
+            file_object = PresentationPPTX(new_filepath)
+            if check_id is not None:
+                file_object.extract_images_with_captions(check_id)
+        elif tmp_filepath.endswith(
+            (
+                '.doc',
+                '.odt',
+                '.docx',
+            )
+        ):
             new_filepath = filepath
             if tmp_filepath.endswith(('.doc', '.odt')):
                 logger.info(f"Отчёт {filepath} старого формата. Временно преобразован в docx для обработки.")
@@ -35,10 +36,11 @@ def parse(filepath, pdf_filepath, check_id):
             docx = DocxUploader()
             docx.upload(new_filepath, pdf_filepath)
             docx.parse()
-            docx.extract_images_with_captions(check_id)
+            if check_id is not None:
+                docx.extract_images_with_captions(check_id)
             file_object = docx
 
-        elif tmp_filepath.endswith('.md' ):
+        elif tmp_filepath.endswith('.md'):
             new_filepath = filepath
             doc = MdUploader(new_filepath)
             md_text = doc.upload()
@@ -52,8 +54,8 @@ def parse(filepath, pdf_filepath, check_id):
             os.remove(new_filepath)
         return file_object
     except Exception as err:
-            logger.error(err, exc_info=True)
-            return None
+        logger.error(err, exc_info=True)
+        return None
 
 
 def save_to_temp_file(file):

@@ -18,10 +18,7 @@ try:
         json_string = vfp.read()
         VERSION_DATA = json.loads(json_string)
 except json.decoder.JSONDecodeError as error:
-    VERSION_DATA = {
-        "error": str(error),
-        "data": error.doc
-    }
+    VERSION_DATA = {"error": str(error), "data": error.doc}
 except IOError as error:
     VERSION_DATA = {"error": f"{error.strerror}: {error.filename}"}
 except Exception as error:

@@ -1,5 +1,6 @@
 import re
-from db import db_methods
+
+from app.db.methods.image import update_image
 
 def parse_headers_and_pages_and_images(chapters, docx):
     text_on_page = docx.pdf_file.get_text_on_page()
@@ -15,7 +16,7 @@ def parse_headers_and_pages_and_images(chapters, docx):
         for image in images:
             if image.caption in text:
                 image.page = page
-                db_methods.update_image(image)
+                update_image(image)
     for chapter in chapters:
         for image in images:
             if image.caption in chapter["text"]:

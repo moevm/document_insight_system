@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-class DocumentUploader(ABC):
 
+class DocumentUploader(ABC):
     def __init__(self):
         self.chapters = []
         self.paragraphs = []
@@ -17,7 +17,7 @@ class DocumentUploader(ABC):
     @abstractmethod
     def upload(self):
         pass
-    
+
     @abstractmethod
     def parse(self):
         pass
@@ -45,10 +45,10 @@ class DocumentUploader(ABC):
     @abstractmethod
     def find_literature_page(self, work_type):
         pass
-    
+
     @abstractmethod
     def show_chapters(self, work_type):
         pass
 
-    def get_main_headers(self):
+    def get_main_headers(self):  # noqa: B027
         pass

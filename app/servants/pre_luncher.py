@@ -1,16 +1,20 @@
 import hashlib
 import logging
 
-from db.db_methods import add_user, get_user, get_client, edit_user, save_criteria_pack
 from main.check_packs.pack_config import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO
-
 from pymongo.errors import ConnectionFailure
+
+from app.db.methods.client import get_client
+from app.db.methods.criteria_pack import save_criteria_pack
+from app.db.methods.edit_user import edit_user
+from app.db.methods.user import add_user, get_user
 from app.server_consts import ALLOWED_EXTENSIONS
 
 logger = logging.getLogger('root_logger')
 
 
-def get_hash(password): return hashlib.md5(password.encode()).hexdigest()
+def get_hash(password):
+    return hashlib.md5(password.encode()).hexdigest()
 
 
 def update_base_check_pack():

@@ -3,8 +3,8 @@ from io import BytesIO
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 
-from .slide_pptx import SlidePPTX
 from ..presentation_basic import PresentationBasic
+from .slide_pptx import SlidePPTX
 
 
 class PresentationPPTX(PresentationBasic):
@@ -22,7 +22,7 @@ class PresentationPPTX(PresentationBasic):
         return super().__str__()
 
     def extract_images_with_captions(self, check_id):
-        from app.db.db_methods import save_image_to_db
+        from app.db.methods.image import save_image_to_db
 
         # Проход по каждому слайду в презентации
         for slide in self.slides:
