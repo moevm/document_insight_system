@@ -16,6 +16,15 @@ results_bp = Blueprint('results', __name__, template_folder='templates', static_
 logger = get_root_logger('web')
 
 
+def _prepare_verdicts_for_view(check, is_admin):
+    if not isinstance(check.enabled_checks, list):
+        return check
+
+    for criterion_info in check.enabled_checks:
+        verdict = criterion_info.get('verdict')
+        if isinstance(verdict, (list, tuple)) and len(verdict) > 1:
+            criterion_info['verdict'] = [verdict[1] if is_admin else verdict[0]]
+    return check
 def is_equal_username(name1: str, name2: str) -> bool:
     if name1 == name2:
         # direct comparison
@@ -46,6 +55,7 @@ def results_main(_id):
         ):
             # show processing time for user
             avg_process_time = None if check.is_ended else celery_check_methods.get_average_processing_time()
+            check = _prepare_verdicts_for_view(check, current_user.is_admin)
             return render_template(
                 "./results.html",
                 navi_upload=True,
