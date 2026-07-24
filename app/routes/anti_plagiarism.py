@@ -4,7 +4,7 @@ from bson import ObjectId
 from flask import Blueprint, render_template, url_for
 from flask_login import current_user, login_required
 
-from app.db import db_methods
+from app.db.methods.check import get_check
 from app.root_logger import get_root_logger
 
 anti_plagiarism = Blueprint('anti_plagiarism', __name__, template_folder='templates', static_folder='static')
@@ -20,7 +20,7 @@ def anti_plagiarism_page(_id, source_check_id):
         logger.error('_id exception:', exc_info=True)
         return render_template("./404.html")
 
-    check = db_methods.get_check(oid)
+    check = get_check(oid)
     if check is None:
         logger.info("Запрошенная проверка не найдена: " + _id)
         return render_template("./404.html")
@@ -30,7 +30,7 @@ def anti_plagiarism_page(_id, source_check_id):
     except bson.errors.InvalidId:
         logger.error('source_check_id exception:', exc_info=True)
         return render_template("./404.html")
-    source_check = db_methods.get_check(source_oid)
+    source_check = get_check(source_oid)
     if source_check is None:
         logger.info("Запрошенная проверка не найдена: " + source_check_id)
         return render_template("./404.html")
