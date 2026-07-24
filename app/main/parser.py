@@ -10,6 +10,7 @@ from utils import convert_to
 
 logger = logging.getLogger('root_logger')
 
+
 def parse(filepath, pdf_filepath, check_id=None):
     tmp_filepath = filepath.lower()
     try:

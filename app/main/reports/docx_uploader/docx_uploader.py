@@ -12,7 +12,6 @@ from .style import Style
 from .table import Cell, Table
 
 
-
 class DocxUploader(DocumentUploader):
     def __init__(self):
         super().__init__()
@@ -298,26 +297,32 @@ class DocxUploader(DocumentUploader):
 
     def extract_images_with_captions(self, check_id):
         from app.db.methods.image import get_images, save_image_to_db
-        
-        emu_to_cm  = 360000
+
+        emu_to_cm = 360000
         image_found = False
         image_data = None
-        image_style="ВКР_Подпись для рисунков"
+        image_style = "ВКР_Подпись для рисунков"
         if not self.images:
             for i, paragraph in enumerate(self.file.paragraphs):
                 for run in paragraph.runs:
                     if "graphic" in run._element.xml:
-                        image_streams = run._element.findall('.//a:blip', namespaces={
-                            'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'})
+                        image_streams = run._element.findall(
+                            './/a:blip', namespaces={'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'}
+                        )
                         for image_stream in image_streams:
                             embed_id = image_stream.get(
-                                '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed')
+                                '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed'
+                            )
                             if embed_id:
                                 image_found = True
                                 image_part = self.file.part.related_parts[embed_id]
                                 image_data = image_part.blob
-                                extent = run._element.find('.//wp:extent', namespaces={
-                                'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
+                                extent = run._element.find(
+                                    './/wp:extent',
+                                    namespaces={
+                                        'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'
+                                    },
+                                )
                                 width_cm = height_cm = None
                                 if extent is not None:
                                     width_cm = int(extent.get('cx')) / emu_to_cm
@@ -337,10 +342,9 @@ class DocxUploader(DocumentUploader):
                             next_paragraph_index += 1
                         save_image_to_db(check_id, image_data, caption, (width_cm, height_cm))
                         image_found = False
-                        image_data = None 
-                
+                        image_data = None
+
             self.images = get_images(check_id)
-                              
 
 
 def main(args):

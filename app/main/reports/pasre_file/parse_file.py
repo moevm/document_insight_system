@@ -2,6 +2,7 @@ import re
 
 from app.db.methods.image import update_image
 
+
 def parse_headers_and_pages_and_images(chapters, docx):
     text_on_page = docx.pdf_file.get_text_on_page()
     images = docx.images
