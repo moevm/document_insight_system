@@ -1,6 +1,6 @@
 from ..base_check import BaseReportCriterion, answer
-from .style_check_settings import StyleCheckSettings
 from .section_component_config import SECTION_CONFIG
+from .style_check_settings import StyleCheckSettings
 
 
 class ReportSectionComponent(BaseReportCriterion):
