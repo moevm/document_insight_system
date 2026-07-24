@@ -1,18 +1,20 @@
 from os.path import join
+
 from bson import ObjectId
+from celery import chain
 from celery.result import AsyncResult
+from flask import Blueprint, current_app, jsonify, request
+from flask_login import current_user, login_required
 
-from flask import Blueprint, request, current_app, jsonify
-from flask_login import login_required, current_user
+from app.db.methods import celery_check as celery_check_methods
+from app.db.methods import check as check_methods
+from app.db.methods import file as file_methods
+from app.db.types.Check import Check
 from app.root_logger import get_root_logger
-
 from app.routes.utils import check_access_token
-from app.utils import get_file_len, check_file
-from app.db import db_methods
-from app.db.db_types import Check
-
 from app.server_consts import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
-from app.tasks import create_task
+from app.tasks import convert_check_file_to_pdf, create_task
+from app.utils import check_file, get_file_len
 
 tasks = Blueprint('tasks', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')
@@ -30,7 +32,7 @@ def run_task():
     if not file:
         logger.critical("request doesn't include file")
         return "request doesn't include file"
-    if get_file_len(file) * 2 + db_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
+    if get_file_len(file) * 2 + file_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
         return 'storage_overload'
     file_check_response = check_file(file, extension, ALLOWED_EXTENSIONS[file_ext_type], check_mime=True)
@@ -44,68 +46,84 @@ def run_task():
             logger.info('Пользователь загрузил файл с ошибочным расширением: pdf_' + pdf_file_check_response)
             return "pdf_" + pdf_file_check_response
 
-    logger.info(
-        f"Запуск обработки файла {file.filename} пользователя {current_user.username} с критериями {current_user.criteria}"
-    )
+        logger.info(
+            f"Запуск обработки файла {file.filename} пользователя {current_user.username}"
+            f" с критериями {current_user.criteria}"
+        )
 
     # save to file on disk for future checking
     file_id = ObjectId()
     filepath = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
     file.save(filepath)
     # add file and file's info to db
-    file_id = db_methods.add_file_info_and_content(current_user.username, filepath, file_type, file_id)
+    file_id = file_methods.add_file_info_and_content(current_user.username, filepath, file_type, file_id)
     # use pdf from response or convert to pdf and save on disk and db
+    need_convert_pdf = False
     if current_user.two_files and pdf_file:
-        if get_file_len(pdf_file) * 2 + db_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
+        if get_file_len(pdf_file) * 2 + file_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
             logger.critical('Storage overload has occured')
             return 'storage_overload'
         logger.info(
-            f"Запуск обработки файла {pdf_file.filename} пользователя {current_user.username} с критериями {current_user.criteria}")
+            f"Запуск обработки файла {pdf_file.filename} пользователя {current_user.username}"
+            f" с критериями {current_user.criteria}"
+        )
         filenamepdf, extension = pdf_file.filename.rsplit('.', 1)
         filepathpdf = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
         pdf_file.save(filepathpdf)
-        converted_id = db_methods.add_file_to_db(filenamepdf, filepathpdf)
+        converted_id = file_methods.add_file_to_db(filenamepdf, filepathpdf)
     else:
-        converted_id = db_methods.write_pdf(filename, filepath)
-    check = Check({
-        '_id': file_id,
-        'conv_pdf_fs_id': converted_id,
-        'user': current_user.username,
-        'lms_user_id': current_user.lms_user_id,
-        'enabled_checks': current_user.criteria,
-        'criteria': current_user.criteria,
-        'file_type': current_user.file_type,
-        'filename': file.filename,
-        'score': -1,  # score=-1 -> checking in progress
-        'is_ended': False,
-        'is_failed': False,
-        'params_for_passback': current_user.params_for_passback
-    })
-    db_methods.add_check(file_id, check)  # add check for parsed_file to db
-    task = create_task.delay(check.pack(to_str=True))  # add check to queue
-    db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
+        logger.info(f"Конвертация файла '{file.filename}' в pdf будет запущена в порядке очереди.")
+        converted_id = str(ObjectId())
+        need_convert_pdf = True
+
+    check = Check(
+        {
+            '_id': file_id,
+            'conv_pdf_fs_id': converted_id,
+            'user': current_user.username,
+            'lms_user_id': current_user.lms_user_id,
+            'enabled_checks': current_user.criteria,
+            'criteria': current_user.criteria,
+            'file_type': current_user.file_type,
+            'filename': file.filename,
+            'score': -1,  # score=-1 -> checking in progress
+            'is_ended': False,
+            'is_failed': False,
+            'params_for_passback': current_user.params_for_passback,
+        }
+    )
+
+    check_methods.add_check(file_id, check)  # add check for parsed_file to db
+
+    if need_convert_pdf:
+        task_chain = chain(convert_check_file_to_pdf.s(check.pack(to_str=True), filepath), create_task.s())
+    else:
+        task_chain = chain(create_task.s(check.pack(to_str=True)))
+
+    task = task_chain.apply_async()
+    celery_check_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
     return {'task_id': task.id, 'check_id': str(file_id)}
 
 
 @tasks.route("/md", methods=["POST"])
 def run_md_task_by_api():
-    if not check_access_token(request.form.get('access_token', None)): 
+    if not check_access_token(request.form.get('access_token', None)):
         return "No valid access token", 401
-    
+
     file = request.files.get('file')
     criteria = request.form.get('criteria', None)
     full_response = request.form.get('full_response', None)
-    
+
     # hardcoded
     file_type = {'type': 'report', 'report_type': 'VKR'}
     file_ext_type = file_type['type']
-    
+
     filename, extension = file.filename.rsplit('.', 1)
 
     if not file:
         logger.critical("request doesn't include file")
         return "request doesn't include file"
-    if get_file_len(file) * 2 + db_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
+    if get_file_len(file) * 2 + file_methods.get_storage() > current_app.config['MAX_SYSTEM_STORAGE']:
         logger.critical('Storage overload has occured')
         return 'storage_overload'
     file_check_response = check_file(file, extension, ALLOWED_EXTENSIONS[file_ext_type], check_mime=True)
@@ -113,40 +131,45 @@ def run_md_task_by_api():
         logger.info('По API загружен файл с ошибочным расширением: ' + file_check_response)
         return file_check_response
 
-    logger.info(
-        f"Запуск обработки файла {file.filename} по API с критериями {criteria}"
-    )
+    logger.info(f"Запуск обработки файла {file.filename} по API с критериями {criteria}")
 
     # save to file on disk for future checking
     file_id = ObjectId()
     filepath = join(UPLOAD_FOLDER, f"{file_id}.{extension}")
     file.save(filepath)
     # add file and file's info to db
-    file_id = db_methods.add_file_info_and_content("api_access_token", filepath, file_type, file_id)
+    file_id = file_methods.add_file_info_and_content("api_access_token", filepath, file_type, file_id)
     # convert to pdf and save on disk and db
-    converted_id = db_methods.write_pdf(filename, filepath)
-    
-    check = Check({
-        '_id': file_id,
-        'conv_pdf_fs_id': converted_id,
-        'user': 'api_access_token',
-        'lms_user_id': None,
-        'enabled_checks': criteria,
-        'criteria': criteria,
-        'file_type': file_type,
-        'filename': file.filename,
-        'score': -1,  # score=-1 -> checking in progress
-        'is_ended': False,
-        'is_failed': False,
-        'params_for_passback': None
-    })
-    db_methods.add_check(file_id, check)  # add check for parsed_file to db
-    task = create_task.delay(check.pack(to_str=True))  # add check to queue
-    db_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
+    logger.info(f"Конвертация файла '{file.filename}' в pdf будет запущена в порядке очереди.")
+    converted_id = str(ObjectId())
+
+    check = Check(
+        {
+            '_id': file_id,
+            'conv_pdf_fs_id': converted_id,
+            'user': 'api_access_token',
+            'lms_user_id': None,
+            'enabled_checks': criteria,
+            'criteria': criteria,
+            'file_type': file_type,
+            'filename': file.filename,
+            'score': -1,  # score=-1 -> checking in progress
+            'is_ended': False,
+            'is_failed': False,
+            'params_for_passback': None,
+        }
+    )
+    check_methods.add_check(file_id, check)  # add check for parsed_file to db
+
+    task_chain = chain(convert_check_file_to_pdf.s(check.pack(to_str=True), filepath), create_task.s())
+    task = task_chain.apply_async()
+    celery_check_methods.add_celery_task(task.id, file_id)  # mapping celery_task to check (check_id = file_id)
+
     if full_response:
         return {'task_id': task.id, 'check_id': str(file_id)}
     else:
         return str(file_id)
+
 
 @tasks.route("/<task_id>", methods=["GET"])
 @login_required

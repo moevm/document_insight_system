@@ -19,12 +19,15 @@ class SldNumCheck(BasePresCriterion):
         'in_range': 'Количество слайдов в допустимых границах',
         'lt_min': 'Число слайдов меньше допустимого',
         'gt_max': 'Число слайдов превышает допустимое',
-        'gt_max_suspected': 'Проверьте, что запасные слайды расположенны после слайда с заголовком “Запасные слайды”'
+        'gt_max_suspected': 'Проверьте, что запасные слайды расположенны после слайда с заголовком “Запасные слайды”',
     }
 
     def sldnum_verdict(self, find_additional, msg):
-        return answer(False, format_header('Всего: {}'.format(find_additional)),
-                      '{}. Допустимые границы: {}'.format(msg, self.slides_number))
+        return answer(
+            False,
+            format_header('Всего: {}'.format(find_additional)),
+            '{}. Допустимые границы: {}'.format(msg, self.slides_number),
+        )
 
     def get_sldnum_range(self, find_additional, suspected_additional=None):
         if self.slides_number[0] <= find_additional <= self.slides_number[1]:
@@ -39,7 +42,7 @@ class SldNumCheck(BasePresCriterion):
 
     def check(self):
         if self.detect_additional:
-            additional = re.compile('[А-Я][а-я]*[\s]слайд[ы]?')
+            additional = re.compile(r'[А-Я][а-я]*[\s]слайд[ы]?')
             find_additional = [i for i, header in enumerate(self.file.get_titles()) if re.fullmatch(additional, header)]
             if len(find_additional) == 0:
                 return self.get_sldnum_range(len(self.file.slides), suspected_additional=True)

@@ -22,6 +22,8 @@ BASE_PRES_CRITERION = [
     ['pres_image_capture'],
     ['task_tracker'],
     ['overview_in_tasks'],
+    ['pres_abbreviations_check'],
+    ['pres_aspect_ratio_check'],
     ['pres_was_were_check'],
 ]
 BASE_REPORT_CRITERION = [
@@ -53,6 +55,7 @@ BASE_REPORT_CRITERION = [
     ["water_in_the_text_check"],
     ["report_task_tracker"],
     ["anti_plagiarism_check"],
+    ["report_abbreviations_check"],
     ["report_was_were_check"],
 ]
 
@@ -63,8 +66,10 @@ DEFAULT_PRES_TYPE_INFO = {'type': 'pres'}
 DEFAULT_TYPE_INFO = DEFAULT_PRES_TYPE_INFO
 
 BASE_PACKS = {
-    'pres': BaseCriterionPack(BASE_PRES_CRITERION, DEFAULT_PRES_TYPE_INFO, min_score=1.0,
-                              name="BasePresentationCriterionPack"),
-    'report': BaseCriterionPack(BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, min_score=1.0,
-                                name="BaseReportCriterionPack")
+    'pres': BaseCriterionPack(
+        BASE_PRES_CRITERION, DEFAULT_PRES_TYPE_INFO, min_score=1.0, name="BasePresentationCriterionPack"
+    ),
+    'report': BaseCriterionPack(
+        BASE_REPORT_CRITERION, DEFAULT_REPORT_TYPE_INFO, min_score=1.0, name="BaseReportCriterionPack"
+    ),
 }
