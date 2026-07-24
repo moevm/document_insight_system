@@ -68,14 +68,18 @@ class CompareGoalAndContentCheck(BaseReportCriterion):
         for i, key in enumerate(sorted_chapters.keys()):
             if i >= 7:
                 break
-            result += f"<br>\"{key}\", {round(self.__output(sorted_chapters[key], sum(sorted_chapters.values())), 3)}%"\
+            result += (
+                f"<br>\"{key}\", {round(self.__output(sorted_chapters[key], sum(sorted_chapters.values())), 3)}%"
                 " текста раскрывают тему<br>"
+            )
         result += "<br><b>7 разделов, наименее раскрывающих тему:</b><br>"
         for i, key in enumerate(sorted_chapters.keys()):
             if i < len(sorted_chapters) - 7:
                 continue
-            result += f"<br>\"{key}\", {self.__output(sorted_chapters[key], sum(sorted_chapters.values()))}%"\
+            result += (
+                f"<br>\"{key}\", {self.__output(sorted_chapters[key], sum(sorted_chapters.values()))}%"
                 " текста раскрывают тему<br>"
+            )
         return answer(True, result)
 
     def __output(self, value, summ):

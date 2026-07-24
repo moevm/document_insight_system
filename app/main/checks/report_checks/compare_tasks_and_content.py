@@ -91,14 +91,18 @@ class CompareTasksAndContentCheck(BaseReportCriterion):
             specific_avg = round(specific_avg, 3)
             if specific_avg < self.specific_to_pass:
                 return answer(False, f"<br>Задача \"{task}\" недостаточно раскрыта<br>")
-            result += f"<br><b>Задача \"{task}\" раскрыта на {round(specific_avg * 100, 2)}%</b>"\
+            result += (
+                f"<br><b>Задача \"{task}\" раскрыта на {round(specific_avg * 100, 2)}%</b>"
                 "<br><br>Задачу \"{task}\" наиболее раскрывают разделы: <br>"
+            )
             for i, key in enumerate(sorted_chapters.keys()):
                 if i >= 3:
                     break
-                result += f"<br>\"{key}\", "\
-                    "{round(self.__output(sorted_chapters[key], sum(sorted_chapters.values())), 3)}"\
+                result += (
+                    f"<br>\"{key}\", "
+                    "{round(self.__output(sorted_chapters[key], sum(sorted_chapters.values())), 3)}"
                     "% текста раскрывают задачу<br>"
+                )
         all_tasks_result = dict(sorted(all_tasks_result.items(), key=lambda item: item[1], reverse=True))
         result += "<br><b>Разделы, наименее раскрывающие задачи:</b><br>"
         for i, key in enumerate(all_tasks_result.keys()):
