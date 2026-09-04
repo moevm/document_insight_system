@@ -115,7 +115,7 @@ class ReportStructureCheck(BaseReportCriterion):
             for section in self.required_sections:
                 if section in text:
                     if "heading" in style:
-                        return False, f"Раздел '{section}' не должен быть оформлен как заголовок"
+                        return False, f"Раздел '{section}' должен быть оформлен стилем 'Обычный', а не как заголовок. Уберите стиль 'Заголовок' и используйте обычный текст."
                     found_sections.append(section)
                     break
 
@@ -127,6 +127,12 @@ class ReportStructureCheck(BaseReportCriterion):
                 f"Ваша структура работы не соотвествует требуемой!"
                 f"<br>Ваша структура: <br>   {'<br>'.join(found_sections)}"
                 f"<br>Требуемая структура: <br>   {'<br>'.join(self.required_sections)}"
+                f"Рекомендации:"
+                f"<ul>"
+                f"<li>Все разделы должны идти строго в указанном порядке</li>"
+                f"<li>Разделы 'ЗАДАНИЕ', 'РЕФЕРАТ', 'ABSTRACT', 'СОДЕРЖАНИЕ' должны быть оформлены как обычный текст (стиль 'Обычный')</li>"
+                f"<li>Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен стилем 'Заголовок 2'</li>"
+                f"</ul>"
             )
             return False, result_str
         
@@ -148,6 +154,7 @@ class ReportStructureCheck(BaseReportCriterion):
             if (vkr_config['check_sequence']):
                 result_bool_check_sequence_sections, result_str_check_sequence_sections = self.check_sequence_sections()
                 result_bool = result_bool and result_bool_check_sequence_sections
+                result_str += "<br>"
                 result_str += "<br>"
                 result_str += result_str_check_sequence_sections
 
