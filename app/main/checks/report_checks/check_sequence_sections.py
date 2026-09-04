@@ -1,5 +1,5 @@
 from ..base_check import BaseReportCriterion, answer
-from .style_check_settings import REQUIRED_SECTIONS_BEFORE_INTRO
+from .style_check_settings import StyleCheckSettings
 
 
 class ReportSequenceSectionsCheck(BaseReportCriterion):
@@ -17,6 +17,7 @@ class ReportSequenceSectionsCheck(BaseReportCriterion):
 
     def __init__(self, file_info):
         super().__init__(file_info)
+        self.required_sections = StyleCheckSettings.REQUIRED_SECTIONS_BEFORE_INTRO
 
     def check(self):
         try:
@@ -50,7 +51,7 @@ class ReportSequenceSectionsCheck(BaseReportCriterion):
                     found_sections.append("ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ")
                     continue
 
-                for section in REQUIRED_SECTIONS_BEFORE_INTRO:
+                for section in self.required_sections:
                     if section in text:
                         if "heading" in style:
                             return answer(
@@ -73,7 +74,7 @@ class ReportSequenceSectionsCheck(BaseReportCriterion):
                 result_str = (
                     f"Ваша структура работы не соотвествует требуемой!"
                     f"<br>Ваша структура: <br>   {'<br>'.join(found_sections)}"
-                    f"<br>Требуемая структура: <br>   {'<br>'.join(REQUIRED_SECTIONS_BEFORE_INTRO)}"
+                    f"<br>Требуемая структура: <br>   {'<br>'.join(self.required_sections)}"
                 )
                 return answer(False, result_str)
 
