@@ -1,4 +1,5 @@
 from ..base_check import BaseReportCriterion, answer
+from .style_check_settings import REQUIRED_SECTIONS_BEFORE_INTRO
 
 
 class ReportSequenceSectionsCheck(BaseReportCriterion):
@@ -20,15 +21,6 @@ class ReportSequenceSectionsCheck(BaseReportCriterion):
     def check(self):
         try:
             paragraphs = self.file.paragraphs
-
-            required_sections = [
-                "ЗАДАНИЕ",
-                "календарный план",
-                "РЕФЕРАТ",
-                "ABSTRACT",
-                "СОДЕРЖАНИЕ",
-                "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ",
-            ]
 
             found_sections = []
             intro_found = False
@@ -58,7 +50,7 @@ class ReportSequenceSectionsCheck(BaseReportCriterion):
                     found_sections.append("ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ")
                     continue
 
-                for section in required_sections:
+                for section in REQUIRED_SECTIONS_BEFORE_INTRO:
                     if section in text:
                         if "heading" in style:
                             return answer(
@@ -81,7 +73,7 @@ class ReportSequenceSectionsCheck(BaseReportCriterion):
                 result_str = (
                     f"Ваша структура работы не соотвествует требуемой!"
                     f"<br>Ваша структура: <br>   {'<br>'.join(found_sections)}"
-                    f"<br>Требуемая структура: <br>   {'<br>'.join(required_sections)}"
+                    f"<br>Требуемая структура: <br>   {'<br>'.join(REQUIRED_SECTIONS_BEFORE_INTRO)}"
                 )
                 return answer(False, result_str)
 
