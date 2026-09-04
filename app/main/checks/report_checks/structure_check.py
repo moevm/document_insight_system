@@ -4,10 +4,7 @@ from .style_check_settings import StyleCheckSettings
 
 class ReportStructureCheck(BaseReportCriterion):
     label = "Проверка стуктуры отчета"
-    _description = (
-        "Проверяет наличие обязательных заголовков и "
-        "правильную последовательность разделов до ВВЕДЕНИЯ"
-    )
+    _description = "Проверяет наличие обязательных заголовков и правильную последовательность разделов до ВВЕДЕНИЯ"
     id = "report_structure_check"
 
     def __init__(self, file_info, main_heading_style="heading 2", headers_map=None):
@@ -35,15 +32,13 @@ class ReportStructureCheck(BaseReportCriterion):
             if 'any_header' in StyleCheckSettings.CONFIGS.get(self.config):
                 self.patterns = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['headers']
 
-
     def check_needed_headers(self):
         if self.file.page_counter() < 4:
             return False, "В отчете недостаточно страниц. Нечего проверять."
         self.late_init()
         if not self.patterns:
             return False, (
-                "Не удалось сформировать требуемые заголовки "
-                "исходя из названия работы. Проверьте наименование работы."
+                "Не удалось сформировать требуемые заголовки исходя из названия работы. Проверьте наименование работы."
             )
         result_string = ''
         patterns = []
@@ -89,7 +84,6 @@ class ReportStructureCheck(BaseReportCriterion):
             result_str += '<br>Если список не точный, убедитесь, что для каждого заголовка указан верный стиль.'
             return False, result_str
 
-
     def check_sequence_sections(self):
         paragraphs = self.file.paragraphs
 
@@ -112,8 +106,7 @@ class ReportStructureCheck(BaseReportCriterion):
             if "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ" in text:
                 if "heading 2" not in style:
                     return False, (
-                        "Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' "
-                        "должен быть оформлен стилем 'Заголовок 2'"
+                        "Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен стилем 'Заголовок 2'"
                     )
                 found_sections.append("ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ")
                 continue
@@ -130,7 +123,7 @@ class ReportStructureCheck(BaseReportCriterion):
         if not intro_found:
             return False, "Не найден раздел 'ВВЕДЕНИЕ' (должен быть заголовком второго уровня)"
 
-        if (" ".join(found_sections) != " ".join(self.required_sections)):
+        if " ".join(found_sections) != " ".join(self.required_sections):
             result_str = (
                 f"Ваша структура работы не соотвествует требуемой!"
                 f"<br>Ваша структура: <br>   {'<br>'.join(found_sections)}"
@@ -147,20 +140,18 @@ class ReportStructureCheck(BaseReportCriterion):
 
         return True, "Проверка последовательности разделов до раздела 'ВВЕДЕНИЕ' пройдена"
 
-
-
     def check(self):
         try:
             result_bool = True
             result_str = ""
             vkr_config = StyleCheckSettings.VKR_CONFIG['any_header']
 
-            if (vkr_config['check_presence']):
+            if vkr_config['check_presence']:
                 result_bool_check_needed_headers, result_str_check_needed_headers = self.check_needed_headers()
                 result_bool = result_bool and result_bool_check_needed_headers
                 result_str += result_str_check_needed_headers
 
-            if (vkr_config['check_sequence']):
+            if vkr_config['check_sequence']:
                 result_bool_check_sequence_sections, result_str_check_sequence_sections = self.check_sequence_sections()
                 result_bool = result_bool and result_bool_check_sequence_sections
                 result_str += "<br>"
