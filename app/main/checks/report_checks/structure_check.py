@@ -13,7 +13,7 @@ class ReportStructureCheck(BaseReportCriterion):
     def __init__(self, file_info, main_heading_style="heading 2", headers_map=None):
         super().__init__(file_info)
         self.required_sections = StyleCheckSettings.REQUIRED_SECTIONS_BEFORE_INTRO
-        
+
         self.headers_page = 1
         self.headers = []
         self.main_heading_style = main_heading_style
@@ -41,7 +41,10 @@ class ReportStructureCheck(BaseReportCriterion):
             return False, "В отчете недостаточно страниц. Нечего проверять."
         self.late_init()
         if not self.patterns:
-            return False, "Не удалось сформировать требуемые заголовки исходя из названия работы. Проверьте наименование работы."
+            return False, (
+                "Не удалось сформировать требуемые заголовки "
+                "исходя из названия работы. Проверьте наименование работы."
+            )
         result_string = ''
         patterns = []
         for pattern in self.patterns:
@@ -108,14 +111,19 @@ class ReportStructureCheck(BaseReportCriterion):
 
             if "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ" in text:
                 if "heading 2" not in style:
-                    return False, "Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен стилем 'Заголовок 2'"
+                    return False, (
+                        "Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' "
+                        "должен быть оформлен стилем 'Заголовок 2'"
+                    )
                 found_sections.append("ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ")
                 continue
 
             for section in self.required_sections:
                 if section in text:
                     if "heading" in style:
-                        return False, f"Раздел '{section}' должен быть оформлен стилем 'Обычный', а не как заголовок. Уберите стиль 'Заголовок' и используйте обычный текст."
+                        f"Раздел '{section}' должен быть оформлен стилем 'Обычный', "
+                        "а не как заголовок. Уберите стиль 'Заголовок' "
+                        "и используйте обычный текст."
                     found_sections.append(section)
                     break
 
@@ -130,12 +138,13 @@ class ReportStructureCheck(BaseReportCriterion):
                 f"Рекомендации:"
                 f"<ul>"
                 f"<li>Все разделы должны идти строго в указанном порядке</li>"
-                f"<li>Разделы 'ЗАДАНИЕ', 'РЕФЕРАТ', 'ABSTRACT', 'СОДЕРЖАНИЕ' должны быть оформлены как обычный текст (стиль 'Обычный')</li>"
+                f"<li>Разделы 'ЗАДАНИЕ', 'РЕФЕРАТ', 'ABSTRACT', 'СОДЕРЖАНИЕ' "
+                "должны быть оформлены как обычный текст (стиль 'Обычный')</li>"
                 f"<li>Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен стилем 'Заголовок 2'</li>"
                 f"</ul>"
             )
             return False, result_str
-        
+
         return True, "Проверка последовательности разделов до раздела 'ВВЕДЕНИЕ' пройдена"
 
 
@@ -145,7 +154,7 @@ class ReportStructureCheck(BaseReportCriterion):
             result_bool = True
             result_str = ""
             vkr_config = StyleCheckSettings.VKR_CONFIG['any_header']
-            
+
             if (vkr_config['check_presence']):
                 result_bool_check_needed_headers, result_str_check_needed_headers = self.check_needed_headers()
                 result_bool = result_bool and result_bool_check_needed_headers
@@ -159,7 +168,7 @@ class ReportStructureCheck(BaseReportCriterion):
                 result_str += result_str_check_sequence_sections
 
             return answer(result_bool, result_str)
-        
+
         except Exception as e:
             return answer(
                 False,
