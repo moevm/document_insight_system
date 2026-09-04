@@ -44,7 +44,7 @@ BASE_REPORT_CRITERION = [
     ["report_table_percentage_check"],
     ["first_pages_check"],
     ["main_character_check"],
-    ["needed_headers_check"],
+    ["report_structure_check"],
     ["header_check"],
     ["report_section_component"],
     ["main_text_check"],
@@ -54,7 +54,6 @@ BASE_REPORT_CRITERION = [
     ["empty_task_page_check"],
     ["water_in_the_text_check"],
     ["report_task_tracker"],
-    ["report_sequence_sections_check"],
     ["report_abbreviations_check"],
     ["report_was_were_check"],
 ]
