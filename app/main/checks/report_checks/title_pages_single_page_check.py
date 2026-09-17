@@ -20,7 +20,7 @@ class TitlePagesSinglePage(BaseReportCriterion):
 
     def _next_page_has_header_key(self, page_num, header_index):
         first_line = self._get_first_line(page_num + 1)
-        for header in self.headers[header_index + 1:]:
+        for header in self.headers[header_index + 1 :]:
             if header["key"] in first_line:
                 return True
         return False
