@@ -15,7 +15,6 @@ from app.utils import format_check
 results_bp = Blueprint('results', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')
 
-
 def is_equal_username(name1: str, name2: str) -> bool:
     if name1 == name2:
         # direct comparison
@@ -46,6 +45,7 @@ def results_main(_id):
         ):
             # show processing time for user
             avg_process_time = None if check.is_ended else celery_check_methods.get_average_processing_time()
+            check = _prepare_verdicts_for_view(check, current_user.is_admin)
             return render_template(
                 "./results.html",
                 navi_upload=True,
