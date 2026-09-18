@@ -10,11 +10,14 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     _description = ''
     id = 'literature_references'
 
-    def __init__(self, file_info, min_ref=1, max_ref=1000, headers_map=None):
+    def __init__(self, file_info, min_ref=1, max_ref=1000, max_count_domains = 5,headers_map=None):
         super().__init__(file_info)
         self.headers = []
+        self.domain_pattern = r'(?:https?|ftp)?://([^/\s?#]+)'
         self.literature_header = None
         self.literature_reference_text = []
+        self.literature_domains = []
+        self.max_count_domains = max_count_domains
         self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
         if headers_map:
             self.config = headers_map
@@ -74,37 +77,68 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.',  # noqa: E501
             )
 
-        duplicates = self.checking_duplicate_sources()
+        duplicates_ref = self.checking_duplicate_sources(self.literature_reference_text)
+        duplicates_domains = self.checking_duplicate_sources(self.literature_domains, self.max_count_domains)
         references, ref_sequence = self.search_references(start_literature_par)
         all_numbers = set(range(1, number_of_sources + 1))
-        if len(references.symmetric_difference(all_numbers)) == 0:
-            if not self.min_ref <= number_of_sources <= self.max_ref:
-                return answer(
-                    False,
-                    f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть не менее {self.min_ref}.',  # noqa: E501
-                )
-            elif ref_sequence:
-                result_str += f"Источники должны нумероваться в порядке упоминания в тексте. Неправильные последовательности: {'; '.join(num for num in ref_sequence)}"  # noqa: E501
-                return answer(False, result_str)
-            elif not duplicates:
-                return answer(True, "Пройдена!")
-        elif len(references.difference(all_numbers)):
-            if len(all_numbers.difference(references)) == 0:
-                references -= all_numbers
-                result_str += f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(references))} <br> Всего источников: {number_of_sources}<br><br>'  # noqa: E501
-            else:
-                extras = references - all_numbers
-                unnamed = all_numbers - references
-                result_str += f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(extras))} <br> А также упомянуты не все источники: {", ".join(str(num) for num in sorted(unnamed))} <br> Всего источников: {number_of_sources}<br><br>'  # noqa: E501
-        else:
-            all_numbers -= references
-            result_str = f'Упомянуты не все источники из списка.<br>Список источников без упоминания: {", ".join(str(num) for num in sorted(all_numbers))} <br> Всего источников: {number_of_sources}<br><br>'  # noqa: E501
 
-        if duplicates:
+        has_errors = False
+
+        if not self.min_ref <= number_of_sources <= self.max_ref:
+            has_errors = True
+            result_str += f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть не менее {self.min_ref}.'
+
+        if ref_sequence:
+            has_errors = True
+            result_str += f"Источники должны нумероваться в порядке упоминания в тексте. Неправильные последовательности: {'; '.join(num for num in ref_sequence)}"
+
+        if len(references.symmetric_difference(all_numbers)) != 0:
+            has_errors = True
+            if len(references.difference(all_numbers)):
+                if len(all_numbers.difference(references)) == 0:
+                    extras = references - all_numbers
+                    result_str += (f'Упомянуты несуществующие источники: '
+                                   f'{", ".join(str(num) for num in sorted(extras))} <br> '
+                                   f'Всего источников: {number_of_sources}<br><br>')
+                else:
+                    extras = references - all_numbers
+                    unnamed = all_numbers - references
+                    result_str += (f'Упомянуты несуществующие источники: '
+                                   f'{", ".join(str(num) for num in sorted(extras))} <br> '
+                                   f'А также упомянуты не все источники: '
+                                   f'{", ".join(str(num) for num in sorted(unnamed))} <br> '
+                                   f'Всего источников: {number_of_sources}<br><br>')
+            else:
+                unnamed = all_numbers - references
+                result_str += (f'Упомянуты не все источники из списка.<br>'
+                               f'Список источников без упоминания: '
+                               f'{", ".join(str(num) for num in sorted(unnamed))} <br> '
+                               f'Всего источников: {number_of_sources}<br><br>')
+
+        if duplicates_ref:
+            has_errors = True
             message = ''
-            for duplicate in duplicates:
-                message += f'<li>Источники с номерами: {duplicate[1]} ссылаются на один и тот же источник: {duplicate[0]};</li>\n'  # noqa: E501
-            result_str += f'Повторяющиеся источники:<ul>\n{message}</ul>'
+            for duplicate in duplicates_ref:
+                message += f'<li>Источники с номерами: {duplicate[1]} ссылаются на один и тот же источник: {duplicate[0]};</li>\n'
+            result_str += (f'Повторяющиеся источники:'
+                           f'<ul>\n'
+                           f'{message}'
+                           f'</ul>')
+
+        if duplicates_domains:
+            has_errors = True
+            message = ''
+            for duplicate in duplicates_domains:
+                message += f'<li>Источники с номерами: {duplicate[1]} ссылаются на один и тот же домен: {duplicate[0]};</li>\n'
+            result_str += (f'Повторяющиеся домены, максимум на один домен могут ссылаться не более {self.max_count_domains} источников:'
+                           f'<ul>\n'
+                           f'{message}'
+                           f'</ul>')
+
+        if not has_errors:
+            return answer(True, "Пройдена!")
+
+
         result_str += '''
                     Если возникли проблемы, попробуйте сделать следующее:
                     <ul>
@@ -178,23 +212,14 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         array_of_references.add(k)
         return prev_ref
 
-    def checking_duplicate_sources(self) -> list:
-        """Функция нахождения дубликатов в источниках"""
-        counter = Counter([text.lower() for text in self.literature_reference_text])
+    def checking_duplicate_sources(self, sources: list, max_count: int=2) -> list:
+        """Функция нахождения дубликатов в определенных позициях"""
+        domain_to_numbers = {}
 
-        duplicates = []
-        for text, count in counter.items():
-            if count >= 2:
-                positions_duplicates = [
-                    i + 1 for i, text_in_ref in enumerate(self.literature_reference_text) if text == text_in_ref.lower()
-                ]
+        for number, domain in sources:
+            domain_to_numbers.setdefault(domain, []).append(number)
 
-                if positions_duplicates:
-                    duplicates.append(
-                        (self.literature_reference_text[positions_duplicates[0] - 1], positions_duplicates)
-                    )
-
-        return duplicates
+        return [(domain, numbers) for domain, numbers in domain_to_numbers.items() if len(numbers) >= max_count]
 
     def find_start_paragraph(self):
         start_index = 0
@@ -205,6 +230,14 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 break
         return start_index
 
+
+    def add_literature_source(self, text, literature_counter):
+        self.literature_reference_text.append((literature_counter, text))
+    
+        domain_match = re.search(self.domain_pattern, text, re.IGNORECASE)
+        if domain_match and domain_match.group(1):
+            self.literature_domains.append((literature_counter, domain_match.group(1)))
+    
     def count_sources_vkr(self, header):
         literature_counter = 0
         if not len(header["child"]):
@@ -214,7 +247,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 break
             # if re.search(f"дата обращения", child["text"].lower()):
             literature_counter += 1
-            self.literature_reference_text.append(child["text"])
+            self.add_literature_source(child["text"], literature_counter)
+            
         return literature_counter
 
     def count_sources(self):
@@ -238,7 +272,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             for ind in range(first_string + 1, last_string):
                 if re.match(f"{literature_counter + 1}.", one_page[ind]):
                     literature_counter += 1
-                    self.literature_reference_text.append(one_page[ind])
+                    self.add_literature_source(one_page[ind], literature_counter)
+
         return literature_counter
 
     def search_literature_start_pdf(self):
