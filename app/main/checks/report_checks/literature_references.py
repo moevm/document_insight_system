@@ -1,7 +1,8 @@
 import re
+from collections import Counter
 
-from .style_check_settings import StyleCheckSettings
 from ..base_check import BaseReportCriterion, answer
+from .style_check_settings import StyleCheckSettings
 
 
 class ReferencesToLiteratureCheck(BaseReportCriterion):
@@ -28,12 +29,20 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
         self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
         if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
-            self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['min_ref_for_literature_references_check']
-            self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['mах_ref_for_literature_references_check']
+            self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main][
+                'min_ref_for_literature_references_check'
+            ]
+            self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main][
+                'mах_ref_for_literature_references_check'
+            ]
         else:
             if 'any_header' in StyleCheckSettings.CONFIGS.get(self.config):
-                self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['min_ref_for_literature_references_check']
-                self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['mах_ref_for_literature_references_check']
+                self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header'][
+                    'min_ref_for_literature_references_check'
+                ]
+                self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header'][
+                    'mах_ref_for_literature_references_check'
+                ]
 
     def check(self):
         if self.file.page_counter() < 4:
@@ -47,20 +56,26 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             if start_literature_par:
                 number_of_sources = self.count_sources()
             else:
-                return answer(False, f'Нет списка литературы.')
+                return answer(False, 'Нет списка литературы.')
         elif self.file_type['report_type'] == 'VKR':
             self.late_init_vkr()
             header = self.literature_header
             if not header:
-                return answer(False,
-                              f'Не найден Список использованных источников.<br><br>Если в вашей работе есть список источников, проверьте корректность использования стилей.')
+                return answer(
+                    False,
+                    'Не найден Список использованных источников.<br><br>Если в вашей работе есть список источников, проверьте корректность использования стилей.',  # noqa: E501
+                )
             start_literature_par = header["number"]
             number_of_sources = self.count_sources_vkr(header)
         else:
-            return answer(False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев')
+            return answer(
+                False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев'
+            )
         if not number_of_sources:
-            return answer(False,
-                          f'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.')
+            return answer(
+                False,
+                'В Списке использованных источников не найдено ни одного источника.<br><br>Проверьте корректность использования нумированного списка.',  # noqa: E501
+            )
 
         duplicates_ref = self.checking_duplicate_sources(self.literature_reference_text)
         duplicates_domains = self.checking_duplicate_sources(self.literature_domains, self.max_count_domains)
@@ -165,12 +180,17 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         prev_ref = 0
         ref_sequence = []
         array_of_references = set()
+        index_table = -1
         for i in range(0, start_par):
-            paragraph_text = self.file.paragraphs[i] if isinstance(self.file.paragraphs[i], str) else self.file.paragraphs[i].paragraph_text
+            paragraph_text = (
+                self.file.paragraphs[i]
+                if isinstance(self.file.paragraphs[i], str)
+                else self.file.paragraphs[i].paragraph_text
+            )
             match = re.search(r'Таблица ([.\d]+)', paragraph_text)
             table_text = ''
             if match:
-                index_table = int(match.group(1)) - 1
+                index_table += 1  # int(match.group(1)) - 1       # TODO: fix logic
                 table_text = self.get_text_in_table(index_table)
 
             paragraph_text += table_text
@@ -200,7 +220,6 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             domain_to_numbers.setdefault(domain, []).append(number)
 
         return [(domain, numbers) for domain, numbers in domain_to_numbers.items() if len(numbers) >= max_count]
-
 
     def find_start_paragraph(self):
         start_index = 0

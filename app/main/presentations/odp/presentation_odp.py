@@ -1,8 +1,9 @@
-from odf import opendocument, draw
+from odf import draw, opendocument
 
 from app.utils import tict
-from .slide_odp import SlideODP
+
 from ..presentation_basic import PresentationBasic
+from .slide_odp import SlideODP
 
 
 class PresentationODP(PresentationBasic):

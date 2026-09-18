@@ -1,9 +1,13 @@
-from ..base_check import BasePresCriterion, answer
 from utils import name_of_image_check_results
+
+from ..base_check import BasePresCriterion, answer
+
 
 class PresImageCaptureCheck(BasePresCriterion):
     label = "Проверка наличия подписи к рисункам"
-    _description = 'Подписи к рисункам должны содержать слово "Рисунок". Подпись к рисункам на слайдах без текста необязательна'
+    _description = (
+        'Подписи к рисункам должны содержать слово "Рисунок". Подпись к рисункам на слайдах без текста необязательна'
+    )
     id = 'pres_image_capture'
 
     def __init__(self, file_info):
@@ -19,7 +23,13 @@ class PresImageCaptureCheck(BasePresCriterion):
             captions = slide.get_captions()
             if captions:
                 for caption in captions:
-                    body_text = slide.get_text().replace(captions[0][0], '').replace(slide.get_title(), '').replace('<number>', '').replace(' ', '')
+                    body_text = (
+                        slide.get_text()
+                        .replace(captions[0][0], '')
+                        .replace(slide.get_title(), '')
+                        .replace('<number>', '')
+                        .replace(' ', '')
+                    )
                     if body_text.strip() or slide.get_table():
                         all_captions.append(caption[0])
                         if 'Рисунок' not in caption[0]:
@@ -31,11 +41,17 @@ class PresImageCaptureCheck(BasePresCriterion):
             result = False
             result_str += (
                 'Подписи к рисункам на следующих слайдах отсутствуют или не содержат слова "Рисунок": {}'.format(
-                        ', '.join(self.format_page_link(sorted(slides_without_capture)))) + '<br>')
+                    ', '.join(self.format_page_link(sorted(slides_without_capture)))
+                )
+                + '<br>'
+            )
         if slide_with_image_only:
             result_str += (
                 'Подписи к рисункам на следующих слайдах без текста необязательны: {}'.format(
-                        ', '.join(self.format_page_link(sorted(slide_with_image_only)))) + '<br>')
+                    ', '.join(self.format_page_link(sorted(slide_with_image_only)))
+                )
+                + '<br>'
+            )
         if result:
             return answer(True, f'Пройдена! {result_str}')
         else:

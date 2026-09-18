@@ -1,13 +1,15 @@
-from app.utils.get_text_from_slides import get_text_from_slides
 from app.nlp.stemming import Stemming
+from app.utils.get_text_from_slides import get_text_from_slides
+
 from ..base_check import BasePresCriterion, answer, morph
+
 
 class TaskTracker(BasePresCriterion):
     label = "Поиск недопустимых задач"
     _description = 'Не пропускать задачи из серии "доделать, решить, описать"'
     id = 'task_tracker'
 
-    def __init__(self, file_info, goal_and_tasks='Цель и задачи', deny_list=['доделать', 'решить', 'описать']):
+    def __init__(self, file_info, goal_and_tasks='Цель и задачи', deny_list=('доделать', 'решить', 'описать')):
         super().__init__(file_info)
         self.goal_and_tasks = goal_and_tasks
         self.deny_list = [morph.parse(word)[0].normal_form for word in deny_list]
@@ -24,6 +26,8 @@ class TaskTracker(BasePresCriterion):
                 if word in self.deny_list:
                     word_in_docs.append(word)
         if word_in_docs:
-            return answer(False, f'Задачи не должны содержать слова: {self.deny_list}! Обнаруженные слова: {word_in_docs}.')
+            return answer(
+                False, f'Задачи не должны содержать слова: {self.deny_list}! Обнаруженные слова: {word_in_docs}.'
+            )
         else:
             return answer(True, 'Задачи сформулированы корректно!')

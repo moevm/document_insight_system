@@ -1,12 +1,10 @@
 import bson
 from bson import ObjectId
-
-from flask import Blueprint, render_template, Response
+from flask import Blueprint, Response, render_template
 from flask_login import login_required
 
-from app.db import db_methods
+from app.db.methods import file as file_methods
 from app.root_logger import get_root_logger
-
 
 checks = Blueprint('checks', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')
@@ -16,7 +14,7 @@ logger = get_root_logger('web')
 @login_required
 def checks_main(_id):
     try:
-        f = db_methods.get_file_by_check(ObjectId(_id))
+        f = file_methods.get_file_by_check(ObjectId(_id))
     except bson.errors.InvalidId:
         logger.error('_id exception in checks occured:', exc_info=True)
         return render_template("./404.html")

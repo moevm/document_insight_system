@@ -4,18 +4,15 @@ morph = pymorphy3.MorphAnalyzer()
 
 
 def answer(mod, *args):
-    return {
-        'score': float(mod),
-        'verdict': args
-    }
+    return {'score': float(mod), 'verdict': args}
 
 
 class BaseCriterion:
     _description = None
     label = None
     id = None
-    priority = False    # if priority criterion is failed -> check is failed
-    warning = False     # warning priority doesn't effect to result score
+    priority = False  # if priority criterion is failed -> check is failed
+    warning = False  # warning priority doesn't effect to result score
 
     def __init__(self, file_info):
         self.file = file_info.get('file')
@@ -27,11 +24,13 @@ class BaseCriterion:
         raise NotImplementedError()
 
     def format_page_link(self, error):
+        def page(err):
+            return f'{base_pdf_link}#page={str(err)}'
+
         base_pdf_link = f'/get_pdf/{self.pdf_id}'
-        page = lambda err: f'{base_pdf_link}#page={str(err)}'
         return [f'<a href="{page(e)}"target="_blank" rel="noopener">{str(e)}<a>' for e in error]
-    
-    @classmethod    # TODO: criteria can depend on params (from db) 
+
+    @classmethod  # TODO: criteria can depend on params (from db)
     def description(cls, pack: str | None = None):
         return cls._description
 
