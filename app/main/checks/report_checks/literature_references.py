@@ -1,9 +1,7 @@
 import re
-from http.cookiejar import domain_match
 
 from .style_check_settings import StyleCheckSettings
 from ..base_check import BaseReportCriterion, answer
-from collections import Counter
 
 
 class ReferencesToLiteratureCheck(BaseReportCriterion):
@@ -103,6 +101,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                                f'Всего источников: {number_of_sources}<br><br>')
 
         if duplicates_ref:
+            has_errors = True
             message = ''
             for duplicate in duplicates_ref:
                 message += f'<li>Источники с номерами: {duplicate[1]} ссылаются на один и тот же источник: {duplicate[0]};</li>\n'
@@ -112,6 +111,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                            f'</ul>')
 
         if duplicates_domains:
+            has_errors = True
             message = ''
             for duplicate in duplicates_domains:
                 message += f'<li>Источники с номерами: {duplicate[1]} ссылаются на один и тот же домен: {duplicate[0]};</li>\n'
