@@ -68,25 +68,39 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         duplicates_domains = self.checking_duplicate_sources(self.literature_domains, self.max_count_domains)
         references, ref_sequence = self.search_references(start_literature_par)
         all_numbers = set(range(1, number_of_sources + 1))
-        if len(references.symmetric_difference(all_numbers)) == 0:
-            if not self.min_ref <= number_of_sources <= self.max_ref:
-                return answer(False, f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть не менее {self.min_ref}.')
-            elif ref_sequence:
-                result_str += f"Источники должны нумероваться в порядке упоминания в тексте. Неправильные последовательности: {'; '.join(num for num in ref_sequence)}"
-                return answer(False, result_str)
-            elif not duplicates_ref and not duplicates_domains:
-                return answer(True, f"Пройдена!")
-        elif len(references.difference(all_numbers)):
-            if len(all_numbers.difference(references)) == 0:
-                references -= all_numbers
-                result_str += f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(references))} <br> Всего источников: {number_of_sources}<br><br>'
+
+        has_errors = False
+
+        if not self.min_ref <= number_of_sources <= self.max_ref:
+            has_errors = True
+            result_str += f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть не менее {self.min_ref}.'
+
+        if ref_sequence:
+            has_errors = True
+            result_str += f"Источники должны нумероваться в порядке упоминания в тексте. Неправильные последовательности: {'; '.join(num for num in ref_sequence)}"
+
+        if len(references.symmetric_difference(all_numbers)) != 0:
+            has_errors = True
+            if len(references.difference(all_numbers)):
+                if len(all_numbers.difference(references)) == 0:
+                    extras = references - all_numbers
+                    result_str += (f'Упомянуты несуществующие источники: '
+                                   f'{", ".join(str(num) for num in sorted(extras))} <br> '
+                                   f'Всего источников: {number_of_sources}<br><br>')
+                else:
+                    extras = references - all_numbers
+                    unnamed = all_numbers - references
+                    result_str += (f'Упомянуты несуществующие источники: '
+                                   f'{", ".join(str(num) for num in sorted(extras))} <br> '
+                                   f'А также упомянуты не все источники: '
+                                   f'{", ".join(str(num) for num in sorted(unnamed))} <br> '
+                                   f'Всего источников: {number_of_sources}<br><br>')
             else:
-                extras = references - all_numbers
                 unnamed = all_numbers - references
-                result_str += f'Упомянуты несуществующие источники: {", ".join(str(num) for num in sorted(extras))} <br> А также упомянуты не все источники: {", ".join(str(num) for num in sorted(unnamed))} <br> Всего источников: {number_of_sources}<br><br>'
-        else:
-            all_numbers -= references
-            result_str = f'Упомянуты не все источники из списка.<br>Список источников без упоминания: {", ".join(str(num) for num in sorted(all_numbers))} <br> Всего источников: {number_of_sources}<br><br>'
+                result_str += (f'Упомянуты не все источники из списка.<br>'
+                               f'Список источников без упоминания: '
+                               f'{", ".join(str(num) for num in sorted(unnamed))} <br> '
+                               f'Всего источников: {number_of_sources}<br><br>')
 
         if duplicates_ref:
             message = ''
@@ -105,6 +119,10 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                            f'<ul>\n'
                            f'{message}'
                            f'</ul>')
+
+        if not has_errors:
+            return answer(True, "Пройдена!")
+
 
         result_str += '''
                     Если возникли проблемы, попробуйте сделать следующее:
@@ -179,9 +197,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         domain_to_numbers = {}
 
         for number, domain in sources:
-            if domain not in domain_to_numbers:
-                domain_to_numbers[domain] = []
-            domain_to_numbers[domain].append(number)
+            domain_to_numbers.setdefault(domain, []).append(number)
 
         return [(domain, numbers) for domain, numbers in domain_to_numbers.items() if len(numbers) >= max_count]
 
@@ -195,6 +211,14 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 break
         return start_index
 
+
+    def add_literature_source(self, text, literature_counter):
+        self.literature_reference_text.append((literature_counter, text))
+    
+        domain_match = re.search(self.domain_pattern, text, re.IGNORECASE)
+        if domain_match and domain_match.group(1):
+            self.literature_domains.append((literature_counter, domain_match.group(1)))
+    
     def count_sources_vkr(self, header):
         literature_counter = 0
         if not len(header["child"]):
@@ -204,12 +228,8 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                 break
             # if re.search(f"дата обращения", child["text"].lower()):
             literature_counter += 1
-            self.literature_reference_text.append((literature_counter, child["text"]))
-            domain_match = re.search(self.domain_pattern, child["text"], re.IGNORECASE)
-
-            if domain_match and domain_match.group(1):
-                self.literature_domains.append((literature_counter, domain_match.group(1)))
-
+            self.add_literature_source(child["text"], literature_counter)
+            
         return literature_counter
 
     def count_sources(self):
@@ -233,10 +253,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             for ind in range(first_string + 1, last_string):
                 if re.match(f"{literature_counter + 1}.", one_page[ind]):
                     literature_counter += 1
-                    self.literature_reference_text.append((literature_counter, one_page[ind]))
-                    domain_match = re.search(self.domain_pattern, one_page[ind])
-                    if domain_match and domain_match.group(1):
-                        self.literature_domains.append((literature_counter, domain_match.group(1)))
+                    self.add_literature_source(one_page[ind], literature_counter)
 
         return literature_counter
 
