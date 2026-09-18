@@ -158,7 +158,7 @@ class StyleCheckSettings:
         'line_spacing': 1.5,
         'space_before': 0,
         'space_after': 0,
-        'max_problematic_paragraphs': 10
+        'max_problematic_paragraphs': 10,
     }
     # Order of styles may be significant! First level 1, then level 2 and so on.
     LR_CONFIG = {
