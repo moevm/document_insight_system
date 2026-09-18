@@ -49,7 +49,7 @@ import re
 import markdown
 
 from ..document_uploader import DocumentUploader
-from ..pdf_document.pdf_document_manager import PdfDocumentManager
+from ..pdf_document.docling_pdf_manager import DoclingPdfManager
 
 
 class MdUploader(DocumentUploader):
@@ -75,7 +75,7 @@ class MdUploader(DocumentUploader):
 
         from md2pdf.core import md2pdf  # some OS lib err on import. worked / used only in 'worker' service
 
-        self.pdf_file = PdfDocumentManager(self.filepath, md2pdf(self.pdf_filepath, md_file_path=self.filepath))
+        self.pdf_file = DoclingPdfManager(self.filepath, md2pdf(self.pdf_filepath, md_file_path=self.filepath))
 
     def make_paragraphs(self, html_text):
         html_text = html_text.replace("<li>", "").replace("</li>", "").replace("</ol>", "").replace("<ol>", "")

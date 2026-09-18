@@ -33,7 +33,7 @@ services:
     image: dis:worker-image-${IMAGE_VERSION}
     init: true
     restart: always
-    command: celery --app=app.tasks.celery worker -n celery@worker --beat -Q ${CELERY_QUERIES} --loglevel=info
+    command: celery --app=app.tasks.celery worker -n celery@worker --beat -Q ${CELERY_QUERIES} --loglevel=info --concurrency=2
     environment:
       - CELERY_BROKER_URL=${REDIS_URL}
       - CELERY_RESULT_BACKEND=${REDIS_URL}
@@ -45,7 +45,7 @@ services:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     cpuset: ${CONTAINER_CPU:-0-1}
-    mem_limit: ${WORKER_MEMORY:-1G}
+    mem_limit: ${WORKER_MEMORY:-4G}
 
   worker-dashboard:
     image: dis:worker-image-${IMAGE_VERSION}

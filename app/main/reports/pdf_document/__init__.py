@@ -1,3 +1,3 @@
-from .pdf_document_manager import PdfDocumentManager
+from .docling_pdf_manager import DoclingPdfManager
 
-__all__ = ['PdfDocumentManager']
+__all__ = ['DoclingPdfManager']
