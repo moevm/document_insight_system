@@ -2,11 +2,70 @@ import {collect_values_if_possible, hash} from "./general";
 
 import { debounce, isFloat, resetTable, ajaxRequest, onPopState } from "./utils"
 
+import flatpickr from "flatpickr";
+import "flatpickr/dist/flatpickr.min.css";
+
 let $table;
 const AJAX_URL = "/check_list/data";
 const filter_prefix = 'filter_';
 let is_latest = false;
 let debounceInterval = 500;
+
+const FLATPICKR_FIELDS = ['upload-date', 'moodle-date'];
+
+function addClearButton($input, fp) {
+    const $clear = $("<span>", {
+        class: "date-filter-clear",
+        role: "button",
+        tabindex: 0,
+        title: "Очистить фильтр",
+        text: "×"
+    });
+
+    function clearFilter(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        fp.clear();
+    }
+
+    $clear.on("click", clearFilter).on("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+            clearFilter(event);
+        }
+    });
+
+    $input.after($clear);
+}
+
+function initFlatpickrFilters(filters) {
+    FLATPICKR_FIELDS.forEach(function (field) {
+        const $input = $(`.bootstrap-table-filter-control-${field}`);
+        if (!$input.length || $input[0]._flatpickr) {
+            return;
+        }
+
+        const fp = flatpickr($input[0], {
+            mode: 'range',
+            enableTime: true,
+            time_24hr: true,
+            dateFormat: 'd.m.Y H:i',
+            locale: {
+                rangeSeparator: ' - '
+            },
+            allowInput: true,
+            onChange: function () {
+                $table.bootstrapTable('refresh');
+            }
+        });
+
+        addClearButton($input, fp);
+
+        const saved = filters && filters[field];
+        if (saved) {
+            fp.setDate(saved, false);
+        }
+    });
+}
 
 
 String.prototype.insert = function (index, string) {
@@ -115,6 +174,7 @@ function initTable() {
                 $input.val(value)
             }
         }
+        initFlatpickrFilters(params.filter)
     })
 
     // activate bs table
@@ -144,7 +204,8 @@ function queryParams(params) {
     let filters = {}
     $('.filter-control').each(function () {
         const name = $(this).parents("th").data("field")
-        const val = this.querySelector("input").value
+        const input = this.querySelector("input")
+        const val = input ? input.value : ""
         if (val) {
             filters[name] = val
         }
