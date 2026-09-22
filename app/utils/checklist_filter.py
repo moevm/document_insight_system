@@ -67,13 +67,24 @@ def checklist_filter(data, is_admin=False):
     elif f_moodle_date:
         logger.warning("Can't apply moodle-date filter: %s", f_moodle_date)
 
-    f_score = filters.get("score", "")
-    f_score_list = list(filter(lambda val: val, f_score.split("-")))
+    f_score_raw = filters.get("score", "").strip()
+    f_score_list = []
+    if f_score_raw:
+        for part in f_score_raw.split("-"):
+            part = part.strip()
+            if part:
+                f_score_list.append(part)
+
     try:
-        if len(f_score_list) == 1:
+        if len(f_score_list) == 0:
+            pass
+        elif len(f_score_list) == 1:
             filter_query["score"] = float(f_score_list[0])
-        elif len(f_score_list) > 1:
-            filter_query["score"] = {"$gte": float(f_score_list[0]), "$lte": float(f_score_list[1])}
+        else:  # len >= 2
+            filter_query["score"] = {
+                "$gte": float(f_score_list[0]),
+                "$lte": float(f_score_list[1]),
+            }
     except Exception as e:
         logger.warning("Can't apply score filter")
         logger.warning(repr(e))

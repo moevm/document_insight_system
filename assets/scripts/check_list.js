@@ -1,11 +1,12 @@
 import {collect_values_if_possible, hash} from "./general";
 
-import { debounce, isFloat, resetTable, ajaxRequest, onPopState } from "./utils"
+import { debounce, resetTable, ajaxRequest, onPopState } from "./utils"
 
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 
 let $table;
+let debouncedRefresh;
 const AJAX_URL = "/check_list/data";
 const filter_prefix = 'filter_';
 let is_latest = false;
@@ -54,7 +55,7 @@ function initFlatpickrFilters(filters) {
             },
             allowInput: true,
             onChange: function () {
-                $table.bootstrapTable('refresh');
+                debouncedRefresh()
             }
         });
 
@@ -80,38 +81,61 @@ $(() => {
     initTable()
     window.onpopstate = onPopState
 
-    const $dataFilter = $(".bootstrap-table-filter-control-result")
+    const $dataFilter = $(".bootstrap-table-filter-control-score")
     $dataFilter.on("keypress", (e) => {
         const val = $dataFilter.val()
-        const numbers = val.split("-")
+        const dot = e.key === "."
+        const minus = e.key === "-"
+        const digit = e.key >= "0" && e.key <= "9"
 
-        if (e.key === ".") {
-            const carret = $dataFilter[0].selectionStart
-            let expectedStr
-            if (carret <= numbers[0].length) {
-                expectedStr = numbers[0].insert(carret, ".")
-            } else {
-                expectedStr = numbers[1].insert(carret - numbers[0].length - 1, ".")
+        if (digit) return
+
+        if (dot) {
+            const parts = val.split("-")
+            const activePartIndex = (parts.length === 1)
+                ? 0
+                : ($dataFilter[0].selectionStart > val.indexOf("-")) ? 1 : 0
+            const part = parts[activePartIndex]
+            if (part.includes(".")) {
+                e.preventDefault()
             }
-
-            if (isFloat(expectedStr)) {
-                return
-            }
-        }
-
-        if (e.key >= "0" && e.key <= "9") {
             return
         }
 
-        if (e.key === "-") {
-            if (numbers.length === 1) {
-                return
+        if (minus) {
+            const parts = val.split("-")
+            if (parts.length >= 2) {
+                e.preventDefault()
             }
+            return
+        }
+
+        if (e.key === " ") {
+            return
         }
 
         e.preventDefault()
     })
+
+    $dataFilter.on("input", function () {
+        $table.bootstrapTable("refresh")
+    })
 })
+
+function syncFilterControlValues() {
+    const table = $table.data("bootstrap.table")
+    if (!table || !table.options || !table.options.valuesFilterControl.length) {
+        return
+    }
+
+    table.options.valuesFilterControl.forEach((item) => {
+        const $input = $(`.bootstrap-table-filter-control-${item.field}`)
+        if ($input.length) {
+            item.value = $input.val()
+            item.hasFocus = $input.is(":focus")
+        }
+    })
+}
 
 
 function extract_filters(params){
@@ -128,6 +152,9 @@ function extract_filters(params){
 
 function initTable() {
     $table = $("#check-list-table");
+    debouncedRefresh = debounce(function (options) {
+        $table.bootstrapTable("refresh", options)
+    }, debounceInterval)
 
     // get query string
     const queryString = window.location.search;
@@ -176,6 +203,8 @@ function initTable() {
         }
         initFlatpickrFilters(params.filter)
     })
+
+    $table.on("post-header.bs.table", syncFilterControlValues)
 
     // activate bs table
     $table.bootstrapTable({
@@ -301,7 +330,7 @@ function buttons() {
                 if (is_latest === true){
                     query = { query: { latest: is_latest } }
                 }
-                $("#check-list-table").bootstrapTable('refresh', query);
+                debouncedRefresh(query)
             }
         };
     }
