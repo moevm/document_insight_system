@@ -7,6 +7,7 @@ from flask_login import current_user
 logger = logging.getLogger('root_logger')
 FILTER_PREFIX = 'filter_'
 
+
 def _parse_datetime(value):
     value = (value or '').strip()
     if not value:
@@ -18,8 +19,10 @@ def _parse_datetime(value):
             continue
     return None
 
+
 def _is_date_only(value):
     return value.hour == 0 and value.minute == 0 and value.second == 0
+
 
 def _parse_bounds(value, offset):
     dates = [_parse_datetime(part) for part in (value or '').split(" - ")]
@@ -29,8 +32,9 @@ def _parse_bounds(value, offset):
     start = dates[0]
     end = dates[1] if len(dates) > 1 else dates[0]
     end += timedelta(hours=23, minutes=59, seconds=59) if _is_date_only(end) else timedelta(seconds=59)
-    
+
     return start - offset, end - offset
+
 
 def checklist_filter(data, is_admin=False):
     from utils import timezone_offset
