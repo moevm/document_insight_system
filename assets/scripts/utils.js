@@ -1,7 +1,4 @@
 export function debounce(func, timeout) {
-    // Closure state (not `this`): the returned function is invoked as a plain
-    // call (e.g. `debouncedRefresh()`), which is `undefined` under the strict
-    // mode of the webpack bundle and made the previous implementation throw.
     let lastCallTimer = null;
     let lastCallArgs = [];
 
