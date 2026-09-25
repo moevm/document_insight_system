@@ -54,6 +54,8 @@ function initFlatpickrFilters(filters) {
                 rangeSeparator: ' - '
             },
             allowInput: true,
+            defaultHour: 0,
+            defaultMinute: 0,
             onChange: function () {
                 debouncedRefresh()
             }

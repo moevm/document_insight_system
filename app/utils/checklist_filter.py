@@ -20,18 +20,23 @@ def _parse_datetime(value):
     return None
 
 
-def _is_date_only(value):
-    return value.hour == 0 and value.minute == 0 and value.second == 0
+def _end_of_day(value):
+    return value.replace(hour=23, minute=59, second=59, microsecond=0)
 
 
 def _parse_bounds(value, offset):
-    dates = [_parse_datetime(part) for part in (value or '').split(" - ")]
+    parts = [part.strip() for part in (value or '').split(" - ") if part.strip()]
+    dates = [_parse_datetime(part) for part in parts]
     if not dates or any(date is None for date in dates):
         return None
 
     start = dates[0]
-    end = dates[1] if len(dates) > 1 else dates[0]
-    end += timedelta(hours=23, minutes=59, seconds=59) if _is_date_only(end) else timedelta(seconds=59)
+    if len(dates) == 1:
+        end = _end_of_day(start)
+    elif ':' not in parts[1]:
+        end = _end_of_day(dates[1])
+    else:
+        end = dates[1] + timedelta(seconds=59) if dates[1].second == 0 else dates[1]
 
     return start - offset, end - offset
 
