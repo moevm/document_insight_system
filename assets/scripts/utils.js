@@ -1,14 +1,11 @@
 export function debounce(func, timeout) {
+    let lastCallTimer = null;
+    let lastCallArgs = [];
+
     return function perform(...args) {
-        let previousCall = this.lastCall;
-        let currCall = Date.now();
-        this.lastCall = currCall;
-
-        if (previousCall && (currCall - previousCall <= timeout)) {
-            clearTimeout(this.lastCallTimer);
-        }
-
-        this.lastCallTimer = setTimeout(() => func(...args), timeout);
+        lastCallArgs = args;
+        clearTimeout(lastCallTimer);
+        lastCallTimer = setTimeout(() => func(...lastCallArgs), timeout);
     }
 };
 
