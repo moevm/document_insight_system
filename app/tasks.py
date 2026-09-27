@@ -34,6 +34,8 @@ celery = Celery(__name__)
 celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379")
 celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379")
 
+celery.conf.imports = ('app.document_diff.tasks',)
+
 celery.conf.beat_schedule = {
     'passback-grades': {
         'task': 'passback-task',
@@ -124,6 +126,3 @@ def remove_files(filepaths):
     for filepath in filepaths:
         if exists(filepath):
             os.remove(filepath)
-
-
-from app.document_diff.tasks import compare_documents

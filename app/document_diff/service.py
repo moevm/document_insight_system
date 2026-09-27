@@ -10,8 +10,9 @@ from flask_login import current_user
 
 from app.db.methods import document_diff as comparison_methods
 from app.db.methods.check import get_check
+from app.document_diff.tasks import compare_documents
 from app.server_consts import UPLOAD_FOLDER
-from app.tasks import convert_check_file_to_pdf, compare_documents
+from app.tasks import convert_check_file_to_pdf
 from app.utils.check_file import check_file
 
 ALLOWED_EXTENSIONS = {'docx': {'doc', 'docx', 'md', 'odt'}, 'pptx': {'ppt', 'pptx', 'odp'}}

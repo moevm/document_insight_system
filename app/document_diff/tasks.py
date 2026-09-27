@@ -1,16 +1,17 @@
 from os.path import join
 
 from bson import ObjectId
+from celery import shared_task
 
 from app.db.methods import check as check_methods
 from app.db.methods import file as file_methods
 from app.document_diff.docx_diff import compare_docx
 from app.document_diff.pptx_diff import compare_pptx
+from app.tasks import FILES_FOLDER, logger, remove_files
 from app.utils.converter import convert_to
-from app.tasks import FILES_FOLDER, celery, logger, remove_files
 
 
-@celery.task(name='compare_documents', queue='document-diff', bind=True, max_retries=1)
+@shared_task(name='compare_documents', queue='document-diff', bind=True, max_retries=1)
 def compare_documents(self, comparison_id, format_name, first_source, second_source):
     if format_name not in ('docx', 'pptx'):
         raise ValueError('Неизвестный формат сравнения')

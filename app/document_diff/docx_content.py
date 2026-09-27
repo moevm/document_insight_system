@@ -3,8 +3,8 @@ import difflib
 import shutil
 
 import docx
-from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from docx.shared import RGBColor
 from docx.text.paragraph import Paragraph
 
@@ -102,7 +102,7 @@ def build_combined_doc(source_path, paragraphs_b, opcodes, output_path):
             continue
         deleted, inserted = output_paragraphs[start_a:end_a], paragraphs_b[start_b:end_b]
         reference = output_paragraphs[start_a - 1]._p if start_a else None
-        for paragraph_a, paragraph_b in zip(deleted, inserted):
+        for paragraph_a, paragraph_b in zip(deleted, inserted, strict=False):
             reference = _add_changed_pair(body, paragraph_a, paragraph_b, document)
         for paragraph in deleted[len(inserted) :]:
             _mark_entire_paragraph(paragraph, 'delete')

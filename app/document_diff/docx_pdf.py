@@ -89,7 +89,7 @@ def _highlight_paragraphs(pdf, paragraphs, change, page_number):
 
 def _highlight_replace(pdf_a, pdf_b, paragraphs_a, paragraphs_b, page_a, page_b):
     location_a = location_b = None
-    for paragraph_a, paragraph_b in zip(paragraphs_a, paragraphs_b):
+    for paragraph_a, paragraph_b in zip(paragraphs_a, paragraphs_b, strict=False):
         words_a, words_b = _word_diff(paragraph_a.text, paragraph_b.text)
         for chunk in _changed_chunks(words_a):
             found, page_a = highlight_words(pdf_a, chunk, 'delete', page_a)

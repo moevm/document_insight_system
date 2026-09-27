@@ -15,6 +15,7 @@ from routes.check_list import check_list
 from routes.checks import checks
 from routes.criterion_pack import criterion_pack
 from routes.criterion_packs import criterion_packs
+from routes.document_diff import document_diff
 from routes.get_csv import get_csv
 from routes.get_last_check_results import get_last_check_results
 from routes.get_pdf import get_pdf
@@ -23,8 +24,6 @@ from routes.login import login
 from routes.logs import logs
 from routes.lti import lti
 from routes.profile import profile
-from routes.document_diff import document_diff
-
 from routes.recheck import recheck
 from routes.results import results_bp
 from routes.tasks import tasks

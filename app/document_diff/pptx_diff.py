@@ -41,7 +41,7 @@ def _render_pdfs(path_a, path_b, folder, comparison_id):
 def _mark_unmatched(item, presentations, dimensions, folder, comparison_id, stats):
     status, side = item['status'], 'a' if item['status'] == 'deleted' else 'b'
     index = item[f'slide_{side}']
-    presentation = presentations[0 if side == 'a' else 1]
+    presentations[0 if side == 'a' else 1]
     width, height = dimensions[0 if side == 'a' else 1]
     draw_highlights(
         _slide_path(folder, comparison_id, side, index),
@@ -95,7 +95,7 @@ def _save_preview_pdf(mapping, folder, comparison_id):
             page_column_height = max(column_heights)
             page = output.new_page(width=PAGE_WIDTH, height=max(MIN_PAGE_HEIGHT, page_column_height + 2 * IMAGE_MARGIN))
             offsets = (PAGE_MARGIN, PAGE_MARGIN + COLUMN_WIDTH + PAGE_MARGIN)
-            for offset, path, column_height in zip(offsets, paths, column_heights):
+            for offset, path, column_height in zip(offsets, paths, column_heights, strict=False):
                 if path and os.path.exists(path):
                     page.insert_image(
                         fitz.Rect(offset, IMAGE_MARGIN, offset + COLUMN_WIDTH, IMAGE_MARGIN + column_height),
