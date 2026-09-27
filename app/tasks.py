@@ -125,4 +125,5 @@ def remove_files(filepaths):
         if exists(filepath):
             os.remove(filepath)
 
+
 from app.document_diff.tasks import compare_documents

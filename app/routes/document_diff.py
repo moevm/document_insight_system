@@ -16,7 +16,12 @@ def _protected(view):
 
 
 def _file_url(comparison_id, filename, download=False):
-    return url_for('document_diff.document_diff_file', comparison_id=comparison_id, filename=filename, download='1' if download else None)
+    return url_for(
+        'document_diff.document_diff_file',
+        comparison_id=comparison_id,
+        filename=filename,
+        download='1' if download else None,
+    )
 
 
 def _result_data(comparison_id, meta):
@@ -33,7 +38,19 @@ def _result_data(comparison_id, meta):
 
 
 def _render_result(comparison_id, meta):
-    return render_template('document_diff.html', navi_upload=True, fmt=meta['fmt'], data=_result_data(comparison_id, meta), stats=meta.get('stats'), first_filename=meta['first_filename'], second_filename=meta['second_filename'], first_pdf_url=_file_url(comparison_id, f'{comparison_id}_1_hl.pdf'), second_pdf_url=_file_url(comparison_id, f'{comparison_id}_2_hl.pdf'), diff_docx_url=_file_url(comparison_id, f'{comparison_id}_diff.docx', True), pdf_url=_file_url(comparison_id, f'{comparison_id}_diff_highlighted.pdf', True))
+    return render_template(
+        'document_diff.html',
+        navi_upload=True,
+        fmt=meta['fmt'],
+        data=_result_data(comparison_id, meta),
+        stats=meta.get('stats'),
+        first_filename=meta['first_filename'],
+        second_filename=meta['second_filename'],
+        first_pdf_url=_file_url(comparison_id, f'{comparison_id}_1_hl.pdf'),
+        second_pdf_url=_file_url(comparison_id, f'{comparison_id}_2_hl.pdf'),
+        diff_docx_url=_file_url(comparison_id, f'{comparison_id}_diff.docx', True),
+        pdf_url=_file_url(comparison_id, f'{comparison_id}_diff_highlighted.pdf', True),
+    )
 
 
 @document_diff.route('/')
@@ -76,11 +93,20 @@ def document_diff_result(comparison_id):
     meta = read_meta(comparison_id)
     task = AsyncResult(meta['task_id'])
     if not task.ready():
-        return render_template('document_diff.html', navi_upload=True, pending=True, comparison_id=comparison_id, first_filename=meta['first_filename'], second_filename=meta['second_filename'])
+        return render_template(
+            'document_diff.html',
+            navi_upload=True,
+            pending=True,
+            comparison_id=comparison_id,
+            first_filename=meta['first_filename'],
+            second_filename=meta['second_filename'],
+        )
     if task.failed():
         record_id = meta.get('comparison_record_id') or meta.get('comparison_id')
         comparison_methods.update_comparison(ObjectId(record_id), {'status': 'error', 'error': str(task.result)})
-        return render_template('document_diff_select.html', navi_upload=True, fmt=meta['fmt'], error=str(task.result)), 500
+        return render_template(
+            'document_diff_select.html', navi_upload=True, fmt=meta['fmt'], error=str(task.result)
+        ), 500
     meta.update(task.result)
     write_meta(comparison_id, meta)
     record_id = meta.get('comparison_record_id') or meta.get('comparison_id')
@@ -92,19 +118,34 @@ def document_diff_result(comparison_id):
 @_protected
 def document_diff_status(comparison_id):
     task = AsyncResult(read_meta(comparison_id)['task_id'])
-    return jsonify({'status': 'pending' if not task.ready() else ('error' if task.failed() else 'done'), 'error': str(task.result) if task.failed() else None})
+    return jsonify(
+        {
+            'status': 'pending' if not task.ready() else ('error' if task.failed() else 'done'),
+            'error': str(task.result) if task.failed() else None,
+        }
+    )
 
 
 @document_diff.route('/file/<string:comparison_id>/<path:filename>')
 @_protected
 def document_diff_file(comparison_id, filename):
     meta = read_meta(comparison_id)
-    allowed = {f'{comparison_id}_1_hl.pdf', f'{comparison_id}_2_hl.pdf', f'{comparison_id}_diff.docx'} if meta['fmt'] == 'docx' else {f'{comparison_id}_diff_highlighted.pdf'}
+    allowed = (
+        {f'{comparison_id}_1_hl.pdf', f'{comparison_id}_2_hl.pdf', f'{comparison_id}_diff.docx'}
+        if meta['fmt'] == 'docx'
+        else {f'{comparison_id}_diff_highlighted.pdf'}
+    )
     for item in meta.get('mapping', []):
-        allowed.update(f'{comparison_id}_{side}_slide_{item[field]}.png' for field, side in (('slide_a', 'a'), ('slide_b', 'b')) if item.get(field) is not None)
+        allowed.update(
+            f'{comparison_id}_{side}_slide_{item[field]}.png'
+            for field, side in (('slide_a', 'a'), ('slide_b', 'b'))
+            if item.get(field) is not None
+        )
     if filename not in allowed:
         abort(404)
-    return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=request.args.get('download') == '1', download_name=filename)
+    return send_from_directory(
+        UPLOAD_FOLDER, filename, as_attachment=request.args.get('download') == '1', download_name=filename
+    )
 
 
 @document_diff.route('/<string:first_id>/<string:second_id>')

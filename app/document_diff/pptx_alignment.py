@@ -4,7 +4,8 @@ import re
 from PIL import Image
 
 TEXT_WEIGHT = 0.65
-VISUAL_WEIGHT = 1- TEXT_WEIGHT
+VISUAL_WEIGHT = 1 - TEXT_WEIGHT
+
 
 def dhash(image, hash_size=8):
     resampling = getattr(Image, 'Resampling', Image).LANCZOS
@@ -54,7 +55,11 @@ def align_slides(slides_a, slides_b, minimum_similarity=0.5):
     for row in range(1, rows + 1):
         for column in range(1, columns + 1):
             matched = scores[row - 1][column - 1] + similarity[row - 1][column - 1]
-            scores[row][column] = max(scores[row - 1][column], scores[row][column - 1], matched if similarity[row - 1][column - 1] >= minimum_similarity else -1)
+            scores[row][column] = max(
+                scores[row - 1][column],
+                scores[row][column - 1],
+                matched if similarity[row - 1][column - 1] >= minimum_similarity else -1,
+            )
     aligned, row, column = [], rows, columns
     while row and column:
         value = similarity[row - 1][column - 1]

@@ -26,10 +26,16 @@ def shapes(slide, height):
     for index, shape in enumerate(slide.shapes):
         if _is_footer(shape, height) or (not shape.has_text_frame and not shape.shape_type):
             continue
-        result.append({
-            'index': index, 'text': shape.text.strip() if shape.has_text_frame else '',
-            'left': shape.left.pt, 'top': shape.top.pt, 'width': shape.width.pt, 'height': shape.height.pt,
-        })
+        result.append(
+            {
+                'index': index,
+                'text': shape.text.strip() if shape.has_text_frame else '',
+                'left': shape.left.pt,
+                'top': shape.top.pt,
+                'width': shape.width.pt,
+                'height': shape.height.pt,
+            }
+        )
     return result
 
 

@@ -52,7 +52,9 @@ def _uploaded_source(side, comparison_id, format_name, uploaded_file):
     if '.' not in uploaded_file.filename:
         raise ValueError('У файла должно быть расширение')
     extension = uploaded_file.filename.rsplit('.', 1)[-1].lower()
-    if extension not in ALLOWED_EXTENSIONS[format_name] or check_file(uploaded_file, extension, ALLOWED_EXTENSIONS[format_name], check_mime=extension != 'md'):
+    if extension not in ALLOWED_EXTENSIONS[format_name] or check_file(
+        uploaded_file, extension, ALLOWED_EXTENSIONS[format_name], check_mime=extension != 'md'
+    ):
         raise ValueError('Выбран неподдерживаемый формат файла')
     number = 1 if side == 'first' else 2
     uploaded_file.save(join(UPLOAD_FOLDER, f'{comparison_id}_{number}.{extension}'))
@@ -76,7 +78,9 @@ def _start_task(comparison_id, format_name, sources):
     for number, source in enumerate(sources, 1):
         if source.get('pdf_id'):
             path = join(UPLOAD_FOLDER, f'{comparison_id}_{number}.{source["extension"]}')
-            conversions.append(convert_check_file_to_pdf.s({'filename': source['filename'], 'conv_pdf_fs_id': source['pdf_id']}, path))
+            conversions.append(
+                convert_check_file_to_pdf.s({'filename': source['filename'], 'conv_pdf_fs_id': source['pdf_id']}, path)
+            )
     callback = compare_documents.si(comparison_id, format_name, *sources)
     return chord(conversions)(callback) if conversions else callback.delay()
 
@@ -85,16 +89,27 @@ def create_comparison(format_name, form=None, files=None):
     comparison_id = uuid.uuid4().hex
     sources = [source_for(side, comparison_id, format_name, form, files) for side in ('first', 'second')]
     task = _start_task(comparison_id, format_name, sources)
-    comparison_record_id = comparison_methods.add_comparison({
-        'comparison_id': comparison_id, 'username': current_user.username, 'format': format_name,
-        'first_source': sources[0], 'second_source': sources[1], 'task_id': task.id, 'status': 'pending', 'created_at': time.time(),
-    })
-    write_meta(comparison_id, {
-        'username': current_user.username,
-        'fmt': format_name,
-        'first_filename': sources[0]['filename'],
-        'second_filename': sources[1]['filename'],
-        'task_id': task.id,
-        'comparison_record_id': str(comparison_record_id),
-    })
+    comparison_record_id = comparison_methods.add_comparison(
+        {
+            'comparison_id': comparison_id,
+            'username': current_user.username,
+            'format': format_name,
+            'first_source': sources[0],
+            'second_source': sources[1],
+            'task_id': task.id,
+            'status': 'pending',
+            'created_at': time.time(),
+        }
+    )
+    write_meta(
+        comparison_id,
+        {
+            'username': current_user.username,
+            'fmt': format_name,
+            'first_filename': sources[0]['filename'],
+            'second_filename': sources[1]['filename'],
+            'task_id': task.id,
+            'comparison_record_id': str(comparison_record_id),
+        },
+    )
     return comparison_id

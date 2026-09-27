@@ -32,7 +32,9 @@ def compare_documents(self, comparison_id, format_name, first_source, second_sou
                 temporary_paths.append(path)
             if format_name == 'docx':
                 pdf_id = check.conv_pdf_fs_id if check_id else source['pdf_id']
-                file_methods.write_file_from_db_file(ObjectId(pdf_id), join(FILES_FOLDER, f'{comparison_id}_{number}_hl.pdf'))
+                file_methods.write_file_from_db_file(
+                    ObjectId(pdf_id), join(FILES_FOLDER, f'{comparison_id}_{number}_hl.pdf')
+                )
             documents.append(path)
         compare = compare_docx if format_name == 'docx' else compare_pptx
         return compare(*documents, comparison_id)

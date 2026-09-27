@@ -110,11 +110,9 @@ def collect_fragments(pdf_a, pdf_b, paragraphs_a, paragraphs_b, opcodes):
         elif tag == 'insert':
             location_b, page_b = _highlight_paragraphs(pdf_b, inserted, 'insert', page_b)
         else:
-            location_a, location_b, page_a, page_b = _highlight_replace(
-                pdf_a, pdf_b, deleted, inserted, page_a, page_b
-            )
-            extra_a, page_a = _highlight_paragraphs(pdf_a, deleted[len(inserted):], 'delete', page_a)
-            extra_b, page_b = _highlight_paragraphs(pdf_b, inserted[len(deleted):], 'insert', page_b)
+            location_a, location_b, page_a, page_b = _highlight_replace(pdf_a, pdf_b, deleted, inserted, page_a, page_b)
+            extra_a, page_a = _highlight_paragraphs(pdf_a, deleted[len(inserted) :], 'delete', page_a)
+            extra_b, page_b = _highlight_paragraphs(pdf_b, inserted[len(deleted) :], 'insert', page_b)
             location_a, location_b = location_a or extra_a, location_b or extra_b
         fragments.append({'id': number, 'tag': tag, 'doc1': location_a, 'doc2': location_b})
     return fragments

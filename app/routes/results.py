@@ -15,6 +15,7 @@ from app.utils import format_check
 results_bp = Blueprint('results', __name__, template_folder='templates', static_folder='static')
 logger = get_root_logger('web')
 
+
 def is_equal_username(name1: str, name2: str) -> bool:
     if name1 == name2:
         # direct comparison

@@ -43,7 +43,12 @@ def _mark_unmatched(item, presentations, dimensions, folder, comparison_id, stat
     index = item[f'slide_{side}']
     presentation = presentations[0 if side == 'a' else 1]
     width, height = dimensions[0 if side == 'a' else 1]
-    draw_highlights(_slide_path(folder, comparison_id, side, index), [{'left': 0, 'top': 0, 'width': width, 'height': height, 'type': status}], width, height)
+    draw_highlights(
+        _slide_path(folder, comparison_id, side, index),
+        [{'left': 0, 'top': 0, 'width': width, 'height': height, 'type': status}],
+        width,
+        height,
+    )
     item['status_label'] = status
     stats[status] += 1
 
@@ -71,7 +76,9 @@ def _save_preview_pdf(mapping, folder, comparison_id):
     try:
         for item in mapping:
             paths = [
-                _slide_path(folder, comparison_id, side, item[f'slide_{side}']) if item[f'slide_{side}'] is not None else None
+                _slide_path(folder, comparison_id, side, item[f'slide_{side}'])
+                if item[f'slide_{side}'] is not None
+                else None
                 for side in ('a', 'b')
             ]
             existing = [path for path in paths if path and os.path.exists(path)]

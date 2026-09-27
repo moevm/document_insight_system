@@ -12,7 +12,12 @@ def comparison_filter(data, format_name):
     query = checklist_filter(data, is_admin=True)
     query['file_type.type'] = 'report' if format_name == 'docx' else 'pres'
     _add_student_filter(query, data.get('filter_student', '').strip())
-    _add_id_and_date_filter(query, data.get('filter_id', '').strip(), data.get('filter_date_from', '').strip(), data.get('filter_date_to', '').strip())
+    _add_id_and_date_filter(
+        query,
+        data.get('filter_id', '').strip(),
+        data.get('filter_date_from', '').strip(),
+        data.get('filter_date_to', '').strip(),
+    )
     _add_score_filter(query, data.get('filter_score_from', '').strip(), data.get('filter_score_to', '').strip())
     return query
 
@@ -20,7 +25,12 @@ def comparison_filter(data, format_name):
 def _add_student_filter(query, student):
     if not student:
         return
-    users, _ = get_user_cursor(filter={'$or': [{'name': {'$regex': student, '$options': 'i'}}, {'username': {'$regex': student, '$options': 'i'}}]}, limit=0)
+    users, _ = get_user_cursor(
+        filter={
+            '$or': [{'name': {'$regex': student, '$options': 'i'}}, {'username': {'$regex': student, '$options': 'i'}}]
+        },
+        limit=0,
+    )
     query['user'] = {'$in': [user['username'] for user in users]}
 
 
@@ -73,5 +83,10 @@ def document_row(check):
 def student_suggestions(value):
     if len(value) < 2:
         return []
-    users, _ = get_user_cursor(filter={'$or': [{'name': {'$regex': value, '$options': 'i'}}, {'username': {'$regex': value, '$options': 'i'}}]}, limit=10)
+    users, _ = get_user_cursor(
+        filter={
+            '$or': [{'name': {'$regex': value, '$options': 'i'}}, {'username': {'$regex': value, '$options': 'i'}}]
+        },
+        limit=10,
+    )
     return list(dict.fromkeys(user.get('name') or user['username'] for user in users))
