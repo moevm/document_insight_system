@@ -45,6 +45,8 @@ celery.conf.timezone = 'Europe/Moscow'  # todo: get from env
 
 @worker_ready.connect
 def at_start(sender, **k):
+    if sender.hostname.startswith('document-diff@'):
+        return
 
     from nltk import download
 
@@ -122,3 +124,5 @@ def remove_files(filepaths):
     for filepath in filepaths:
         if exists(filepath):
             os.remove(filepath)
+
+from app.document_diff.tasks import compare_documents

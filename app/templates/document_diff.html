@@ -5,45 +5,133 @@
 {% block main %}
     <div class="holder" id="document_diff_holder">
         <h3 id="results_title" class="texteous ins" style="text-align: center;">
-            Проверка на заимствования
+            {% if pending %}
+                <i>Производится сравнение документов, страница перезагрузится автоматически.</i>
+            {% else %}
+                Сравнение документов
+            {% endif %}
         </h3>
+        {% if pending %}
+            <table class="dataframe" id="stats_table" width="100%">
+                <thead>
+                <tr>
+                    <th>Документ №1</th>
+                    <th>Документ №2</th>
+                    <th>Статус</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ first_filename }}</td>
+                    <td>{{ second_filename }}</td>
+                    <td>Выполняется</td>
+                </tr>
+                </tbody>
+            </table>
+        {% else %}
 
-        <div class="pdf_compare_container">
-            <div class="pdf_block">
-                <h5 class="title">Документ студента</h5>
-                <div class="pdf_controls">
-                    <button class="btn" id="student-prev-page"><i class="bi bi-arrow-left"></i></button>
-                    <button class="btn" id="student-next-page"><i class="bi bi-arrow-right"></i></button>
-                    <span class="page-info">
-                        Страница <span id="student-page-num"></span> из <span id="student-page-count"></span>
-                    </span>
-                    <a href="{{ student_pdf_url }}" id="student-pdf-download" class="hidden"></a>
-                </div>
-                <div class="pdf_canvas_frame" id="student-canvas-frame">
-                    <canvas id="student-canvas" style="direction:ltr;"></canvas>
-                </div>
+        {% if fmt == 'pptx' and stats %}
+            <div class="diff_stats">
+                {% if stats.modified %}<span class="diff_chip chip_modified">Изменено: {{ stats.modified }}</span>{% endif %}
+                {% if stats.added %}<span class="diff_chip chip_added">Добавлено: {{ stats.added }}</span>{% endif %}
+                {% if stats.deleted %}<span class="diff_chip chip_deleted">Удалено: {{ stats.deleted }}</span>{% endif %}
+                {% if stats.shift %}<span class="diff_chip chip_shift">Сдвиги: {{ stats.shift }}</span>{% endif %}
             </div>
+            <div class="diff_legend">
+                <span><i class="dot dot_added"></i>Добавлено</span>
+                <span><i class="dot dot_deleted"></i>Удалено</span>
+                <span><i class="dot dot_modified"></i>Изменённый текст</span>
+                <span><i class="dot dot_position"></i>Сдвиг</span>
+            </div>
+        {% elif fmt == 'docx' %}
+            <div class="diff_legend">
+                <span><i class="dot dot_deleted"></i>Удалено</span>
+                <span><i class="dot dot_added"></i>Добавлено</span>
+            </div>
+        {% endif %}
 
-            <div class="pdf_block">
-                <h5 class="title">Документ для сравнения</h5>
-                <div class="pdf_controls">
-                    <button class="btn" id="source-prev-page"><i class="bi bi-arrow-left"></i></button>
-                    <button class="btn" id="source-next-page"><i class="bi bi-arrow-right"></i></button>
-                    <span class="page-info">
-                        Страница <span id="source-page-num"></span> из <span id="source-page-count"></span>
-                    </span>
-                    <a href="{{ source_pdf_url }}" id="source-pdf-download" class="hidden"></a>
-                </div>
-                <div class="pdf_canvas_frame" id="source-canvas-frame">
-                    <canvas id="source-canvas" style="direction:ltr;"></canvas>
-                </div>
-            </div>
+        {% if fmt == 'docx' %}
+        <div class="pdf_controls flex-wrap">
+            <button class="btn btn-secondary" id="previous-difference" title="Предыдущее отличие" type="button"><i class="bi bi-arrow-left"></i></button>
+            <span class="page-info" id="difference-info"></span>
+            <button class="btn btn-secondary" id="next-difference" title="Следующее отличие" type="button"><i class="bi bi-arrow-right"></i></button>
+            <a class="btn btn-primary" href="{{ diff_docx_url }}" download>Скачать DOCX с изменениями</a>
+            <a class="btn btn-secondary" href="{{ url_for('document_diff.document_diff_select_page') }}">Новое сравнение</a>
         </div>
+        {% else %}
+        <div class="pdf_controls flex-wrap">
+            <button class="btn btn-secondary" id="previous-difference" title="Предыдущее отличие" type="button"><i class="bi bi-arrow-left"></i></button>
+            <span class="page-info" id="difference-info"></span>
+            <button class="btn btn-secondary" id="next-difference" title="Следующее отличие" type="button"><i class="bi bi-arrow-right"></i></button>
+            {% if pdf_url %}<a class="btn btn-primary" href="{{ pdf_url }}" download>Скачать PDF с подсветкой</a>{% endif %}
+            <a class="btn btn-secondary" href="{{ url_for('document_diff.document_diff_select_page') }}">Новое сравнение</a>
+        </div>
+        {% endif %}
+
+        {% if fmt == 'docx' %}
+            <div class="pdf_compare_container">
+                {% for side, filename, doc_pdf in [('student', first_filename, first_pdf_url),
+                                                   ('source', second_filename, second_pdf_url)] %}
+                    <div class="pdf_block">
+                        <h5 class="title">{{ filename }}</h5>
+                        <div class="pdf_controls flex-wrap">
+                            <button class="btn btn-secondary" id="{{ side }}-prev-page" type="button"><i class="bi bi-arrow-left"></i></button>
+                            <button class="btn btn-secondary" id="{{ side }}-next-page" type="button"><i class="bi bi-arrow-right"></i></button>
+                            <span class="page-info">
+                                Страница <input id="{{ side }}-page-input" type="number" min="1" class="page-input"> из <span id="{{ side }}-page-count"></span>
+                            </span>
+                            <a href="{{ doc_pdf }}" id="{{ side }}-pdf-download" class="hidden"></a>
+                        </div>
+                        <div class="pdf_canvas_frame" id="{{ side }}-canvas-frame">
+                            <canvas id="{{ side }}-canvas" style="direction:ltr;"></canvas>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="pdf_compare_container">
+                {% for side, filename in [('a', first_filename), ('b', second_filename)] %}
+                    <div class="pdf_block">
+                        <h5 class="title">{{ filename }}</h5>
+                        <div class="pdf_controls flex-wrap">
+                            <button class="btn btn-secondary" id="slide-{{ side }}-prev" type="button"><i class="bi bi-arrow-left"></i></button>
+                            <span class="page-info">
+                                Слайд <input id="slide-{{ side }}-page-input" type="number" min="1" class="page-input"> из <span id="slide-{{ side }}-page-count"></span>
+                            </span>
+                            <button class="btn btn-secondary" id="slide-{{ side }}-next" type="button"><i class="bi bi-arrow-right"></i></button>
+                        </div>
+                        <div class="pdf_canvas_frame slide_frame">
+                            <img id="slide-img-{{ side }}" alt="">
+                            <span class="slide_empty d-none" id="slide-empty-{{ side }}"></span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% endif %}
     </div>
 {% endblock %}
+
 {% block script %}
+{% if pending %}
 <script>
-    const fragments = {{ fragments|tojson|safe }};
+    (function poll() {
+        fetch("{{ url_for('document_diff.document_diff_status', comparison_id=comparison_id) }}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'pending') {
+                    setTimeout(poll, 10000);
+                } else {
+                    window.location.href = "{{ url_for('document_diff.document_diff_result', comparison_id=comparison_id) }}";
+                }
+            })
+            .catch(() => setTimeout(poll, 10000));
+    }());
 </script>
+{% else %}
+<script>
+    window.diffData = {{ data|tojson }};
+</script>
+{% endif %}
 <script src="{{ url_for('static', filename='document_diff.js') }}"></script>
 {% endblock script %}
