@@ -5,7 +5,6 @@ from docx.oxml.ns import nsmap, qn
 
 from ..base_check import BaseReportCriterion, answer
 
-
 REL_NS = nsmap['r']
 REL_HYPERLINK = f'{REL_NS}/hyperlink'
 REL_HEADER = f'{REL_NS}/header'
@@ -21,7 +20,8 @@ ACTIVE_MD_SCHEMES = ('http://', 'https://', 'ftp://', 'mailto:')
 
 class ReportHyperlinksCheck(BaseReportCriterion):
     label = "Проверка наличия активных гиперссылок во всей работе"
-    _description = "В работе не должно быть активных (внешних) гиперссылок - ни в тексте, ни в таблицах, ни в колонтитулах, ни в сносках, ни на изображениях"
+    _description = "В работе не должно быть активных (внешних) гиперссылок -" + \
+        " ни в тексте, ни в таблицах, ни в колонтитулах, ни в сносках, ни на изображениях"
     id = 'hyperlinks_check'
     warning = True
 
@@ -38,7 +38,7 @@ class ReportHyperlinksCheck(BaseReportCriterion):
         except Exception as e:
             return answer(False, f"Ошибка при проверке гиперссылок: {e}")
 
-        if not links: # len(links) == 0
+        if not links:  # len(links) == 0
             return answer(True, "Проверка на гиперссылки пройдена")
         return answer(False, self._forming_response(links))
 
