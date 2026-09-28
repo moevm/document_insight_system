@@ -3,11 +3,16 @@ import re
 
 from PIL import Image
 
-TEXT_WEIGHT = 0.65
-VISUAL_WEIGHT = 1 - TEXT_WEIGHT
+from app.document_diff.config import (
+    PPTX_ALIGNMENT_FLOAT_TOLERANCE,
+    PPTX_DHASH_SIZE,
+    PPTX_MIN_SLIDE_SIMILARITY,
+    PPTX_SLIDE_TEXT_WEIGHT,
+    PPTX_SLIDE_VISUAL_WEIGHT,
+)
 
 
-def dhash(image, hash_size=8):
+def dhash(image, hash_size=PPTX_DHASH_SIZE):
     resampling = getattr(Image, 'Resampling', Image).LANCZOS
     pixels = list(image.convert('L').resize((hash_size + 1, hash_size), resampling).getdata())
     value = 0
@@ -42,13 +47,16 @@ def _slide_similarity(slides_a, slides_b):
     for slide_a in slides_a:
         row = []
         for slide_b in slides_b:
-            visual = 1 - (slide_a['dhash'] ^ slide_b['dhash']).bit_count() / 64
-            row.append(TEXT_WEIGHT * text_similarity(slide_a['text'], slide_b['text']) + VISUAL_WEIGHT * max(0, visual))
+            visual = 1 - (slide_a['dhash'] ^ slide_b['dhash']).bit_count() / (PPTX_DHASH_SIZE**2)
+            row.append(
+                PPTX_SLIDE_TEXT_WEIGHT * text_similarity(slide_a['text'], slide_b['text'])
+                + PPTX_SLIDE_VISUAL_WEIGHT * max(0, visual)
+            )
         result.append(row)
     return result
 
 
-def align_slides(slides_a, slides_b, minimum_similarity=0.5):
+def align_slides(slides_a, slides_b, minimum_similarity=PPTX_MIN_SLIDE_SIMILARITY):
     rows, columns = len(slides_a), len(slides_b)
     similarity = _slide_similarity(slides_a, slides_b)
     scores = [[0.0] * (columns + 1) for _ in range(rows + 1)]
@@ -63,10 +71,11 @@ def align_slides(slides_a, slides_b, minimum_similarity=0.5):
     aligned, row, column = [], rows, columns
     while row and column:
         value = similarity[row - 1][column - 1]
-        if value >= minimum_similarity and abs(scores[row][column] - scores[row - 1][column - 1] - value) < 1e-5:
+        is_match = abs(scores[row][column] - scores[row - 1][column - 1] - value) < PPTX_ALIGNMENT_FLOAT_TOLERANCE
+        if value >= minimum_similarity and is_match:
             aligned.append((row - 1, column - 1))
             row, column = row - 1, column - 1
-        elif abs(scores[row][column] - scores[row - 1][column]) < 1e-5:
+        elif abs(scores[row][column] - scores[row - 1][column]) < PPTX_ALIGNMENT_FLOAT_TOLERANCE:
             row -= 1
         else:
             column -= 1

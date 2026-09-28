@@ -4,14 +4,16 @@ import pymupdf as fitz
 from PIL import Image
 from pptx import Presentation
 
+from app.document_diff.config import (
+    PPTX_PREVIEW_COLUMN_WIDTH,
+    PPTX_PREVIEW_IMAGE_MARGIN,
+    PPTX_PREVIEW_MIN_PAGE_HEIGHT,
+    PPTX_PREVIEW_PAGE_MARGIN,
+    PPTX_PREVIEW_PAGE_WIDTH,
+    PPTX_RENDER_DPI,
+)
 from app.document_diff.pptx_alignment import align_slides, dhash
 from app.document_diff.pptx_render import draw_highlights, slide_changes
-
-PAGE_WIDTH = 1600
-COLUMN_WIDTH = 750
-PAGE_MARGIN = 50
-IMAGE_MARGIN = 40
-MIN_PAGE_HEIGHT = 520
 
 
 def _slide_path(folder, comparison_id, side, index):
@@ -22,7 +24,7 @@ def _render_slides(pdf, folder, comparison_id, side):
     slides = []
     for index, page in enumerate(pdf):
         path = _slide_path(folder, comparison_id, side, index)
-        page.get_pixmap(dpi=120).save(path)
+        page.get_pixmap(dpi=PPTX_RENDER_DPI).save(path)
         with Image.open(path) as image:
             slides.append({'index': index, 'text': page.get_text(), 'dhash': dhash(image)})
     return slides
@@ -88,16 +90,27 @@ def _save_preview_pdf(mapping, folder, comparison_id):
                 if path and os.path.exists(path):
                     with Image.open(path) as image:
                         width, height = image.size
-                    column_heights.append(int(COLUMN_WIDTH * height / width))
+                    column_heights.append(int(PPTX_PREVIEW_COLUMN_WIDTH * height / width))
                 else:
                     column_heights.append(0)
             page_column_height = max(column_heights)
-            page = output.new_page(width=PAGE_WIDTH, height=max(MIN_PAGE_HEIGHT, page_column_height + 2 * IMAGE_MARGIN))
-            offsets = (PAGE_MARGIN, PAGE_MARGIN + COLUMN_WIDTH + PAGE_MARGIN)
+            page = output.new_page(
+                width=PPTX_PREVIEW_PAGE_WIDTH,
+                height=max(PPTX_PREVIEW_MIN_PAGE_HEIGHT, page_column_height + 2 * PPTX_PREVIEW_IMAGE_MARGIN),
+            )
+            offsets = (
+                PPTX_PREVIEW_PAGE_MARGIN,
+                PPTX_PREVIEW_PAGE_MARGIN + PPTX_PREVIEW_COLUMN_WIDTH + PPTX_PREVIEW_PAGE_MARGIN,
+            )
             for offset, path, column_height in zip(offsets, paths, column_heights, strict=False):
                 if path and os.path.exists(path):
                     page.insert_image(
-                        fitz.Rect(offset, IMAGE_MARGIN, offset + COLUMN_WIDTH, IMAGE_MARGIN + column_height),
+                        fitz.Rect(
+                            offset,
+                            PPTX_PREVIEW_IMAGE_MARGIN,
+                            offset + PPTX_PREVIEW_COLUMN_WIDTH,
+                            PPTX_PREVIEW_IMAGE_MARGIN + column_height,
+                        ),
                         filename=path,
                     )
         output.save(os.path.join(folder, f'{comparison_id}_diff_highlighted.pdf'))

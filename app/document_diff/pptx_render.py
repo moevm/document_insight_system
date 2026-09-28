@@ -3,22 +3,33 @@ import os
 from PIL import Image, ImageDraw
 from pptx.enum.shapes import PP_PLACEHOLDER
 
+from app.document_diff.config import (
+    PPTX_EXACT_TEXT_SIMILARITY,
+    PPTX_FOOTER_MAX_TEXT_LENGTH,
+    PPTX_FOOTER_START_RATIO,
+    PPTX_HIGHLIGHT_BORDER_WIDTH,
+    PPTX_HIGHLIGHT_COLORS,
+    PPTX_HIGHLIGHT_PADDING,
+    PPTX_MIN_SHAPE_MATCH_SCORE,
+    PPTX_PARTIAL_MATCH_MAX_DISTANCE,
+    PPTX_PARTIAL_TEXT_SIMILARITY,
+    PPTX_POSITION_TOLERANCE,
+    PPTX_SHAPE_DISTANCE_NORMALIZER,
+    PPTX_SHAPE_DISTANCE_WEIGHT,
+    PPTX_SHAPE_TEXT_WEIGHT,
+)
 from app.document_diff.pptx_alignment import normalize_text, text_similarity
-
-COLORS = {
-    'position': {'fill': (33, 150, 243, 60), 'border': (33, 150, 243, 255)},
-    'modified': {'fill': (255, 152, 0, 60), 'border': (255, 152, 0, 255)},
-    'added': {'fill': (76, 175, 80, 60), 'border': (76, 175, 80, 255)},
-    'deleted': {'fill': (244, 67, 54, 60), 'border': (244, 67, 54, 255)},
-}
-POSITION_TOLERANCE = 0.005
 
 
 def _is_footer(shape, height):
     placeholders = (PP_PLACEHOLDER.SLIDE_NUMBER, PP_PLACEHOLDER.FOOTER, PP_PLACEHOLDER.HEADER, PP_PLACEHOLDER.DATE)
     if shape.is_placeholder and shape.placeholder_format.type in placeholders:
         return True
-    return shape.has_text_frame and shape.top.pt > height * 0.88 and len(shape.text.strip()) < 30
+    return (
+        shape.has_text_frame
+        and shape.top.pt > height * PPTX_FOOTER_START_RATIO
+        and len(shape.text.strip()) < PPTX_FOOTER_MAX_TEXT_LENGTH
+    )
 
 
 def shapes(slide, height):
@@ -46,10 +57,14 @@ def match_shapes(shapes_a, shapes_b):
         for shape_b in remaining_b:
             distance = ((shape_a['left'] - shape_b['left']) ** 2 + (shape_a['top'] - shape_b['top']) ** 2) ** 0.5
             similarity = text_similarity(shape_a['text'], shape_b['text'])
-            score = 0.7 * similarity + 0.3 * max(0, 1 - distance / 200)
-            if similarity >= 0.4 or (similarity > 0.15 and distance < 40):
+            score = PPTX_SHAPE_TEXT_WEIGHT * similarity + PPTX_SHAPE_DISTANCE_WEIGHT * max(
+                0, 1 - distance / PPTX_SHAPE_DISTANCE_NORMALIZER
+            )
+            if similarity >= PPTX_EXACT_TEXT_SIMILARITY or (
+                similarity > PPTX_PARTIAL_TEXT_SIMILARITY and distance < PPTX_PARTIAL_MATCH_MAX_DISTANCE
+            ):
                 candidates.append((score, shape_b))
-        if candidates and max(candidates, key=lambda item: item[0])[0] > 0.45:
+        if candidates and max(candidates, key=lambda item: item[0])[0] > PPTX_MIN_SHAPE_MATCH_SCORE:
             _, shape_b = max(candidates, key=lambda item: item[0])
             matched.append((shape_a, shape_b))
             remaining_a.remove(shape_a)
@@ -65,11 +80,14 @@ def draw_highlights(path, highlights, width, height):
     overlay = Image.new('RGBA', image.size, (255, 255, 255, 0))
     drawing = ImageDraw.Draw(overlay)
     for item in highlights:
-        x0, y0 = item['left'] / width * image.width - 2, item['top'] / height * image.height - 2
-        x1 = (item['left'] + item['width']) / width * image.width + 2
-        y1 = (item['top'] + item['height']) / height * image.height + 2
-        color = COLORS[item['type']]
-        drawing.rectangle((x0, y0, x1, y1), fill=color['fill'], outline=color['border'], width=3)
+        x0 = item['left'] / width * image.width - PPTX_HIGHLIGHT_PADDING
+        y0 = item['top'] / height * image.height - PPTX_HIGHLIGHT_PADDING
+        x1 = (item['left'] + item['width']) / width * image.width + PPTX_HIGHLIGHT_PADDING
+        y1 = (item['top'] + item['height']) / height * image.height + PPTX_HIGHLIGHT_PADDING
+        color = PPTX_HIGHLIGHT_COLORS[item['type']]
+        drawing.rectangle(
+            (x0, y0, x1, y1), fill=color['fill'], outline=color['border'], width=PPTX_HIGHLIGHT_BORDER_WIDTH
+        )
     Image.alpha_composite(image, overlay).convert('RGB').save(path)
     image.close()
     overlay.close()
@@ -79,8 +97,8 @@ def _position_changed(shape_a, shape_b, dimensions_a, dimensions_b):
     width_a, height_a = dimensions_a
     width_b, height_b = dimensions_b
     return (
-        abs(shape_a['left'] / width_a - shape_b['left'] / width_b) > POSITION_TOLERANCE
-        or abs(shape_a['top'] / height_a - shape_b['top'] / height_b) > POSITION_TOLERANCE
+        abs(shape_a['left'] / width_a - shape_b['left'] / width_b) > PPTX_POSITION_TOLERANCE
+        or abs(shape_a['top'] / height_a - shape_b['top'] / height_b) > PPTX_POSITION_TOLERANCE
     )
 
 

@@ -1,11 +1,15 @@
 import difflib
 import os
 
-PALE_RED = (248 / 255, 215 / 255, 218 / 255)
-PALE_GREEN = (214 / 255, 245 / 255, 214 / 255)
-RED = (220 / 255, 53 / 255, 69 / 255)
-GREEN = (0 / 255, 200 / 255, 0 / 255)
-MAX_PHRASE_LENGTH = 40
+from app.document_diff.config import (
+    DOCX_DELETED_HIGHLIGHT_COLOR,
+    DOCX_DELETED_MARK_COLOR,
+    DOCX_FALLBACK_PHRASE_WORD_COUNT,
+    DOCX_HIGHLIGHT_OPACITY,
+    DOCX_INSERTED_HIGHLIGHT_COLOR,
+    DOCX_INSERTED_MARK_COLOR,
+    DOCX_MAX_PHRASE_LENGTH,
+)
 
 
 def _word_diff(text_a, text_b):
@@ -29,7 +33,7 @@ def _changed_chunks(words):
         yield chunk
 
 
-def _phrases(words, maximum_length=MAX_PHRASE_LENGTH):
+def _phrases(words, maximum_length=DOCX_MAX_PHRASE_LENGTH):
     phrase, length = [], 0
     for word in words:
         if phrase and length + len(word) + 1 > maximum_length:
@@ -52,23 +56,24 @@ def _find(pdf, phrase, start_page):
 
 def _annotate(page, rectangle, change):
     highlight = page.add_highlight_annot(rectangle)
-    highlight.set_colors(stroke=PALE_RED if change == 'delete' else PALE_GREEN)
-    highlight.set_opacity(0.6)
+    highlight.set_colors(stroke=DOCX_DELETED_HIGHLIGHT_COLOR if change == 'delete' else DOCX_INSERTED_HIGHLIGHT_COLOR)
+    highlight.set_opacity(DOCX_HIGHLIGHT_OPACITY)
     highlight.update()
     if change == 'delete':
         strikeout = page.add_strikeout_annot(rectangle)
-        strikeout.set_colors(stroke=RED)
+        strikeout.set_colors(stroke=DOCX_DELETED_MARK_COLOR)
         strikeout.update()
     else:
         underline = page.add_underline_annot(rectangle)
-        underline.set_colors(stroke=GREEN)
+        underline.set_colors(stroke=DOCX_INSERTED_MARK_COLOR)
         underline.update()
 
 
 def highlight_words(pdf, words, change, start_page=0):
     location, page_number = None, start_page
     for phrase in _phrases(words):
-        found = _find(pdf, phrase, page_number) or _find(pdf, ' '.join(phrase.split()[:3]), page_number)
+        fallback_phrase = ' '.join(phrase.split()[:DOCX_FALLBACK_PHRASE_WORD_COUNT])
+        found = _find(pdf, phrase, page_number) or _find(pdf, fallback_phrase, page_number)
         if found is None:
             continue
         page, page_number, rectangles = found
