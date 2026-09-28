@@ -1,10 +1,7 @@
-import json
 import time
-import uuid
 from os.path import join
 
 from bson import ObjectId
-from celery import chord
 from flask import abort, request
 from flask_login import current_user
 
@@ -12,27 +9,33 @@ from app.db.methods import document_diff as comparison_methods
 from app.db.methods.check import get_check
 from app.document_diff.tasks import compare_documents
 from app.server_consts import UPLOAD_FOLDER
-from app.tasks import convert_check_file_to_pdf
 from app.utils.check_file import check_file
 
 ALLOWED_EXTENSIONS = {'docx': {'doc', 'docx', 'md', 'odt'}, 'pptx': {'ppt', 'pptx', 'odp'}}
 
 
-def meta_path(comparison_id):
-    return join(UPLOAD_FOLDER, f'{comparison_id}.json')
-
-
 def read_meta(comparison_id):
     try:
-        with open(meta_path(comparison_id), encoding='utf-8') as file:
-            return json.load(file)
-    except (FileNotFoundError, ValueError):
+        meta = comparison_methods.get_comparison(ObjectId(comparison_id))
+    except Exception:
         abort(404)
+    if meta is None:
+        abort(404)
+    return meta
 
 
 def write_meta(comparison_id, meta):
-    with open(meta_path(comparison_id), 'w', encoding='utf-8') as file:
-        json.dump(meta, file)
+    comparison_record_id = meta.get('_id')
+    if comparison_record_id is None:
+        try:
+            comparison = comparison_methods.get_comparison(ObjectId(comparison_id))
+        except Exception:
+            abort(404)
+        if comparison is None:
+            abort(404)
+        comparison_record_id = comparison['_id']
+    values = {key: value for key, value in meta.items() if key != '_id'}
+    comparison_methods.update_comparison(comparison_record_id, values)
 
 
 def _system_source(document_id, format_name):
@@ -59,7 +62,7 @@ def _uploaded_source(side, comparison_id, format_name, uploaded_file):
         raise ValueError('Выбран неподдерживаемый формат файла')
     number = 1 if side == 'first' else 2
     uploaded_file.save(join(UPLOAD_FOLDER, f'{comparison_id}_{number}.{extension}'))
-    return {'extension': extension, 'filename': uploaded_file.filename, 'pdf_id': str(ObjectId())}
+    return {'extension': extension, 'filename': uploaded_file.filename}
 
 
 def source_for(side, comparison_id, format_name, form=None, files=None):
@@ -75,42 +78,28 @@ def source_for(side, comparison_id, format_name, form=None, files=None):
 
 
 def _start_task(comparison_id, format_name, sources):
-    conversions = []
-    for number, source in enumerate(sources, 1):
-        if source.get('pdf_id'):
-            path = join(UPLOAD_FOLDER, f'{comparison_id}_{number}.{source["extension"]}')
-            conversions.append(
-                convert_check_file_to_pdf.s({'filename': source['filename'], 'conv_pdf_fs_id': source['pdf_id']}, path)
-            )
-    callback = compare_documents.si(comparison_id, format_name, *sources)
-    return chord(conversions)(callback) if conversions else callback.delay()
+    return compare_documents.delay(comparison_id, format_name, *sources)
 
 
 def create_comparison(format_name, form=None, files=None):
-    comparison_id = uuid.uuid4().hex
+    comparison_record_id = ObjectId()
+    comparison_id = str(comparison_record_id)
     sources = [source_for(side, comparison_id, format_name, form, files) for side in ('first', 'second')]
-    task = _start_task(comparison_id, format_name, sources)
-    comparison_record_id = comparison_methods.add_comparison(
+    comparison_methods.add_comparison(
         {
-            'comparison_id': comparison_id,
+            '_id': comparison_record_id,
             'username': current_user.username,
             'format': format_name,
+            'fmt': format_name,
             'first_source': sources[0],
             'second_source': sources[1],
-            'task_id': task.id,
+            'first_filename': sources[0]['filename'],
+            'second_filename': sources[1]['filename'],
+            'task_id': None,
             'status': 'pending',
             'created_at': time.time(),
         }
     )
-    write_meta(
-        comparison_id,
-        {
-            'username': current_user.username,
-            'fmt': format_name,
-            'first_filename': sources[0]['filename'],
-            'second_filename': sources[1]['filename'],
-            'task_id': task.id,
-            'comparison_record_id': str(comparison_record_id),
-        },
-    )
+    task = _start_task(comparison_id, format_name, sources)
+    comparison_methods.update_comparison(comparison_record_id, {'task_id': task.id})
     return comparison_id

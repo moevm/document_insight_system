@@ -6,7 +6,6 @@ from pptx import Presentation
 
 from app.document_diff.pptx_alignment import align_slides, dhash
 from app.document_diff.pptx_render import draw_highlights, slide_changes
-from app.utils.converter import convert_to
 
 PAGE_WIDTH = 1600
 COLUMN_WIDTH = 750
@@ -107,8 +106,6 @@ def _save_preview_pdf(mapping, folder, comparison_id):
 
 
 def compare_pptx(path_a, path_b, comparison_id):
-    if convert_to(path_a) is None or convert_to(path_b) is None:
-        raise ValueError('Не удалось преобразовать презентацию в PDF')
     folder = os.path.dirname(path_a)
     slides_a, slides_b = _render_pdfs(path_a, path_b, folder, comparison_id)
     presentations = Presentation(path_a), Presentation(path_b)

@@ -1,6 +1,8 @@
+import fcntl
 import logging.config
 import os
 from configparser import ConfigParser
+from contextlib import contextmanager
 from os.path import dirname, exists, join
 
 from celery import Celery
@@ -29,6 +31,17 @@ if os.path.isfile(log_conf):
 logger = get_root_logger('tasks')
 
 FILES_FOLDER = '/usr/src/project/files'
+LIBREOFFICE_LOCK_PATH = join(FILES_FOLDER, '.libreoffice.lock')
+
+
+@contextmanager
+def libreoffice_lock():
+    with open(LIBREOFFICE_LOCK_PATH, 'w', encoding='utf-8') as lock_file:
+        fcntl.flock(lock_file, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lock_file, fcntl.LOCK_UN)
 
 celery = Celery(__name__)
 celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379")
@@ -107,7 +120,8 @@ def convert_check_file_to_pdf(self, check_obj, filepath, rewrite=False):
     try:
         filename = check_obj['filename']
         pdf_id = check_obj['conv_pdf_fs_id']
-        file_methods.write_pdf(filename, filepath, pdf_id, rewrite=rewrite)
+        with libreoffice_lock():
+            file_methods.write_pdf(filename, filepath, pdf_id, rewrite=rewrite)
         return check_obj
     except Exception as e:
         logger.error(

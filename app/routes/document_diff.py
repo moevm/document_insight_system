@@ -1,11 +1,14 @@
+from io import BytesIO
+
 from bson import ObjectId
 from celery.result import AsyncResult
-from flask import Blueprint, abort, jsonify, redirect, render_template, request, send_from_directory, url_for
+from flask import Blueprint, abort, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 
 from app.db.methods import document_diff as comparison_methods
+from app.db.methods import file as file_methods
 from app.document_diff.selection import documents, student_suggestions
-from app.document_diff.service import ALLOWED_EXTENSIONS, UPLOAD_FOLDER, create_comparison, read_meta, write_meta
+from app.document_diff.service import ALLOWED_EXTENSIONS, create_comparison, read_meta, write_meta
 from app.routes.admin import admin_required
 
 document_diff = Blueprint('document_diff', __name__, template_folder='templates', static_folder='static')
@@ -102,15 +105,13 @@ def document_diff_result(comparison_id):
             second_filename=meta['second_filename'],
         )
     if task.failed():
-        record_id = meta.get('comparison_record_id') or meta.get('comparison_id')
-        comparison_methods.update_comparison(ObjectId(record_id), {'status': 'error', 'error': str(task.result)})
+        comparison_methods.update_comparison(meta['_id'], {'status': 'error', 'error': str(task.result)})
         return render_template(
             'document_diff_select.html', navi_upload=True, fmt=meta['fmt'], error=str(task.result)
         ), 500
     meta.update(task.result)
     write_meta(comparison_id, meta)
-    record_id = meta.get('comparison_record_id') or meta.get('comparison_id')
-    comparison_methods.update_comparison(ObjectId(record_id), {'status': 'done', 'result': task.result})
+    comparison_methods.update_comparison(meta['_id'], {'status': 'done', 'result': task.result})
     return _render_result(comparison_id, meta)
 
 
@@ -143,8 +144,18 @@ def document_diff_file(comparison_id, filename):
         )
     if filename not in allowed:
         abort(404)
-    return send_from_directory(
-        UPLOAD_FOLDER, filename, as_attachment=request.args.get('download') == '1', download_name=filename
+    file_id = meta.get('files', {}).get(filename)
+    if file_id is None:
+        abort(404)
+    db_file = file_methods.get_file_by_check(ObjectId(file_id))
+    if db_file is None:
+        abort(404)
+    content = db_file.read()
+    db_file.close()
+    return send_file(
+        BytesIO(content),
+        as_attachment=request.args.get('download') == '1',
+        download_name=filename,
     )
 
 
