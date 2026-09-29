@@ -31,6 +31,7 @@ BASE_REPORT_CRITERION = [
     ["banned_words_in_literature"],
     ["page_counter"],
     ["image_share_check"],
+    ["count_images_check"],
     ["headers_at_page_top_check", {"headers": ["Приложение А Исходный код программы"]}],
     ["headers_at_page_top_check"],
     ["lr_sections_check"],
