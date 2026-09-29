@@ -56,6 +56,7 @@ BASE_REPORT_CRITERION = [
     ["report_task_tracker"],
     ["report_abbreviations_check"],
     ["report_was_were_check"],
+    ["appendix_reference_check"],
 ]
 
 DEFAULT_TYPE = 'pres'
