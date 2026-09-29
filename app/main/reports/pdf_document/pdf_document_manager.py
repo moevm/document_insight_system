@@ -43,6 +43,22 @@ class PdfDocumentManager:
                     total_height += image_height
         return total_height
 
+    def page_images_count(self, page_without_pril: int) -> int:
+        """Возвращяет кол-во изображение без учета 'Приложение'"""
+        images_count = 0
+        pages_count = min(page_without_pril, self.page_count_all)
+        for page_num in range(pages_count):
+            page = self.pdf_file[page_num]
+            image_xrefs = set()
+            for image in self.pdf_file.get_page_images(page_num, full=True):
+                if image[1]:
+                    continue
+                image_xrefs.add(image[0])
+            for xref in image_xrefs:
+                # get_image_rects возвращает все места размещения изображения на странице
+                images_count += len(page.get_image_rects(xref))
+        return images_count
+
     def page_height(self, page_without_pril):
         page = self.pdf_file[0]  # get first page as a sample
         page_rect = page.rect
