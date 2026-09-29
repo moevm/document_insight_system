@@ -53,6 +53,7 @@ BASE_REPORT_CRITERION = [
     ["theme_in_report_check"],
     ["empty_task_page_check"],
     ["water_in_the_text_check"],
+    ["hyperlinks_check"],
     ["report_task_tracker"],
     ["report_abbreviations_check"],
     ["report_was_were_check"],
