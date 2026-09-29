@@ -23,6 +23,8 @@ from routes.login import login
 from routes.logs import logs
 from routes.lti import lti
 from routes.profile import profile
+from routes.anti_plagiarism import anti_plagiarism
+
 from routes.recheck import recheck
 from routes.results import results_bp
 from routes.tasks import tasks
@@ -73,6 +75,7 @@ app.register_blueprint(get_last_check_results, url_prefix='/get_last_check_resul
 app.register_blueprint(version, url_prefix='/version')
 app.register_blueprint(capacity, url_prefix='/capacity')
 app.register_blueprint(profile, url_prefix='/profile')
+app.register_blueprint(anti_plagiarism, url_prefix='/anti_plagiarism')
 
 app.logger.propagate = True
 login_manager = LoginManager()

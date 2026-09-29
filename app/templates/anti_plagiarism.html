@@ -1,0 +1,49 @@
+{% extends "root.html" %}
+
+{% block title %}Сравнение документов{% endblock %}
+
+{% block main %}
+    <div class="holder" id="anti_plagiarism_holder">
+        <h3 id="results_title" class="texteous ins" style="text-align: center;">
+            Проверка на заимствования
+        </h3>
+
+        <div class="pdf_compare_container">
+            <div class="pdf_block">
+                <h5 class="title">Документ студента</h5>
+                <div class="pdf_controls">
+                    <button class="btn" id="student-prev-page"><i class="bi bi-arrow-left"></i></button>
+                    <button class="btn" id="student-next-page"><i class="bi bi-arrow-right"></i></button>
+                    <span class="page-info">
+                        Страница <span id="student-page-num"></span> из <span id="student-page-count"></span>
+                    </span>
+                    <a href="{{ student_pdf_url }}" id="student-pdf-download" class="hidden"></a>
+                </div>
+                <div class="pdf_canvas_frame" id="student-canvas-frame">
+                    <canvas id="student-canvas" style="direction:ltr;"></canvas>
+                </div>
+            </div>
+
+            <div class="pdf_block">
+                <h5 class="title">Документ для сравнения</h5>
+                <div class="pdf_controls">
+                    <button class="btn" id="source-prev-page"><i class="bi bi-arrow-left"></i></button>
+                    <button class="btn" id="source-next-page"><i class="bi bi-arrow-right"></i></button>
+                    <span class="page-info">
+                        Страница <span id="source-page-num"></span> из <span id="source-page-count"></span>
+                    </span>
+                    <a href="{{ source_pdf_url }}" id="source-pdf-download" class="hidden"></a>
+                </div>
+                <div class="pdf_canvas_frame" id="source-canvas-frame">
+                    <canvas id="source-canvas" style="direction:ltr;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+<script>
+    const fragments = {{ fragments|tojson|safe }};
+</script>
+<script src="{{ url_for('static', filename='anti_plagiarism.js') }}"></script>
+{% endblock script %}
