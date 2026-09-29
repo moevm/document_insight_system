@@ -127,14 +127,14 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
 
     def search_references_in_text(self, text: str, prev_ref, array_of_references, ref_sequence) -> int:
         """Функция поиска ссылок в переданном тексте"""
-        reg_exp = r'\[[\^]{0,1}[\d \-,]+\]'
+        reg_exp = r'\[[\^]{0,1}[\d \-,–]+\]'
         detected_references = re.findall(reg_exp, text)
         if detected_references:
             for reference_raw in detected_references:
                 reference = reference_raw.replace('^', '')  # TODO: kostyl'...
                 for one_part in re.split(r'[\[\],]', reference):
-                    if re.match(r'\d+[ \-]+\d+', one_part):
-                        start, end = re.split(r'[ -]+', one_part)
+                    if re.match(r'\d+[ \-–]+\d+', one_part):
+                        start, end = re.split(r'[ -–]+', one_part)
                         for k in range(int(start), int(end) + 1):
                             prev_ref = self.add_references(k, prev_ref, array_of_references, ref_sequence)
                     elif one_part != '':
