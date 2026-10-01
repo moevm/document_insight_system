@@ -5,10 +5,30 @@ from collections import defaultdict
 class DecimalPlacesCheck:
     DECIMAL_PATTERN = r'\b\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?\b'
 
+    EXCLUSION_PATTERNS = [
+        r'https?://\S+',
+        r'doi\.org/\S+',
+        r'DOI:\s*\S+',
+        r'ГОСТ\s*[А-Яа-я]?\s*[\d]+(?:[.\-]\S+)*',
+    ]
+
     def __init__(self, file_info, max_decimal_places=2, max_violations=3):
         self.file_type = file_info['file_type']['type']
         self.max_decimal_places = max_decimal_places
         self.max_violations = max_violations
+
+    def _get_exclusion_zones(self, text):
+        zones = []
+        for pattern in self.EXCLUSION_PATTERNS:
+            for match in re.finditer(pattern, text, re.IGNORECASE):
+                zones.append((match.start(), match.end()))
+        return zones
+
+    def _is_in_exclusion_zone(self, match, zones):
+        for zone_start, zone_end in zones:
+            if match.start() >= zone_start and match.end() <= zone_end:
+                return True
+        return False
 
     def is_valid_number(self, match, text):
         start_pos = match.start()
@@ -37,9 +57,13 @@ class DecimalPlacesCheck:
 
     def find_violations_in_text(self, text):
         violations = []
+        exclusion_zones = self._get_exclusion_zones(text)
         matches = re.finditer(self.DECIMAL_PATTERN, text)
 
         for match in matches:
+            if self._is_in_exclusion_zone(match, exclusion_zones):
+                continue
+
             if not self.is_valid_number(match, text):
                 continue
 
