@@ -1,0 +1,6 @@
+services:
+  report-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile_reports_tests
+    command: pytest tests/reports -v
