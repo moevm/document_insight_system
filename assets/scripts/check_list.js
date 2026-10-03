@@ -85,30 +85,33 @@ $(() => {
 
     const $dataFilter = $(".bootstrap-table-filter-control-score")
     $dataFilter.on("keypress", (e) => {
-        const val = $dataFilter.val()
-        const dot = e.key === "."
-        const minus = e.key === "-"
-        const digit = e.key >= "0" && e.key <= "9"
-
-        if (digit) return
-
-        if (dot) {
-            const parts = val.split("-")
-            const activePartIndex = (parts.length === 1)
-                ? 0
-                : ($dataFilter[0].selectionStart > val.indexOf("-")) ? 1 : 0
-            const part = parts[activePartIndex]
-            if (part.includes(".")) {
-                e.preventDefault()
-            }
+        if (e.key.length > 1) {
             return
         }
 
-        if (minus) {
-            const parts = val.split("-")
-            if (parts.length >= 2) {
-                e.preventDefault()
+        if (e.key >= "0" && e.key <= "9") {
+            return
+        }
+
+        const val = $dataFilter.val()
+        const pos = $dataFilter[0].selectionStart
+        const beforeCursor = val.slice(0, pos)
+
+        if (e.key === "." || e.key === ",") {
+            const currentNumber = beforeCursor.split(/[\s-]/).pop()
+            if (!currentNumber.includes(".") && !currentNumber.includes(",")) {
+                return
             }
+            e.preventDefault()
+            return
+        }
+
+        if (e.key === "-") {
+            const prev = beforeCursor.slice(-1)
+            if (beforeCursor === "" || prev === " " || (prev >= "0" && prev <= "9")) {
+                return
+            }
+            e.preventDefault()
             return
         }
 

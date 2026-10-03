@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import datetime, timedelta
 
 from bson import ObjectId
@@ -6,6 +7,10 @@ from flask_login import current_user
 
 logger = logging.getLogger('root_logger')
 FILTER_PREFIX = 'filter_'
+
+_SCORE_NUMBER = r"[+-]?\d+(?:[.,]\d+)?"
+_SCORE_SINGLE_RE = re.compile(rf"^\s*({_SCORE_NUMBER})\s*$")
+_SCORE_RANGE_RE = re.compile(rf"^\s*({_SCORE_NUMBER})\s*-\s*({_SCORE_NUMBER})\s*$")
 
 
 def _parse_datetime(value):
@@ -39,6 +44,29 @@ def _parse_bounds(value, offset):
         end = dates[1] + timedelta(seconds=59) if dates[1].second == 0 else dates[1]
 
     return start - offset, end - offset
+
+
+def _to_score(number):
+    return float(number.replace(",", "."))
+
+
+def _parse_score_bounds(value):
+    value = (value or "").strip()
+    if not value:
+        return None
+
+    range_match = _SCORE_RANGE_RE.match(value)
+    if range_match:
+        low, high = (_to_score(number) for number in range_match.groups())
+        if low > high:
+            low, high = high, low
+        return {"$gte": low, "$lte": high}
+
+    single_match = _SCORE_SINGLE_RE.match(value)
+    if single_match:
+        return _to_score(single_match.group(1))
+
+    return None
 
 
 def checklist_filter(data, is_admin=False):
@@ -77,26 +105,12 @@ def checklist_filter(data, is_admin=False):
         logger.warning("Can't apply moodle-date filter: %s", f_moodle_date)
 
     f_score_raw = filters.get("score", "").strip()
-    f_score_list = []
     if f_score_raw:
-        for part in f_score_raw.split("-"):
-            part = part.strip()
-            if part:
-                f_score_list.append(part)
-
-    try:
-        if len(f_score_list) == 0:
-            pass
-        elif len(f_score_list) == 1:
-            filter_query["score"] = float(f_score_list[0])
-        else:  # len >= 2
-            filter_query["score"] = {
-                "$gte": float(f_score_list[0]),
-                "$lte": float(f_score_list[1]),
-            }
-    except Exception as e:
-        logger.warning("Can't apply score filter")
-        logger.warning(repr(e))
+        score_bounds = _parse_score_bounds(f_score_raw)
+        if score_bounds is not None:
+            filter_query["score"] = score_bounds
+        else:
+            logger.warning("Can't apply score filter: %s", f_score_raw)
 
     # set user filter for current non-admin user
     if not (is_admin or current_user.is_admin):
