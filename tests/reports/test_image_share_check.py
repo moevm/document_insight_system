@@ -1,9 +1,10 @@
 from unittest.mock import MagicMock
+
 from app.main.checks.report_checks.image_share_check import ReportImageShareCheck
 from tests.util.report_file_utils import create_report_file_info
 
-class TestReportImageShareCheck:
 
+class TestReportImageShareCheck:
     def test_01_valid_share(self, reports_fixture_dir):
         file_info = create_report_file_info(reports_fixture_dir / "image_share_check" / "valid.md")
         checker = ReportImageShareCheck(file_info, limit=0.5)

@@ -1,7 +1,8 @@
-import pytest
 import sys
 import types
 from pathlib import Path
+
+import pytest
 
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
@@ -26,6 +27,7 @@ if _is_reports_test_run():
             f"{prefix}.report_checks",
             project_root / "app" / "main" / "checks" / "report_checks",
         )
+
 
 @pytest.fixture
 def reports_fixture_dir():

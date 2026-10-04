@@ -1,8 +1,8 @@
 from app.main.checks.report_checks.sw_section_size import SWSectionSizeCheck
 from tests.util import create_report_file_info
 
-class TestSWSectionSizeCheck:
 
+class TestSWSectionSizeCheck:
     def test_01_valid_section_size(selfs, reports_fixture_dir):
         report_path = reports_fixture_dir / "sw_section_size" / "valid.md"
         checker = SWSectionSizeCheck(create_report_file_info(report_path), "SW_KEY_QUESTIONS_SECTIONS")
@@ -13,7 +13,7 @@ class TestSWSectionSizeCheck:
 
     def test_02_extra_words_count(selfs, reports_fixture_dir):
         report_path = reports_fixture_dir / "sw_section_size" / "extra_words.md"
-        checker = SWSectionSizeCheck(create_report_file_info(report_path),"SW_KEY_QUESTIONS_SECTIONS")
+        checker = SWSectionSizeCheck(create_report_file_info(report_path), "SW_KEY_QUESTIONS_SECTIONS")
         result = checker.check()
 
         assert result["score"] == 0.0
@@ -26,4 +26,3 @@ class TestSWSectionSizeCheck:
 
         assert result["score"] == 0.0
         assert "по количеству предложений" in result["verdict"][0]
-

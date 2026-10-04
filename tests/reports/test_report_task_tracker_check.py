@@ -1,8 +1,8 @@
 from app.main.checks.report_checks.task_tracker import ReportTaskTracker
 from tests.util import create_report_file_info
 
-class TestReportTaskTrackerCheck:
 
+class TestReportTaskTrackerCheck:
     def test_01_valid_report(self, reports_fixture_dir):
         # TODO: fix assertion error
         return

@@ -1,8 +1,8 @@
 from app.main.checks.report_checks.table_references import TableReferences
 from tests.util import create_report_file_info
 
-class TestTableReferences:
 
+class TestTableReferences:
     def test_01_valid_references(self, reports_fixture_dir):
         # TODO: fix assertion error
         return

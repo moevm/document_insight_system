@@ -1,10 +1,12 @@
 from unittest.mock import MagicMock
+
 import pytest
+
 from app.main.checks.report_checks.sw_section_lit_reference import SWSectionLiteratureReferenceCheck
 from tests.util import create_report_file_info
 
-class TestSWSectionLiteratureReferenceCheck:
 
+class TestSWSectionLiteratureReferenceCheck:
     @pytest.fixture
     def checker(self):
         mock_file_info = MagicMock()
@@ -45,4 +47,3 @@ class TestSWSectionLiteratureReferenceCheck:
         expected_references = {1, 2, 3, 4, 5, 6, 7, 8}
 
         assert references == expected_references
-

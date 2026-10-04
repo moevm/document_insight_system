@@ -1,9 +1,10 @@
 from unittest.mock import MagicMock
+
 from app.main.checks.report_checks.decimal_places import ReportDecimalPlacesCheck
 from tests.util.report_file_utils import create_report_file_info
 
-class TestReportDecimalPlacesCheck:
 
+class TestReportDecimalPlacesCheck:
     def test_01_valid_places(self, reports_fixture_dir):
         file_info = create_report_file_info(reports_fixture_dir / "decimal_places_check" / "valid.md")
         checker = ReportDecimalPlacesCheck(file_info, max_decimal_places=2, max_violations=0)

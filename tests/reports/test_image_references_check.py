@@ -1,9 +1,10 @@
 from unittest.mock import MagicMock
+
 from app.main.checks.report_checks.image_references import ImageReferences
 from tests.util.report_file_utils import create_report_file_info
 
-class TestImageReferencesCheck:
 
+class TestImageReferencesCheck:
     def test_01_valid_references(self, reports_fixture_dir):
         file_info = create_report_file_info(reports_fixture_dir / "image_references" / "valid.md")
         checker = ImageReferences(file_info, image_style="вкр_подпись для рисунков")
@@ -24,7 +25,9 @@ class TestImageReferencesCheck:
     def test_03_non_existent_reference(self, reports_fixture_dir):
         file_info = create_report_file_info(reports_fixture_dir / "image_references" / "valid.md")
         file_info['file'].paragraphs = ["Reference to рис. 99.", "But no image."]
-        file_info['file'].make_chapters = lambda t: [{"child": [{"style": "вкр_подпись для рисунков", "text": "Рисунок 1", "number": 1}]}]
+        file_info['file'].make_chapters = lambda t: [
+            {"child": [{"style": "вкр_подпись для рисунков", "text": "Рисунок 1", "number": 1}]}
+        ]
         checker = ImageReferences(file_info, image_style="вкр_подпись для рисунков")
         result = checker.check()
         assert result["score"] == 0.0

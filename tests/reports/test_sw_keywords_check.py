@@ -3,7 +3,6 @@ from tests.util import create_report_file_info
 
 
 class TestSWKeywordsCheck:
-
     def test_01_valid_keywords(self, reports_fixture_dir):
         report_path = reports_fixture_dir / "keywords" / "valid.md"
         checker = SWKeywordsCheck(create_report_file_info(report_path))

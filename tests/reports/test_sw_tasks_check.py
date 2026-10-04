@@ -1,8 +1,8 @@
 from app.main.checks.report_checks.sw_tasks import SWTasksCheck
 from tests.util import create_report_file_info
 
-class TestSWTasksCheck:
 
+class TestSWTasksCheck:
     def test_01_valid_task_count(selfs, reports_fixture_dir):
         report_path = reports_fixture_dir / "sw_tasks" / "valid.md"
         checker = SWTasksCheck(create_report_file_info(report_path))

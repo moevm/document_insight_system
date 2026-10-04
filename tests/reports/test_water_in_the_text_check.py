@@ -1,13 +1,13 @@
 from unittest.mock import MagicMock
+
 import pytest
+from main.checks.report_checks.watery_phrase_settings import WateryPhrase
 
 from app.main.checks.report_checks.water_in_the_text_check import WaterInTheTextCheck
-from main.checks.report_checks.watery_phrase_settings import WateryPhrase
 from tests.util import create_report_file_info
 
 
 class TestWaterInTheTextCheck:
-
     @pytest.fixture
     def checker(self):
         mock_file_info = MagicMock()
@@ -43,7 +43,7 @@ class TestWaterInTheTextCheck:
     def test_04_meaningful_word_density(self, checker):
         words = ['стол', 'и', 'красивый', 'бежать', 'в', 'дом']
         density = checker.meaningful_word_density(words)
-        expected_density = 4/6
+        expected_density = 4 / 6
 
         assert density == expected_density
 
@@ -56,6 +56,3 @@ class TestWaterInTheTextCheck:
 
         assert result["score"] == 1.0
         assert result["verdict"][0] == "Пройдена!"
-
-
-

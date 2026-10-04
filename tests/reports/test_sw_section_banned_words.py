@@ -3,7 +3,6 @@ from tests.util import create_report_file_info
 
 
 class TestSWSectionBannedWordsCheck:
-
     def test_01_valid_chapter(self, reports_fixture_dir):
         report_path = reports_fixture_dir / "sw_section_banned_words" / "valid.md"
         checker = SWSectionBannedWordsCheck(create_report_file_info(report_path), "SW_KEY_QUESTIONS_SECTIONS")
