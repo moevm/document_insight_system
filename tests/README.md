@@ -50,8 +50,13 @@ Tests check: if page "/login" opens, if it doesn't take wrong login/password and
 
 ### Test for open page /check_list:
 
-class StatisticTestSelenium(BasicSeleniumTest) with 1 test
-Test check: if page "/check_list" opens
+class StatisticTestSelenium(BasicSeleniumTest) with 9 tests
+Tests check: if page "/check_list" opens;
+that the score filter (including negative values like "-1" and ranges like
+"0.5-0.89") and the upload-date filter are saved into the URL and restored
+from it;
+that the filters actually filter table rows;
+Row-based tests use skipTest when there are no checks in the system.
 
 
 ### Test for open single check card:
