@@ -1,7 +1,8 @@
-import pytest
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock
+
+import pytest
 
 mock_md2pdf_module = MagicMock()
 mock_md2pdf_module.core.md2pdf.return_value = "mock.pdf"
@@ -27,9 +28,11 @@ if tests_path in sys.path:
     sys.path.remove(tests_path)
 sys.path.insert(0, str(project_root / "app"))
 
+
 @pytest.fixture
 def reports_fixture_dir():
     return Path(__file__).parent.parent / "fixtures" / "reports"
+
 
 @pytest.fixture(autouse=True)
 def auto_patch_uploader():
@@ -46,7 +49,12 @@ def auto_patch_uploader():
             if work_type == 'VKR':
                 headers = [
                     {"name": "Титульный лист", "marker": False, "key": "титульный лист", "page": 1},
-                    {"name": "Задание на выпускную квалификационную работу", "marker": False, "key": "задание", "page": 2},
+                    {
+                        "name": "Задание на выпускную квалификационную работу",
+                        "marker": False,
+                        "key": "задание",
+                        "page": 2,
+                    },
                     {"name": "Календарный план", "marker": False, "key": "календарный план", "page": 3},
                     {"name": "Реферат", "marker": False, "key": "реферат", "page": 4},
                     {"name": "Abstract", "marker": False, "key": "abstract", "page": 5},
@@ -65,6 +73,7 @@ def auto_patch_uploader():
             images_counter = 0
             all_numbers = set()
             import re
+
             for paragraph in self.styled_paragraphs:
                 if paragraph['runs'][0]['style'] == "вкр_подпись для рисунков":
                     text = paragraph['text'].lower()
