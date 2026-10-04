@@ -1,0 +1,16 @@
+name: Unit_tests
+
+on: [pull_request]
+
+jobs:
+  unit_tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build docker image
+        run: |
+          cp .env_example .env
+          cp app/VERSION_example.json app/VERSION.json
+          make build-worker
+      - name: Run unit tests
+        run: docker compose -f docker-compose-criteria-tests.yml up --build
