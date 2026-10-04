@@ -1,0 +1,11 @@
+name: Selenium_tests
+
+on: [pull_request]
+
+jobs:
+  unit_tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run unit tests
+        run: docker compose -f docker-compose-reports-tests.yml up --build

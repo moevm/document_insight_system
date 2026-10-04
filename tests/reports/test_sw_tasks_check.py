@@ -17,7 +17,7 @@ class TestSWTasksCheck:
         result = checker.check()
 
         assert result["score"] == 0.0
-        assert   "Количество задач исследования должно быть в диапазоне" in result["verdict"][0]
+        assert "Количество задач исследования должно быть в рамках" in result["verdict"][0]
 
     def test_03_extra_task_count(selfs, reports_fixture_dir):
         report_path = reports_fixture_dir / "sw_tasks" / "extra_task.md"
@@ -25,4 +25,4 @@ class TestSWTasksCheck:
         result = checker.check()
 
         assert result["score"] == 0.0
-        assert  "Количество задач исследования должно быть в диапазоне" in result["verdict"][0]
+        assert "Количество задач исследования должно быть в рамках" in result["verdict"][0]
