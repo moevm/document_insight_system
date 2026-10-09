@@ -1,6 +1,6 @@
 FROM selenium/standalone-chrome:121.0-chromedriver-121.0-grid-4.18.0-20240220
 
-ENV LOGIN=""
+ENV LOGIN="" 
 ENV PASSWORD=""
 
 WORKDIR /usr/src/project
@@ -11,7 +11,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY tests/requirements.txt tests/requirements.txt
-RUN pip install -r tests/requirements.txt
+RUN pip install -r tests/requirements.txt --no-cache-dir
+
 COPY tests ./tests
 
 ENTRYPOINT sleep 30 && python3 tests/main.py --login ${LOGIN} --password ${PASSWORD}
