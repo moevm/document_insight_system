@@ -47,6 +47,7 @@ BASE_REPORT_CRITERION = [
     ["needed_headers_check"],
     ["header_check"],
     ["report_section_component"],
+    ["sw_tasks_check", {"min_tasks": 3, "max_tasks": 5}],
     ["main_text_check"],
     ["spelling_check"],
     ["max_abstract_size_check"],
