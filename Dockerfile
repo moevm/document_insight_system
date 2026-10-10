@@ -2,7 +2,7 @@ FROM node:20-alpine AS frontend_build
 
 WORKDIR /app
 COPY package.json webpack.config.js ./
-RUN npm install && npm install webpack
+RUN npm install
 
 COPY ./assets ./assets
 RUN npm run build
@@ -34,3 +34,4 @@ ADD ./app ./app/
 COPY --from=frontend_build /app/src ./src/
 
 CMD ["./scripts/local_start.sh"]
+
