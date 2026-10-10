@@ -34,6 +34,8 @@ class TestSWTasksCheck:
         [
             ("invalid_less_tasks.docx", False, 1),
             ("invalid_more_tasks.docx", False, 8),
+            ("invalid_tasks_not_found.docx", False, 0),
+            ("invalid_tasks_is_empty.docx", False, 0),
             ("valid.docx", True, None),
             ("valid_missing_stop_marker.docx", True, None),
             ("valid_start_marker_is_last.docx", True, None),

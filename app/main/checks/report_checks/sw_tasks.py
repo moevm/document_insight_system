@@ -45,7 +45,7 @@ class SWTasksCheck(BaseReportCriterion):
 
         tasks = self.find_tasks(chapters)
         if not tasks:
-            return answer(False, f'В разделе "{self.chapter}" не обнаружены задачи!')
+            return answer(False, f'В разделе "{self.chapter}" не обнаружены задачи! 0 Задач.')
 
         tasks_count = len(tasks)
         if self.min_tasks <= tasks_count <= self.max_tasks:
