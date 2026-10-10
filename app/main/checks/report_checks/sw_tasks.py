@@ -8,13 +8,13 @@ DEFAULT_CHAPTER = "Введение"
 DEFAULT_MIN_TASKS = 3
 DEFAULT_MAX_TASKS = 5
 DEFAULT_REPORT_TYPE = "VKR"
-TASKS_MARKER = "задач" # параграф, с которого начинается перечисление задач
+TASKS_MARKER = "задач"  # параграф, с которого начинается перечисление задач
 DEFAULT_STOP_MARKERS = [
     "объект",
     "актуальность",
     "цель",
     "предмет",
-] # список параграфов, на которых перечисление задач заканчивается
+]  # список параграфов, на которых перечисление задач заканчивается
 
 
 class SWTasksCheck(BaseReportCriterion):

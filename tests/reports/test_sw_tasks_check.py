@@ -55,4 +55,3 @@ class TestSWTasksCheck:
             assert count_task == real_find_count_task
         else:
             assert result.get("score") == 1.0
-
