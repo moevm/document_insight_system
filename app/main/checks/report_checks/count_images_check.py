@@ -15,14 +15,11 @@ class ReportCountImagesCheck(BaseReportCriterion):
         if self.file.page_counter() < 4:
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
 
-        #! self.file.page_count - возвращяет в большинстве случев ВСЕ страницы(включая Приложение)
-        #! Проблема заключается, в том, что текущий regexp не обрабатывает все случаи.
-        #! Необходимо уточнить есть ли уже ПР с исправлением
         img_counter = self.file.pdf_file.page_images_count(page_without_pril=self.file.page_count)
 
         if img_counter < self.min_cnt_img:
             result_str = (
-                f"Проверка не пройдена! В работе найдено {self.img_counter} изображений "
+                f"Проверка не пройдена! В работе найдено {img_counter} изображений "
                 + f"без учета приложения, минимальное количество - {self.min_cnt_img}"
             )
 
@@ -38,4 +35,4 @@ class ReportCountImagesCheck(BaseReportCriterion):
                         '''
             return answer(False, result_str)
         else:
-            return answer(True, 'Пройдена!')
+            return answer(True, 'Проверка пройдена!')
