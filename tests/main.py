@@ -13,6 +13,7 @@ from test_statistic import StatisticTestSelenium
 from test_version import VersionTestSelenium
 from test_check_list_filters_selenium import CheckListFiltersTestSelenium
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run Selenium tests with specified data')
     parser.add_argument('--host', type=str, default='http://127.0.0.1:8080', help='Host address for testing')
