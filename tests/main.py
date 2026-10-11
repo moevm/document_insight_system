@@ -11,7 +11,7 @@ from test_file_load import FileLoadTestSelenium
 from test_single_card_check import SingleCheckTestSelenium
 from test_statistic import StatisticTestSelenium
 from test_version import VersionTestSelenium
-
+from test_check_list_filters_selenium import CheckListFiltersTestSelenium
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run Selenium tests with specified data')
@@ -53,6 +53,7 @@ def main():
         VersionTestSelenium,
         CriterionPacksTestSelenium,
         AdminCriterionsTestSelenium,
+        CheckListFiltersTestSelenium,
     )
 
     param = (args.host, args.login, args.password, args.report, args.report_doc, args.pres)

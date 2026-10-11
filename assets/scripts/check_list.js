@@ -133,6 +133,18 @@ function initTable() {
             formatter: idFormatter
         }]
     })
+
+    $table.on("column-search.bs.table", function () {
+        updateUrlFromFilters();
+    });
+
+    $table.on("sort.bs.table", function () {
+        updateUrlFromFilters();
+    });
+
+    $table.on("page-change.bs.table", function () {
+        updateUrlFromFilters();
+    });
 }
 
 
@@ -256,4 +268,30 @@ function downdloadBlob(blob, filename) {
     document.body.appendChild(a);
     a.click();
     a.remove();
+}
+
+function updateUrlFromFilters() {
+    let filters = {}
+    $('.filter-control').each(function() {
+        const name = $(this).parents("th").data("field")
+        const val = this.querySelector("input").value
+        if (val) {
+            filters[name] = val
+        }
+    })
+    
+    const params = new URLSearchParams()
+    const options = $table.bootstrapTable('getOptions')
+    
+    if (options.pageSize) params.set('size', options.pageSize)
+    if (options.pageNumber > 1) params.set('page', options.pageNumber)
+    if (options.sortName) params.set('sort', options.sortName)
+    if (options.sortOrder) params.set('order', options.sortOrder)
+    
+    for (const [key, value] of Object.entries(filters)) {
+        params.set(`${filter_prefix}${key}`, value)
+    }
+    
+    const newUrl = `${window.location.pathname}?${params.toString()}`
+    window.history.replaceState({}, '', newUrl)
 }
