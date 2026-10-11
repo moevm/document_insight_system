@@ -6,6 +6,7 @@ import unittest
 from basic_selenium_test import BasicSeleniumTest
 from test_admin_criterions_page import AdminCriterionsTestSelenium
 from test_authorization import AuthTestSelenium
+from test_check_list_filters_selenium import CheckListFiltersTestSelenium
 from test_criterion_packs_page import CriterionPacksTestSelenium
 from test_file_load import FileLoadTestSelenium
 from test_single_card_check import SingleCheckTestSelenium
@@ -53,6 +54,7 @@ def main():
         VersionTestSelenium,
         CriterionPacksTestSelenium,
         AdminCriterionsTestSelenium,
+        CheckListFiltersTestSelenium,
     )
 
     param = (args.host, args.login, args.password, args.report, args.report_doc, args.pres)
