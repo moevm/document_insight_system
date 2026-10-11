@@ -23,14 +23,19 @@ export function isFloat(str) {
     return true;
 };
 
-
 export function pushHistoryState(paramsData) {
     const {limit, offset, sort, order, filter} = paramsData;
-
-    // push history state
-    history.pushState(paramsData, "", "?" + $.param({limit, offset, filter, sort, order}))
+    
+    const currentParams = new URLSearchParams(window.location.search);
+    
+    currentParams.set('limit', limit || '');
+    currentParams.set('offset', offset || '');
+    currentParams.set('filter', filter || '');
+    currentParams.set('sort', sort || '');
+    currentParams.set('order', order || '');
+    
+    history.pushState(paramsData, "", "?" + currentParams.toString());
 };
-
 
 export function ajaxRequest(AJAX_URL, params) {
     const queryString = "?" + $.param(params.data)
