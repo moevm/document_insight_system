@@ -6,12 +6,12 @@ import unittest
 from basic_selenium_test import BasicSeleniumTest
 from test_admin_criterions_page import AdminCriterionsTestSelenium
 from test_authorization import AuthTestSelenium
+from test_check_list_filters_selenium import CheckListFiltersTestSelenium
 from test_criterion_packs_page import CriterionPacksTestSelenium
 from test_file_load import FileLoadTestSelenium
 from test_single_card_check import SingleCheckTestSelenium
 from test_statistic import StatisticTestSelenium
 from test_version import VersionTestSelenium
-from test_check_list_filters_selenium import CheckListFiltersTestSelenium
 
 
 def parse_arguments():
