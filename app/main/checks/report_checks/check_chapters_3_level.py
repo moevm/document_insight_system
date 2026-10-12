@@ -4,13 +4,13 @@ from ..base_check import BaseReportCriterion, answer
 
 
 class ReportСhaptersLevel3ContentCheck(BaseReportCriterion):
-    label = "Проверка содержания на наличия объктов 3 уровня"
-    _description = "В содержании не должно быть объектов третьего уровня"
+    label = "Проверка содержания на наличие пунктов с превышающей глубиной"
+    _description = "В содержании не должно быть пунктов глубже допустимой глубины"
     id = "report_3_level_in_content_check"
 
-    def __init__(self, file_info, forbidden_level=3, end_marker="ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ"):
+    def __init__(self, file_info, forbidden_depth=3, end_marker="ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ"):
         super().__init__(file_info)
-        self.forbidden_level = forbidden_level
+        self.forbidden_depth = forbidden_depth
         self.end_marker = end_marker
 
     def check(self):
@@ -30,10 +30,10 @@ class ReportСhaptersLevel3ContentCheck(BaseReportCriterion):
                     continue
 
                 if bool_content_find:
-                    if "heading 2" in style or (self.end_marker in text_par and "heading" in style):
+                    if "heading" in style:
                         bool_end_content_find = True
                         break
-                    if self._is_forbidden_level(text_par):
+                    if self._is_forbidden_depth(text_par):
                         failed_str.append(text_par)
 
             if not bool_content_find:
@@ -42,37 +42,32 @@ class ReportСhaptersLevel3ContentCheck(BaseReportCriterion):
             if not bool_end_content_find:
                 return answer(
                     False,
-                    "Не найдено конца раздела 'СОДЕРЖАНИЕ'."
-                    f"заголовок {self.end_marker} или любой заголовок второго уровня считаются\
-                          концом раздела 'СОДЕРЖАНИЕ'",
+                    "Не найден конец раздела «Содержание». Конец содержания - это любой заголовок после него.",
                 )
 
             if failed_str:
                 result_str = (
-                    f"Найдено {len(failed_str)} заголовков {self.forbidden_level} уровня и выше:<br>"
-                    f"Заголовки {self.forbidden_level} уровня и выше: {'<br>  '.join(failed_str)}"
-                    f"<br>Содержание должно содержать только заголовки меньше {self.forbidden_level} уровня.<br>"
-                    "Пример заголовка 1 уровня: 1.TEXT"
-                    "                 2 уровня: 1.1.TEXT"
-                    "                 3 уровня: 1.1.1.TEXT"
-                    "Аналогично для последующих уровней"
-                    f"Уберите заголовки {self.forbidden_level} уровня и выше из раздела 'СОДЕРЖАНИЕ'"
-                    f"заголовок {self.end_marker} или любой заголовок второго уровня считаются\
-                          концом раздела 'СОДЕРЖАНИЕ'"
+                    f"<b>Найдено {len(failed_str)} пунктов глубже {self.forbidden_depth - 1}:</b>"
+                    f"В содержании глубина пунктов не должна превышать {self.forbidden_depth - 1}. "
+                    f"Примеры пунктов 1 глубины: 1.TEXT"
+                    "                 2 глубины: 1.1.TEXT"
+                    "                 3 глубины: 1.1.1.TEXT"
+                    f"<br>Для прохождения критерия требуется убрать в содержании пункты у которых"
+                    "глубина превышает {self.forbidden_depth - 1}.<br>"
                 )
                 return answer(False, result_str)
 
-            return answer(True, f"Все заголовки соответствуют требованиям (меньше {self.forbidden_level} уровеня)")
+            return answer(True, f"Все пункты содержания имеют глубину меньше {self.forbidden_depth}.")
 
         except Exception as e:
             return answer(False, f"Ошибка при проверке: {str(e)}")
 
-    def _is_forbidden_level(self, line):
+    def _is_forbidden_depth(self, line):
         match = re.match(r"^(\d+(\.\d+)+)", line)
 
         if match:
             numbering = match.group(1)
-            dots_count = numbering.count(".")
-            return dots_count >= self.forbidden_level
+            numbers_count = len(numbering.split("."))
+            return numbers_count >= self.forbidden_depth
 
         return False
