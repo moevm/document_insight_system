@@ -44,7 +44,7 @@ BASE_REPORT_CRITERION = [
     ["report_table_percentage_check"],
     ["first_pages_check"],
     ["main_character_check"],
-    ["needed_headers_check"],
+    ["report_structure_check"],
     ["header_check"],
     ["report_section_component"],
     ["main_text_check"],
