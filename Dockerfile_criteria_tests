@@ -1,0 +1,16 @@
+FROM dis:worker-image-0.6
+
+RUN pip install --no-cache-dir pytest pytest-mock pytest-cov pytest-xdist pytest-html \
+  && python3 -m nltk.downloader punkt stopwords
+
+COPY app/main ./app/main
+COPY app/nlp ./app/nlp
+COPY app/utils ./app/utils
+
+COPY tests/__init__.py ./tests/__init__.py
+COPY tests/conftest.py ./tests/conftest.py
+COPY tests/util ./tests/util
+COPY tests/reports ./tests/reports
+COPY tests/fixtures/reports ./tests/fixtures/reports
+
+CMD ["pytest", "-n", "auto", "--html=test_results/report.html", "--self-contained-html", "tests/reports"]

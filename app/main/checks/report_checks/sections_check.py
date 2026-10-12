@@ -64,7 +64,7 @@ class LRReportSectionCheck(BaseReportCriterion):
                 <li>Выделите нужный текст и явно примените к нему недостающее форматирование;</li>
                 <li>
                     Не пользуйтесь стандартным стилем. Настройте отдельный стиль для заголовков
-                    (<a href="http://se.moevm.info/doku.php/courses:informatics:reportrules">инструкция</a>)
+                    (<a href="https://se.moevm.pro/doku.php/courses:reportrules">инструкция</a>)
                     и примените его к проблемному заголовку.
                 </li>
             </ul>
