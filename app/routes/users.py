@@ -12,9 +12,11 @@ users = Blueprint('users', __name__, template_folder='templates', static_folder=
 def admin_required(route_func):
     @wraps(route_func)
     def my_wrapper(*args, **kwargs):
-        if current_user and current_user.is_admin:
-            return route_func(*args, **kwargs)
-        abort(403)
+        if not current_user.is_authenticated:
+            abort(401)
+        if not current_user.is_admin:
+            abort(403)
+        return route_func(*args, **kwargs)
 
     return my_wrapper
 
