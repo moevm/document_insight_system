@@ -1,5 +1,7 @@
 from docling.document_converter import DocumentConverter
+
 from app.utils import convert_to
+
 
 class DoclingPdfManager:
     def __init__(self, path_to_file, pdf_filepath):
@@ -9,11 +11,11 @@ class DoclingPdfManager:
 
         self.converter = DocumentConverter()
         self.doc = self.converter.convert(pdf_filepath).document
-        
+
         self.pages = self.doc.pages
         self.page_count = len(self.doc.pages)
         self.text_on_page = self._build_text_on_page()
-    
+
     def _build_text_on_page(self):
         text_by_page = {}
 
@@ -60,7 +62,7 @@ class DoclingPdfManager:
         page_size = first_page.page_size
         height = page_size.height
 
-        available_space = height* page_without_pril
+        available_space = height * page_without_pril
         return available_space
 
     def page_rows_text(self, page_num):
@@ -71,13 +73,15 @@ class DoclingPdfManager:
                 continue
             for prov in item.prov:
                 if prov.page_no == page_num and prov.bbox:
-                    result.append({
-                        "text": item.text,
-                        "x0": prov.bbox.l,
-                        "y0": prov.bbox.t,
-                        "x1": prov.bbox.r,
-                        "y1": prov.bbox.b,
-                    })
+                    result.append(
+                        {
+                            "text": item.text,
+                            "x0": prov.bbox.l,
+                            "y0": prov.bbox.t,
+                            "x1": prov.bbox.r,
+                            "y1": prov.bbox.b,
+                        }
+                    )
                     break
 
         return result
