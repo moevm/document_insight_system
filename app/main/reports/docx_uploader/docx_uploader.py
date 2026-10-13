@@ -4,7 +4,7 @@ from functools import reduce
 import docx
 
 from ..document_uploader import DocumentUploader
-from ..pdf_document.pdf_document_manager import PdfDocumentManager
+from ..pdf_document.docling_pdf_manager import DoclingPdfManager
 from .core_properties import CoreProperties
 from .inline_shape import InlineShape
 from .paragraph import Paragraph
@@ -27,7 +27,7 @@ class DocxUploader(DocumentUploader):
 
     def upload(self, file, pdf_filepath=''):
         self.file = docx.Document(file)
-        self.pdf_file = PdfDocumentManager(file, pdf_filepath)
+        self.pdf_file = DoclingPdfManager(file, pdf_filepath)
 
     def parse(self):
         self.core_properties = CoreProperties(self.file)

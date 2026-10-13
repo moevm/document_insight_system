@@ -7,7 +7,8 @@ Flask==2.0.3
 flask-login==0.5.0
 flask-security==3.0.0
 flower==1.2.0
-fsspec==2022.2.0
+    # fsspec==2022.2.0
+fsspec>=2023.5.0
 jinja2==3.0.0
 language-tool-python==3.3.0
 lti==0.9.5
@@ -18,18 +19,24 @@ nltk==3.6.6
 numpy==1.26.4
 oauthlib~=3.1.0
 #odfpy==1.4.1
-pandas==3.0.0
+    # pandas==3.0.0
+pandas>=2.1.4,<3.0.0
 #pdfplumber==0.6.1
 PyMuPDF==1.26.6
 PyPDF2~=3.0.1
 pymongo==3.11.1
 pymorphy3==2.0.6
 pytest~=7.1.2
-python-docx==0.8.11
-python-pptx==0.6.18
+    # python-docx==0.8.11
+python-docx>=1.1.2,<2.0.0
+    # python-pptx==0.6.18
+python-pptx<2.0.0,>=1.0.2
 pytz~=2023.3
 redis==6.1.0
-requests~=2.31.0
+    # requests~=2.31.0
+requests<3.0.0,>=2.32.3
 scipy~=1.11.1
 urllib3~=2.0.3
 werkzeug==2.0.0
+
+docling>=2.0.0
