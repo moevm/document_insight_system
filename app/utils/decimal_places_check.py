@@ -3,7 +3,7 @@ from collections import defaultdict
 
 
 class DecimalPlacesCheck:
-    DECIMAL_PATTERN = r'\b\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?\b'
+    DECIMAL_PATTERN = r'\b\d+(?:[.,]\d+)?'
 
     EXCLUSION_PATTERNS = [
         r'https?://\S+',
@@ -36,12 +36,12 @@ class DecimalPlacesCheck:
 
         char_before = text[start_pos - 1] if start_pos > 0 else ' '
 
-        if char_before == '.':
+        if char_before == '.' or (char_before == ',' and start_pos > 1 and text[start_pos - 2].isdigit()):
             return False
 
         if end_pos < len(text):
             char_after = text[end_pos]
-            if char_after == '.' and end_pos + 1 < len(text) and text[end_pos + 1].isdigit():
+            if char_after in '.,' and end_pos + 1 < len(text) and text[end_pos + 1].isdigit():
                 return False
 
         return True
