@@ -7,8 +7,8 @@ from flask import Blueprint, abort, request
 from flask_login import current_user, login_required
 
 from app.db.methods import check as check_methods
-from app.db.methods import log as log_methods
 from app.db.methods import criteria_pack as criteria_pack_methods
+from app.db.methods import log as log_methods
 from app.main.check_packs import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO, REPORT_TYPES, init_criterions
 from app.root_logger import get_root_logger
 

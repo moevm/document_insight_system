@@ -10,8 +10,9 @@ from test_criterion_packs_page import CriterionPacksTestSelenium
 from test_file_load import FileLoadTestSelenium
 from test_single_card_check import SingleCheckTestSelenium
 from test_statistic import StatisticTestSelenium
-from test_version import VersionTestSelenium
 from test_technical_logs import TechLogsTestSelenium
+from test_version import VersionTestSelenium
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run Selenium tests with specified data')
