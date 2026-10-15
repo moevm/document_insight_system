@@ -10,6 +10,7 @@ from test_criterion_packs_page import CriterionPacksTestSelenium
 from test_file_load import FileLoadTestSelenium
 from test_single_card_check import SingleCheckTestSelenium
 from test_statistic import StatisticTestSelenium
+from test_technical_logs import TechLogsTestSelenium
 from test_version import VersionTestSelenium
 
 
@@ -53,6 +54,7 @@ def main():
         VersionTestSelenium,
         CriterionPacksTestSelenium,
         AdminCriterionsTestSelenium,
+        TechLogsTestSelenium,
     )
 
     param = (args.host, args.login, args.password, args.report, args.report_doc, args.pres)

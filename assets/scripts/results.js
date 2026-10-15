@@ -198,8 +198,8 @@ $(function () {
             $stage.text(last.stage || "—");
             $lastErr.text(last.message || "—");
             $diag.show();
-        }).catch(() => {
-            showLoadError("Диагностика", arguments[0]);
+        }).catch(err => {
+            showLoadError("Диагностика", err);
         });
     }
 
@@ -215,8 +215,7 @@ $(function () {
                 $logsText.text(prev ? (prev + "\n" + lines.join("\n")) : lines.join("\n"));
                 logsOffset += rows.length;
             }
-        }).catch(() => {
-            const err = arguments[0];
+        }).catch(err => {
             const status = err && err.status ? err.status : "n/a";
             const msg = `Логи: не удалось загрузить (status=${status})`;
             console.error(msg, err || "");
