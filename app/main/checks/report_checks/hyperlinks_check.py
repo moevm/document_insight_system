@@ -25,7 +25,7 @@ class ReportHyperlinksCheck(BaseReportCriterion):
         + " ни в тексте, ни в таблицах, ни в колонтитулах, ни в сносках, ни на изображениях"
     )
     id = 'hyperlinks_check'
-    # warning = True
+    warning = True
 
     def __init__(self, file_info):
         super().__init__(file_info)
