@@ -7,8 +7,10 @@ class AppendixReferenceCheck(BaseReportCriterion):
     label = "Проверка наличия ссылок на все приложения"
     id = "appendix_reference_check"
 
-    header_pattern = re.compile(r'(?i)приложение ([А-ЯЁа-яё])')
-    ref_pattern = re.compile(r'(?i)приложени[еияюй]\s+([А-ЯЁа-яё])')
+    tag_pattern = re.compile(r'<[^>]+>')
+    header_pattern = re.compile(r'^\s*приложение\s+([А-ЯЁ])\b', re.IGNORECASE)
+    ref_pattern = re.compile(r'(?i:приложени(?:ях|ями|ям|е|и|я|ю|й))\s+([А-ЯЁ]\b(?:(?:\s*,\s*|\s+и\s+)[А-ЯЁ]\b)*)')
+    ref_separator_pattern = re.compile(r'\s*,\s*|\s+и\s+')
 
     def __init__(self, file_info):
         super().__init__(file_info)
@@ -17,22 +19,27 @@ class AppendixReferenceCheck(BaseReportCriterion):
     def late_init(self):
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
 
+    def _appendix_letter(self, chapter):
+        match = self.header_pattern.search(self.tag_pattern.sub('', chapter["text"]))
+        return match.group(1).upper() if match else None
+
     def _collect_appendices(self):
         appendices = set()
         for chapter in self.chapters:
-            match = self.header_pattern.search(chapter["text"])
-            if match:
-                appendices.add(match.group(1))
+            letter = self._appendix_letter(chapter)
+            if letter:
+                appendices.add(letter)
         return appendices
 
     def _collect_references(self):
         references = set()
         for chapter in self.chapters:
-            if self.header_pattern.search(chapter["text"]):
+            if self._appendix_letter(chapter):
                 break
             for child in chapter["child"]:
                 for match in self.ref_pattern.finditer(child["text"]):
-                    references.add(match.group(1).upper())
+                    for letter in self.ref_separator_pattern.split(match.group(1)):
+                        references.add(letter.upper())
         return references
 
     def check(self):
