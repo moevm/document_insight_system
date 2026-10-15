@@ -7,6 +7,7 @@ from flask import Blueprint, abort, request
 from flask_login import current_user, login_required
 
 from app.db.methods import check as check_methods
+from app.db.methods import log as log_methods
 from app.db.methods import criteria_pack as criteria_pack_methods
 from app.main.check_packs import BASE_PACKS, DEFAULT_REPORT_TYPE_INFO, REPORT_TYPES, init_criterions
 from app.root_logger import get_root_logger
@@ -109,7 +110,7 @@ def api_result_logs(_id):
     if levels:
         filter_query["levelname"] = {"$in": levels}
 
-    rows, count = check_methods.get_logs_cursor(
+    rows, count = log_methods.get_logs_cursor(
         filter=filter_query, limit=limit, offset=offset, sort="timestamp", order="desc"
     )
     return {
