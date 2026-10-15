@@ -25,7 +25,7 @@ class ReportHyperlinksCheck(BaseReportCriterion):
         + " ни в тексте, ни в таблицах, ни в колонтитулах, ни в сносках, ни на изображениях"
     )
     id = 'hyperlinks_check'
-    warning = True
+    # warning = True
 
     def __init__(self, file_info):
         super().__init__(file_info)
@@ -35,7 +35,7 @@ class ReportHyperlinksCheck(BaseReportCriterion):
         try:
             links = self._collect_hyperlinks()
         except AttributeError:
-            # загрузчики без docx-документа (например: mdUploader) - проверяем ссылки markdown
+            # загрузчики без docx-документа - проверяем ссылки markdown
             links = self._collect_md_hyperlinks()
         except Exception as e:
             return answer(False, f"Ошибка при проверке гиперссылок: {e}")
