@@ -1,11 +1,14 @@
 /src
 /node_modules
 
-.venv
-.git
-.github
+.*
+!.github
+venv
+__pycache__
+
 playground
-
-
-
 lt_docker
+files
+output
+examples
+test_results

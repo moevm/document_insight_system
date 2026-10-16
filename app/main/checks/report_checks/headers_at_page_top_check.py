@@ -19,12 +19,16 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
         self.headers_page = self.file.find_header_page(self.file_type['report_type'])
 
     def check(self):
-        if self.file.page_counter() < 4:
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
+        if self.is_markdown:
+            return answer(False, 'Проверка расположения заголовков применима к отчётам DOCX.')
         result = True
         result_str = ""
         # TODO: проверить совместимость / дублируемость LR и VKR
         if self.file_type["report_type"] == 'LR':
+            if not self.headers:
+                return answer(False, 'Для LR необходимо задать список headers.')
             for header in self.headers:
                 found = False
                 for page_num in range(1, self.pdf.page_count_all):
@@ -33,6 +37,8 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                     collected_text = ""
                     while True:
                         collected_text += " "
+                        if last_header_line >= len(lines):
+                            break
                         collected_text += lines[last_header_line]
                         collected_text = collected_text.strip()
                         if collected_text.lower() == header.lower():
@@ -67,6 +73,7 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                             header["marker"] = 1
                             break
                         elif collected_text.find(header_text.strip()) > 0:
+                            result = False
                             result_str += (
                                 ("<br>" if len(result_str) else "") + f"Заголовок второго уровня \"{header['text']}\" "
                                 f"находится не в начале страницы или пронумирован с помощью списка "
