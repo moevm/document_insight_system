@@ -25,6 +25,7 @@ output/
 !README.md
 !CHANGELOG.md
 !docs/criteria.md
+!docs/ROADMAP.md
 
 # Repository instructions must remain visible despite the Markdown ignore rule.
 !AGENTS.md
