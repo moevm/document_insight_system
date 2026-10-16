@@ -11,7 +11,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY tests/requirements.txt tests/requirements.txt
-RUN pip install -r tests/requirements.txt
+RUN pip install -r tests/requirements.txt --no-cache-dir
+
 COPY tests ./tests
 
 ENTRYPOINT sleep 30 && python3 tests/main.py --login ${LOGIN} --password ${PASSWORD}
