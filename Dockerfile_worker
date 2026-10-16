@@ -1,15 +1,49 @@
-ARG IMAGE_VERSION=0.6
+ARG IMAGE_VERSION
 
 FROM dvivanov/dis:worker-base-${IMAGE_VERSION}
 
-LABEL project='dis'
-LABEL version='worker-image-${IMAGE_VERSION}'
+ARG IMAGE_VERSION
 
-ENV PYTHONPATH="${PYTHONPATH}:/usr/src/project/app"
+
+ENV PYTHONPATH="/usr/src/project/app" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /usr/src/project
 
-COPY requirements.txt .
-RUN python3 -m pip install -r requirements.txt --no-cache-dir
+COPY requirements.lock .
+RUN python3 -m pip install --require-hashes -r requirements.lock --no-cache-dir
 
-COPY . .
+# The same numeric identity owns shared uploads in both images.
+RUN groupadd --gid 10001 app \
+    && useradd --uid 10001 --gid app --create-home --shell /usr/sbin/nologin app \
+    && install -d -o app -g app /usr/src/project/files /etc/db
+
+# Script entrypoints need the package root as well as legacy top-level imports.
+ENV HOME=/home/app \
+    PYTHONPATH="/usr/src/project:/usr/src/project/app"
+
+# Keep the application package intact: task handlers load checks dynamically.
+COPY app ./app
+
+ARG VCS_REF=unknown
+ARG BUILD_DATE=unknown
+ARG SOURCE_BRANCH=unknown
+ARG SOURCE_STATE=unknown
+
+LABEL project="dis" \
+    version="${IMAGE_VERSION}" \
+    org.opencontainers.image.version="${IMAGE_VERSION}" \
+    org.opencontainers.image.revision="${VCS_REF}" \
+    org.opencontainers.image.created="${BUILD_DATE}" \
+    org.opencontainers.image.source="https://github.com/moevm/document_insight_system" \
+    org.opencontainers.image.source-state="${SOURCE_STATE}" \
+    dis.role="worker"
+
+ENV APP_VERSION="${IMAGE_VERSION}" \
+    APP_COMMIT="${VCS_REF}" \
+    APP_BUILD_DATE="${BUILD_DATE}" \
+    APP_BRANCH="${SOURCE_BRANCH}" \
+    APP_SOURCE_STATE="${SOURCE_STATE}"
+
+USER app:app

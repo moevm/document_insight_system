@@ -1,0 +1,23 @@
+name: Application version
+
+on:
+  pull_request:
+  push:
+    branches: [main, dev, release]
+    tags: ['v*']
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check manifest, lock and Docker versions
+        run: python3 scripts/check_versions.py
+      - name: Test automatic version synchronization
+        run: python3 scripts/test_versioning.py
+      - name: Check release tag
+        if: github.ref_type == 'tag'
+        run: python3 scripts/check_versions.py --tag "$GITHUB_REF_NAME"

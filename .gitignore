@@ -4,17 +4,22 @@ __pycache__/
 .idea
 venv
 .venv
+.venv-lock
 .vscode
 *.pyc
-
+*.pdf
+*.docx
+#*.txt
+*.pptx
 files/*
 !files/sample.odp
 
-package-lock.json
 node_modules
 
 src/
 .env
 
-VERSION.json
 
+tests/
+output/
+*.md

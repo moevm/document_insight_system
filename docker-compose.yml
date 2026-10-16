@@ -1,16 +1,62 @@
 services:
+  worker-base:
+    image: dvivanov/dis:worker-base-${IMAGE_VERSION:?Run make sync-version to derive IMAGE_VERSION from package.json}
+    profiles:
+      - build-base
+    build:
+      context: .
+      dockerfile: Dockerfile_worker_base
+      args:
+        - IMAGE_VERSION=${IMAGE_VERSION:?Run make sync-version to derive IMAGE_VERSION from package.json}
+        - VCS_REF=${VCS_REF:-unknown}
+        - BUILD_DATE=${BUILD_DATE:-unknown}
+        - SOURCE_BRANCH=${SOURCE_BRANCH:-unknown}
+        - SOURCE_STATE=${SOURCE_STATE:-unknown}
+
+  volumes-init:
+    image: dis:web-image-${IMAGE_VERSION:?Run make sync-version to derive IMAGE_VERSION from package.json}
+    user: "0:0"
+    restart: "no"
+    network_mode: none
+    read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+    security_opt:
+      - no-new-privileges:true
+    command: ["/bin/sh", "./scripts/init_volumes.sh", "/usr/src/project/files", "/etc/db"]
+    volumes:
+      - files:/usr/src/project/files
+      - flower_data:/etc/db
+
   web:
     build:
       context: .
       args:
-        - VERSION=${IMAGE_VERSION}
-    image: dis:web-image-${IMAGE_VERSION}
+        - IMAGE_VERSION=${IMAGE_VERSION:?Run make sync-version to derive IMAGE_VERSION from package.json}
+        - VCS_REF=${VCS_REF:-unknown}
+        - BUILD_DATE=${BUILD_DATE:-unknown}
+        - SOURCE_BRANCH=${SOURCE_BRANCH:-unknown}
+        - SOURCE_STATE=${SOURCE_STATE:-unknown}
+    image: dis:web-image-${IMAGE_VERSION:?Run make sync-version to derive IMAGE_VERSION from package.json}
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     restart: always
+    init: true
     ports:
       - "${WEB_PORT:-8080}:8080"
     depends_on:
-      - mongodb
-      - redis
+      volumes-init:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file:
       - .env
     environment:
@@ -29,17 +75,29 @@ services:
       context: .
       dockerfile: Dockerfile_worker
       args:
-        - VERSION=${IMAGE_VERSION}
-    image: dis:worker-image-${IMAGE_VERSION}
+        - IMAGE_VERSION=${IMAGE_VERSION:?Run make sync-version to derive IMAGE_VERSION from package.json}
+        - VCS_REF=${VCS_REF:-unknown}
+        - BUILD_DATE=${BUILD_DATE:-unknown}
+        - SOURCE_BRANCH=${SOURCE_BRANCH:-unknown}
+        - SOURCE_STATE=${SOURCE_STATE:-unknown}
+    image: dis:worker-image-${IMAGE_VERSION:?Run make sync-version to derive IMAGE_VERSION from package.json}
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     init: true
     restart: always
-    command: celery --app=app.tasks.celery worker -n celery@worker --beat -Q ${CELERY_QUERIES} --loglevel=info
+    command: celery --app=app.tasks.celery worker -n celery@worker --beat --schedule=/home/app/celerybeat-schedule -Q ${CELERY_QUERIES} --loglevel=info
     environment:
       - CELERY_BROKER_URL=${REDIS_URL}
       - CELERY_RESULT_BACKEND=${REDIS_URL}
     depends_on:
-      - redis
-      - mongodb
+      volumes-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
     volumes:
       - files:/usr/src/project/files/
       - "/etc/timezone:/etc/timezone:ro"
@@ -48,8 +106,12 @@ services:
     mem_limit: ${WORKER_MEMORY:-1G}
 
   worker-dashboard:
-    image: dis:worker-image-${IMAGE_VERSION}
-    command: celery --broker=${REDIS_URL} flower --port=${FLOWER_PORT} --url_prefix=${FLOWER_PREFIX} --basic_auth=${FLOWER_AUTH} --persistent=True
+    image: dis:worker-image-${IMAGE_VERSION:?Run make sync-version to derive IMAGE_VERSION from package.json}
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    command: celery --broker=${REDIS_URL} flower --port=5555 --url_prefix=${FLOWER_PREFIX} --basic_auth=${FLOWER_AUTH} --persistent=True --db=/etc/db/flower
     ports:
       - "${FLOWER_PORT}:5555"
     environment:
@@ -61,13 +123,22 @@ services:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     depends_on:
-      - worker
-      - redis
+      volumes-init:
+        condition: service_completed_successfully
+      worker:
+        condition: service_started
+      redis:
+        condition: service_healthy
     cpuset: ${CONTAINER_CPU:-0-1}
 
   redis:
     image: redis:6-alpine
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
     volumes:
       - redis_data:/data
     cpuset: ${CONTAINER_CPU:-0-1}
@@ -75,6 +146,12 @@ services:
   mongodb:
     image: mongo:8-noble
     restart: always
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ping: 1}).ok ? 0 : 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
     command:
       - '--wiredTigerCacheSizeGB=${MONGODB_CACHE_SIZE:-1}'
     volumes:

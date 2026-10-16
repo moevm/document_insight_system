@@ -2,14 +2,11 @@
 
 set -e
 
-VERSION_FILE_NAME="VERSION.json" # project directory
+make sync-version
 
 apache_config_filename=${1}
 apache_ssl_mod=${2:-''}
 #sudo scripts/setup_apache_config.sh $apache_config_filename $apache_ssl_mod
-
-# generate version file
-scripts/version.sh > app/$VERSION_FILE_NAME
 
 mkdir -p ../slides_checker_mongo_data
 
