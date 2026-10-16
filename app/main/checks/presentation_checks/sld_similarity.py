@@ -20,6 +20,8 @@ class SldSimilarity(BasePresCriterion):
         goals = get_text_from_slides(self.file, self.goals)
         conclusions = get_text_from_slides(self.file, self.conclusion)
 
+        if not goals or not conclusions:
+            return answer(False, "Не найден слайд целей/задач или заключения.")
         results = check_similarity(goals, conclusions)
 
         return answer(results[0] >= self.actual_number, *tasks_conclusions_feedback(results))

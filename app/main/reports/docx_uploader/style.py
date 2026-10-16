@@ -1,3 +1,6 @@
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+
 class Style:
     _friendly_property_names = {
         "font_name": "Имя шрифта",
@@ -35,7 +38,7 @@ class Style:
         for attr_name in attr_names:
             if nested_attr is None:
                 return None
-            nested_attr = getattr(nested_attr, attr_name)
+            nested_attr = getattr(nested_attr, attr_name, None)
         return nested_attr
 
     @staticmethod
@@ -57,7 +60,8 @@ class Style:
             run_style_result = Style.resolve_style_property(run.style, attr_names)
             if run_style_result is not None:
                 return run_style_result
-        return Style.resolve_style_property(par.style, attr_names)
+        direct = Style.get_style_attribute(par, attr_names)
+        return direct if direct is not None else Style.resolve_style_property(par.style, attr_names)
 
     def set_font_name(self, run, par):
         self.font_name = Style.resolve_style_hierarchy(run, par, ["font", "name"])
@@ -90,6 +94,8 @@ class Style:
         self.alignment = par.alignment
         if self.alignment is None:
             self.alignment = Style.resolve_style_hierarchy(None, par, ["paragraph_format", "alignment"])
+        if self.alignment is None:
+            self.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
     '''def set_line_spacing_rule(self, run, par):
         self.line_spacing_rule = Style.resolve_style_hierarchy(None, par, ["paragraph_format", "line_spacing_rule"])
@@ -107,6 +113,8 @@ class Style:
         )
         if self.first_line_indent_cm is not None:
             self.first_line_indent_cm = round(self.first_line_indent_cm * 100) / 100
+        else:
+            self.first_line_indent_cm = 0.0
 
     def set_space_after_pt(self, run, par):
         self.space_after_pt = Style.resolve_style_hierarchy(None, par, ["paragraph_format", "space_after", "pt"])
@@ -133,19 +141,15 @@ class Style:
                 continue
             if getattr(template_style, property_name) is None:
                 continue
-            if getattr(self, property_name) != getattr(template_style, property_name):
+            actual = getattr(self, property_name)
+            expected = getattr(template_style, property_name)
+            matches = actual in expected if isinstance(expected, (tuple, list, set)) else actual == expected
+            if not matches:
                 if error_list is None:
                     return False
-                else:
-                    flag = False
-                    if getattr(self, property_name):
-                        error_list.append(
-                            "{0}: ожидалось \"{1}\", фактически \"{2}\"".format(
-                                Style._friendly_property_names[property_name],
-                                getattr(template_style, property_name),
-                                # "по умолчанию"
-                                # if getattr(self, property_name) is None else getattr(self, property_name)
-                                getattr(self, property_name),
-                            )
-                        )
+                flag = False
+                error_list.append(
+                    f'{Style._friendly_property_names[property_name]}: ожидалось "{expected}", '
+                    f'фактически "{actual if actual is not None else "по умолчанию"}"'
+                )
         return flag
