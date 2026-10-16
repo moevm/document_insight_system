@@ -19,7 +19,12 @@ node_modules
 src/
 .env
 
-
-tests/
 output/
 *.md
+# Release documentation is part of the project.
+!README.md
+!CHANGELOG.md
+!docs/criteria.md
+
+# Repository instructions must remain visible despite the Markdown ignore rule.
+!AGENTS.md
