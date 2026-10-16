@@ -14,6 +14,8 @@ class TestBannedWordsInIntroReport:
             ("invalid.docx", 0),
             ("valid.md", 1),
             ("invalid.md", 0),
+            ("invalid_without_intro.docx", 0),
+            ("invalid_without_intro.md", 0),
         ],
     )
     def test_01_with_and_without_banword(self, reports_fixture_dir, file, excepted_score):
