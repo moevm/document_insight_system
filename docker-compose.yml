@@ -111,11 +111,13 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    command: celery --broker=${REDIS_URL} flower --port=5555 --url_prefix=${FLOWER_PREFIX} --basic_auth=${FLOWER_AUTH} --persistent=True --db=/etc/db/flower
+    command: ["/bin/sh", "./scripts/start_flower.sh"]
     ports:
       - "${FLOWER_PORT}:5555"
     environment:
       - SECRET_KEY=${FLOWER_SECRET_KEY}
+      - FLOWER_PREFIX=${FLOWER_PREFIX:-}
+      - FLOWER_BASIC_AUTH=${FLOWER_AUTH}
       - CELERY_BROKER=${REDIS_URL}
       - CELERY_BACKEND=${REDIS_URL}
     volumes:

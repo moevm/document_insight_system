@@ -1,17 +1,8 @@
-#! /bin/bash
+#!/bin/bash
+set -euo pipefail
 
-set -e
-
-make sync-version
-
-apache_config_filename=${1}
-apache_ssl_mod=${2:-''}
-#sudo scripts/setup_apache_config.sh $apache_config_filename $apache_ssl_mod
-
-mkdir -p ../slides_checker_mongo_data
-
-docker-compose stop
-docker-compose --project-name dis_test_build build --no-cache
-docker-compose build
-
-docker-compose up -d --remove-orphans
+# Run from the repository root. Keep the current Compose project and volumes.
+# Build before stopping the services so a failed build leaves them running.
+make build-all
+docker compose stop web worker worker-dashboard
+make up-d

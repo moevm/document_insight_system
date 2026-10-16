@@ -28,3 +28,8 @@ output/
 
 # Repository instructions must remain visible despite the Markdown ignore rule.
 !AGENTS.md
+
+# Synthetic report fixtures are required by tests from a clean checkout.
+!tests/fixtures/reports/**/*.md
+!tests/fixtures/reports/**/*.docx
+!tests/fixtures/reports/**/*.pdf

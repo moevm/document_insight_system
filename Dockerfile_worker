@@ -25,6 +25,7 @@ ENV HOME=/home/app \
 
 # Keep the application package intact: task handlers load checks dynamically.
 COPY app ./app
+COPY scripts/start_flower.sh ./scripts/
 
 ARG VCS_REF=unknown
 ARG BUILD_DATE=unknown

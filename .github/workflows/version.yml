@@ -3,7 +3,7 @@ name: Application version
 on:
   pull_request:
   push:
-    branches: [main, dev, release]
+    branches: [main, dev, pre-release, release]
     tags: ['v*']
 
 jobs:

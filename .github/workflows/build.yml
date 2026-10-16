@@ -3,6 +3,22 @@ name: CI
 on: pull_request
 
 jobs:
+  criteria:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - name: Install locked Python dependencies
+        run: python -m pip install --require-hashes -r requirements.lock
+      - name: Check criteria and document parsers
+        env:
+          PYTHONPATH: app:.
+        run: python -m pytest -p no:cacheprovider -c /dev/null --rootdir=. --import-mode=importlib -q tests/criteria tests/reports
+
   build:
     runs-on: ubuntu-22.04
 
@@ -12,7 +28,7 @@ jobs:
       - name: Check application versions
         run: python3 scripts/check_versions.py
 
-      - name: Build system images (non-pulling)
+      - name: Build system images
         run: |
           cp .env_example .env
           make build-all
@@ -22,8 +38,19 @@ jobs:
           sleep 20
       - name: Run tests
         run: |
-          curl http://localhost:8080
-          curl http://localhost:5555
+          curl --fail --retry 10 --retry-delay 3 --retry-connrefused http://localhost:8080/login/
+          docker compose exec -T web python3 - <<'PYTHON'
+          import os
+          import requests
+          prefix = os.environ.get('FLOWER_PREFIX', '').strip('/')
+          url = 'http://worker-dashboard:5555/' + (prefix + '/' if prefix else '')
+          auth = tuple(os.environ['FLOWER_AUTH'].split(':', 1))
+          response = requests.get(url, auth=auth, timeout=10, allow_redirects=False)
+          assert response.status_code == 200, f'Flower returned HTTP {response.status_code}'
+          assert 'Flower' in response.text, 'Expected the Flower dashboard'
+          PYTHON
+      - name: Check upload, processing and access_token API
+        run: docker compose exec -T web python3 - < scripts/verify_deployment.py
       - name: Check logs 
         run: docker compose -f docker-compose.yml -f lt_docker/docker-compose.yaml -f docker-compose-selenium.yml logs
         if: always()
