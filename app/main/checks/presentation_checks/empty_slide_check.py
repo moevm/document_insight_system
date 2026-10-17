@@ -15,6 +15,9 @@ class PresEmptySlideCheck(BasePresCriterion):
         self.status = status
 
     def check(self):
+        if not self.file.slides:
+            return answer(False, 'В презентации нет слайдов.')
+        self.status = False
         result_str = ''
         page_titles = {}
         full_pages = {}
@@ -27,9 +30,12 @@ class PresEmptySlideCheck(BasePresCriterion):
 
         for page, slide in enumerate(self.file.get_text_from_slides(), 1):
             slide_string = ''.join(slide.replace("\n", " "))
-            slide_without_page = re.sub(r'\d+(?=\s*$)', '', slide_string)
+            number = self.file.slides[page - 1].get_page_number()[0]
+            slide_without_page = slide_string.replace('‹#›', '')
+            if number != -1:
+                slide_without_page = re.sub(r'(?<!\d)' + re.escape(str(number)) + r'(?=\s*$)', '', slide_without_page)
             full_pages[str(page)] = ''.join(char for char in slide_without_page.strip() if char.isprintable())
-            if not full_pages[str(page)]:
+            if not full_pages[str(page)] and page not in pages_with_images:
                 empty_pages.append(page)
 
         for page, slide in enumerate(self.file.get_titles(), 1):
@@ -38,7 +44,7 @@ class PresEmptySlideCheck(BasePresCriterion):
                 if slide == full_pages[str(page)] and page not in pages_with_images and page not in empty_pages:
                     pages_with_title.append(page)
 
-        if self.file.presentation_name.endswith('.ppt') or self.file.presentation_name.endswith('.pptx'):
+        if self.file.presentation_name.lower().endswith(('.ppt', '.pptx')):
             if empty_pages and not pages_with_title:
                 result_str += format_header(
                     'Не пройдена! Обнаружены пустые слайды: {}'.format(', '.join(self.format_page_link(empty_pages)))

@@ -1,4 +1,9 @@
 services:
+  volumes-init:
+    extends:
+      file: docker-compose.yml
+      service: volumes-init
+
   web:
     extends:
       file: docker-compose.yml
@@ -19,7 +24,7 @@ services:
     extends:
       file: docker-compose.yml
       service: worker-dashboard
-    command: celery --broker=${REDIS_URL} flower --port=5555 --persistent=True
+    command: celery --broker=${REDIS_URL} flower --port=5555 --persistent=True --db=/etc/db/flower
     ports:
       - "5555:5555"
 
