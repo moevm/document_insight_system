@@ -1,60 +1,72 @@
-include .env
+# package.json is the only manually maintained application version.
+# Ignore obsolete environment/CLI overrides so tags cannot drift from the manifest.
+override IMAGE_VERSION := $(shell python3 scripts/check_versions.py --print-version)
+export IMAGE_VERSION
 
-VERSION=${IMAGE_VERSION}
-WORKER_BASE_IMAGE=dvivanov/dis:worker-base-${VERSION}
-WORKER_BASE_DOCKERFILE=Dockerfile_worker_base
-BUILD_ARG_STR=--build-arg IMAGE_VERSION=${VERSION}
+# Build provenance is captured locally and passed explicitly to every image.
+export VCS_REF ?= $(shell git rev-parse HEAD)
+export BUILD_DATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+export SOURCE_BRANCH ?= $(shell git branch --show-current)
+export SOURCE_STATE ?= $(shell test -z "$$(git status --porcelain)" && echo clean || echo dirty)
 
-define image_exists
-$(shell docker image inspect $(1) > /dev/null 2>&1 && echo "yes")
-endef
+COMPOSE = docker compose -f docker-compose.yml
+FULL_COMPOSE = $(COMPOSE) -f lt_docker/docker-compose.yaml
+TEST_COMPOSE = $(FULL_COMPOSE) -f docker-compose-selenium.yml
 
+.PHONY: sync-version check-version build-base build-web build-worker build-tests check-base build build-all up up-d full-up full-up-d down tests
 
-.PHONY: build-base build-web build-worker build-tests check-base build build-all up upd full-up full-up-d down tests
+build-base: sync-version Dockerfile_worker_base
+	$(COMPOSE) build worker-base
 
-build-base: $(WORKER_BASE_DOCKERFILE)
-	docker build -t $(WORKER_BASE_IMAGE) ${BUILD_ARG_STR} -f $(WORKER_BASE_DOCKERFILE) . ;
-	
-build-web: $(WORKER_DOCKERFILE)
-	docker compose build ${BUILD_ARG_STR} web ;
+build-web: sync-version Dockerfile
+	$(COMPOSE) build web
 
-build-worker: $(WEB_DOCKERFILE)
-	docker compose build ${BUILD_ARG_STR} worker ;
+build-worker: sync-version check-base Dockerfile_worker
+	$(COMPOSE) build worker
 
-build-tests:
-	docker compose -f docker-compose.yml -f docker-compose-selenium.yml build ${BUILD_ARG_STR} selenium-tests ;
+build-tests: sync-version
+	$(TEST_COMPOSE) build selenium-tests
+
+sync-version:
+	python3 scripts/check_versions.py --sync
+
+check-version:
+	python3 scripts/check_versions.py
 
 check-base:
-	@if [ "$(call image_exists,$(WORKER_BASE_IMAGE))" != "yes" ]; then \
-		echo "Trying to pull $(WORKER_BASE_IMAGE) from remote..." ; \
-		if docker pull $(WORKER_BASE_IMAGE) 2>/dev/null ; then \
-			echo "Successfully pulled $(WORKER_BASE_IMAGE)" ; \
-		else \
-			echo "Remote image not found or cannot pull. Building locally..." ; \
-			$(MAKE) build-base ; \
-		fi \
+	@set -eu; \
+	image=$$($(COMPOSE) --profile build-base config --images worker-base); \
+	test -n "$$image"; \
+	if docker image inspect "$$image" >/dev/null 2>&1; then \
+		echo "$$image already exists"; \
+	elif docker pull "$$image"; then \
+		echo "Successfully pulled $$image"; \
 	else \
-		echo "${WORKER_BASE_IMAGE} already exists"; \
+		echo "Cannot pull $$image. Building locally..."; \
+		$(MAKE) build-base; \
 	fi
 
 build: build-web build-worker
 
-build-all: build-base build
+# A prerequisite list alone would allow base and worker to race under make -j.
+build-all: build-base
+	$(MAKE) build
 
-up:
-	docker compose -f docker-compose.yml up ;
+up: sync-version
+	$(COMPOSE) up
 
-up-d:
-	docker compose -f docker-compose.yml up -d ;
+up-d: sync-version
+	$(COMPOSE) up -d
 
-full-up:
-	docker compose -f docker-compose.yml -f lt_docker/docker-compose.yaml up ;
+full-up: sync-version
+	$(FULL_COMPOSE) up
 
-full-up-d:
-	docker compose -f docker-compose.yml -f lt_docker/docker-compose.yaml up -d ;
+full-up-d: sync-version
+	$(FULL_COMPOSE) up -d
 
-down:
-	docker compose -f docker-compose.yml -f lt_docker/docker-compose.yaml down ;
+down: sync-version
+	$(FULL_COMPOSE) down
 
-tests: build-all build-tests
-	docker compose -f docker-compose.yml -f lt_docker/docker-compose.yaml -f docker-compose-selenium.yml up -d
+tests: build-all
+	$(MAKE) build-tests
+	$(TEST_COMPOSE) up -d

@@ -2,6 +2,7 @@ import re
 from functools import reduce
 
 import docx
+from docx.oxml.ns import qn
 
 from ..document_uploader import DocumentUploader
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
@@ -27,6 +28,23 @@ class DocxUploader(DocumentUploader):
 
     def upload(self, file, pdf_filepath=''):
         self.file = docx.Document(file)
+        # Expose visible paragraphs/tables inside Word content controls to python-docx.
+        # This changes only the in-memory reader; the uploaded file is preserved.
+        for control in reversed(list(self.file.element.iter(qn('w:sdt')))):
+            content = control.find(qn('w:sdtContent'))
+            parent = control.getparent()
+            if content is not None and parent is not None:
+                index = parent.index(control)
+                for child in list(content):
+                    parent.insert(index, child)
+                    index += 1
+                parent.remove(control)
+        # Word uses logical start/end alignment; python-docx only accepts left/right.
+        for root in (self.file.element, self.file.styles.element):
+            for alignment in root.xpath('.//w:jc'):
+                value = alignment.get(qn('w:val'))
+                if value in ('start', 'end'):
+                    alignment.set(qn('w:val'), 'left' if value == 'start' else 'right')
         self.pdf_file = PdfDocumentManager(file, pdf_filepath)
 
     def parse(self):
@@ -79,9 +97,13 @@ class DocxUploader(DocumentUploader):
             self.chapters = tmp_chapters
         return self.chapters
 
-    def make_headers(self, work_type):
+    def make_headers(self, work_type, required_headers=None):
+        configuration = (work_type, tuple(required_headers) if required_headers is not None else None)
+        if getattr(self, '_headers_configuration', None) != configuration:
+            self.headers = []
+            self._headers_configuration = configuration
         if not self.headers:
-            if work_type == 'VKR':
+            if work_type == 'VKR' or required_headers is not None:
                 # find first pages
                 headers = [
                     {
@@ -107,16 +129,23 @@ class DocxUploader(DocumentUploader):
                     },
                     {"name": "Реферат", "marker": False, "key": "реферат", "main_character": False, "page": 0},
                     {"name": "Abstract", "marker": False, "key": "abstract", "main_character": False, "page": 0},
-                    {"name": "Cодержание", "marker": False, "key": "содержание", "main_character": False, "page": 0},
+                    {"name": "Содержание", "marker": False, "key": "содержание", "main_character": False, "page": 0},
                 ]
-                for page in range(1, self.page_count if self.page_counter() < 2 * len(headers) else 2 * len(headers)):
-                    page_text = (self.pdf_file.get_text_on_page()[page].split("\n")[0]).lower()
-                    for i in range(len(headers)):
-                        if not headers[i]["marker"]:
-                            if page_text.find(headers[i]["key"]) >= 0:
-                                headers[i]["marker"] = True
-                                headers[i]["page"] = page
-                                break
+                if required_headers is not None:
+                    headers = [
+                        {'name': name, 'key': name.lower(), 'marker': False, 'main_character': False, 'page': 0}
+                        for name in required_headers
+                    ]
+                self.page_counter()
+                previous_page = 0
+                for header in headers:
+                    for page, text in self.pdf_file.get_text_on_page(end_page=self.page_count).items():
+                        first_line = text.splitlines()[0].strip().lower() if text.splitlines() else ''
+                        if page > previous_page and header['key'] in first_line:
+                            header['marker'] = True
+                            header['page'] = page
+                            previous_page = page
+                            break
                 self.headers = headers
         return self.headers
 
@@ -146,7 +175,7 @@ class DocxUploader(DocumentUploader):
                 self.headers_page = 1
                 return self.headers_page
             for header in self.make_headers(work_type):
-                if header["name"].find('Cодержание') >= 0:
+                if header["name"].find('Содержание') >= 0:
                     if not header["page"]:
                         self.headers_page = 1
                     else:
@@ -156,21 +185,22 @@ class DocxUploader(DocumentUploader):
 
     def find_literature_page(self, work_type=None):
         if not self.literature_page:
-            for _, v in self.pdf_file.text_on_page.items():
-                line = v[:40] if len(v) > 21 else v
+            for page, text in self.pdf_file.get_text_on_page().items():
+                first_lines = ' '.join(text.splitlines()[:2])
                 if re.search(
-                    'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)', line.strip().lower()
+                    r'список\s+(?:использованных\s+|использованной\s+)?(?:источников|литературы)', first_lines, re.I
                 ):
+                    self.literature_page = page
                     break
-                self.literature_page += 1
-            self.literature_page += 1
         return self.literature_page
 
     def find_literature_vkr(self, work_type):
         if not self.literature_header:
             for header in self.make_chapters(work_type):
                 header_text = header["text"].lower()
-                if header_text.find('список использованных источников') >= 0:
+                if re.search(
+                    r'список\s+(?:использованных\s+|использованной\s+)?(?:источников|литературы)', header_text
+                ):
                     self.literature_header = header
         return self.literature_header
 

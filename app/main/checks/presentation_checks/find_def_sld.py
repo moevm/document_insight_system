@@ -12,6 +12,9 @@ class FindDefSld(BasePresCriterion):
         self.found_idxs = []
 
     def check(self):
+        self.found_idxs = []
+        if self.file is None:
+            return answer(False, 'Презентация не загружена.')
         if self.file is not None:
             for i, title in enumerate(self.file.get_titles(), 1):
                 if str(title).lower().find(str(self.type_of_slide).lower()) != -1:
