@@ -1,6 +1,7 @@
 import re
 
-from ..base_check import BaseReportCriterion, answer, morph
+from ..base_check import BaseReportCriterion, answer
+from ..word_counts import normalize_phrase, phrase_counts
 from .style_check_settings import StyleCheckSettings
 
 
@@ -22,40 +23,17 @@ class ReportBannedWordsCheck(BaseReportCriterion):
 
     def late_init(self):
         self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
-        if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
-            self.words = {
-                morph.normal_forms(word)[0]
-                for word in StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['banned_words']
-            }
-            self.warned_words = {
-                morph.normal_forms(word)[0]
-                for word in StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main]['warned_words']
-            }
-            self.min_count = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main][
-                'min_count_for_banned_words_check'
-            ]
-            self.max_count = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main][
-                'max_count_for_banned_words_check'
-            ]
-        else:
-            if 'any_header' in StyleCheckSettings.CONFIGS.get(self.config):
-                self.words = {
-                    morph.normal_forms(word)[0]
-                    for word in StyleCheckSettings.CONFIGS.get(self.config)['any_header']['banned_words']
-                }
-                self.warned_words = {
-                    morph.normal_forms(word)[0]
-                    for word in StyleCheckSettings.CONFIGS.get(self.config)['any_header']['warned_words']
-                }
-                self.min_count = StyleCheckSettings.CONFIGS.get(self.config)['any_header'][
-                    'min_count_for_banned_words_check'
-                ]
-                self.max_count = StyleCheckSettings.CONFIGS.get(self.config)['any_header'][
-                    'max_count_for_banned_words_check'
-                ]
+        config = StyleCheckSettings.CONFIGS.get(self.config)
+        if not isinstance(config, dict):
+            raise ValueError(f'Неизвестная карта заголовков: {self.config}')
+        settings = config.get(self.headers_main, config.get('any_header', {}))
+        self.words = {normalize_phrase(word) for word in settings.get('banned_words', [])}
+        self.warned_words = {normalize_phrase(word) for word in settings.get('warned_words', [])}
+        self.min_count = settings.get('min_count_for_banned_words_check', 3)
+        self.max_count = settings.get('max_count_for_banned_words_check', 6)
 
     def check(self):
-        if self.file.page_counter() < 4:
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         self.late_init()
         result_str = f'<b>Запрещенные слова: {"; ".join(self.words)}</b><br>'
@@ -64,11 +42,11 @@ class ReportBannedWordsCheck(BaseReportCriterion):
         for k, v in self.file.pdf_file.get_text_on_page().items():
             lines_on_page = re.split(r'\n', v)
             for index, line in enumerate(lines_on_page):
-                words_on_line = {morph.normal_forms(word)[0] for word in re.split(r'[^\w-]+', line)}
                 for counter in (banned_counter, warned_counter):
-                    count_banned_words = words_on_line.intersection(counter['words'])
+                    counts = phrase_counts(line, counter['words'])
+                    count_banned_words = {word for word, count in counts.items() if count}
                     if count_banned_words:
-                        counter['count'] += len(count_banned_words)
+                        counter['count'] += sum(counts.values())
                         if k not in counter['detected_lines'].keys():
                             counter['detected_lines'][k] = []
                         counter['detected_lines'][k].append(

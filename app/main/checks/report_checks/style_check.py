@@ -104,13 +104,15 @@ class ReportStyleCheck(BaseReportCriterion):
         return None
 
     def check(self):
+        if self.is_markdown:
+            return answer(False, 'Проверка стилей применима к отчётам DOCX.')
         self.late_init()
         if not self.skip_first_page:
             base_index = 0
         else:
             base_index = self.get_index_after_skip()
         if base_index is None:
-            return answer(True, "Нечего проверять: отчёт содержит не более одной непустой страницы.")
+            return answer(False, "Не удалось определить начало основного текста после титульной страницы.")
         result = True
         result_str = ""
         valid_key_properties = tuple(map(lambda s: self.get_style_properties(s["style"]), self.target_styles))
