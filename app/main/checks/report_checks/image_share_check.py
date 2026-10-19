@@ -35,12 +35,12 @@ class ReportImageShareCheck(BaseReportCriterion):
                 """
             )
             return answer(False, result_str)
-        
+
         cnt_img = self.file.pdf_file.page_images_count(page_without_pril=self.file.page_count)
         if cnt_img < self.min_cnt_img:
             result_str = (
                 f"Проверка не пройдена! Кол-во изображний меньше минимального количества: {cnt_img}/{self.min_cnt_img}"
             )
             return answer(False, result_str)
-        
+
         return answer(True, 'Пройдена!')
