@@ -52,11 +52,8 @@ class PdfDocumentManager:
             page = self.pdf_file[page_num]
             image_xrefs = set()
             for image in self.pdf_file.get_page_images(page_num, full=True):
-                if image[1]:
-                    continue
                 image_xrefs.add(image[0])
             for xref in image_xrefs:
-                # get_image_rects возвращает все места размещения изображения на странице
                 images_count += len(page.get_image_rects(xref))
         return images_count
 
