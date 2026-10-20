@@ -1,3 +1,4 @@
+import { event } from "jquery";
 import {collect_values_if_possible, hash} from "./general";
 
 import { debounce, resetTable, ajaxRequest, onPopState } from "./utils"
@@ -170,6 +171,8 @@ function initTable() {
     params.filter = extract_filters(params)
     console.log(params)
 
+    is_latest = params.latest === "true"
+
     // check correct order query
     if (params.order !== "asc" && params.order !== "desc" && params.order !== "") {
         params.order = ""
@@ -252,6 +255,7 @@ function queryParams(params) {
         order: params.order,
         latest: params.latest
     }
+    if(is_latest) {query.latest = true;}
 
     if (!$.isEmptyObject(filters)) {
         for (const [key, value] of Object.entries(filters)){
@@ -289,13 +293,13 @@ function buttons() {
     let buttonsObj = {};
 
     buttonsObj["ResetTable"] = {
-        text: 'Reset',
+        text: 'Сбросить фильтры',
         event: function() { resetTable($table, queryParams) }
     };
 
     if (is_admin) {
         buttonsObj["FetchCSV"] = {
-            text: 'CSV',
+            text: 'Скачать CSV',
             event: function () {
                 //const queryString = window.location.search
                 const params = window.location.search
@@ -328,15 +332,8 @@ function buttons() {
         };
 
         buttonsObj["LatestChecks"] = {
-            text: 'Latest',
-            event: function () {
-                is_latest = !is_latest;
-                let query = {}
-                if (is_latest === true){
-                    query = { query: { latest: is_latest } }
-                }
-                debouncedRefresh(query)
-            }
+            text: 'Последняя проверка',
+            event: function() {is_latest = !is_latest; debouncedRefresh();}
         };
     }
     return buttonsObj;

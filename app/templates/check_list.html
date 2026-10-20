@@ -75,24 +75,24 @@
             >
                 <thead>
                 <tr>
-                    <th data-field="_id" data-width="160">Upload ID</th>
-                    <th data-field="filename" data-filter-control="input" data-sortable="true">File name</th>
-                    <th data-field="criteria" data-filter-control="input" data-sortable="true">Criteria pack</th>
+                    <th data-field="_id" data-width="160">ID загрузки</th>
+                    <th data-field="filename" data-filter-control="input" data-sortable="true">Название файла</th>
+                    <th data-field="criteria" data-filter-control="input" data-sortable="true">Пак критериев</th>
                     {% if current_user.is_admin %}
-                        <th data-field="user" data-filter-control="input" data-sortable="true">Username</th>
-                        <th data-field="lms-user-id" data-sortable="false">User ID</th>
+                        <th data-field="user" data-filter-control="input" data-sortable="true">Пользователь</th>
+                        <th data-field="lms-user-id" data-sortable="false">ID пользователя</th>
                     {% endif %}
                     <th data-field="upload-date" data-filter-control="input"
                         data-filter-control-placeholder="дд.мм.гггг [чч:мм]"
-                        data-sortable="true">Upload date
+                        data-sortable="true">Дата загрузки
                     </th>
                     <th data-field="moodle-date" data-filter-control="input"
                         data-filter-control-placeholder="дд.мм.гггг [чч:мм]"
-                        data-sortable="true">Moodle upload date
+                        data-sortable="true">Дата загрузки на мудл
                     </th>
                     <th data-field="score" data-filter-control="input"
                         data-filter-control-placeholder="от -1 до 1"
-                        data-sortable="true">Result
+                        data-sortable="true">Результат
                 </th>
                 </tr>
                 </thead>
