@@ -28,6 +28,7 @@ def _parse_datetime(value):
 def _start_of_next_day(value: datetime) -> datetime:
     return (value + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
 
+
 def _parse_bounds(value, offset):
     parts = [part.strip() for part in (value or '').split(" - ") if part.strip()]
     dates = [_parse_datetime(part) for part in parts]
