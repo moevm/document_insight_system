@@ -25,9 +25,8 @@ def _parse_datetime(value):
     return None
 
 
-def _end_of_day(value):
-    return value.replace(hour=23, minute=59, second=59, microsecond=0)
-
+def _start_of_next_day(value: datetime) -> datetime:
+    return (value + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
 
 def _parse_bounds(value, offset):
     parts = [part.strip() for part in (value or '').split(" - ") if part.strip()]
@@ -37,11 +36,11 @@ def _parse_bounds(value, offset):
 
     start = dates[0]
     if len(dates) == 1:
-        end = _end_of_day(start)
+        end = _start_of_next_day(start)
     elif ':' not in parts[1]:
-        end = _end_of_day(dates[1])
+        end = _start_of_next_day(dates[1])
     else:
-        end = dates[1] + timedelta(seconds=59) if dates[1].second == 0 else dates[1]
+        end = dates[1] + timedelta(minutes=1) if dates[1].second == 0 else dates[1] + timedelta(seconds=1)
 
     return start - offset, end - offset
 
@@ -92,7 +91,7 @@ def checklist_filter(data, is_admin=False):
     if upload_bounds:
         filter_query["_id"] = {
             "$gte": ObjectId.from_datetime(upload_bounds[0]),
-            "$lte": ObjectId.from_datetime(upload_bounds[1]),
+            "$lt": ObjectId.from_datetime(upload_bounds[1]),
         }
     elif f_upload_date:
         logger.warning("Can't apply upload-date filter: %s", f_upload_date)
@@ -100,7 +99,7 @@ def checklist_filter(data, is_admin=False):
     f_moodle_date = filters.get("moodle-date", "")
     moodle_bounds = _parse_bounds(f_moodle_date, timedelta())
     if moodle_bounds:
-        filter_query["lms_passback_time"] = {"$gte": moodle_bounds[0], "$lte": moodle_bounds[1]}
+        filter_query["lms_passback_time"] = {"$gte": moodle_bounds[0], "$lt": moodle_bounds[1]}
     elif f_moodle_date:
         logger.warning("Can't apply moodle-date filter: %s", f_moodle_date)
 
