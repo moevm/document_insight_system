@@ -39,6 +39,14 @@ function addClearButton($input, fp) {
     $input.after($clear);
 }
 
+function readUrlFilter(){
+    const search = window.location.search;
+    const params = Object.fromEntries(
+        new URLSearchParams(decodeURIComponent(search)).entries()
+    );
+    return extract_filters(params);
+}
+
 function initFlatpickrFilters(filters) {
     FLATPICKR_FIELDS.forEach(function (field) {
         const $input = $(`.bootstrap-table-filter-control-${field}`);
@@ -201,15 +209,13 @@ function initTable() {
     }
 
     // Fill filters
-    $table.on("created-controls.bs.table", function () {
-        if (params.filter) {
-            console.log(params.filter)
-            for (const [key, value] of Object.entries(params.filter)) {
-                const $input = $(`.bootstrap-table-filter-control-${key}`)
-                $input.val(value)
-            }
+    $table.on("created-controls.bs.table", function (){
+        const filters = readUrlFilter();
+
+        for(const [key, value] of Object.entries(filters)){
+            $(`.bootstrap-table-filter-control-${key}`).val(value);
         }
-        initFlatpickrFilters(params.filter)
+        initFlatpickrFilters(filters);
     })
 
     $table.on("post-header.bs.table", syncFilterControlValues)
@@ -293,9 +299,21 @@ function buttons() {
     let buttonsObj = {};
 
     buttonsObj["ResetTable"] = {
-        text: 'Сбросить фильтры',
-        event: function() { resetTable($table, queryParams) }
-    };
+        text: "Сбросить фильтры",
+        event: function(){
+            is_latest = false;
+            history.replaceState(null, "", window.location.pathname);
+
+            FLATPICKR_FIELDS.forEach(function (field) {
+                const el = $(`.bootstrap-table-filter-control-${field}`)[0];
+                if (el && el._flatpickr){
+                    el._flatpickr.clear();
+                }
+            });
+
+            resetTable($table, queryParams);
+        }
+    }
 
     if (is_admin) {
         buttonsObj["FetchCSV"] = {

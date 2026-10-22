@@ -39,9 +39,9 @@ def _parse_bounds(value, offset):
     if len(dates) == 1:
         end = _start_of_next_day(start)
     elif ':' not in parts[1]:
-        end = _start_of_next_day(dates[1])
+        end = dates[1].replace(hour=0, minute=0)
     else:
-        end = dates[1] + timedelta(minutes=1) if dates[1].second == 0 else dates[1] + timedelta(seconds=1)
+        end = dates[1]
 
     return start - offset, end - offset
 
