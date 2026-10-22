@@ -42,7 +42,7 @@ def _parse_bounds(value, offset):
         end = dates[1].replace(hour=0, minute=0)
     else:
         end = dates[1]
-    
+
     if start > end:
         start, end = end, start
 
