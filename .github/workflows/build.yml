@@ -17,7 +17,7 @@ jobs:
       - name: Check criteria and document parsers
         env:
           PYTHONPATH: app:.
-        run: python -m pytest -p no:cacheprovider -c /dev/null --rootdir=. --import-mode=importlib -q tests/criteria tests/reports
+        run: python -m pytest -p no:cacheprovider -c /dev/null --rootdir=. --import-mode=importlib -q tests/criteria tests/reports tests/unit
 
   build:
     runs-on: ubuntu-22.04
