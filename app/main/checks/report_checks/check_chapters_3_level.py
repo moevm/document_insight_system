@@ -53,7 +53,7 @@ class ReportСhaptersLevel3ContentCheck(BaseReportCriterion):
                     "                 2 глубины: 1.1.TEXT"
                     "                 3 глубины: 1.1.1.TEXT"
                     f"<br>Для прохождения критерия требуется убрать в содержании пункты у которых"
-                    "глубина превышает {self.forbidden_depth - 1}.<br>"
+                    f"глубина превышает {self.forbidden_depth - 1}.<br>"
                 )
                 return answer(False, result_str)
 

@@ -40,7 +40,7 @@ class TestForbiddenLevel:
             ("", False),
         ],
     )
-    def _is_forbidden_depth_3(self, line, expected):
+    def test_is_forbidden_depth_3(self, line, expected):
         checker = make_checker(forbidden_depth=3)
         assert checker._is_forbidden_depth(line) is expected
 
@@ -52,7 +52,7 @@ class TestForbiddenLevel:
             ("1.1.1.", True),
         ],
     )
-    def _is_forbidden_depth_2(self, line, expected):
+    def test_is_forbidden_depth_2(self, line, expected):
         checker = make_checker(forbidden_depth=2)
         assert checker._is_forbidden_depth(line) is expected
 
@@ -65,7 +65,7 @@ class TestForbiddenLevel:
             ("1.1.1.1.", True),
         ],
     )
-    def _is_forbidden_depth_4(self, line, expected):
+    def test_is_forbidden_depth_4(self, line, expected):
         checker = make_checker(forbidden_depth=4)
         assert checker._is_forbidden_depth(line) is expected
 
@@ -95,6 +95,8 @@ class TestCheck:
 
         assert result["score"] == 0.0
         assert "пунктов глубже" in str(result["verdict"])
+        assert "глубина превышает 2" in str(result["verdict"])
+        assert "{self.forbidden_depth" not in str(result["verdict"])
 
     def test_no_content_section(self):
         paragraphs = [

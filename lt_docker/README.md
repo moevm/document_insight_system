@@ -1,13 +1,14 @@
-# LanguageTool Server Docker image
-Server using for [spelling check](https://github.com/moevm/document_insight_system/blob/master/app/main/checks/report_checks/spelling_check.py)
+# LanguageTool
 
+Дополнительный сервис для критерия `spelling_check`. Запускается командой
+`make full-up-d` из корня проекта; сборка приложения — `make build-all`.
 
-Current version based on erikvl87/languagetool:6.7
+Worker обращается к `http://languagetool:8010`. Параметры сервера находятся в
+[docker-compose.yaml](docker-compose.yaml). Образ `erikvl87/languagetool` сейчас
+не закреплён тегом, поэтому версия сервера зависит от скачанного образа.
 
-Config settings:
-- 
+Для другого сервера передайте `LANGUAGETOOL_URL` явно в окружение worker.
+Записи только в `.env` недостаточно. Без доступного сервера критерий сообщает
+об ошибке обращения к LanguageTool.
 
-
-Original source:
-- https://github.com/languagetool-org/languagetool
-- https://github.com/Erikvl87/docker-languagetool
+Общий запуск и проверка развёртывания — в [README](../README.md).
