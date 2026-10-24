@@ -1,6 +1,7 @@
 import re
 
-from ..base_check import BasePresCriterion, answer, morph
+from ..base_check import BasePresCriterion, answer
+from ..word_counts import normalize_phrase, phrase_counts
 
 
 class PresBannedWordsCheck(BasePresCriterion):
@@ -10,29 +11,31 @@ class PresBannedWordsCheck(BasePresCriterion):
 
     def __init__(self, file_info, words=tuple(), min_count=3, max_count=6):
         super().__init__(file_info)
-        self.words = [morph.normal_forms(word)[0] for word in words]
+        self.words = [normalize_phrase(word) for word in words]
+        self.warning = not bool(self.words)
         self.min_count = min_count
         self.max_count = max_count
 
     def check(self):
+        if not self.words:
+            return answer(True, 'Запрещённые слова не заданы; критерий не влияет на оценку.')
         detected_slides = {}
         result_str = f'<b>Запрещенные слова: {"; ".join(self.words)}</b><br>'
         count = 0
         for k, v in enumerate(self.file.get_text_from_slides()):
             lines_on_slides = re.split(r'\n', v)
             for index, line in enumerate(lines_on_slides):
-                words_on_line = re.split(r'[^\w-]+', line)
-                words_on_line = [morph.normal_forms(word)[0] for word in words_on_line]
-                count_banned_words = set(words_on_line).intersection(self.words)
+                counts = phrase_counts(line, self.words)
+                count_banned_words = {word for word, occurrences in counts.items() if occurrences}
                 if count_banned_words:
-                    count += len(count_banned_words)
+                    count += sum(counts.values())
                     if k not in detected_slides.keys():
                         detected_slides[k] = []
                     detected_slides[k].append(f'[{index + 1}]: {line} <b>[{"; ".join(count_banned_words)}]</b>')
         if len(detected_slides):
             result_str += 'Обнаружены запретные слова! <br><br>'
             for k, _ in detected_slides.items():
-                result_str += f'Слайд №{k}:<br>{"<br>".join(detected_slides[k])}<br><br>'
+                result_str += f'Слайд №{k + 1}:<br>{"<br>".join(detected_slides[k])}<br><br>'
         else:
             result_str = 'Пройдена!'
         result_score = 1

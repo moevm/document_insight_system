@@ -1,3 +1,5 @@
+import re
+
 from utils import name_of_image_check_results
 
 from ..base_check import BasePresCriterion, answer
@@ -25,14 +27,14 @@ class PresImageCaptureCheck(BasePresCriterion):
                 for caption in captions:
                     body_text = (
                         slide.get_text()
-                        .replace(captions[0][0], '')
+                        .replace(caption[0], '')
                         .replace(slide.get_title(), '')
                         .replace('<number>', '')
                         .replace(' ', '')
                     )
                     if body_text.strip() or slide.get_table():
                         all_captions.append(caption[0])
-                        if 'Рисунок' not in caption[0]:
+                        if not re.search(r'\bрисунок\b', caption[0], re.I):
                             slides_without_capture.add(num)
                     else:
                         if caption[0] != slide.get_title():

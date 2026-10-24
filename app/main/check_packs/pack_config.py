@@ -56,8 +56,10 @@ BASE_REPORT_CRITERION = [
     ["empty_task_page_check"],
     ["water_in_the_text_check"],
     ["report_task_tracker"],
+    ["report_3_level_in_content_check"],
     ["report_abbreviations_check"],
     ["report_was_were_check"],
+    ["banned_words_in_intro"],
 ]
 
 DEFAULT_TYPE = 'pres'
