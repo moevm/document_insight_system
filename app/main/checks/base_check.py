@@ -28,7 +28,7 @@ class BaseCriterion:
             return f'{base_pdf_link}#page={str(err)}'
 
         base_pdf_link = f'/get_pdf/{self.pdf_id}'
-        return [f'<a href="{page(e)}"target="_blank" rel="noopener">{str(e)}<a>' for e in error]
+        return [f'<a href="{page(e)}"target="_blank" rel="noopener">{str(e)}</a>' for e in error]
 
     @classmethod  # TODO: criteria can depend on params (from db)
     def description(cls, pack: str | None = None):
@@ -44,4 +44,11 @@ class BasePresCriterion(BaseCriterion):
 
 
 class BaseReportCriterion(BaseCriterion):
-    pass
+    @property
+    def is_markdown(self):
+        return getattr(self.file, 'source_format', None) == 'md'
+
+    def has_enough_pages(self):
+        # Short Markdown assignments are valid documents too. Their page count
+        # must stay real; layout requirements belong in page_counter.
+        return self.is_markdown or self.file.page_counter() >= 4

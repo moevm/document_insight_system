@@ -50,7 +50,7 @@ class SlidePPTX(SlideBasic):
                         + abs(x[3] + x[2] - (image.left + image.width))
                     ),
                 )
-                self.captions.append(sorted_size_of_shape[0])
+                self.captions.append(sorted_size_of_shape[0] if sorted_size_of_shape else ('', 0, 0, 0))
 
     def __str__(self):
         return super().__str__()

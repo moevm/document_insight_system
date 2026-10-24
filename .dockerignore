@@ -1,11 +1,20 @@
 /src
 /node_modules
 
-.venv
-.git
-.github
+.*
+!.github
+venv
+__pycache__
+
 playground
-
-
-
 lt_docker
+files
+output
+examples
+test_results
+
+# Local audit materials and operator scripts are not application sources.
+/reviews
+/run_recheck.py
+/a.sh
+/Jenkinsfile
