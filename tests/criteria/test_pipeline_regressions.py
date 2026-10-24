@@ -176,3 +176,27 @@ def test_equivalent_pack_entries_are_counted_once(md_document):
     results, score, passed = pack.check()
     assert passed and score == 1
     assert len(results) == 1
+
+
+@pytest.mark.parametrize('file_type', ['report', 'pres'])
+@pytest.mark.parametrize(
+    'identifier',
+    [
+        'https://example.org/1.23456',
+        'http://example.org/1.23456',
+        'doi.org/10.12345/abc',
+        'DOI: 10.12345/abc',
+        'doi: 10.54321/xyz',
+        'ГОСТ 2.105-95',
+        'ГОСТ Р 7.0.100-2018',
+        'гост 2.105-95',
+    ],
+)
+def test_decimal_identifiers_are_excluded_without_hiding_following_numbers(file_type, identifier):
+    checker = DecimalPlacesCheck({'file_type': {'type': file_type}}, max_decimal_places=2)
+    assert checker.find_violations_in_text(identifier) == []
+    text = f'{identifier} и значения -1,234.5678; +1.234,56789'
+    expected = [('-1,234.5678', 4), ('+1.234,56789', 5)]
+    for _ in range(2):
+        violations = checker.find_violations_in_text(text)
+        assert [(number, places) for number, places, _ in violations] == expected
