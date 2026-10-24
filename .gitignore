@@ -34,3 +34,8 @@ output/
 !tests/fixtures/reports/**/*.md
 !tests/fixtures/reports/**/*.docx
 !tests/fixtures/reports/**/*.pdf
+
+# Local operating-system metadata.
+.DS_Store
+
+!docs/pre-release-check.md
