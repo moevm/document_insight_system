@@ -3,7 +3,7 @@ from collections import defaultdict
 
 
 class DecimalPlacesCheck:
-    DECIMAL_PATTERN = r'\b\d+(?:[.,]\d+)?'
+    DECIMAL_PATTERN = r'(?<![\w.])[-+]?\d+(?:[.,]\d+)+(?!\w|[.,]\d)'
 
     EXCLUSION_PATTERNS = [
         r'https?://\S+',
@@ -36,12 +36,15 @@ class DecimalPlacesCheck:
 
         char_before = text[start_pos - 1] if start_pos > 0 else ' '
 
-        if char_before == '.' or (char_before == ',' and start_pos > 1 and text[start_pos - 2].isdigit()):
+        separators = re.findall(r'[.,]', match.group())
+        if len(separators) > 1 and len(set(separators)) == 1:
+            return False  # Dates, IP addresses, numbering and grouped integers.
+        if char_before == '.':
             return False
 
         if end_pos < len(text):
             char_after = text[end_pos]
-            if char_after in '.,' and end_pos + 1 < len(text) and text[end_pos + 1].isdigit():
+            if char_after == '.' and end_pos + 1 < len(text) and text[end_pos + 1].isdigit():
                 return False
 
         return True
@@ -50,7 +53,7 @@ class DecimalPlacesCheck:
         normalized = number_str.replace(',', '.')
 
         if '.' in normalized:
-            decimal_part = normalized.split('.')[1]
+            decimal_part = normalized.rsplit('.', 1)[1]
             return len(decimal_part)
 
         return 0

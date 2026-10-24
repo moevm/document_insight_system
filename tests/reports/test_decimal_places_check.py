@@ -131,9 +131,9 @@ class TestReportDecimalPlacesCheck:
         result = self._check(reports_fixture_dir, "valid.md", "Точность равна 0.98. Далее текст")
         assert result["score"] == 1.0
 
-    def test_27_number_with_unit(self, reports_fixture_dir):
-        result = self._check(reports_fixture_dir, "invalid.md", "Длина 1.2345мм")
-        assert result["score"] == 0.0
+    def test_27_number_attached_to_unit_is_not_standalone(self, reports_fixture_dir):
+        result = self._check(reports_fixture_dir, "valid.md", "Длина 1.2345мм")
+        assert result["score"] == 1.0
 
     def test_28_comma_separated_list(self, reports_fixture_dir):
         result = self._check(reports_fixture_dir, "invalid.md", "Значения: 1,2345, 2,3456", max_violations=5)
@@ -170,3 +170,18 @@ class TestReportDecimalPlacesCheck:
     def test_34_comma_after_word_before_number(self, reports_fixture_dir):
         result = self._check(reports_fixture_dir, "invalid.md", "Значения,1.2345")
         assert result["score"] == 0.0
+
+    def test_35_number_with_separated_unit(self, reports_fixture_dir):
+        result = self._check(reports_fixture_dir, "invalid.md", "Длина 1.2345 мм")
+        assert result["score"] == 0.0
+        assert "<b>1.2345</b>" in result["verdict"][0]
+
+    def test_36_exclusions_preserve_mixed_separators(self, reports_fixture_dir):
+        result = self._check(
+            reports_fixture_dir,
+            "invalid.md",
+            "DOI: 10.12345/abc, ГОСТ 2.105-95, https://example.org/3.14159; значение -1,234.5678",
+        )
+        assert result["score"] == 0.0
+        assert "Всего нарушений: 1" in result["verdict"][0]
+        assert "<b>-1,234.5678</b>" in result["verdict"][0]

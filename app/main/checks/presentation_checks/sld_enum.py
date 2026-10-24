@@ -12,6 +12,8 @@ class SldEnumCheck(BasePresCriterion):
         super().__init__(file_info)
 
     def check(self):
+        if not self.file.slides:
+            return answer(False, "В презентации нет слайдов.")
         error = []
         if self.file.slides[0].page_number[0] != -1:
             error.append(1)

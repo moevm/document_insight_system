@@ -1,5 +1,3 @@
-{# Accepts: header dependicies #}
-
 {% extends 'root.html' %}
 
 {% block title %}
@@ -7,44 +5,19 @@
 {% endblock title %}
 
 {% block main %}
-    
     <div class="holder row justify-content-center">
         <div class="container-fluid p-3 d-flex flex-column align-items-center">
-            {% if "error" not in config["VERSION_DATA"] %}
-                <table id="version-table">
-                    <tbody>
-                    <tr id="commit">
-                        <td class="name">Commit:</td>
-                        <td class="value">{{ config["VERSION_DATA"]["commit"] }}</td>
-                    </tr>
-                    <tr id="message">
-                        <td class="name">Commit message:</td>
-                        <td class="value">{{ config["VERSION_DATA"]["message"] }}</td>
-                    </tr>
-                    <tr id="date">
-                        <td class="name">Deploy date:</td>
-                        <td class="value">{{ config["VERSION_DATA"]["date"] }}</td>
-                    </tr>
-                    <tr id="branch">
-                        <td class="name">Branch:</td>
-                        <td class="value">{{ config["VERSION_DATA"]["branch"] }}</td>
-                    </tr>
-                    <tr id="version">
-                        <td class="name">Version:</td>
-                        <td class="value">{{ config["VERSION_DATA"]["version"] }}</td>
-                    </tr>
-                    </tbody>
-                </table>
-            {% else %}
-                <div class="error">
-                    <pre class="px-2 py-1 rounded bg-danger">{{ config["VERSION_DATA"]["error"] }}</pre>
-                    {% if "data" in config["VERSION_DATA"] %}
-                        <pre class="line-numbers">{{ config["VERSION_DATA"]["data"] }}</pre>
-                    {% endif %}
-                </div>
-            {% endif %}
+            <table id="version-table">
+                <tbody>
+                {% for key, label in [('commit', 'Commit'), ('date', 'Build date'), ('branch', 'Branch'), ('source_state', 'Source state'), ('version', 'Version')] %}
+                <tr id="{{ key | replace('_', '-') }}">
+                    <td class="name">{{ label }}:</td>
+                    <td class="value">{{ config['BUILD_INFO'][key] }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-<script src={{ url_for("static", filename="version.js") }}></script>
-
+<script src={{ url_for('static', filename='version.js') }}></script>
 {% endblock main %}
