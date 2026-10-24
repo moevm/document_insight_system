@@ -19,6 +19,12 @@ class StatisticTestSelenium(BasicSeleniumTest):
     # диапазон, в который не попадёт ни одна реальная загрузка
     NO_DATES = '01.01.1900 00:00 - 02.01.1900 00:00'
 
+    PAGE_SIZE_TOGGLE = (By.CSS_SELECTOR, '.fixed-table-pagination .page-list .dropdown-toggle')
+    LATEST_BUTTON = (By.NAME, "LatestChecks")
+
+    DEFAULT_PAGE_SIZE = 10
+    DEFAULT_PAGE_NUMBER = 1
+
     def open_check_list(self, filters=None):
         self.authorization()
         url = self.get_url(self.CHECK_LIST_URL)
@@ -152,3 +158,96 @@ class StatisticTestSelenium(BasicSeleniumTest):
         self.wait_for_rows_or_empty()
         self.assertEqual(len(self.get_data_rows()), 0)
         self.assertNotEqual(self.get_driver().find_elements(*self.NO_RECORDS), [])
+
+    # pagination
+
+    @staticmethod
+    def page_size_item_locator(size):
+        return (
+            By.XPATH,
+            '//div[contains(@class, "page-list")]//a[normalize-space()="{}"]'.format(size),
+        )
+
+    @staticmethod
+    def page_link_locator(page):
+        return (
+            By.XPATH,
+            '//div[contains(@class, "fixed-table-pagination")]'
+            '//ul[contains(@class, "pagination")]'
+            '//a[normalize-space()="{}"]'.format(page),
+        )
+
+    def get_table_option(self, name):
+        return self.get_driver().execute_script(
+            "return $('#check-list-table').bootstrapTable('getOptions').{};".format(name)
+        )
+
+    def wait_url_param(self, name, value):
+        WebDriverWait(self.get_driver(), 10).until(lambda driver: self.url_param(driver.current_url, name) == value)
+
+    def latest_button(self):
+        buttons = self.get_driver().find_elements(*self.LATEST_BUTTON)
+        if not buttons:
+            self.skipTest('The Latest checks button is unavailable for the current user')
+        return buttons[0]
+
+    def test_page_size_and_number_defaults(self):
+        # При открытии списка размер страницы — 10, номер страницы - 1
+        self.open_check_list()
+        self.wait_for_rows_or_empty()
+        self.assertEqual(self.get_table_option('pageSize'), self.DEFAULT_PAGE_SIZE)
+        self.assertEqual(self.get_table_option('pageNumber'), self.DEFAULT_PAGE_NUMBER)
+
+    def test_page_size_and_number_after_reload(self):
+        # После перезагрузки страницы размер и номер страницы возвращаются к значениям по умолчанию
+        self.open_check_list()
+        self.wait_for_rows_or_empty()
+        self.get_driver().refresh()
+        WebDriverWait(self.get_driver(), 30).until(EC.presence_of_element_located(self.SCORE_INPUT))
+        self.wait_for_rows_or_empty()
+        self.assertEqual(self.get_table_option('pageSize'), self.DEFAULT_PAGE_SIZE)
+        self.assertEqual(self.get_table_option('pageNumber'), self.DEFAULT_PAGE_NUMBER)
+
+    def test_page_size_change_is_sent_to_server(self):
+        # При смене размера страницы через интерфейс новый размер уходит на сервер
+        self.open_check_list()
+        self.wait_for_rows_or_empty()
+        self.get_driver().find_element(*self.PAGE_SIZE_TOGGLE).click()
+        item = WebDriverWait(self.get_driver(), 10).until(
+            EC.visibility_of_element_located(self.page_size_item_locator(25))
+        )
+        item.click()
+        self.wait_url_param('limit', '25')
+        self.assertEqual(self.get_table_option('pageSize'), 25)
+
+    def test_page_number_change_is_sent_to_server(self):
+        # При переходе на вторую страницу номер страницы уходит на сервер
+        self.open_check_list()
+        self.wait_for_rows_or_empty()
+        links = self.get_driver().find_elements(*self.page_link_locator(2))
+        if not links:
+            self.skipTest('In the system there are not enough checks for the second page')
+        links[0].click()
+        WebDriverWait(self.get_driver(), 10).until(lambda driver: self.get_table_option('pageNumber') == 2)
+        self.wait_url_param('offset', '10')
+
+    def test_latest_checks_toggle_is_saved_in_url(self):
+        # Кнопка 'Последняя проверка' добавляет latest=true в адрес страницы
+        self.open_check_list()
+        self.wait_for_rows_or_empty()
+        self.latest_button().click()
+        self.wait_url_param('latest', 'true')
+
+    def test_latest_checks_is_restored_after_reload(self):
+        # Режим 'Последняя проверка' сохраняется после перезагрузки, размер и номер страницы
+        # возвращаются к значениям по умолчанию
+        self.open_check_list()
+        self.wait_for_rows_or_empty()
+        self.latest_button().click()
+        self.wait_url_param('latest', 'true')
+        self.get_driver().refresh()
+        WebDriverWait(self.get_driver(), 30).until(EC.presence_of_element_located(self.SCORE_INPUT))
+        self.wait_for_rows_or_empty()
+        self.wait_url_param('latest', 'true')
+        self.assertEqual(self.get_table_option('pageSize'), self.DEFAULT_PAGE_SIZE)
+        self.assertEqual(self.get_table_option('pageNumber'), self.DEFAULT_PAGE_NUMBER)
