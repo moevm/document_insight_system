@@ -33,6 +33,6 @@ def create_report_file_info(report_path, report_type="VKR", pdf_id=None):
         "pdf_id": pdf_id,
         "file_type": {
             "report_type": report_type,
-            "type": report_type,
+            "type": "report",
         },
     }

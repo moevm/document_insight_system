@@ -13,9 +13,11 @@ class ReportHeadersReferencesCheck(BaseReportCriterion):
     def __init__(self, file_info):
         super().__init__(file_info)
         self.headers = []
+        self.headers_page = 1
         self.chapters = []
 
     def late_init(self):
+        self.headers_page = self.file.find_header_page(self.file_type['report_type'])
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
         self.headers = self.find_headers()
 
@@ -53,7 +55,9 @@ class ReportHeadersReferencesCheck(BaseReportCriterion):
         for header in self.chapters:
             headers.append({'text': header['text'], 'page': -1})  # страницы нет = -1
 
-        main_headers = self.file.make_headers(self.file_type['report_type'])
+        main_headers = (
+            self.file.make_headers(self.file_type['report_type']) if hasattr(self.file, 'make_headers') else []
+        )
         for main_header in main_headers:
             for header in headers:
                 if main_header['name'] == header['text']:
