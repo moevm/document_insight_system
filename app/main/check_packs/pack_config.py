@@ -59,6 +59,7 @@ BASE_REPORT_CRITERION = [
     ["report_3_level_in_content_check"],
     ["report_abbreviations_check"],
     ["report_was_were_check"],
+    ["report_gaps_between_title_and_text_check"],
 ]
 
 DEFAULT_TYPE = 'pres'
