@@ -80,13 +80,14 @@ class ReportTablePercentageCheck(BaseReportCriterion):
     def get_percent_of_tables(self) -> float:
         """Функция получение процента таблиц в документе"""
         doc_docx = self.file.file
+        self._large_tables = []
 
         page_count = self.file.page_counter()
         if page_count == 0:
             return 0
 
         section = doc_docx.sections[0]
-        page_height = section.page_height.pt
+        page_height = section.page_height.pt - section.top_margin.pt - section.bottom_margin.pt
         total_height = page_height * page_count
 
         if total_height == 0:
@@ -100,11 +101,15 @@ class ReportTablePercentageCheck(BaseReportCriterion):
             end_index = self.find_table_index_after_text('ПРИЛОЖЕНИЕ')
             end_index = end_index if end_index is not None else len(doc_docx.tables)
 
+        chapters = self.file.make_chapters(self.file_type['report_type'])
+        first_heading = chapters[0]['text'] if chapters else None
+        start_index = self.find_table_index_after_text(first_heading) if first_heading else 0
+        start_index = len(doc_docx.tables) if start_index is None else start_index
         for table_index, table in enumerate(doc_docx.tables):
-            if table_index < end_index:
+            if start_index <= table_index < end_index:
                 table_height = self.height_table(table)
                 if table_height > page_height * self._max_pages_table:
-                    self._large_tables.append(table_index)
+                    self._large_tables.append(table_index + 1)
                 tables_height += table_height
 
         percentage = (tables_height / total_height) * 100
@@ -114,7 +119,14 @@ class ReportTablePercentageCheck(BaseReportCriterion):
         """Функция находит первый индекс таблицы после target_text, если не найден, то вернет None"""
         doc_docx = self.file.file
         for _, paragraph in enumerate(doc_docx.paragraphs):
-            if target_text in paragraph.text:
+            if target_text and (
+                (
+                    target_text == 'ПРИЛОЖЕНИЕ'
+                    and paragraph.text.startswith(target_text)
+                    and 'heading' in paragraph.style.name.lower()
+                )
+                or paragraph.text.strip() == target_text
+            ):
                 para_elem = paragraph._element
                 following_tables = para_elem.xpath('./following-sibling::w:tbl')
 
@@ -133,6 +145,8 @@ class ReportTablePercentageCheck(BaseReportCriterion):
         return start_index, end_index
 
     def check(self):
+        if self.is_markdown:
+            return answer(False, 'Проверка доли таблиц применима к отчётам DOCX.')
         try:
             percent_tables = self.get_percent_of_tables()
 

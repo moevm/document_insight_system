@@ -1,8 +1,10 @@
+import os
 from logging import getLogger
 from time import perf_counter
 from typing import Iterator
 
 from language_tool_python import LanguageTool, exceptions
+from requests.exceptions import RequestException
 
 from ..base_check import BaseReportCriterion, answer
 
@@ -15,7 +17,11 @@ class LanguageToolWrapper:
 
     def __init__(self, fixed_suggestion: int = 2):
         if not self.__class__.client:
-            self.__class__.client = LanguageTool('ru-RU', mother_tongue='ru', remote_server="languagetool:8010")
+            self.__class__.client = LanguageTool(
+                'ru-RU',
+                mother_tongue='ru',
+                remote_server=os.environ.get("LANGUAGETOOL_URL", "http://languagetool:8010"),
+            )
         self.rules_sort = (
             'MORFOLOGIK_RULE_RU_RU',
             'Verb_comma_Verb',
@@ -108,21 +114,19 @@ class SpellingCheck(BaseReportCriterion):
         self.max_errors_count = max_errors_count
 
     def check(self):
-        if self.file.page_counter() < 4:
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         try:
             spell_checker = LanguageToolWrapper()
-            if literature_page := self.file.find_literature_page():
-                literature_page -= 1  # page before literature
-            main_text_page = 3
+            literature_page = self.file.find_literature_page(self.file_type['report_type'])
+            end_page = literature_page - 1 if literature_page else None
+            main_text_page = 1 if self.is_markdown else 3
 
-            spell_checker.check_pages(
-                enumerate(
-                    self.file.pdf_file.get_text_on_page(start_page=main_text_page, end_page=literature_page).values(),
-                    start=main_text_page,
-                )
-            )
-        except exceptions.LanguageToolError as exc:
+            pages = self.file.pdf_file.get_text_on_page(start_page=main_text_page, end_page=end_page)
+            if not pages:
+                return answer(0, 'Не найден текст для проверки орфографии.')
+            spell_checker.check_pages(pages.items())
+        except (exceptions.LanguageToolError, RequestException) as exc:
             logger.error(f"LanguageToolError: {exc}")
             return answer(0, "Сервер проверки орфографии сейчас недоступен - проверка пропущена.")
 

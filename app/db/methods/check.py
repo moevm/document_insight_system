@@ -1,14 +1,12 @@
 from datetime import datetime
 
 import pymongo
-from gridfs import NoFile
 
 from app.db.db_main import get_checks_collection, get_files_info_collection, get_users_collection
-from app.db.methods.client import get_db, get_fs
+from app.db.methods.client import get_db
 from app.db.types.Check import Check
 
 db = get_db()
-fs = get_fs()
 
 checks_collection = get_checks_collection()
 
@@ -32,28 +30,6 @@ def get_check(checks_id):
         return Check(checks)
     else:
         return None
-
-
-# Returns presentations parsed_file with given id or None
-
-
-def get_checks_pdf(checks_id):
-    checks = checks_collection.find_one({'_id': checks_id})
-    pdf_id = checks.get('conv_pdf_fs_id')
-    try:
-        return fs.open_download_stream(pdf_id)
-    except NoFile:
-        return None
-
-
-def delete_check(presentation, checks_id):
-    if checks_id in presentation.checks:
-        files_info_collection.update_one({'_id': presentation._id}, {"$pull": {'checks': checks_id}})
-        checks = Check(checks_collection.find_one_and_delete({'_id': checks_id}))
-        fs.delete(checks_id)
-        return presentation, checks
-    else:
-        return presentation, get_check(checks_id)
 
 
 def get_unpassed_checks():
@@ -96,10 +72,6 @@ def get_latest_check_cursor(filter, *args, **kwargs):
     return get_latest_users_check(filter)
 
 
-def get_all_checks():
-    return checks_collection.find()
-
-
 def get_checks(filter=None, latest=None, limit=10, offset=0, sort=None, order=None):
     filter = filter or {}
     if latest:
@@ -122,14 +94,3 @@ def get_checks_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
     rows = rows.limit(limit) if limit else rows
 
     return rows, count
-
-
-# get logs cursor with specified parameters
-
-
-def get_user_checks(login):
-    return checks_collection.find({'user': login})
-
-
-def get_check_stats(oid):
-    return checks_collection.find_one({'_id': oid})

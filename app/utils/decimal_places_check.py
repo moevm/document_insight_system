@@ -3,7 +3,7 @@ from collections import defaultdict
 
 
 class DecimalPlacesCheck:
-    DECIMAL_PATTERN = r'\b\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?\b'
+    DECIMAL_PATTERN = r'(?<![\w.])[-+]?\d+(?:[.,]\d+)+(?!\w|[.,]\d)'
 
     def __init__(self, file_info, max_decimal_places=2, max_violations=3):
         self.file_type = file_info['file_type']['type']
@@ -16,6 +16,9 @@ class DecimalPlacesCheck:
 
         char_before = text[start_pos - 1] if start_pos > 0 else ' '
 
+        separators = re.findall(r'[.,]', match.group())
+        if len(separators) > 1 and len(set(separators)) == 1:
+            return False  # Dates, IP addresses, numbering and grouped integers.
         if char_before == '.':
             return False
 
@@ -30,7 +33,7 @@ class DecimalPlacesCheck:
         normalized = number_str.replace(',', '.')
 
         if '.' in normalized:
-            decimal_part = normalized.split('.')[1]
+            decimal_part = normalized.rsplit('.', 1)[1]
             return len(decimal_part)
 
         return 0

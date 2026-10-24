@@ -12,14 +12,17 @@ class PresRightWordsCheck(BasePresCriterion):
         super().__init__(file_info)
         patterns = patterns if patterns else []
         self.patterns = dict.fromkeys(patterns, False)
+        self.warning = not bool(self.patterns)
 
     def check(self):
+        if not self.patterns:
+            return answer(True, 'Шаблоны поиска не заданы; критерий не влияет на оценку.')
         for i, text_on_page in enumerate(self.file.get_text_from_slides()):
             if i == 0:
                 continue  # skip title page
             lower_text = text_on_page.lower()
             for pattern in self.patterns:
-                if re.search(pattern, lower_text):
+                if re.search(pattern, lower_text, re.I):
                     self.patterns[pattern] = True
         result_score = 0
         if all(value for value in self.patterns.values()):

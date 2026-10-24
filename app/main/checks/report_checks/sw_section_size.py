@@ -1,3 +1,4 @@
+from copy import deepcopy
 from logging import getLogger
 
 from ..base_check import BaseReportCriterion, answer
@@ -26,13 +27,22 @@ class SWSectionSizeCheck(BaseReportCriterion):
     def __init__(self, file_info, sections_info=None):
         super().__init__(file_info)
 
-        self.sections = None
-        if sections_info in SW_CONSTANTS:
-            self.sections = SW_CONSTANTS[sections_info]
-        elif isinstance(sections_info, dict):
-            self.sections = sections_info
+        if sections_info is None:
+            sections_info = 'SW_KEY_QUESTIONS_SECTIONS'
+        if isinstance(sections_info, dict):
+            self.sections = deepcopy(sections_info)
+        elif isinstance(sections_info, str) and sections_info in SW_CONSTANTS:
+            self.sections = deepcopy(SW_CONSTANTS[sections_info])
+        else:
+            raise ValueError(f'Неизвестная конфигурация разделов: {sections_info!r}')
+
+        self.warning = not bool(self.sections)
 
     def check(self):
+        if not self.sections:
+            return answer(True, 'Правила для выбранных разделов не заданы; критерий не влияет на оценку.')
+        if not self.is_markdown:
+            return answer(False, 'Критерий предназначен для отчётов Markdown.')
         self.file.make_chapters('VKR')
         chapters = self.file.chapters_to_str()
         result = dict.fromkeys(self.sections.keys(), None)
@@ -46,6 +56,9 @@ class SWSectionSizeCheck(BaseReportCriterion):
                     'sentences': len(sentences) <= self.sections[chapter['name']]['sentences'],
                     'words': len(words) <= self.sections[chapter['name']]['words'],
                 }
+        missing = [name for name, value in result.items() if value is None]
+        if missing:
+            return answer(0, 'Не найдены разделы: ' + ', '.join(missing))
         feedback = ""
         if not all(r['sentences'] for r in result.values()):
             feedback += (

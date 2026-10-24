@@ -8,8 +8,8 @@ class TestSWSectionBannedWordsCheck:
         checker = SWSectionBannedWordsCheck(create_report_file_info(report_path), "SW_KEY_QUESTIONS_SECTIONS")
         result = checker.check()
 
-        assert result["score"] == 1.0
-        assert result["verdict"][0] == "Проверка пройдена!"
+        assert result["score"] == 0.0
+        assert "Не найдены разделы" in result["verdict"][0]
 
     def test_02_banned_word_chapter(self, reports_fixture_dir):
         report_path = reports_fixture_dir / "sw_section_banned_words" / "banned.md"
