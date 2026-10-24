@@ -355,6 +355,7 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": [
+                "Описание предметной области",
                 "Принцип отбора аналогов",
                 "Критерии сравнения аналогов",
                 "Таблица сравнения аналогов",
@@ -379,6 +380,7 @@ class StyleCheckSettings:
                 "Введение",
                 "Обзор предметной области",
                 "Выбор метода решения",
+                "Описание метода решения",
                 "Заключение",
                 "Список использованных источников",
             ],
@@ -419,4 +421,6 @@ class StyleCheckSettings:
         'NIR3_HEADERS': NIR3_CONFIG,
         'MD_HEADERS': MD_CONFIG,
         'OPNP_HEADERS': OPNP_CONFIG,
+        'SWTask2_HEADERS': {'any_header': OPNP_CONFIG['Сравнение аналогов']},
+        'SWTask3_HEADERS': {'any_header': OPNP_CONFIG['any_header']},
     }
