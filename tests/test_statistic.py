@@ -1,7 +1,7 @@
 from urllib.parse import parse_qs, urlencode, urlparse
 
 from basic_selenium_test import BasicSeleniumTest
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -37,8 +37,10 @@ class StatisticTestSelenium(BasicSeleniumTest):
         return self.get_driver().find_element(*locator).get_attribute('value')
 
     def wait_for_rows_or_empty(self):
+        self.wait_for_table_ready()
         WebDriverWait(self.get_driver(), 30).until(
-            lambda driver: driver.find_elements(*self.DATA_ROWS) or driver.find_elements(*self.NO_RECORDS)
+            lambda driver: driver.find_elements(*self.DATA_ROWS)
+                           or driver.find_elements(*self.NO_RECORDS)
         )
 
     def get_data_rows(self):
@@ -178,9 +180,39 @@ class StatisticTestSelenium(BasicSeleniumTest):
         )
 
     def get_table_option(self, name):
+        self.wait_for_table_ready()
         return self.get_driver().execute_script(
-            "return $('#check-list-table').bootstrapTable('getOptions').{};".format(name)
+            "return window.jQuery('#check-list-table')"
+            ".bootstrapTable('getOptions')[arguments[0]];",
+            name,
         )
+
+    def wait_for_table_ready(self, timeout=30):
+        WebDriverWait(self.get_driver(), timeout).until(
+            lambda d: d.execute_script(
+                "try {"
+                "  if (typeof window.jQuery === 'undefined') return false;"
+                "  var $t = window.jQuery('#check-list-table');"
+                "  if (!$t.length) return false;"
+                "  if (!$t.data('bootstrap.table')) return false;"
+                "  var opts = $t.bootstrapTable('getOptions');"
+                "  return opts && typeof opts.pageSize === 'number';"
+                "} catch (e) { return false; }"
+            )
+        )
+
+    def safe_click(self, locator, retries=3, timeout=10):
+        last_exc = None
+        for _ in range(retries):
+            try:
+                WebDriverWait(self.get_driver(), timeout).until(
+                    EC.element_to_be_clickable(locator)
+                ).click()
+                return
+            except StaleElementReferenceException as exc:
+                last_exc = exc
+        if last_exc is not None:
+            raise last_exc
 
     def wait_url_param(self, name, value):
         WebDriverWait(self.get_driver(), 10).until(lambda driver: self.url_param(driver.current_url, name) == value)
@@ -212,11 +244,11 @@ class StatisticTestSelenium(BasicSeleniumTest):
         # При смене размера страницы через интерфейс новый размер уходит на сервер
         self.open_check_list()
         self.wait_for_rows_or_empty()
-        self.get_driver().find_element(*self.PAGE_SIZE_TOGGLE).click()
-        item = WebDriverWait(self.get_driver(), 10).until(
+        self.safe_click(self.PAGE_SIZE_TOGGLE)
+        WebDriverWait(self.get_driver(), 10).until(
             EC.visibility_of_element_located(self.page_size_item_locator(25))
         )
-        item.click()
+        self.safe_click(self.page_size_item_locator(25))
         self.wait_url_param('limit', '25')
         self.assertEqual(self.get_table_option('pageSize'), 25)
 
@@ -224,11 +256,12 @@ class StatisticTestSelenium(BasicSeleniumTest):
         # При переходе на вторую страницу номер страницы уходит на сервер
         self.open_check_list()
         self.wait_for_rows_or_empty()
-        links = self.get_driver().find_elements(*self.page_link_locator(2))
-        if not links:
+        if not self.get_driver().find_elements(*self.page_link_locator(2)):
             self.skipTest('In the system there are not enough checks for the second page')
-        links[0].click()
-        WebDriverWait(self.get_driver(), 10).until(lambda driver: self.get_table_option('pageNumber') == 2)
+        self.safe_click(self.page_link_locator(2))
+        WebDriverWait(self.get_driver(), 10).until(
+            lambda driver: self.get_table_option('pageNumber') == 2
+        )
         self.wait_url_param('offset', '10')
 
     def test_latest_checks_toggle_is_saved_in_url(self):
