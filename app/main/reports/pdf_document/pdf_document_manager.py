@@ -45,7 +45,7 @@ class PdfDocumentManager:
         return total_height
 
     def page_images_count(self, page_without_pril: int) -> int:
-        """Возвращяет кол-во изображение без учета 'Приложение'"""
+        """Возвращяет кол-во РАСТРОВЫХ изображение без учета 'Приложение'"""
         images_count = 0
         pages_count = min(page_without_pril, self.page_count_all)
         for page_num in range(pages_count):

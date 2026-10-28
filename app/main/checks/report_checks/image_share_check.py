@@ -3,7 +3,10 @@ from ..base_check import BaseReportCriterion, answer
 
 class ReportImageShareCheck(BaseReportCriterion):
     label = "Проверка доли объема отчёта, приходящейся на изображения"
-    _description = 'Доля изображений (не включая "Приложение") не должна превышать 0,9 и минимального количества'
+    _description = (
+        "Доля изображений (Не включая 'Приложение') не должна превышать заданного порога и "
+        + "минимального кол-ва РАСТРОВЫХ изображений. (Критерий учитывает только растровые изображения)"
+    )
     id = 'image_share_check'
     warning = True
 
@@ -37,10 +40,12 @@ class ReportImageShareCheck(BaseReportCriterion):
             )
             return answer(False, result_str)
 
+        # Считает только растровые изображения.
         cnt_img = self.file.pdf_file.page_images_count(page_without_pril=self.file.page_count)
         if cnt_img < self.min_cnt_img:
             result_str = (
-                f"Проверка не пройдена! Кол-во изображний меньше минимального количества: {cnt_img}/{self.min_cnt_img}"
+                "Проверка не пройдена! "
+                + f"Кол-во Растровых изображний меньше минимального количества: {cnt_img}/{self.min_cnt_img}"
             )
             return answer(False, result_str)
 
