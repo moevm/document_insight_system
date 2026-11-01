@@ -44,6 +44,9 @@
                 <span><i class="dot dot_position"></i>Сдвиг</span>
             </div>
         {% elif fmt == 'docx' %}
+            <div class="diff_stats">
+                <span class="diff_chip">Схожесть текста: {{ '%.1f'|format(data.jaccard_similarity * 100) }}%</span>
+            </div>
             <div class="diff_legend">
                 <span><i class="dot dot_deleted"></i>Удалено</span>
                 <span><i class="dot dot_added"></i>Добавлено</span>

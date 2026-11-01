@@ -1,11 +1,23 @@
 import difflib
 import os
+import re
 
 import docx
 import pymupdf as fitz
+from pymorphy3 import MorphAnalyzer
 
 from app.document_diff.docx_content import build_combined_doc
 from app.document_diff.docx_pdf import collect_fragments, save_pdf
+
+MORPH_ANALYZER = MorphAnalyzer()
+
+
+def jaccard_similarity(text_a, text_b):
+    words_a = {MORPH_ANALYZER.parse(word)[0].normal_form for word in re.findall(r'\w+', text_a.lower())}
+    words_b = {MORPH_ANALYZER.parse(word)[0].normal_form for word in re.findall(r'\w+', text_b.lower())}
+    if not words_a and not words_b:
+        return 1.0
+    return len(words_a & words_b) / len(words_a | words_b)
 
 
 def compare_docx(docx_a_path, docx_b_path, comparison_id):
@@ -29,4 +41,4 @@ def compare_docx(docx_a_path, docx_b_path, comparison_id):
         pdf_a.close()
         pdf_b.close()
         raise
-    return {'fragments': fragments}
+    return {'fragments': fragments, 'jaccard_similarity': jaccard_similarity(' '.join(text_a), ' '.join(text_b))}

@@ -29,7 +29,11 @@ def _file_url(comparison_id, filename, download=False):
 
 def _result_data(comparison_id, meta):
     if meta['fmt'] == 'docx':
-        return {'format': 'docx', 'fragments': meta.get('fragments', [])}
+        return {
+            'format': 'docx',
+            'fragments': meta.get('fragments', []),
+            'jaccard_similarity': meta.get('jaccard_similarity', 0),
+        }
     mapping = []
     for item in meta.get('mapping', []):
         item = item.copy()
