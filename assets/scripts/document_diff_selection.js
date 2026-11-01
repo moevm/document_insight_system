@@ -15,6 +15,19 @@ export function initDocumentSelection(form) {
     let activeSide, timer;
     const clearError = () => error.classList.add('d-none');
     const showError = message => { error.textContent = message; error.classList.remove('d-none'); };
+    const savedParams = new URLSearchParams(window.location.search);
+    const savedFormat = savedParams.get('format');
+    const hasSavedFilters = FILTERS.some(name => savedParams.has(name));
+    if (savedFormat === 'docx' || savedFormat === 'pptx') {
+        const formatInput = form.querySelector(`input[name="format"][value="${savedFormat}"]`);
+        formatInput.checked = true;
+        form.querySelectorAll('#format-toggle label').forEach(label => {
+            label.classList.toggle('active', label.contains(formatInput));
+        });
+    }
+    FILTERS.forEach(name => {
+        form.elements[name].value = savedParams.get(name) || '';
+    });
     const update = () => {
         compare.disabled = !['first', 'second'].every(side => document.getElementById(`${side}-file`).files.length || document.getElementById(`${side}-document-id`).value);
     };
@@ -43,8 +56,10 @@ export function initDocumentSelection(form) {
         });
     };
     const load = () => {
-        clearError(); const query = new URLSearchParams({ format: form.elements.format.value });
+        clearError();
+        const query = new URLSearchParams({ format: form.elements.format.value });
         FILTERS.forEach(name => form.elements[name].value && query.set(name, form.elements[name].value));
+        window.history.replaceState({}, '', `${window.location.pathname}?${query}`);
         fetch(`/document_diff/data?${query}`).then(async response => {
             const data = await response.json(); if (!response.ok) throw Error(data.error); return data;
         }).then(data => render(data.rows)).catch(exception => showError(exception.message));
@@ -64,11 +79,21 @@ export function initDocumentSelection(form) {
         ['first', 'second'].forEach(side => { document.getElementById(`${side}-file`).accept = accepted; document.getElementById(`${side}-file`).value = ''; document.getElementById(`${side}-document-id`).value = ''; }); update();
     }));
     document.getElementById('find-system-documents').addEventListener('click', load);
-    document.getElementById('reset-system-document-filters').addEventListener('click', () => { FILTERS.forEach(name => form.elements[name].value = ''); rows.replaceChildren(); clearError(); });
+    document.getElementById('reset-system-document-filters').addEventListener('click', () => {
+        FILTERS.forEach(name => form.elements[name].value = '');
+        window.history.replaceState({}, '', window.location.pathname);
+        rows.replaceChildren();
+        clearError();
+    });
     document.getElementById('filter-student').addEventListener('input', event => {
         clearTimeout(timer); timer = setTimeout(() => fetch(`/document_diff/student-suggestions?query=${encodeURIComponent(event.target.value)}`).then(response => response.json()).then(data => {
             const list = document.getElementById('student-suggestions'); list.replaceChildren(); data.items.forEach(item => { const option = document.createElement('option'); option.value = item; list.appendChild(option); });
         }), 250);
     });
     update();
+    if (hasSavedFilters) {
+        panel.classList.remove('d-none');
+        filters.classList.remove('d-none');
+        load();
+    }
 }

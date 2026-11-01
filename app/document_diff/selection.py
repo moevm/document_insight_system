@@ -5,7 +5,7 @@ from bson import ObjectId
 from app.db.methods.check import get_checks_cursor
 from app.db.methods.user import get_user, get_user_cursor
 from app.document_diff.service import ALLOWED_EXTENSIONS
-from app.utils import checklist_filter, format_check_for_table
+from app.utils import checklist_filter, format_check_for_table, timezone_offset
 
 
 def comparison_filter(data, format_name):
@@ -41,9 +41,11 @@ def _add_id_and_date_filter(query, document_id, date_from, date_to):
     date_filter = {}
     try:
         if date_from:
-            date_filter['$gte'] = ObjectId.from_datetime(datetime.fromisoformat(date_from))
+            date_filter['$gte'] = ObjectId.from_datetime(datetime.fromisoformat(date_from) - timezone_offset)
         if date_to:
-            date_filter['$lt'] = ObjectId.from_datetime(datetime.fromisoformat(date_to) + timedelta(seconds=1))
+            date_filter['$lt'] = ObjectId.from_datetime(
+                datetime.fromisoformat(date_to) - timezone_offset + timedelta(minutes=1)
+            )
     except ValueError as error:
         raise ValueError('Укажите корректные дату и время') from error
     if identifier and date_filter:

@@ -7,6 +7,7 @@ from basic_selenium_test import BasicSeleniumTest
 from test_admin_criterions_page import AdminCriterionsTestSelenium
 from test_authorization import AuthTestSelenium
 from test_criterion_packs_page import CriterionPacksTestSelenium
+from test_document_diff import DocumentDiffTestSelenium
 from test_file_load import FileLoadTestSelenium
 from test_single_card_check import SingleCheckTestSelenium
 from test_statistic import StatisticTestSelenium
@@ -53,6 +54,7 @@ def main():
         VersionTestSelenium,
         CriterionPacksTestSelenium,
         AdminCriterionsTestSelenium,
+        DocumentDiffTestSelenium,
     )
 
     param = (args.host, args.login, args.password, args.report, args.report_doc, args.pres)
