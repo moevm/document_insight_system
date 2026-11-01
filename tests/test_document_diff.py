@@ -31,9 +31,7 @@ class DocumentDiffTestSelenium(BasicSeleniumTest):
         self.begin()
 
         format_pptx = self.get_driver().find_element(By.CSS_SELECTOR, 'input[name="format"][value="pptx"]')
-        self.get_driver().find_element(
-            By.XPATH, '//input[@name="format" and @value="pptx"]/parent::label'
-        ).click()
+        self.get_driver().find_element(By.XPATH, '//input[@name="format" and @value="pptx"]/parent::label').click()
         WebDriverWait(self.driver, 10).until(
             lambda driver: driver.find_element(By.ID, 'first-file').get_attribute('accept') == '.ppt,.pptx,.odp'
         )
@@ -47,9 +45,7 @@ class DocumentDiffTestSelenium(BasicSeleniumTest):
         self.begin()
 
         self.get_driver().find_element(By.CSS_SELECTOR, '.find-system-document[data-side="first"]').click()
-        WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located((By.ID, 'system-document-search'))
-        )
+        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.ID, 'system-document-search')))
         table = self.get_driver().find_element(By.ID, 'document-diff-table')
 
         self.assertTrue(table.is_displayed())
