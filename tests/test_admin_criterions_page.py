@@ -1,8 +1,8 @@
 from basic_selenium_test import BasicSeleniumTest
 from selenium.webdriver.common.by import By
 
-class AdminCriterionsTestSelenium(BasicSeleniumTest):
 
+class AdminCriterionsTestSelenium(BasicSeleniumTest):
     def begin(self):
         self.authorization()
         URL = self.get_url('/admin')
@@ -15,7 +15,6 @@ class AdminCriterionsTestSelenium(BasicSeleniumTest):
             URL = self.get_url('/admin/criterions')
             self.get_driver().get(URL)
             self.get_driver().implicitly_wait(30)
-
 
     def test_open_criterions_list(self):
         self.begin()
@@ -33,5 +32,7 @@ class AdminCriterionsTestSelenium(BasicSeleniumTest):
         self.begin()
         button = self.driver.find_element(By.XPATH, '//table[contains(@class, "table")]//tbody/tr[1]/td[1]/i')
         button.click()
-        description = self.driver.find_element(By.XPATH, '//table[contains(@class, "table")]//tbody/tr[2]/td').text.strip()
+        description = self.driver.find_element(
+            By.XPATH, '//table[contains(@class, "table")]//tbody/tr[2]/td'
+        ).text.strip()
         self.assertNotEqual(description, None)

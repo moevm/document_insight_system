@@ -26,8 +26,9 @@ class DocumentInfo:
         self.datetime_modified = datetime_modified
 
     def __str__(self):
-        return "document.DocumentInfo object:\nAuthor: {0}\nCreated: {1}\nModified: {2}" \
-            .format(self.author, self.datetime_created, self.datetime_modified)
+        return "document.DocumentInfo object:\nAuthor: {0}\nCreated: {1}\nModified: {2}".format(
+            self.author, self.datetime_created, self.datetime_modified
+        )
 
 
 def main(args):

@@ -22,5 +22,8 @@ class SldEnumCheck(BasePresCriterion):
             return answer(True, "Пройдена!")
         else:
             error = self.format_page_link(error)
-            return answer(False, format_header('Не пройдена, проблемные слайды: {}'.format(', '.join(map(str, error)))), \
-                          'Убедитесь в корректности формата номеров слайдов')
+            return answer(
+                False,
+                format_header('Не пройдена, проблемные слайды: {}'.format(', '.join(map(str, error)))),
+                'Убедитесь в корректности формата номеров слайдов',
+            )

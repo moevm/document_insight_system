@@ -1,4 +1,5 @@
 from app.utils import tict
+
 from ..slide_basic import SlideBasic
 
 

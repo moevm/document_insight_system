@@ -1,10 +1,10 @@
-import os
 import time
+
 from basic_selenium_test import BasicSeleniumTest
 from selenium.webdriver.common.by import By
 
-class AuthTestSelenium(BasicSeleniumTest):
 
+class AuthTestSelenium(BasicSeleniumTest):
     def check_auth(self, login_param, password_param):
         URL = self.get_url('/login/')
         self.get_driver().get(URL)
@@ -23,7 +23,7 @@ class AuthTestSelenium(BasicSeleniumTest):
         self.get_driver().get(URL)
         self.get_driver().implicitly_wait(30)
         obj = self.get_driver().find_element(By.CLASS_NAME, "form-group")
-        self.assertNotEquals(obj, None)    
+        self.assertNotEquals(obj, None)
 
     def test_failed_auth(self):
         host, login, password = self.param[:3]

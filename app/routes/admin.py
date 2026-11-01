@@ -1,6 +1,8 @@
-from flask import abort, Blueprint, render_template
-from flask_login import current_user
 from functools import wraps
+
+from flask import Blueprint, abort, render_template
+from flask_login import current_user
+
 from app.main.checks import CRITERIA_INFO
 
 admin = Blueprint('admin', __name__, template_folder='templates', static_folder='static')
@@ -12,6 +14,7 @@ def admin_required(route_func):
         if current_user and current_user.is_admin:
             return route_func(*args, **kwargs)
         abort(403)
+
     return my_wrapper
 
 

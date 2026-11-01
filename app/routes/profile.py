@@ -1,7 +1,6 @@
 from flask import Blueprint, abort
 from flask_login import login_required
 
-
 profile = Blueprint('profile', __name__, template_folder='templates', static_folder='static')
 
 
@@ -22,4 +21,3 @@ def profile_main(username):
     #         return render_template("./404.html")
     # else:
     #     abort(403)
-

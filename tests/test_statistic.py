@@ -1,10 +1,9 @@
-import time
 from basic_selenium_test import BasicSeleniumTest
-from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+
 
 class StatisticTestSelenium(BasicSeleniumTest):
-
     def test_open_statistic(self):
         self.authorization()
         URL = self.get_url('/check_list')

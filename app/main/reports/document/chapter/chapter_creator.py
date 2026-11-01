@@ -4,7 +4,7 @@ import docx
 from docx2python import docx2python
 
 from .chapter import Chapter
-from .chapter_object import ChapterObjectImage, ChapterObjectTable, ChapterObjectHeader
+from .chapter_object import ChapterObjectHeader, ChapterObjectImage, ChapterObjectTable
 
 
 class ChapterCreator:
@@ -22,8 +22,10 @@ class ChapterCreator:
         index = 0
         paragraph_index += 1
         flag = False
-        while len(doc.body[body_index][0][0]) >= paragraph_index + 1 \
-                and doc.body[body_index][0][0][paragraph_index] == ' ':
+        while (
+            len(doc.body[body_index][0][0]) >= paragraph_index + 1
+            and doc.body[body_index][0][0][paragraph_index] == ' '
+        ):
             paragraph_index += 1
         if len(doc.body[body_index][0][0]) == paragraph_index + 1:
             body_index += 1
@@ -36,10 +38,15 @@ class ChapterCreator:
                 if re.search(r'(ЗАКЛЮЧЕНИЕ|Заключение|заключение)', s):
                     flag = True
                     break
-                elif re.search(r'(ВВЕДЕНИЕ|Введение|введение)', s) \
-                        or re.search(r'(ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ|Определения, обозначения и сокращения|'
-                                     r'определения, обозначения и сокращения)', s) \
-                        or len(s) == len(elem):
+                elif (
+                    re.search(r'(ВВЕДЕНИЕ|Введение|введение)', s)
+                    or re.search(
+                        r'(ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ|Определения, обозначения и сокращения|'
+                        r'определения, обозначения и сокращения)',
+                        s,
+                    )
+                    or len(s) == len(elem)
+                ):
                     continue
                 else:
                     if s.split('+')[1].strip():
@@ -52,21 +59,27 @@ class ChapterCreator:
             if not flag:
                 return False, None, None
             for i in range(paragraph_index, len(doc.body[body_index][0][0])):
-                if re.search(r'(ВВЕДЕНИЕ|Введение|введение)', doc.body[body_index][0][0][i]) \
-                        or re.search(r'(ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ|Определения, обозначения и сокращения|'
-                                     r'определения, обозначения и сокращения)', doc.body[body_index][0][0][i]) \
-                        or doc.body[body_index][0][0][i] == '':
+                if (
+                    re.search(r'(ВВЕДЕНИЕ|Введение|введение)', doc.body[body_index][0][0][i])
+                    or re.search(
+                        r'(ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ|Определения, обозначения и сокращения|'
+                        r'определения, обозначения и сокращения)',
+                        doc.body[body_index][0][0][i],
+                    )
+                    or doc.body[body_index][0][0][i] == ''
+                ):
                     continue
                 elif re.search(r'(ЗАКЛЮЧЕНИЕ|Заключение|заключение)', doc.body[body_index][0][0][i]):
                     index = i + 1
                     break
                 else:
                     new_chapters.append(
-                        doc.body[body_index][0][0][i]
-                        [re.search(
-                            r'[\w. ]{2,}',
-                            doc.body[body_index][0][0][i]).start():re.search(r'[\w. ]{2,}',
-                                                                             doc.body[body_index][0][0][i]).end()])
+                        doc.body[body_index][0][0][i][
+                            re.search(r'[\w. ]{2,}', doc.body[body_index][0][0][i]).start() : re.search(
+                                r'[\w. ]{2,}', doc.body[body_index][0][0][i]
+                            ).end()
+                        ]
+                    )
         if flag:
             return True, new_chapters, index
         else:
@@ -91,26 +104,30 @@ class ChapterCreator:
                 else:
                     if indices[i][0][0] == indices[i][1][0]:
                         for _ in range(indices[i][0][1], indices[i][1][1] + 1):
-                            current_page_object.append(self.make_chapter_object(docx_docx2python, docx_docx, j, _,
-                                                                                paragraph_index))
+                            current_page_object.append(
+                                self.make_chapter_object(docx_docx2python, docx_docx, j, _, paragraph_index)
+                            )
                             paragraph_index += 1
 
                     elif j == indices[i][0][0] and j != indices[i][1][0]:
                         for _ in range(indices[i][0][1], len(docx_docx2python.body[j][0][0])):
-                            current_page_object.append(self.make_chapter_object(docx_docx2python, docx_docx, j, _,
-                                                                                paragraph_index))
+                            current_page_object.append(
+                                self.make_chapter_object(docx_docx2python, docx_docx, j, _, paragraph_index)
+                            )
                             paragraph_index += 1
 
                     elif j != indices[i][0][0] and j != indices[i][1][0]:
                         for _ in range(0, len(docx_docx2python.body[j][0][0])):
-                            current_page_object.append(self.make_chapter_object(docx_docx2python, docx_docx, j, _,
-                                                                                paragraph_index))
+                            current_page_object.append(
+                                self.make_chapter_object(docx_docx2python, docx_docx, j, _, paragraph_index)
+                            )
                             paragraph_index += 1
 
                     elif j == indices[i][1][0]:
                         for _ in range(0, indices[i][1][1] + 1):
-                            current_page_object.append(self.make_chapter_object(docx_docx2python, docx_docx, j, _,
-                                                                                paragraph_index))
+                            current_page_object.append(
+                                self.make_chapter_object(docx_docx2python, docx_docx, j, _, paragraph_index)
+                            )
                             paragraph_index += 1
 
             page_objects.append(Chapter(chapter, current_page_object))
@@ -136,7 +153,6 @@ class ChapterCreator:
         application_find_index = 0
         find_index = 0
         while cur_chapter != len(chapter_names):
-
             if not parsed_doc.body:
                 # пустой документ
                 errors = chapter_names.copy()
@@ -153,10 +169,12 @@ class ChapterCreator:
 
             if len(parsed_doc.body[cur_index]) > 1:  # table
                 cur_index += 1
-            elif chapter_names[cur_chapter] in parsed_doc.body[cur_index][0][0][find_index:] \
-                    or chapter_names[cur_chapter].lower() in parsed_doc.body[cur_index][0][0][find_index:] \
-                    and file_type != 'LR' \
-                    or chapter_names[cur_chapter].capitalize() in parsed_doc.body[cur_index][0][0][find_index:]:
+            elif (
+                chapter_names[cur_chapter] in parsed_doc.body[cur_index][0][0][find_index:]
+                or chapter_names[cur_chapter].lower() in parsed_doc.body[cur_index][0][0][find_index:]
+                and file_type != 'LR'
+                or chapter_names[cur_chapter].capitalize() in parsed_doc.body[cur_index][0][0][find_index:]
+            ):
                 if chapter_names[cur_chapter] in parsed_doc.body[cur_index][0][0][find_index:]:
                     find_chapter = chapter_names[cur_chapter]
                 elif chapter_names[cur_chapter].lower() in parsed_doc.body[cur_index][0][0][find_index:]:
@@ -164,22 +182,25 @@ class ChapterCreator:
                 else:
                     find_chapter = chapter_names[cur_chapter].capitalize()
                 if chapter_names[cur_chapter] == 'СОДЕРЖАНИЕ':
-                    is_correct, new_chapters, index = self.make_content(parsed_doc, cur_index,
-                                                                        parsed_doc.body[cur_index][0][0]
-                                                                        .index(find_chapter))
+                    is_correct, new_chapters, index = self.make_content(
+                        parsed_doc, cur_index, parsed_doc.body[cur_index][0][0].index(find_chapter)
+                    )
                     if is_correct:
-                        chapter_names = chapter_names[:cur_chapter + 3] + new_chapters + chapter_names[cur_chapter + 3:]
+                        chapter_names = (
+                            chapter_names[: cur_chapter + 3] + new_chapters + chapter_names[cur_chapter + 3 :]
+                        )
 
                         if not doc_chapters:
-                            doc_chapters.append([
-                                i_start,
-                                [cur_index, parsed_doc.body[cur_index][0][0].index(find_chapter) - 1]
-                            ])
+                            doc_chapters.append(
+                                [i_start, [cur_index, parsed_doc.body[cur_index][0][0].index(find_chapter) - 1]]
+                            )
                         else:
-                            doc_chapters.append([
-                                [doc_chapters[-1][1][0], doc_chapters[-1][1][1] + 1],
-                                [cur_index, parsed_doc.body[cur_index][0][0].index(find_chapter) - 1]
-                            ])
+                            doc_chapters.append(
+                                [
+                                    [doc_chapters[-1][1][0], doc_chapters[-1][1][1] + 1],
+                                    [cur_index, parsed_doc.body[cur_index][0][0].index(find_chapter) - 1],
+                                ]
+                            )
 
                         find_index = index
                         i_start = [doc_chapters[-1][1][0], doc_chapters[-1][1][1] + 1]
@@ -192,8 +213,10 @@ class ChapterCreator:
                     tmp_i_end[0], tmp_i_end[1] = cur_index - 1, len(parsed_doc.body[cur_index - 1][0][0]) - 1
                     i_start[0], i_start[1] = tmp_i_end[0] + 1, 0
                 else:
-                    tmp_i_end[0], tmp_i_end[1] = cur_index, parsed_doc.body[cur_index][0][0].index(find_chapter,
-                                                                                                   find_index) - 1
+                    tmp_i_end[0], tmp_i_end[1] = (
+                        cur_index,
+                        parsed_doc.body[cur_index][0][0].index(find_chapter, find_index) - 1,
+                    )
                     i_start[0], i_start[1] = tmp_i_end[0], tmp_i_end[1] + 1
                 doc_chapters.append([tmp_i_start, tmp_i_end])
                 cur_chapter += 1
@@ -207,14 +230,17 @@ class ChapterCreator:
                         if not doc_chapters:
                             doc_chapters.append([[0, 0], [i, j - 1]])
                         else:
-                            doc_chapters.append([[doc_chapters[-1][1][0], doc_chapters[-1][1][1] + 1],
-                                                 [i, j - 1]])
+                            doc_chapters.append([[doc_chapters[-1][1][0], doc_chapters[-1][1][1] + 1], [i, j - 1]])
                         application_find_index = j - 1
             cur_index += 1
         if not doc_chapters:
             if parsed_doc.body:  # empty file
                 doc_chapters.append([[0, 0], [len(parsed_doc.body) - 1, len(parsed_doc.body[-1][0][0]) - 1]])
         else:
-            doc_chapters.append([[doc_chapters[-1][1][0], doc_chapters[-1][1][1] + 1],
-                                 [len(parsed_doc.body) - 1, len(parsed_doc.body[-1][0][0]) - 1]])
+            doc_chapters.append(
+                [
+                    [doc_chapters[-1][1][0], doc_chapters[-1][1][1] + 1],
+                    [len(parsed_doc.body) - 1, len(parsed_doc.body[-1][0][0]) - 1],
+                ]
+            )
         return doc_chapters, errors

@@ -1,5 +1,4 @@
 from ..base_check import BaseReportCriterion, answer, morph
-from .style_check_settings import StyleCheckSettings
 
 
 class ReportTaskTracker(BaseReportCriterion):
@@ -7,7 +6,9 @@ class ReportTaskTracker(BaseReportCriterion):
     _description = 'Не пропускать задачи из серии "доделать, решить, описать"'
     id = 'report_task_tracker'
 
-    def __init__(self, file_info, chapter='Введение', patterns=('задач', 'объект'), deny_list=['доделать', 'решить', 'описать']):
+    def __init__(
+        self, file_info, chapter='Введение', patterns=('задач', 'объект'), deny_list=('доделать', 'решить', 'описать')
+    ):
         super().__init__(file_info)
         self.chapter = chapter
         self.chapters = []
@@ -31,7 +32,9 @@ class ReportTaskTracker(BaseReportCriterion):
                 if normal_form in self.deny_list:
                     word_in_docs.append(word)
         if word_in_docs:
-            return answer(False, f'Задачи не должны содержать слова: {self.deny_list}! Обнаруженные слова: {word_in_docs}.')
+            return answer(
+                False, f'Задачи не должны содержать слова: {self.deny_list}! Обнаруженные слова: {word_in_docs}.'
+            )
         else:
             return answer(True, 'Задачи сформулированы корректно!')
 
@@ -49,10 +52,9 @@ class ReportTaskTracker(BaseReportCriterion):
                 if tasks and self.patterns[1] in text:
                     return tasks
                 if self.patterns[0] in text:
-                    coef= i
+                    coef = i
                 if i > coef:
                     words = [word for word in text.split() if word.strip()]
                     if words:
                         tasks.append(text.split())
         return tasks
-            

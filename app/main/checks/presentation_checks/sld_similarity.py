@@ -1,6 +1,7 @@
 from utils import get_text_from_slides, tasks_conclusions_feedback
+
 from app.nlp.similarity_of_texts import check_similarity
-from app.nlp.stemming import Stemming
+
 from ..base_check import BasePresCriterion, answer
 
 

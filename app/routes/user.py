@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from flask_login import login_required
+
 import app.servants.user as user
 
 user_blueprint = Blueprint('user', __name__, template_folder='templates', static_folder='static')

@@ -10,12 +10,14 @@ class LTIProvider(ToolProvider):
 
     def new_request(self, defaults):
         opts = dict(defaults)
-        opts.update({
-            'consumer_key': self.consumer_key,
-            'consumer_secret': self.consumer_secret,
-            'lis_outcome_service_url': self.lis_outcome_service_url,
-            'lis_result_sourcedid': self.lis_result_sourcedid
-        })
+        opts.update(
+            {
+                'consumer_key': self.consumer_key,
+                'consumer_secret': self.consumer_secret,
+                'lis_outcome_service_url': self.lis_outcome_service_url,
+                'lis_result_sourcedid': self.lis_result_sourcedid,
+            }
+        )
         self.outcome_requests.append(LTIOutcomeRequest(opts=opts))
         self._last_outcome_request = self.outcome_requests[-1]
         return self._last_outcome_request

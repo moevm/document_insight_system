@@ -1,5 +1,4 @@
 from distutils.util import strtobool
-
 from settings import DEBUG_AUTH
 
 

@@ -3,8 +3,8 @@ from io import BytesIO
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 
-from .slide_pptx import SlidePPTX
 from ..presentation_basic import PresentationBasic
+from .slide_pptx import SlidePPTX
 
 
 class PresentationPPTX(PresentationBasic):

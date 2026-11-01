@@ -1,8 +1,8 @@
 import re
 
-from .style_check_settings import StyleCheckSettings
-from ..base_check import BaseReportCriterion, answer
 from ...reports.docx_uploader.style import Style
+from ..base_check import BaseReportCriterion, answer
+from .style_check_settings import StyleCheckSettings
 
 
 class ReportChapters(BaseReportCriterion):
@@ -13,23 +13,30 @@ class ReportChapters(BaseReportCriterion):
     def __init__(self, file_info):
         super().__init__(file_info)
         self.headers = []
-        self.target_styles = StyleCheckSettings.VKR_CONFIG if (self.file_type['report_type'] == 'VKR') else StyleCheckSettings.LR_CONFIG
-        self.target_styles = list(map(lambda elem: {
-            "style": self.construct_style_from_description(elem["style"])
-        }, self.target_styles.values()))
+        self.target_styles = (
+            StyleCheckSettings.VKR_CONFIG if (self.file_type['report_type'] == 'VKR') else StyleCheckSettings.LR_CONFIG
+        )
+        self.target_styles = list(
+            map(
+                lambda elem: {"style": self.construct_style_from_description(elem["style"])},
+                self.target_styles.values(),
+            )
+        )
         self.docx_styles = {}
         self.style_regex = {}
         self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
         self.presets = StyleCheckSettings.CONFIGS.get(self.config)
         level = 0
         for _, format_description in self.presets.items():
-            self.docx_styles.update({level: { 'styles': format_description["docx_style"], 'headers': format_description['headers']}})
+            self.docx_styles.update(
+                {level: {'styles': format_description["docx_style"], 'headers': format_description['headers']}}
+            )
             pattern = re.compile(format_description["regex"])
             self.style_regex.update({level: pattern})
             level += 1
 
     def late_init(self):
-        self.headers = self.file.make_chapters()#self.file_type['report_type'])
+        self.headers = self.file.make_chapters()  # self.file_type['report_type'])
 
     @staticmethod
     def construct_style_from_description(style_dict):
@@ -43,12 +50,9 @@ class ReportChapters(BaseReportCriterion):
         for run in par["runs"]:
             diff_lst = []
             run["style"].matches(template_style, diff_lst)
-            diff_lst = list(map(
-                lambda diff: f"Заголовок \"{par['text']}\""
-                             f", фрагмент "
-                             f"\"{run['text']}\": {diff}.",
-                diff_lst
-            ))
+            diff_lst = list(
+                map(lambda diff: f"Заголовок \"{par['text']}\", фрагмент \"{run['text']}\": {diff}.", diff_lst)
+            )
             err.extend(diff_lst)
         return err
 
@@ -68,16 +72,19 @@ class ReportChapters(BaseReportCriterion):
                 styles = self.docx_styles[key]['styles']
                 for style_name in styles:
                     if header["style"].find(style_name) >= 0:
-                        if pre_headers and (header["text"] not in pre_headers and "приложение" not in header["text"].lower()):
+                        if pre_headers and (
+                            header["text"] not in pre_headers and "приложение" not in header["text"].lower()
+                        ):
                             # если для стиля есть предопределенные заголовки (= структурные части ВКР) -> проверяем
-                            # иначе идем дальше, т.к. может быть несколько стилей для одного вида заголовка (нумерованные и нет)
+                            # иначе идем дальше, т.к. может быть несколько стилей для одного вида заголовка
+                            # (нумерованные и нет)
                             # TODO: исправить костыль, описанный выше
                             continue
                         marked_style = 1
                         if self.style_regex[key].match(header["text"]):
                             err = self.style_diff(header["styled_text"], self.target_styles[key]["style"])
                             err = list(map(lambda msg: f'Стиль "{header["style"]}": ' + msg, err))
-                            result_str += ("<br>".join(err) + "<br>" if len(err) else "")
+                            result_str += "<br>".join(err) + "<br>" if len(err) else ""
                         else:
                             err = f'Заголовок "{header["text"]}": '
                             err += f"текст заголовка не соответствует требуемому формату ({self.style_regex[key]})."
@@ -86,7 +93,7 @@ class ReportChapters(BaseReportCriterion):
             if not marked_style:
                 err = f"Заголовок \"{header['text']}\": "
                 err += f'Стиль "{header["style"]}" не соответствует ни одному из стилей заголовков.'
-                result_str += (str(err) + "<br>")
+                result_str += str(err) + "<br>"
         if not result_str:
             return answer(True, "Форматирование заголовков соответствует требованиям.")
         else:
@@ -98,5 +105,5 @@ class ReportChapters(BaseReportCriterion):
                                         <li>Убедитесь, что названия разделов и нумированные разделы оформлены по ГОСТу;</li>
                                         <li>Убедитесь, что красная строка не сделана с помощью пробелов или табуляции.</li>
                                     </ul>
-                                    '''
+                                    '''  # noqa: E501
             return answer(False, result_string)
