@@ -45,19 +45,27 @@ class ImageQualityCheck(BaseReportCriterion):
 
                 if self.laplacian_score <= self.min_laplacian:
                     deny_list.append(
-                        f"Изображение с подписью '{img.caption}' имеет низкий показатель лапласиана: {self.laplacian_score:.2f} (минимум {self.min_laplacian:.2f}).<br>"
+                        f"Изображение с подписью '{img.caption}' имеет низкий "
+                        f"показатель лапласиана: {self.laplacian_score:.2f} "
+                        f"(минимум {self.min_laplacian:.2f}).<br>"
                     )
 
                 if self.entropy_score <= self.min_entropy:
                     deny_list.append(
-                        f"Изображение с подписью '{img.caption}' имеет низкую энтропию: {self.entropy_score:.2f} (минимум {self.min_entropy:.2f}).<br>"
+                        f"Изображение с подписью '{img.caption}' имеет низкую "
+                        f"энтропию: {self.entropy_score:.2f} "
+                        f"(минимум {self.min_entropy:.2f}).<br>"
                     )
         else:
             return answer(True, 'Изображения не найдены!')
+
         if deny_list:
             return answer(
                 False,
-                f'Изображения нечитаемы! <br>Попробуйте улучшить качество изображений, возможно они слишком размыты или зашумлены.<br>{"".join(deny_list)}',
+                'Изображения нечитаемы! <br>'
+                'Попробуйте улучшить качество изображений, возможно они '
+                'слишком размыты или зашумлены.<br>'
+                f'{"".join(deny_list)}',
             )
         else:
             return answer(True, 'Изображения корректны!')
@@ -65,6 +73,7 @@ class ImageQualityCheck(BaseReportCriterion):
     def find_params(self, image):
         if image is None or image.size == 0:
             return None, None
+
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         self.laplacian_score = cv2.Laplacian(gray_image, cv2.CV_64F).var()
         hist, _ = np.histogram(gray_image.flatten(), bins=256, range=[0, 256])

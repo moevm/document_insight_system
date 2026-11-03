@@ -7,10 +7,18 @@ class ImageTextCheck(BaseReportCriterion):
     id = 'image_text_check'
 
     def __init__(
-        self, file_info, symbols_set=list("@#$%^&*~`‘|±§№¤¢£€{¥}©®™•¶÷×"), max_symbols_percentage=5, max_text_density=4
+        self,
+        file_info,
+        symbols_set=None,
+        max_symbols_percentage=5,
+        max_text_density=4,
     ):
         super().__init__(file_info)
         self.images = self.file.images
+
+        if symbols_set is None:
+            symbols_set = list("@#$%^&*~`‘|±§№¤¢£€{¥}©®™•¶÷×")
+
         self.symbols_set = symbols_set
         self.max_symbols_percentage = max_symbols_percentage
         self.max_text_density = max_text_density
@@ -22,7 +30,12 @@ class ImageTextCheck(BaseReportCriterion):
         if self.images:
             check_id = self.images[0].active_check_id
             tesseract_task = tesseract_recognize.apply_async(
-                args=[check_id, self.symbols_set, self.max_symbols_percentage, self.max_text_density],
+                args=[
+                    check_id,
+                    self.symbols_set,
+                    self.max_symbols_percentage,
+                    self.max_text_density,
+                ],
                 link=callback_task.si(check_id),
                 link_error=callback_task.si(check_id),
             )
