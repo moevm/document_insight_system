@@ -1,50 +1,46 @@
 import logging.config
 import os
-from configparser import ConfigParser
-from os.path import dirname, exists, join
+from os.path import exists, join
 
 from celery import Celery
 from celery.signals import worker_ready
+from app.celery_tasks.config import (
+    APP_DIR,
+    FILES_FOLDER,
+    CELERY_BEAT_SCHEDULE,
+    CELERY_BROKER_URL,
+    CELERY_RESULT_BACKEND,
+    CELERY_TIMEZONE,
+    CHECK_MAX_TASK_RETRIES,
+    CHECK_TASK_RETRY_COUNTDOWN,
+)
+from app.celery_tasks.tesseract import update_tesseract_criteria_result
 from check_log_context import check_log_context, current_check_stage
-from db.types.Check import Check
-from db import db_methods
-from db.db_types import ParsedText
 from main.checker import check
 from main.parser import parse
-from main.reports.pasre_file import parse_file
+from main.reports.parse_file import parse_file
 from passback_grades import run_passback
 from root_logger import get_root_logger
-from tesseract_tasks import update_tesseract_criteria_result
 
 from app.db.methods import celery_check as celery_check_methods
+from app.db.methods import celery_tesseract as celery_tesseract_methods
 from app.db.methods import check as check_methods
 from app.db.methods import file as file_methods
+from app.db.methods import parsed_text as parsed_text_methods
+from app.db.types.Check import Check
+from app.db.types.ParsedText import ParsedText
 
-config = ConfigParser()
-config.read('app/config.ini')
-
-TASK_RETRY_COUNTDOWN = 60  # default = 3 * 60
-MAX_TASK_RETRIES = 3
-
-log_conf = join(dirname(__file__), 'logging.conf')
-if os.path.isfile(log_conf):
-    logging.config.fileConfig(log_conf, disable_existing_loggers=False)
+logging_config = APP_DIR / "logging.conf"
+if logging_config.is_file():
+    logging.config.fileConfig(logging_config, disable_existing_loggers=False)
 
 logger = get_root_logger('tasks')
 
-FILES_FOLDER = '/usr/src/project/files'
-
 celery = Celery(__name__)
-celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379")
-celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379")
-
-celery.conf.beat_schedule = {
-    'passback-grades': {
-        'task': 'passback-task',
-        'schedule': config.getint('consts', 'PASSBACK_TIMER'),
-    },
-}
-celery.conf.timezone = 'Europe/Moscow'  # todo: get from env
+celery.conf.broker_url = CELERY_BROKER_URL
+celery.conf.result_backend = CELERY_RESULT_BACKEND
+celery.conf.beat_schedule = CELERY_BEAT_SCHEDULE
+celery.conf.timezone = CELERY_TIMEZONE
 
 
 @worker_ready.connect
@@ -69,17 +65,18 @@ def create_task(self, check_info):
         try:
             current_check_stage.set("parse")
             logger.info("Пайплайн проверки: начало парсинга файла")
-            parsed = parse(original_filepath, pdf_filepath, check_id)
+            document_id = parsed_text_methods.get_or_create_parsed_text_id(check_info['filename'])
+            parsed = parse(original_filepath, pdf_filepath, check_id, document_id)
             parsed.make_chapters(check_obj.file_type['report_type'])
             parsed.make_headers(check_obj.file_type['report_type'])
-            chapters = parse_file.parse_chapters(parsed)
+            chapters = parse_file.chapters_to_sections(parsed)
             current_check_stage.set("check")
             logger.info("Пайплайн проверки: парсинг завершён, запуск критериев")
             updated_check = check(parsed, check_obj)
-            parsed_text = ParsedText({'filename': check_info['filename']})
-            parsed_text.parsed_chapters = parse_file.parse_headers_and_pages_and_images(chapters, parsed)
-            db_methods.add_parsed_text(check_id, parsed_text)
-            if db_methods.get_celery_tesseract_task_status_by_check(check_id):
+            parsed_text = ParsedText(filename=check_info['filename'])
+            parsed_text.parsed_chapters = parse_file.attach_pages_and_images_to_sections(chapters, parsed)
+            parsed_text_methods.save_parsed_text(check_id, parsed_text, document_id)
+            if celery_tesseract_methods.get_celery_tesseract_task_status_by_check(check_id):
                 update_tesseract_criteria_result(updated_check)
             current_check_stage.set("persist")
             logger.info("Пайплайн проверки: критерии завершены, сохранение результата")
@@ -91,7 +88,7 @@ def create_task(self, check_info):
             return updated_check.pack(to_str=True)
         except Exception as e:
             current_check_stage.set("error")
-            if self.request.retries == MAX_TASK_RETRIES:
+            if self.request.retries == CHECK_MAX_TASK_RETRIES:
                 logger.error(
                     "\tДостигнуто максимальное количество попыток перезапуска. Удаление задачи из очереди",
                     exc_info=True,
@@ -104,7 +101,7 @@ def create_task(self, check_info):
                 remove_uploaded_files = True
                 return 'Not OK, error: {}'.format(e)
             logger.error(f"\tПри обработке произошла ошибка: {e}. Попытка повторного запуска", exc_info=True)
-            self.retry(countdown=TASK_RETRY_COUNTDOWN)  # Retry the task, adding it to the back of the queue.
+            self.retry(countdown=CHECK_TASK_RETRY_COUNTDOWN)  # Retry the task, adding it to the back of the queue.
         finally:
             if remove_uploaded_files:
                 remove_files(paths)
@@ -119,10 +116,10 @@ def convert_check_file_to_pdf(self, check_obj, filepath, rewrite=False):
         return check_obj
     except Exception as e:
         logger.error(
-            f"При конвертации файла произошла ошибка: {e}. Следующая попытка через {TASK_RETRY_COUNTDOWN}",
+            f"При конвертации файла произошла ошибка: {e}. Следующая попытка через {CHECK_TASK_RETRY_COUNTDOWN}",
             exc_info=True,
         )
-        raise self.retry(countdown=TASK_RETRY_COUNTDOWN) from e
+        raise self.retry(countdown=CHECK_TASK_RETRY_COUNTDOWN) from e
 
 
 @celery.task(name="passback-task", queue='passback-grade')

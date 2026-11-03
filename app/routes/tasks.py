@@ -13,7 +13,7 @@ from app.db.types.Check import Check
 from app.root_logger import get_root_logger
 from app.routes.utils import check_access_token
 from app.server_consts import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
-from app.tasks import convert_check_file_to_pdf, create_task
+from app.celery_tasks.check import convert_check_file_to_pdf, create_task
 from app.utils import check_file, get_file_len
 
 tasks = Blueprint('tasks', __name__, template_folder='templates', static_folder='static')

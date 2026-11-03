@@ -10,7 +10,8 @@ from utils import convert_to
 
 logger = logging.getLogger('root_logger')
 
-def parse(filepath, pdf_filepath, check_id=None):
+
+def parse(filepath, pdf_filepath, check_id=None, document_id=None):
     tmp_filepath = filepath.lower()
     try:
         if tmp_filepath.endswith(('.odp', '.ppt', '.pptx')):
@@ -20,7 +21,7 @@ def parse(filepath, pdf_filepath, check_id=None):
                 new_filepath = convert_to(filepath, target_format='pptx')
             presentation = PresentationPPTX(new_filepath)
             if check_id is not None:
-                presentation.extract_images_with_captions(check_id)
+                presentation.extract_images_with_captions(check_id, document_id)
             file_object = presentation
 
         elif tmp_filepath.endswith(
@@ -39,7 +40,7 @@ def parse(filepath, pdf_filepath, check_id=None):
             docx.upload(new_filepath, pdf_filepath)
             docx.parse()
             if check_id is not None:
-                docx.extract_images_with_captions(check_id)
+                docx.extract_images_with_captions(check_id, document_id)
             file_object = docx
 
         elif tmp_filepath.endswith('.md'):

@@ -23,6 +23,7 @@ pandas==3.0.0
 PyMuPDF==1.26.6
 PyPDF2~=3.0.1
 pymongo==3.11.1
+pymodm==0.4.3
 pymorphy3==2.0.6
 pytest~=7.1.2
 python-docx==0.8.11
@@ -33,5 +34,5 @@ requests~=2.31.0
 scipy~=1.11.1
 urllib3~=2.0.3
 werkzeug==2.0.0
-opencv-python==4.5.5.64
+opencv-python-headless==4.5.5.64
 pytesseract==0.3.10

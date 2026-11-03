@@ -1,5 +1,6 @@
 import re
 from functools import reduce
+from types import SimpleNamespace
 
 import docx
 
@@ -11,6 +12,15 @@ from .paragraph import Paragraph
 from .style import Style
 from .table import Cell, Table
 
+EMU_PER_CENTIMETER = 360000
+IMAGE_CAPTION_STYLE = 'вкр_подпись для рисунков'
+DEFAULT_IMAGE_CAPTION = 'picture without caption'
+GRAPHIC_XML_MARKER = 'graphic'
+IMAGE_DRAWING_NAMESPACE = {'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'}
+WORDPROCESSING_DRAWING_NAMESPACE = {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'}
+IMAGE_BLIP_PATH = './/a:blip'
+IMAGE_EXTENT_PATH = './/wp:extent'
+IMAGE_RELATIONSHIP_ATTRIBUTE = '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed'
 
 
 class DocxUploader(DocumentUploader):
@@ -296,51 +306,55 @@ class DocxUploader(DocumentUploader):
                 chapters_str += "&nbsp;&nbsp;&nbsp;&nbsp;" + header["text"] + "<br>"
         return chapters_str
 
-    def extract_images_with_captions(self, check_id):
-        from app.db.db_methods import save_image_to_db, get_images_by_check_id
-        
-        emu_to_cm  = 360000
-        image_found = False
-        image_data = None
-        image_style="ВКР_Подпись для рисунков"
+    def _find_image_data_and_size(self, run):
+        if GRAPHIC_XML_MARKER not in run._element.xml:
+            return None
+        for image_stream in run._element.findall(IMAGE_BLIP_PATH, namespaces=IMAGE_DRAWING_NAMESPACE):
+            embed_id = image_stream.get(IMAGE_RELATIONSHIP_ATTRIBUTE)
+            if not embed_id:
+                continue
+            image_data = self.file.part.related_parts[embed_id].blob
+            extent = run._element.find(IMAGE_EXTENT_PATH, namespaces=WORDPROCESSING_DRAWING_NAMESPACE)
+            if extent is None:
+                return SimpleNamespace(data=image_data, size=(None, None))
+            return SimpleNamespace(
+                data=image_data,
+                size=(
+                    int(extent.get('cx')) / EMU_PER_CENTIMETER,
+                    int(extent.get('cy')) / EMU_PER_CENTIMETER,
+                ),
+            )
+        return None
+
+    def _find_image_caption(self, paragraph_index):
+        for paragraph in self.file.paragraphs[paragraph_index + 1 :]:
+            style_name = paragraph.style.name.lower()
+            text = paragraph.text.strip()
+            if any(GRAPHIC_XML_MARKER in run._element.xml for run in paragraph.runs):
+                break
+            if text and style_name == IMAGE_CAPTION_STYLE and 'Рисунок' in text:
+                return text
+        return DEFAULT_IMAGE_CAPTION
+
+    def extract_images_with_captions(self, check_id, document_id=None):
+        from app.db.methods.image import get_images_by_check_id, save_image_to_db
+
+        self.check_id = str(check_id)
         if not self.images:
             for i, paragraph in enumerate(self.file.paragraphs):
                 for run in paragraph.runs:
-                    if "graphic" in run._element.xml:
-                        image_streams = run._element.findall('.//a:blip', namespaces={
-                            'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'})
-                        for image_stream in image_streams:
-                            embed_id = image_stream.get(
-                                '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed')
-                            if embed_id:
-                                image_found = True
-                                image_part = self.file.part.related_parts[embed_id]
-                                image_data = image_part.blob
-                                extent = run._element.find('.//wp:extent', namespaces={
-                                'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'})
-                                width_cm = height_cm = None
-                                if extent is not None:
-                                    width_cm = int(extent.get('cx')) / emu_to_cm
-                                    height_cm = int(extent.get('cy')) / emu_to_cm
-                    if image_found:
-                        caption = "picture without caption"
-                        next_paragraph_index = i + 1
-                        while next_paragraph_index < len(self.file.paragraphs):
-                            next_paragraph = self.file.paragraphs[next_paragraph_index]
-                            style_name = next_paragraph.style.name.lower()
-                            next_text = next_paragraph.text.strip()
-                            if any("graphic" in r._element.xml for r in next_paragraph.runs):
-                                break
-                            elif next_text and style_name == image_style.lower() and 'Рисунок' in next_text:
-                                caption = next_text
-                                break
-                            next_paragraph_index += 1
-                        save_image_to_db(check_id, image_data, caption, (width_cm, height_cm))
-                        image_found = False
-                        image_data = None 
-                
+                    image_info = self._find_image_data_and_size(run)
+                    if image_info is None:
+                        continue
+                    save_image_to_db(
+                        check_id,
+                        image_info.data,
+                        self._find_image_caption(i),
+                        image_info.size,
+                        document_id=document_id,
+                    )
+
             self.images = get_images_by_check_id(check_id)
-                              
 
 
 def main(args):

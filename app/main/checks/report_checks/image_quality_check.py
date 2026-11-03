@@ -1,12 +1,14 @@
 from ..base_check import BaseReportCriterion, answer
+from app.db.methods.image import update_image
 import cv2
 import numpy as np
+
 
 class ImageQualityCheck(BaseReportCriterion):
     label = "Проверка качества изображений"
     _description = ''
     id = 'image_quality_check'
-    # необходимо подобрать min_laplacian и min_entropy
+
     def __init__(self, file_info, min_laplacian=100, min_entropy=1):
         super().__init__(file_info)
         self.images = self.file.images
@@ -19,28 +21,42 @@ class ImageQualityCheck(BaseReportCriterion):
         deny_list = []
         if self.images:
             for img in self.images:
-                image_array = np.frombuffer(img.image_data, dtype=np.uint8)
-                img_cv = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-                
-                if img_cv is None:
-                    deny_list.append(f"Изображение с подписью '{img.caption}' не может быть обработано.<br>")
-                    continue
-                
-                self.find_params(img_cv)
-                
+                self.laplacian_score = img.laplacian_score
+                self.entropy_score = img.entropy_score
+
+                if self.laplacian_score is None or self.entropy_score is None:
+                    image_array = np.frombuffer(img.image_data, dtype=np.uint8)
+                    img_cv = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+
+                    if img_cv is None:
+                        deny_list.append(f"Изображение с подписью '{img.caption}' не может быть обработано.<br>")
+                        continue
+
+                    self.find_params(img_cv)
+                    img.laplacian_score = self.laplacian_score
+                    img.entropy_score = self.entropy_score
+                    update_image(img)
+
                 if self.laplacian_score is None or self.entropy_score is None:
                     deny_list.append(f"Изображение с подписью '{img.caption}' не может быть обработано.<br>")
                     continue
-                
-                if self.laplacian_score < self.min_laplacian:
-                    deny_list.append(f"Изображение с подписью '{img.caption}' имеет низкий показатель лапласиана: {self.laplacian_score:.2f} (минимум {self.min_laplacian:.2f}).<br>")
-                
-                if self.entropy_score < self.min_entropy:
-                    deny_list.append(f"Изображение с подписью '{img.caption}' имеет низкую энтропию: {self.entropy_score:.2f} (минимум {self.min_entropy:.2f}).<br>")
-        else: 
+
+                if self.laplacian_score <= self.min_laplacian:
+                    deny_list.append(
+                        f"Изображение с подписью '{img.caption}' имеет низкий показатель лапласиана: {self.laplacian_score:.2f} (минимум {self.min_laplacian:.2f}).<br>"
+                    )
+
+                if self.entropy_score <= self.min_entropy:
+                    deny_list.append(
+                        f"Изображение с подписью '{img.caption}' имеет низкую энтропию: {self.entropy_score:.2f} (минимум {self.min_entropy:.2f}).<br>"
+                    )
+        else:
             return answer(True, 'Изображения не найдены!')
         if deny_list:
-            return answer(False, f'Изображения нечитаемы! <br>Попробуйте улучшить качество изображений, возможно они слишком размыты или зашумлены.<br>{"".join(deny_list)}')
+            return answer(
+                False,
+                f'Изображения нечитаемы! <br>Попробуйте улучшить качество изображений, возможно они слишком размыты или зашумлены.<br>{"".join(deny_list)}',
+            )
         else:
             return answer(True, 'Изображения корректны!')
 
