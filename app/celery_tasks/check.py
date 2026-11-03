@@ -4,17 +4,6 @@ from os.path import exists, join
 
 from celery import Celery
 from celery.signals import worker_ready
-from app.celery_tasks.config import (
-    APP_DIR,
-    FILES_FOLDER,
-    CELERY_BEAT_SCHEDULE,
-    CELERY_BROKER_URL,
-    CELERY_RESULT_BACKEND,
-    CELERY_TIMEZONE,
-    CHECK_MAX_TASK_RETRIES,
-    CHECK_TASK_RETRY_COUNTDOWN,
-)
-from app.celery_tasks.tesseract import update_tesseract_criteria_result
 from check_log_context import check_log_context, current_check_stage
 from main.checker import check
 from main.parser import parse
@@ -22,6 +11,17 @@ from main.reports.parse_file import parse_file
 from passback_grades import run_passback
 from root_logger import get_root_logger
 
+from app.celery_tasks.config import (
+    APP_DIR,
+    CELERY_BEAT_SCHEDULE,
+    CELERY_BROKER_URL,
+    CELERY_RESULT_BACKEND,
+    CELERY_TIMEZONE,
+    CHECK_MAX_TASK_RETRIES,
+    CHECK_TASK_RETRY_COUNTDOWN,
+    FILES_FOLDER,
+)
+from app.celery_tasks.tesseract import update_tesseract_criteria_result
 from app.db.methods import celery_check as celery_check_methods
 from app.db.methods import celery_tesseract as celery_tesseract_methods
 from app.db.methods import check as check_methods

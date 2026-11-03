@@ -1,7 +1,9 @@
-from ..base_check import BaseReportCriterion, answer
-from app.db.methods.image import update_image
 import cv2
 import numpy as np
+
+from app.db.methods.image import update_image
+
+from ..base_check import BaseReportCriterion, answer
 
 
 class ImageQualityCheck(BaseReportCriterion):

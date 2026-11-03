@@ -2,7 +2,6 @@ import os
 from configparser import ConfigParser
 from pathlib import Path
 
-
 APP_DIR = Path(__file__).resolve().parent.parent
 
 FILES_FOLDER = '/usr/src/project/files'

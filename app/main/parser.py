@@ -7,7 +7,6 @@ from main.reports.docx_uploader import DocxUploader
 from main.reports.md_uploader import MdUploader
 from utils import convert_to
 
-
 logger = logging.getLogger('root_logger')
 
 

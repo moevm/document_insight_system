@@ -1,12 +1,14 @@
+import re
 import time
 
-from celery import Celery
-from celery.exceptions import SoftTimeLimitExceeded, MaxRetriesExceededError
 import cv2
 import numpy as np
 import pytesseract
-import re
 from bson import ObjectId
+from celery import Celery
+from celery.exceptions import MaxRetriesExceededError, SoftTimeLimitExceeded
+from main.check_packs.pack_config import BASE_REPORT_CRITERION
+from root_logger import get_root_logger
 
 from app.celery_tasks.config import (
     CELERY_BROKER_URL,
@@ -18,8 +20,6 @@ from app.celery_tasks.config import (
     TESSERACT_TASK_RETRY_COUNTDOWN,
     TESSERACT_TASK_SOFT_TIME_LIMIT,
 )
-from main.check_packs.pack_config import BASE_REPORT_CRITERION
-from root_logger import get_root_logger
 from app.db.methods import celery_check as celery_check_methods
 from app.db.methods import celery_tesseract as celery_tesseract_methods
 from app.db.methods import check as check_methods
@@ -73,7 +73,7 @@ def tesseract_recognize(self, check_id, symbols_set, max_symbols_percentage, max
             self.retry(countdown=TESSERACT_TASK_RETRY_COUNTDOWN)
         except MaxRetriesExceededError:
             logger.error(f"Достигнут лимит повторных попыток для check_id: {check_id}")
-            add_tesseract_result(check_id, [[f"Превышен лимит времени и попыток"], 0])
+            add_tesseract_result(check_id, [["Превышен лимит времени и попыток"], 0])
     except Exception as e:
         logger.error(f"Ошибка при распознавании текста для check_id: {check_id}: {e}", exc_info=True)
         try:
