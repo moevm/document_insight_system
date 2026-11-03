@@ -11,6 +11,9 @@ consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
 logs_collection = db.create_collection('logs', capped=True, size=5242880) if not db['logs'] else db['logs']
 celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
+celery_tesseract_collection = db['celery_tesseract']
+images_collection = db['images']
+parsed_texts_collection = db['parsed_texts']
 
 
 def get_checks_collection():
@@ -35,3 +38,15 @@ def get_logs_collection():
 
 def get_celery_check_collection():
     return celery_check_collection
+
+
+def get_celery_tesseract_collection():
+    return celery_tesseract_collection
+
+
+def get_images_collection():
+    return images_collection
+
+
+def get_parsed_texts_collection():
+    return parsed_texts_collection

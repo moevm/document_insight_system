@@ -1,5 +1,6 @@
 import re
 from functools import reduce
+from types import SimpleNamespace
 
 import docx
 
@@ -10,6 +11,16 @@ from .inline_shape import InlineShape
 from .paragraph import Paragraph
 from .style import Style
 from .table import Cell, Table
+
+EMU_PER_CENTIMETER = 360000
+IMAGE_CAPTION_STYLE = 'вкр_подпись для рисунков'
+DEFAULT_IMAGE_CAPTION = 'picture without caption'
+GRAPHIC_XML_MARKER = 'graphic'
+IMAGE_DRAWING_NAMESPACE = {'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'}
+WORDPROCESSING_DRAWING_NAMESPACE = {'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing'}
+IMAGE_BLIP_PATH = './/a:blip'
+IMAGE_EXTENT_PATH = './/wp:extent'
+IMAGE_RELATIONSHIP_ATTRIBUTE = '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed'
 
 
 class DocxUploader(DocumentUploader):
@@ -294,6 +305,56 @@ class DocxUploader(DocumentUploader):
             else:
                 chapters_str += "&nbsp;&nbsp;&nbsp;&nbsp;" + header["text"] + "<br>"
         return chapters_str
+
+    def _find_image_data_and_size(self, run):
+        if GRAPHIC_XML_MARKER not in run._element.xml:
+            return None
+        for image_stream in run._element.findall(IMAGE_BLIP_PATH, namespaces=IMAGE_DRAWING_NAMESPACE):
+            embed_id = image_stream.get(IMAGE_RELATIONSHIP_ATTRIBUTE)
+            if not embed_id:
+                continue
+            image_data = self.file.part.related_parts[embed_id].blob
+            extent = run._element.find(IMAGE_EXTENT_PATH, namespaces=WORDPROCESSING_DRAWING_NAMESPACE)
+            if extent is None:
+                return SimpleNamespace(data=image_data, size=(None, None))
+            return SimpleNamespace(
+                data=image_data,
+                size=(
+                    int(extent.get('cx')) / EMU_PER_CENTIMETER,
+                    int(extent.get('cy')) / EMU_PER_CENTIMETER,
+                ),
+            )
+        return None
+
+    def _find_image_caption(self, paragraph_index):
+        for paragraph in self.file.paragraphs[paragraph_index + 1 :]:
+            style_name = paragraph.style.name.lower()
+            text = paragraph.text.strip()
+            if any(GRAPHIC_XML_MARKER in run._element.xml for run in paragraph.runs):
+                break
+            if text and style_name == IMAGE_CAPTION_STYLE and 'Рисунок' in text:
+                return text
+        return DEFAULT_IMAGE_CAPTION
+
+    def extract_images_with_captions(self, check_id, document_id=None):
+        from app.db.methods.image import get_images_by_check_id, save_image_to_db
+
+        self.check_id = str(check_id)
+        if not self.images:
+            for i, paragraph in enumerate(self.file.paragraphs):
+                for run in paragraph.runs:
+                    image_info = self._find_image_data_and_size(run)
+                    if image_info is None:
+                        continue
+                    save_image_to_db(
+                        check_id,
+                        image_info.data,
+                        self._find_image_caption(i),
+                        image_info.size,
+                        document_id=document_id,
+                    )
+
+            self.images = get_images_by_check_id(check_id)
 
 
 def main(args):

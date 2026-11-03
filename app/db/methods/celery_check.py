@@ -54,3 +54,8 @@ def get_celery_task(celery_task_id):
 
 def get_celery_task_by_check(check_id):
     return celery_check_collection.find_one({'check_id': check_id})
+
+
+def get_celery_task_status_by_check(check_id):
+    celery_task = get_celery_task_by_check(check_id)
+    return bool(celery_task and 'finished_at' in celery_task)
