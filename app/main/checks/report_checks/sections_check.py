@@ -34,6 +34,8 @@ class LRReportSectionCheck(BaseReportCriterion):
         return style
 
     def check(self):
+        if self.is_markdown:
+            return answer(False, 'Проверка стилей применима к отчётам DOCX.')
         self.file.parse_effective_styles()
         result = True
         result_str = ""
@@ -114,7 +116,7 @@ class LRReportSectionCheck(BaseReportCriterion):
                 continue
             match = pattern.match(found_texts[found_idx])
             if match:
-                if headers[header_idx].lower() in match.group(2).lower():
+                if headers[header_idx].lower() in match.group(0).lower():
                     errors.extend(self.style_diff(pars[found_idx], template_style))
                     last_found = found_idx
                     marker_idx += 1

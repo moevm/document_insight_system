@@ -11,14 +11,17 @@ class ReportRightWordsCheck(BaseReportCriterion):
     def __init__(self, file_info, patterns=("цел[ьией]",)):
         super().__init__(file_info)
         self.patterns = dict.fromkeys(patterns, False)
+        self.warning = not bool(self.patterns)
 
     def check(self):
-        if self.file.page_counter() < 4:
+        if not self.patterns:
+            return answer(True, 'Шаблоны поиска не заданы; критерий не влияет на оценку.')
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         for text_on_page in self.file.pdf_file.get_text_on_page().values():
             lower_text = text_on_page.lower()
             for pattern in self.patterns:
-                if re.search(pattern, lower_text):
+                if re.search(pattern, lower_text, re.I):
                     self.patterns[pattern] = True
         result_score = 0
         if all(value for value in self.patterns.values()):

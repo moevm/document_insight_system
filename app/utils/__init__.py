@@ -12,7 +12,6 @@ from .parse_for_html import (
     name_of_image_check_results,
     tasks_conclusions_feedback,
 )
-from .repeated_timer import RepeatedTimer
 from .timezone import timezone_offset
 
 __all__ = [
@@ -30,6 +29,5 @@ __all__ = [
     'format_header',
     'name_of_image_check_results',
     'tasks_conclusions_feedback',
-    'RepeatedTimer',
     'timezone_offset',
 ]

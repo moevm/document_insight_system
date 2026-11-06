@@ -1,11 +1,7 @@
 import pymongo
 
 from app.db.db_main import get_users_collection
-from app.db.methods.client import get_db
-from app.db.methods.file import delete_presentation
 from app.db.types.User import User
-
-db = get_db()
 
 users_collection = get_users_collection()
 
@@ -39,18 +35,6 @@ def get_user(username):
         return None
 
 
-def get_all_users():
-    return users_collection.find()
-
-
-def delete_user(username):
-    user = get_user(username)
-    for presentation_id in user.files:
-        user, presentation = delete_presentation(user, presentation_id)
-    user = User(users_collection.find_one_and_delete({'username': username}))
-    return user
-
-
 def get_user_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
     filter = filter or {}
     sort = 'username' if sort == 'username' else sort
@@ -64,11 +48,3 @@ def get_user_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
     rows = rows.limit(limit) if limit else rows
 
     return rows, count
-
-
-#
-# def edit_user(user):
-#     if users_collection.find_one_and_replace({'username': user.username}, user.pack()) is not None:
-#         return True
-#     else:
-#         return False

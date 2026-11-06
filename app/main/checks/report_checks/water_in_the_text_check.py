@@ -34,12 +34,14 @@ class WaterInTheTextCheck(BaseReportCriterion):
     def check(self):
         self.watery_phrase = WateryPhrase.INTRODUCTORY_PHRASE
         self.watery_words = WateryPhrase.SERVICE_WORDS + WateryPhrase.ABSTRACT_WORDS
-        if self.file.page_counter() < 4:
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         self.late_init()
         result_str = ""
         for chapter in self.chapters:
-            if 'список использованных источников' in chapter['text'].lower():
+            if re.search(
+                r'список\s+(?:использованных\s+|использованной\s+)?(?:источников|литературы)', chapter['text'], re.I
+            ):
                 break
             text = self.get_chapter_text(chapter)
             words = self.get_words(text)

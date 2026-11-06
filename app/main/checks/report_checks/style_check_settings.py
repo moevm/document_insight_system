@@ -145,7 +145,7 @@ class StyleCheckSettings:
         "alignment": WD_ALIGN_PARAGRAPH.CENTER,
         "font_name": "Times New Roman",
         "font_size_pt": 14.0,
-        "first_line_indent_cm": 1.25,  # ????
+        "first_line_indent_cm": 0.0,
         "line_spacing": 1.5,
     }
     TABLE_CAPTION_STYLE = {
@@ -156,7 +156,7 @@ class StyleCheckSettings:
         "line_spacing": 1.0,
     }
     TABLE_CAPTION_STYLE_VKR = {
-        "alignment": WD_ALIGN_PARAGRAPH.LEFT,
+        "alignment": (WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.JUSTIFY),
         "font_name": "Times New Roman",
         "font_size_pt": 14.0,
         "first_line_indent_cm": 0.0,
@@ -179,7 +179,7 @@ class StyleCheckSettings:
             'mах_ref_for_literature_references_check': STD_MAX_LIT_REF,
         },
         '1/2_header': {
-            "style": HEADER_2_REGEX,
+            "style": HEADER_2_STYLE,
             "docx_style": ["heading 3", "heading 4"],
             "headers": [],
             "unify_regex": None,
@@ -366,6 +366,7 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": [
+                "Описание предметной области",
                 "Принцип отбора аналогов",
                 "Критерии сравнения аналогов",
                 "Таблица сравнения аналогов",
@@ -390,6 +391,7 @@ class StyleCheckSettings:
                 "Введение",
                 "Обзор предметной области",
                 "Выбор метода решения",
+                "Описание метода решения",
                 "Заключение",
                 "Список использованных источников",
             ],
@@ -408,7 +410,7 @@ class StyleCheckSettings:
         {"name": "Основной текст", "style": MAIN_TEXT_STYLE},
         {"name": "Листинг", "style": LISTING_STYLE},
         {"name": "вкр_подпись для рисунков", "style": IMAGE_CAPTION_STYLE},
-        {"name": "вкр_подпись таблицы", "style": TABLE_CAPTION_STYLE_VKR},
+        {"name": "вкр_подпись таблицы", "style": TABLE_CAPTION_STYLE},
     ]
 
     VKR_MAIN_TEXT_CONFIG = [
@@ -430,4 +432,6 @@ class StyleCheckSettings:
         'NIR3_HEADERS': NIR3_CONFIG,
         'MD_HEADERS': MD_CONFIG,
         'OPNP_HEADERS': OPNP_CONFIG,
+        'SWTask2_HEADERS': {'any_header': OPNP_CONFIG['Сравнение аналогов']},
+        'SWTask3_HEADERS': {'any_header': OPNP_CONFIG['any_header']},
     }

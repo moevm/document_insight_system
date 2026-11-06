@@ -3,6 +3,7 @@ from ..check_abbreviations import forming_response, main_check
 
 
 class PresAbbreviationsCheck(BasePresCriterion):
+    label = "Проверка расшифровки аббревиатур"
     _description = "Аббревиатуры в тексте должны быть расшифрованы при первом использовании."
     id = "pres_abbreviations_check"
     warning = True
@@ -22,7 +23,7 @@ class PresAbbreviationsCheck(BasePresCriterion):
 
             unexplained_abbr_with_slides = {}
 
-            for slide_num, slide_text in enumerate(slides_text, 0):
+            for slide_num, slide_text in enumerate(slides_text, 1):
                 for abbr in unexplained_abbr:
                     if abbr in slide_text and abbr not in unexplained_abbr_with_slides:
                         unexplained_abbr_with_slides[abbr] = slide_num

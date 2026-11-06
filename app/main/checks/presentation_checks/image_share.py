@@ -11,6 +11,8 @@ class PresImageShareCheck(BasePresCriterion):
         self.limit = limit
 
     def check(self):
+        if not self.file.slides:
+            return answer(False, "В презентации нет слайдов.")
         buf = []
         count = 0
         for slide in self.file.slides:

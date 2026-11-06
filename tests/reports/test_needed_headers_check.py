@@ -28,6 +28,7 @@ class TestReportNeededHeadersCheck:
         monkeypatch.setitem(StyleCheckSettings.VKR_CONFIG["any_header"], "check_sequence", False)
 
         file_info = create_report_file_info(reports_fixture_dir / "needed_headers_check" / "valid.md")
+        file_info['file'].source_format = 'docx'
         file_info['file'].page_counter = lambda: 3
         checker = ReportStructureCheck(file_info)
         result = checker.check()

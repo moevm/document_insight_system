@@ -1,3 +1,5 @@
+import re
+
 from ..base_check import BaseReportCriterion, answer, morph
 
 
@@ -13,13 +15,15 @@ class ReportTaskTracker(BaseReportCriterion):
         self.chapter = chapter
         self.chapters = []
         self.patterns = patterns
+        if len(patterns) != 2:
+            raise ValueError("patterns должен содержать начальный и конечный маркер задач.")
         self.deny_list = [morph.parse(word)[0].normal_form for word in deny_list]
 
     def late_init(self):
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
 
     def check(self):
-        if self.file.page_counter() < 4:
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         self.late_init()
         tasks = self.find_tasks()
@@ -56,5 +60,5 @@ class ReportTaskTracker(BaseReportCriterion):
                 if i > coef:
                     words = [word for word in text.split() if word.strip()]
                     if words:
-                        tasks.append(text.split())
+                        tasks.append(re.findall(r'\w+(?:-\w+)*', text))
         return tasks

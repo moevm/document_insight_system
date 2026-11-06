@@ -6,13 +6,10 @@ from gridfs import errors as gridfs_errors
 from pymongo import errors as pymongo_errors
 
 from app.db.db_main import get_files_info_collection, get_users_collection
-from app.db.methods.check import delete_check
-from app.db.methods.client import get_client, get_db, get_fs
-from app.db.methods.edit_user import edit_user
+from app.db.methods.client import get_db, get_fs
 from app.db.types.Presentation import Presentation
 from app.utils.converter import convert_to
 
-client = get_client()
 db = get_db()
 fs = get_fs()
 
@@ -43,38 +40,6 @@ def get_presentation(file_id):
         return Presentation(file)
     else:
         return None
-
-
-# Returns files of given user with given id or None
-def find_presentation(user, presentation_name):
-    files = []
-    for presentation_id in user.files:
-        files.append(get_presentation(presentation_id))
-    presentation = next((x for x in files if x.name == presentation_name), None)
-    if presentation is not None:
-        return presentation
-    else:
-        return None
-
-
-# Deletes files with given id, deleting also its checks, returns files
-def delete_presentation(user, presentation_id):
-    if presentation_id in user.files:
-        user.files.remove(presentation_id)
-        edit_user(user)
-        presentation = get_presentation(presentation_id)
-        for check_id in presentation.checks:
-            presentation, check = delete_check(presentation, check_id)
-        presentation = Presentation(files_info_collection.find_one_and_delete({'_id': presentation_id}))
-        return user, presentation
-    else:
-        return user, get_presentation(presentation_id)
-
-
-def get_pdf_id(file_id=None):
-    if not file_id:
-        file_id = ObjectId()
-    return file_id
 
 
 def write_pdf(filename, filepath, file_id=None, rewrite=False):

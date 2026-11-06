@@ -16,7 +16,7 @@ class PresTemplateNameCheck(BasePresCriterion):
 
     def __init__(self, file_info, regex=f"{CUR_YEAR}" + "ВКР[0-9]{6}([А-ЯЁ]+)_(презентация|ПРЕЗЕНТАЦИЯ)"):
         super().__init__(file_info)
-        self.filename = self.filename.split('.', 1)[0]
+        self.filename = self.filename.rsplit('.', 1)[0]
         self.reg = regex
 
     def check(self):
