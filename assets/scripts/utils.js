@@ -1,14 +1,11 @@
 export function debounce(func, timeout) {
+    let lastCallTimer = null;
+    let lastCallArgs = [];
+
     return function perform(...args) {
-        let previousCall = this.lastCall;
-        let currCall = Date.now();
-        this.lastCall = currCall;
-
-        if (previousCall && (currCall - previousCall <= timeout)) {
-            clearTimeout(this.lastCallTimer);
-        }
-
-        this.lastCallTimer = setTimeout(() => func(...args), timeout);
+        lastCallArgs = args;
+        clearTimeout(lastCallTimer);
+        lastCallTimer = setTimeout(() => func(...lastCallArgs), timeout);
     }
 };
 
@@ -25,10 +22,15 @@ export function isFloat(str) {
 
 
 export function pushHistoryState(paramsData) {
-    const {limit, offset, sort, order, filter} = paramsData;
+    const query = {};
+    for (const [key, value] of Object.entries(paramsData)) {
+        if (value === undefined || value === null || value === "") {
+            continue;
+        }
+        query[key] = value;
+    }
 
-    // push history state
-    history.pushState(paramsData, "", "?" + $.param({limit, offset, filter, sort, order}))
+    history.pushState(paramsData, "", "?" + $.param(query))
 };
 
 
@@ -50,7 +52,19 @@ export function onPopState() {
 export function resetTable($table, queryParams) {
     let queryString = window.location.search;
     const params = Object.fromEntries(new URLSearchParams(decodeURIComponent(queryString)).entries());
-    params.filter = "";
+
+    for (const key of Object.keys(params)) {
+        if (key === "filter" || key.startsWith("filter_")) {
+            delete params[key];
+        }
+    }
+
+    $(".filter-control input").each(function () {
+        if (this._flatpickr) {
+            this._flatpickr.clear();
+        }
+        $(this).val("");
+    });
 
     pushHistoryState(params);
 

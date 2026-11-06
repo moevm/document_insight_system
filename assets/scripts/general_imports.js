@@ -11,6 +11,8 @@ import 'bootstrap-table/dist/extensions/auto-refresh/bootstrap-table-auto-refres
 
 import 'bootstrap-icons/font/bootstrap-icons.css'
 
+import 'bootstrap-table/dist/locale/bootstrap-table-ru-RU.min.js'
+
 import 'bootstrap-datepicker';
 import 'bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css'
 

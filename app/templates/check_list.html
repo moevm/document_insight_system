@@ -24,6 +24,35 @@
         #check-list-table.table-bordered > tbody > tr > td {
             border: 1px solid #a1a1a1;
         }
+        .flatpickr-calendar {
+            z-index: 1050;
+        }
+        .filter-control {
+            position: relative;
+        }
+        .date-filter-clear {
+            position: absolute;
+            top: 50%;
+            right: 0.4rem;
+            transform: translateY(-50%);
+            color: #6c757d;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .date-filter-clear:hover,
+        .date-filter-clear:focus {
+            color: #343a40;
+        }
+        .bootstrap-table-filter-control-upload-date,
+        .bootstrap-table-filter-control-moodle-date {
+            padding-right: 1.3rem;
+        }
+
+        .bootstrap-table-filter-control-upload-date::-webkit-search-cancel-button,
+        .bootstrap-table-filter-control-moodle-date::-webkit-search-cancel-button {
+            display: none;
+        }
     </style>
     <div class="holder row">
         <div class="container-fluid table-responsive-xl">
@@ -46,22 +75,25 @@
             >
                 <thead>
                 <tr>
-                    <th data-field="_id" data-width="160">Upload ID</th>
-                    <th data-field="filename" data-filter-control="input" data-sortable="true">File name</th>
-                    <th data-field="criteria" data-filter-control="input" data-sortable="true">Criteria pack</th>
+                    <th data-field="_id" data-width="160">ID загрузки</th>
+                    <th data-field="filename" data-filter-control="input" data-sortable="true">Название файла</th>
+                    <th data-field="criteria" data-filter-control="input" data-sortable="true">Пак критериев</th>
                     {% if current_user.is_admin %}
-                        <th data-field="user" data-filter-control="input" data-sortable="true">Username</th>
-                        <th data-field="lms-user-id" data-sortable="false">User ID</th>
+                        <th data-field="user" data-filter-control="input" data-sortable="true">Пользователь</th>
+                        <th data-field="lms-user-id" data-sortable="false">ID пользователя</th>
                     {% endif %}
-                    <th data-field="upload-date" data-filter-control="datepicker"
-                        data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}'
-                        data-sortable="true">Upload date
+                    <th data-field="upload-date" data-filter-control="input"
+                        data-filter-control-placeholder="дд.мм.гггг [чч:мм]"
+                        data-sortable="true">Дата загрузки
                     </th>
-                    <th data-field="moodle-date" data-filter-control="datepicker"
-                        data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}'
-                        data-sortable="true">Moodle upload date
+                    <th data-field="moodle-date" data-filter-control="input"
+                        data-filter-control-placeholder="дд.мм.гггг [чч:мм]"
+                        data-sortable="true">Дата загрузки на мудл
                     </th>
-                    <th data-field="score" data-filter-control="input" data-sortable="true">Result</th>
+                    <th data-field="score" data-filter-control="input"
+                        data-filter-control-placeholder="от -1 до 1"
+                        data-sortable="true">Результат
+                </th>
                 </tr>
                 </thead>
             </table>

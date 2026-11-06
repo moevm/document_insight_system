@@ -1,12 +1,83 @@
+import { event } from "jquery";
 import {collect_values_if_possible, hash} from "./general";
 
-import { debounce, isFloat, resetTable, ajaxRequest, onPopState } from "./utils"
+import { debounce, resetTable, ajaxRequest, onPopState } from "./utils"
+
+import flatpickr from "flatpickr";
+import "flatpickr/dist/flatpickr.min.css";
 
 let $table;
+let debouncedRefresh;
 const AJAX_URL = "/check_list/data";
 const filter_prefix = 'filter_';
 let is_latest = false;
 let debounceInterval = 500;
+
+const FLATPICKR_FIELDS = ['upload-date', 'moodle-date'];
+
+function addClearButton($input, fp) {
+    const $clear = $("<span>", {
+        class: "date-filter-clear",
+        role: "button",
+        tabindex: 0,
+        title: "Очистить фильтр",
+        text: "×"
+    });
+
+    function clearFilter(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        fp.clear();
+    }
+
+    $clear.on("click", clearFilter).on("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+            clearFilter(event);
+        }
+    });
+
+    $input.after($clear);
+}
+
+function readUrlFilter(){
+    const search = window.location.search;
+    const params = Object.fromEntries(
+        new URLSearchParams(decodeURIComponent(search)).entries()
+    );
+    return extract_filters(params);
+}
+
+function initFlatpickrFilters(filters) {
+    FLATPICKR_FIELDS.forEach(function (field) {
+        const $input = $(`.bootstrap-table-filter-control-${field}`);
+        if (!$input.length || $input[0]._flatpickr) {
+            return;
+        }
+
+        const fp = flatpickr($input[0], {
+            mode: 'range',
+            enableTime: true,
+            time_24hr: true,
+            dateFormat: 'd.m.Y H:i',
+            locale: {
+                rangeSeparator: ' - '
+            },
+            allowInput: true,
+            defaultHour: 0,
+            defaultMinute: 0,
+            onChange: function () {
+                debouncedRefresh()
+            }
+        });
+
+        addClearButton($input, fp);
+
+        const saved = filters && filters[field];
+        if (saved) {
+            fp.setDate(saved, false);
+        }
+    });
+}
 
 
 String.prototype.insert = function (index, string) {
@@ -21,38 +92,64 @@ $(() => {
     initTable()
     window.onpopstate = onPopState
 
-    const $dataFilter = $(".bootstrap-table-filter-control-result")
+    const $dataFilter = $(".bootstrap-table-filter-control-score")
     $dataFilter.on("keypress", (e) => {
-        const val = $dataFilter.val()
-        const numbers = val.split("-")
-
-        if (e.key === ".") {
-            const carret = $dataFilter[0].selectionStart
-            let expectedStr
-            if (carret <= numbers[0].length) {
-                expectedStr = numbers[0].insert(carret, ".")
-            } else {
-                expectedStr = numbers[1].insert(carret - numbers[0].length - 1, ".")
-            }
-
-            if (isFloat(expectedStr)) {
-                return
-            }
+        if (e.key.length > 1) {
+            return
         }
 
         if (e.key >= "0" && e.key <= "9") {
             return
         }
 
-        if (e.key === "-") {
-            if (numbers.length === 1) {
+        const val = $dataFilter.val()
+        const pos = $dataFilter[0].selectionStart
+        const beforeCursor = val.slice(0, pos)
+
+        if (e.key === "." || e.key === ",") {
+            const currentNumber = beforeCursor.split(/[\s-]/).pop()
+            if (!currentNumber.includes(".") && !currentNumber.includes(",")) {
                 return
             }
+            e.preventDefault()
+            return
+        }
+
+        if (e.key === "-") {
+            const prev = beforeCursor.slice(-1)
+            if (beforeCursor === "" || prev === " " || (prev >= "0" && prev <= "9")) {
+                return
+            }
+            e.preventDefault()
+            return
+        }
+
+        if (e.key === " ") {
+            return
         }
 
         e.preventDefault()
     })
+
+    $dataFilter.on("input", function () {
+        $table.bootstrapTable("refresh")
+    })
 })
+
+function syncFilterControlValues() {
+    const table = $table.data("bootstrap.table")
+    if (!table || !table.options || !table.options.valuesFilterControl.length) {
+        return
+    }
+
+    table.options.valuesFilterControl.forEach((item) => {
+        const $input = $(`.bootstrap-table-filter-control-${item.field}`)
+        if ($input.length) {
+            item.value = $input.val()
+            item.hasFocus = $input.is(":focus")
+        }
+    })
+}
 
 
 function extract_filters(params){
@@ -69,6 +166,9 @@ function extract_filters(params){
 
 function initTable() {
     $table = $("#check-list-table");
+    debouncedRefresh = debounce(function (options) {
+        $table.bootstrapTable("refresh", options)
+    }, debounceInterval)
 
     // get query string
     const queryString = window.location.search;
@@ -78,6 +178,8 @@ function initTable() {
     // configure filter
     params.filter = extract_filters(params)
     console.log(params)
+
+    is_latest = params.latest === "true"
 
     // check correct order query
     if (params.order !== "asc" && params.order !== "desc" && params.order !== "") {
@@ -107,15 +209,16 @@ function initTable() {
     }
 
     // Fill filters
-    $table.on("created-controls.bs.table", function () {
-        if (params.filter) {
-            console.log(params.filter)
-            for (const [key, value] of Object.entries(params.filter)) {
-                const $input = $(`.bootstrap-table-filter-control-${key}`)
-                $input.val(value)
-            }
+    $table.on("created-controls.bs.table", function (){
+        const filters = readUrlFilter();
+
+        for(const [key, value] of Object.entries(filters)){
+            $(`.bootstrap-table-filter-control-${key}`).val(value);
         }
+        initFlatpickrFilters(filters);
     })
+
+    $table.on("post-header.bs.table", syncFilterControlValues)
 
     // activate bs table
     $table.bootstrapTable({
@@ -144,7 +247,8 @@ function queryParams(params) {
     let filters = {}
     $('.filter-control').each(function () {
         const name = $(this).parents("th").data("field")
-        const val = this.querySelector("input").value
+        const input = this.querySelector("input")
+        const val = input ? input.value : ""
         if (val) {
             filters[name] = val
         }
@@ -157,6 +261,7 @@ function queryParams(params) {
         order: params.order,
         latest: params.latest
     }
+    if(is_latest) {query.latest = true;}
 
     if (!$.isEmptyObject(filters)) {
         for (const [key, value] of Object.entries(filters)){
@@ -194,13 +299,25 @@ function buttons() {
     let buttonsObj = {};
 
     buttonsObj["ResetTable"] = {
-        text: 'Reset',
-        event: function() { resetTable($table, queryParams) }
-    };
+        text: "Сбросить фильтры",
+        event: function(){
+            is_latest = false;
+            history.replaceState(null, "", window.location.pathname);
+
+            FLATPICKR_FIELDS.forEach(function (field) {
+                const el = $(`.bootstrap-table-filter-control-${field}`)[0];
+                if (el && el._flatpickr){
+                    el._flatpickr.clear();
+                }
+            });
+
+            resetTable($table, queryParams);
+        }
+    }
 
     if (is_admin) {
         buttonsObj["FetchCSV"] = {
-            text: 'CSV',
+            text: 'Скачать CSV',
             event: function () {
                 //const queryString = window.location.search
                 const params = window.location.search
@@ -233,15 +350,8 @@ function buttons() {
         };
 
         buttonsObj["LatestChecks"] = {
-            text: 'Latest',
-            event: function () {
-                is_latest = !is_latest;
-                let query = {}
-                if (is_latest === true){
-                    query = { query: { latest: is_latest } }
-                }
-                $("#check-list-table").bootstrapTable('refresh', query);
-            }
+            text: 'Последняя проверка',
+            event: function() {is_latest = !is_latest; debouncedRefresh();}
         };
     }
     return buttonsObj;
