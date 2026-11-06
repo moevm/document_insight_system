@@ -1,4 +1,5 @@
 const FILTERS = ['filter_filename', 'filter_id', 'filter_student', 'filter_criteria', 'filter_date_from', 'filter_date_to', 'filter_score_from', 'filter_score_to'];
+const ACTIVE_SIDE = 'active_side';
 
 function addCell(row, value) {
     const cell = document.createElement('td');
@@ -12,10 +13,11 @@ export function initDocumentSelection(form) {
     const panel = document.getElementById('system-document-search');
     const filters = document.getElementById('system-document-filters');
     const compare = document.getElementById('start-document-diff');
-    let activeSide, timer;
+    const savedParams = new URLSearchParams(window.location.search);
+    let activeSide = savedParams.get(ACTIVE_SIDE);
+    let timer;
     const clearError = () => error.classList.add('d-none');
     const showError = message => { error.textContent = message; error.classList.remove('d-none'); };
-    const savedParams = new URLSearchParams(window.location.search);
     const savedFormat = savedParams.get('format');
     const hasSavedFilters = FILTERS.some(name => savedParams.has(name));
     if (savedFormat === 'docx' || savedFormat === 'pptx') {
@@ -27,6 +29,13 @@ export function initDocumentSelection(form) {
     }
     FILTERS.forEach(name => {
         form.elements[name].value = savedParams.get(name) || '';
+    });
+    ['first', 'second'].forEach(side => {
+        const documentId = savedParams.get(`${side}_document_id`);
+        if (documentId) {
+            document.getElementById(`${side}-document-id`).value = documentId;
+            document.getElementById(`${side}-document-name`).textContent = savedParams.get(`${side}_document_name`) || documentId;
+        }
     });
     const update = () => {
         compare.disabled = !['first', 'second'].every(side => document.getElementById(`${side}-file`).files.length || document.getElementById(`${side}-document-id`).value);
@@ -47,6 +56,10 @@ export function initDocumentSelection(form) {
                 document.getElementById(`${activeSide}-document-id`).value = item._id;
                 document.getElementById(`${activeSide}-file`).value = '';
                 document.getElementById(`${activeSide}-document-name`).textContent = item.filename;
+                const query = new URLSearchParams(window.location.search);
+                query.set(`${activeSide}_document_id`, item._id);
+                query.set(`${activeSide}_document_name`, item.filename);
+                window.history.replaceState({}, '', `${window.location.pathname}?${query}`);
                 panel.classList.add('d-none');
                 update();
             });
@@ -59,6 +72,14 @@ export function initDocumentSelection(form) {
         clearError();
         const query = new URLSearchParams({ format: form.elements.format.value });
         FILTERS.forEach(name => form.elements[name].value && query.set(name, form.elements[name].value));
+        ['first', 'second'].forEach(side => {
+            const documentId = document.getElementById(`${side}-document-id`).value;
+            if (documentId) {
+                query.set(`${side}_document_id`, documentId);
+                query.set(`${side}_document_name`, document.getElementById(`${side}-document-name`).textContent);
+            }
+        });
+        query.set(ACTIVE_SIDE, activeSide);
         window.history.replaceState({}, '', `${window.location.pathname}?${query}`);
         fetch(`/document_diff/data?${query}`).then(async response => {
             const data = await response.json(); if (!response.ok) throw Error(data.error); return data;
