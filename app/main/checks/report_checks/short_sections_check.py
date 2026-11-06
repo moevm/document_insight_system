@@ -1,5 +1,7 @@
 import re
 
+from app.main.reports.section_patterns import APPENDIX_TITLE
+
 from ..base_check import BaseReportCriterion, answer
 from .style_check_settings import StyleCheckSettings
 
@@ -31,7 +33,7 @@ class ReportShortSectionsCheck(BaseReportCriterion):
             return answer(False, 'Не найдено ни одного заголовка требуемого уровня.')
         errors = []
         for index, chapter in selected:
-            if 'приложение' in chapter['text'].lower():
+            if APPENDIX_TITLE.lower() in chapter['text'].lower():
                 break
             children = list(chapter['child'])
             level = int(chapter['style'].split()[-1])

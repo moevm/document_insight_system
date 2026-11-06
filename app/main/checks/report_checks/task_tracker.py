@@ -1,5 +1,7 @@
 import re
 
+from app.main.reports.section_patterns import INTRODUCTION_TITLE
+
 from ..base_check import BaseReportCriterion, answer, morph
 
 
@@ -9,7 +11,11 @@ class ReportTaskTracker(BaseReportCriterion):
     id = 'report_task_tracker'
 
     def __init__(
-        self, file_info, chapter='Введение', patterns=('задач', 'объект'), deny_list=('доделать', 'решить', 'описать')
+        self,
+        file_info,
+        chapter=INTRODUCTION_TITLE,
+        patterns=('задач', 'объект'),
+        deny_list=('доделать', 'решить', 'описать'),
     ):
         super().__init__(file_info)
         self.chapter = chapter

@@ -4,8 +4,11 @@ from functools import reduce
 import docx
 from docx.oxml.ns import qn
 
+from app.main.reports.section_patterns import ABSTRACT_TITLE, REFERAT_TITLE
+
 from ..document_uploader import DocumentUploader
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
+from ..section_patterns import APPENDIX_PAGE_PATTERN, CONTENTS_TITLE, LITERATURE_PATTERN
 from .core_properties import CoreProperties
 from .inline_shape import InlineShape
 from .paragraph import Paragraph
@@ -127,9 +130,27 @@ class DocxUploader(DocumentUploader):
                         "main_character": True,
                         "page": 0,
                     },
-                    {"name": "Реферат", "marker": False, "key": "реферат", "main_character": False, "page": 0},
-                    {"name": "Abstract", "marker": False, "key": "abstract", "main_character": False, "page": 0},
-                    {"name": "Содержание", "marker": False, "key": "содержание", "main_character": False, "page": 0},
+                    {
+                        "name": REFERAT_TITLE,
+                        "marker": False,
+                        "key": REFERAT_TITLE.lower(),
+                        "main_character": False,
+                        "page": 0,
+                    },
+                    {
+                        "name": ABSTRACT_TITLE,
+                        "marker": False,
+                        "key": ABSTRACT_TITLE.lower(),
+                        "main_character": False,
+                        "page": 0,
+                    },
+                    {
+                        "name": CONTENTS_TITLE,
+                        "marker": False,
+                        "key": CONTENTS_TITLE.lower(),
+                        "main_character": False,
+                        "page": 0,
+                    },
                 ]
                 if required_headers is not None:
                     headers = [
@@ -175,7 +196,7 @@ class DocxUploader(DocumentUploader):
                 self.headers_page = 1
                 return self.headers_page
             for header in self.make_headers(work_type):
-                if header["name"].find('Содержание') >= 0:
+                if header["name"].find(CONTENTS_TITLE) >= 0:
                     if not header["page"]:
                         self.headers_page = 1
                     else:
@@ -187,8 +208,13 @@ class DocxUploader(DocumentUploader):
         if not self.literature_page:
             for page, text in self.pdf_file.get_text_on_page().items():
                 first_lines = ' '.join(text.splitlines()[:2])
-                if re.search(
-                    r'список\s+(?:использованных\s+|использованной\s+)?(?:источников|литературы)', first_lines, re.I
+                if any(
+                    re.fullmatch(
+                        LITERATURE_PATTERN,
+                        line.strip(),
+                        re.I,
+                    )
+                    for line in (text.splitlines()[0] if text.splitlines() else '', first_lines)
                 ):
                     self.literature_page = page
                     break
@@ -198,9 +224,7 @@ class DocxUploader(DocumentUploader):
         if not self.literature_header:
             for header in self.make_chapters(work_type):
                 header_text = header["text"].lower()
-                if re.search(
-                    r'список\s+(?:использованных\s+|использованной\s+)?(?:источников|литературы)', header_text
-                ):
+                if re.search(LITERATURE_PATTERN, header_text):
                     self.literature_header = header
         return self.literature_header
 
@@ -283,7 +307,7 @@ class DocxUploader(DocumentUploader):
         if not self.page_count:
             for _, v in self.pdf_file.text_on_page.items():
                 line = v[:20] if len(v) > 21 else v
-                match = re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip())
+                match = re.search(APPENDIX_PAGE_PATTERN, line.strip())
                 if match:
                     remaining_text = line[match.end() :]
                     match_ellipsis = re.match(r'\.{2,}\s*', remaining_text.lstrip())

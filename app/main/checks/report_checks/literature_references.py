@@ -3,6 +3,7 @@ from collections import Counter
 
 from docx.oxml.ns import qn
 
+from ...reports.section_patterns import APPENDIX_A_PATTERN, APPENDIX_TITLE, LITERATURE_INLINE_PATTERN
 from ..base_check import BaseReportCriterion, answer
 from ..references import literature_numbers
 from .style_check_settings import StyleCheckSettings
@@ -20,7 +21,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         self.max_ref = max_ref
         self.literature_header = None
         self.literature_reference_text = []
-        self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
+        self.name_pattern = LITERATURE_INLINE_PATTERN
         if headers_map:
             self.config = headers_map
         else:
@@ -116,10 +117,12 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         prev_ref, ref_sequence, references = 0, [], set()
         document = getattr(self.file, 'file', None)
         if document is not None and hasattr(document, 'element'):
+            paragraphs = [paragraph for paragraph in document.paragraphs if paragraph.text.strip()]
+            boundary = paragraphs[start_par]._p
             texts = []
             for element in document.element.body:
                 text = ''.join(node.text or '' for node in element.iter(qn('w:t')))
-                if re.search(self.name_pattern, text, re.I):
+                if element is boundary:
                     break
                 texts.append(text)
         else:
@@ -178,7 +181,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         if not len(header["child"]):
             return literature_counter
         for child in header["child"]:
-            if child["text"].upper().startswith('ПРИЛОЖЕНИЕ'):
+            if child["text"].upper().startswith(APPENDIX_TITLE):
                 break
             # if re.search(f"дата обращения", child["text"].lower()):
             literature_counter += 1
@@ -199,7 +202,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                     first_string = j
                     break
             for j in range(first_string, len(one_page)):
-                if re.search('приложение а[\n .]', one_page[j].lower()):
+                if re.search(APPENDIX_A_PATTERN, one_page[j].lower()):
                     last_string = j
                     break
 
@@ -216,7 +219,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             lowercase_str = self.file.pdf_file.text_on_page[i].lower()
             if re.search(self.name_pattern, lowercase_str):
                 start_page = i
-            if re.search('приложение а[\n .]', lowercase_str):
+            if re.search(APPENDIX_A_PATTERN, lowercase_str):
                 end_page = i
                 break
         return start_page, end_page

@@ -5,6 +5,8 @@ from types import SimpleNamespace
 import markdown
 from lxml import html
 
+from app.main.reports.section_patterns import LITERATURE_MD_PATTERN
+
 from ..document_uploader import DocumentUploader
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
 
@@ -166,7 +168,7 @@ class MdUploader(DocumentUploader):
             (
                 chapter
                 for chapter in self.make_chapters(work_type)
-                if re.search(r'список\s+(?:использованных\s+)?(?:источников|литературы)', chapter['text'], re.I)
+                if re.search(LITERATURE_MD_PATTERN, chapter['text'], re.I)
             ),
             [],
         )
