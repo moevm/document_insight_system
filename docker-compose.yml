@@ -47,6 +47,27 @@ services:
     cpuset: ${CONTAINER_CPU:-0-1}
     mem_limit: ${WORKER_MEMORY:-1G}
 
+  document-diff-worker:
+    build:
+      context: .
+      args:
+        - VERSION=${IMAGE_VERSION}
+    image: dis:worker-image-${IMAGE_VERSION}
+    restart: always
+    command: celery --app=app.tasks.celery worker -n document-diff@worker -Q document-diff --loglevel=info
+    environment:
+      - CELERY_BROKER_URL=${REDIS_URL}
+      - CELERY_RESULT_BACKEND=${REDIS_URL}
+    depends_on:
+      - redis
+      - mongodb
+    volumes:
+      - files:/usr/src/project/files/
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    cpuset: ${CONTAINER_CPU:-0-1}
+    mem_limit: ${DIFF_WORKER_MEMORY:-1G}
+
   worker-dashboard:
     image: dis:worker-image-${IMAGE_VERSION}
     command: celery --broker=${REDIS_URL} flower --port=${FLOWER_PORT} --url_prefix=${FLOWER_PREFIX} --basic_auth=${FLOWER_AUTH} --persistent=True
@@ -85,3 +106,4 @@ volumes:
   flower_data:
   files:
   redis_data:
+  

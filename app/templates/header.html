@@ -14,6 +14,7 @@
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
             <a class="dropdown-item" href="/check_list">Статистика</a>
             {% if current_user.is_admin %}
+                <a class="dropdown-item" href="/document_diff/">Сравнение документов</a>
                 <a class="dropdown-item" href="/criterion_packs">Наборы критериев</a>
                 <a class="dropdown-item" href="/logs">Логи</a>
                 <div class="dropdown-divider"></div>
