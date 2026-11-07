@@ -3,7 +3,7 @@ from functools import wraps
 from flask import Blueprint, abort, jsonify, render_template, request
 from flask_login import current_user
 
-from app.db.methods.user import get_user, get_user_cursor
+from app.db.methods.user import get_user, get_user_cursor, set_user_role
 from app.utils.table_query import number_filter, page_options, read_filters, text_filter
 
 users = Blueprint('users', __name__, template_folder='templates', static_folder='static')
@@ -94,3 +94,14 @@ def user_info(username):
     if user_info is None:
         abort(404)
     return render_template('one_user_info.html', user_info=user_info)
+
+
+@users.route('/<username>/role', methods=['PUT'])
+@admin_required
+def user_role(username):
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or type(data.get('is_admin')) is not bool:
+        return jsonify(error='Поле is_admin должно быть логическим значением.'), 400
+    if not set_user_role(username, data['is_admin']):
+        return jsonify(error='Пользователь не найден.'), 404
+    return jsonify(is_admin=data['is_admin'])

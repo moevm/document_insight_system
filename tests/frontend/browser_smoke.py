@@ -39,6 +39,12 @@ def fixture_app():
     app.secret_key = 'test-only-key'
     manager = LoginManager(app)
     manager.request_loader(lambda req: Admin())
+    app.add_url_rule(
+        '/users/<username>/role',
+        endpoint='users.user_role',
+        methods=['PUT'],
+        view_func=lambda username: jsonify(is_admin=request.json['is_admin']),
+    )
     app.add_url_rule('/checks/<_id>', endpoint='checks.checks_main', view_func=lambda _id: '')
 
     @app.route('/users/')

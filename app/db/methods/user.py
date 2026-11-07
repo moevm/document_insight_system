@@ -35,6 +35,11 @@ def get_user(username):
         return None
 
 
+def set_user_role(username, is_admin):
+    result = users_collection.update_one({'username': username}, {'$set': {'is_admin': is_admin}})
+    return result.matched_count == 1
+
+
 def get_user_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
     filter = filter or {}
     sort = {'all_formats': 'formats', 'all_criteria': 'criteria', 'role': 'is_admin'}.get(sort, sort)
