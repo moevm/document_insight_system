@@ -4,6 +4,20 @@
 {% block main %}
 <div class="holder row"><div class="container-fluid">
     <h3 id="user_title" class="mt-3">Пользователь: {{ user_info.username }}</h3>
+    <form id="user-role-form" class="mb-3"
+          data-url="{{ url_for('users.user_role', username=user_info.username) }}"
+          data-is-self="{{ 'true' if current_user.username == user_info.username else 'false' }}">
+        <label for="user-role">Роль:</label>
+        <select id="user-role" class="form-control w-auto d-inline-block">
+            <option value="false" {% if not user_info.is_admin %}selected{% endif %}>Пользователь</option>
+            <option value="true" {% if user_info.is_admin %}selected{% endif %}>Администратор</option>
+        </select>
+        <button type="submit" class="btn blue_button">Сохранить роль</button>
+        <span id="user-role-status" role="status" aria-live="polite"></span>
+        {% if user_info.is_LTI %}
+        <p class="text-muted mt-2">При следующем входе через LTI роль обновится из LMS.</p>
+        {% endif %}
+    </form>
     <h4>Проверки пользователя</h4>
     {{ checks_table('one-user-table', user_info.username) }}
 </div></div>

@@ -219,6 +219,7 @@ def users_table_client(monkeypatch):
     methods = ModuleType('app.db.methods.user')
     methods.get_user = Mock()
     methods.get_user_cursor = Mock(return_value=([], 0))
+    methods.set_user_role = Mock()
     monkeypatch.setitem(sys.modules, methods.__name__, methods)
     routes = runpy.run_path(str(ROOT / 'app/routes/users.py'))
 
