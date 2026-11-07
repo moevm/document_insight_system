@@ -1,25 +1,20 @@
 import string
 from collections import defaultdict
 
-import nltk
 import numpy as np
-from nltk import word_tokenize
-from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 from nltk.util import ngrams
+
+from .tokenization import content_lemmas
 
 
 class NLPProcessor:
     def __init__(self, language='russian'):
-        nltk.download('punkt')
-        nltk.download('stopwords')
-        self.stop_words = set(stopwords.words(language))
         self.stemmer = SnowballStemmer(language)
 
     def preprocessing(self, text):
         text = text.translate(str.maketrans('', '', string.punctuation))
-        tokens = word_tokenize(text)
-        tokens = [word for word in tokens if word.lower() not in self.stop_words]
+        tokens = content_lemmas(text)
         return [self.stemmer.stem(token) for token in tokens]
 
     def get_ngrams(self, tokens, n=2):
@@ -52,7 +47,7 @@ class NLPProcessor:
             for item in docs:
                 if word in item:
                     word_in_docs += 1
-            return np.log10(len(docs) / (word_in_docs + 1))
+            return np.log((1 + len(docs)) / (1 + word_in_docs)) + 1
 
         def tf_idf(word, doc, docs):
             return tf(word, doc) * idf(word, docs)
@@ -76,8 +71,8 @@ class NLPProcessor:
         return round(cosine_sim, 3)
 
     def calculate_cosine_similarity(self, goal, texts: dict):
-        if not (goal or texts):
-            return
+        if not goal or not texts:
+            return {}
         corpus = []
         text1_n_grams = self.get_ngrams(self.preprocessing(goal))
         text2_n_grams = {}

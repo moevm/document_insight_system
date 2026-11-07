@@ -44,7 +44,7 @@ def get_zip_main():
 
     # zip
     tmp = tempfile.TemporaryDirectory()
-    archive_path = shutil.make_archive(f"{tmp}/archive", 'zip', dirpath.name)
+    archive_path = shutil.make_archive(os.path.join(tmp.name, "archive"), 'zip', dirpath.name)
     dirpath.cleanup()
 
     # send

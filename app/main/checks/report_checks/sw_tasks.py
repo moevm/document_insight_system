@@ -18,14 +18,16 @@ class SWTasksCheck(BaseReportCriterion):
         self.max_tasks = max_tasks
 
     def check(self):
+        if not self.is_markdown:
+            return answer(False, 'Критерий предназначен для отчётов Markdown.')
         self.file.make_chapters('VKR')
         for chapter in self.file.chapters:
             if "Задачи" in chapter['text']:
                 if self.min_tasks <= len(chapter['child']) <= self.max_tasks:
-                    return answer(1, "Проверка пройдена!")
+                    return answer(1, 'Проверка пройдена!')
                 feedback = (
                     f"Количество задач исследования должно быть в рамках [{self.min_tasks};{self.max_tasks}],"
                     f" сейчас их {len(chapter['child'])}. Проверьте, что раздел не содержит ничего, кроме списка задач."
                 )
                 return answer(0, feedback)
-        return answer(1, "Проверка пройдена!")
+        return answer(0, 'Раздел "Задачи" не найден.')

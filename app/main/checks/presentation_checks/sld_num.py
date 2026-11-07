@@ -42,7 +42,7 @@ class SldNumCheck(BasePresCriterion):
 
     def check(self):
         if self.detect_additional:
-            additional = re.compile(r'[А-Я][а-я]*[\s]слайд[ы]?')
+            additional = re.compile(r'\s*запасные\s+слайды\s*', re.I)
             find_additional = [i for i, header in enumerate(self.file.get_titles()) if re.fullmatch(additional, header)]
             if len(find_additional) == 0:
                 return self.get_sldnum_range(len(self.file.slides), suspected_additional=True)

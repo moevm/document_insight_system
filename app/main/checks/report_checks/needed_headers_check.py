@@ -8,11 +8,13 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
     id = 'needed_headers_check'
     priority = True
 
-    def __init__(self, file_info, main_heading_style="heading 2", headers_map=None):
+    def __init__(self, file_info, main_heading_style=None, headers_map=None):
         super().__init__(file_info)
         self.headers_page = 1
         self.headers = []
-        self.main_heading_style = main_heading_style
+        self.main_heading_style = (
+            main_heading_style or ('heading 3' if self.file_type['report_type'] == 'LR' else 'heading 2')
+        ).lower()
         self.patterns = []
         if headers_map:
             self.config = headers_map
@@ -32,7 +34,7 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
                 self.patterns = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['headers']
 
     def check(self):
-        if self.file.page_counter() < 4:
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         self.late_init()
         if not self.patterns:
@@ -47,6 +49,8 @@ class ReportNeededHeadersCheck(BaseReportCriterion):
         if not len(self.headers):
             return answer(False, "Не найдено ни одного заголовка.<br><br>Проверьте корректность использования стилей.")
         for header in self.headers:
+            if header['style'] != self.main_heading_style:
+                continue
             header_text = header["text"].lower()
             for i in range(len(patterns)):
                 pattern = patterns[i]["pattern"]

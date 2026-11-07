@@ -1,11 +1,7 @@
 import pymongo
 
 from app.db.db_main import get_users_collection
-from app.db.methods.client import get_db
-from app.db.methods.file import delete_presentation
 from app.db.types.User import User
-
-db = get_db()
 
 users_collection = get_users_collection()
 
@@ -39,36 +35,26 @@ def get_user(username):
         return None
 
 
-def get_all_users():
-    return users_collection.find()
-
-
-def delete_user(username):
-    user = get_user(username)
-    for presentation_id in user.files:
-        user, presentation = delete_presentation(user, presentation_id)
-    user = User(users_collection.find_one_and_delete({'username': username}))
-    return user
+def set_user_role(username, is_admin):
+    result = users_collection.update_one({'username': username}, {'$set': {'is_admin': is_admin}})
+    return result.matched_count == 1
 
 
 def get_user_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
     filter = filter or {}
-    sort = 'username' if sort == 'username' else sort
+    sort = {'all_formats': 'formats', 'all_criteria': 'criteria', 'role': 'is_admin'}.get(sort, sort)
     count = users_collection.count_documents(filter)
+    if sort == 'check_counts':
+        pipeline = [
+            {'$match': filter},
+            {'$addFields': {'_check_count': {'$size': {'$ifNull': ['$files', []]}}}},
+            {'$sort': {'_check_count': 1 if order == 'asc' else -1, 'username': 1}},
+            {'$skip': offset},
+        ]
+        if limit:
+            pipeline.append({'$limit': limit})
+        return users_collection.aggregate(pipeline), count
     rows = users_collection.find(filter)
-
-    if sort and order in ("asc, desc"):
-        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
-
-    rows = rows.skip(offset) if offset else rows
-    rows = rows.limit(limit) if limit else rows
-
-    return rows, count
-
-
-#
-# def edit_user(user):
-#     if users_collection.find_one_and_replace({'username': user.username}, user.pack()) is not None:
-#         return True
-#     else:
-#         return False
+    if sort and order in ('asc', 'desc'):
+        rows = rows.sort([(sort, pymongo.ASCENDING if order == 'asc' else pymongo.DESCENDING), ('_id', 1)])
+    return rows.skip(offset).limit(limit), count

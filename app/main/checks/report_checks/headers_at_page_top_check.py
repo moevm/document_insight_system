@@ -1,3 +1,6 @@
+import re
+
+from ...reports.section_patterns import APPENDIX_TITLE, CONTENTS_PAGE_SUFFIX_PATTERN
 from ..base_check import BaseReportCriterion, answer
 
 
@@ -19,12 +22,16 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
         self.headers_page = self.file.find_header_page(self.file_type['report_type'])
 
     def check(self):
-        if self.file.page_counter() < 4:
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
+        if self.is_markdown:
+            return answer(False, 'Проверка расположения заголовков применима к отчётам DOCX.')
         result = True
         result_str = ""
         # TODO: проверить совместимость / дублируемость LR и VKR
         if self.file_type["report_type"] == 'LR':
+            if not self.headers:
+                return answer(False, 'Для LR необходимо задать список headers.')
             for header in self.headers:
                 found = False
                 for page_num in range(1, self.pdf.page_count_all):
@@ -33,6 +40,8 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                     collected_text = ""
                     while True:
                         collected_text += " "
+                        if last_header_line >= len(lines):
+                            break
                         collected_text += lines[last_header_line]
                         collected_text = collected_text.strip()
                         if collected_text.lower() == header.lower():
@@ -63,15 +72,10 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
                 for header in self.headers:
                     if not header["marker"]:
                         header_text = header["text"].lower()
-                        if collected_text.startswith(header_text.strip()):
-                            header["marker"] = 1
-                            break
-                        elif collected_text.find(header_text.strip()) > 0:
-                            result_str += (
-                                ("<br>" if len(result_str) else "") + f"Заголовок второго уровня \"{header['text']}\" "
-                                f"находится не в начале страницы или пронумирован с помощью списка "
-                                f"{self.format_page_link([page_num])}. "
-                            )
+                        if collected_text.startswith(header_text.strip()) and (
+                            not re.fullmatch(CONTENTS_PAGE_SUFFIX_PATTERN, collected_text[len(header_text.strip()) :])
+                            or self.pdf.text_on_page[page_num].split('\n', 1)[0].strip().lower() == header_text.strip()
+                        ):
                             header["marker"] = 1
                             break
 
@@ -101,7 +105,7 @@ class ReportHeadersAtPageTopCheck(BaseReportCriterion):
         chapters = []
         for header in self.chapters:
             if header["style"] == 'heading 2':
-                if header["text"].find("ПРИЛОЖЕНИЕ") >= 0:
+                if header["text"].find(APPENDIX_TITLE) >= 0:
                     break
                 chapters.append({"text": header["text"], "marker": 0})
         return chapters

@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 
-from ..base_check import BasePresCriterion, answer
+from ..base_check import BaseReportCriterion, answer
 
 CUR_YEAR = datetime.now().year
 
@@ -15,14 +15,14 @@ TEMPLATE_TYPES = {
 DEFAULT_TEMPLATE_DESC = "Проверка соответствия названия файла требуемому шаблону."
 
 
-class ReportTemplateNameCheck(BasePresCriterion):
+class ReportTemplateNameCheck(BaseReportCriterion):
     label = "Проверка соответствия названия файла шаблону"
     _description = ''
     id = 'template_name'
 
     def __init__(self, file_info, regex=f"{CUR_YEAR}" + r"ВКР[0-9]{6}([А-ЯЁ]+)"):
         super().__init__(file_info)
-        self.filename = self.filename.split('.', 1)[0]
+        self.filename = self.filename.rsplit('.', 1)[0]
         self.reg = regex
 
     def check(self):
@@ -33,7 +33,7 @@ class ReportTemplateNameCheck(BasePresCriterion):
     @classmethod
     def description(cls, pack: str | None = None):
         if not pack:
-            return TEMPLATE_TYPES[None]
+            return DEFAULT_TEMPLATE_DESC
         elif pack == 'ALL':
             return TEMPLATE_TYPES
         for named_pack in TEMPLATE_TYPES:
