@@ -37,14 +37,19 @@ def get_user(username):
 
 def get_user_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
     filter = filter or {}
-    sort = 'username' if sort == 'username' else sort
+    sort = {'all_formats': 'formats', 'all_criteria': 'criteria', 'role': 'is_admin'}.get(sort, sort)
     count = users_collection.count_documents(filter)
+    if sort == 'check_counts':
+        pipeline = [
+            {'$match': filter},
+            {'$addFields': {'_check_count': {'$size': {'$ifNull': ['$files', []]}}}},
+            {'$sort': {'_check_count': 1 if order == 'asc' else -1, 'username': 1}},
+            {'$skip': offset},
+        ]
+        if limit:
+            pipeline.append({'$limit': limit})
+        return users_collection.aggregate(pipeline), count
     rows = users_collection.find(filter)
-
-    if sort and order in ("asc, desc"):
-        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
-
-    rows = rows.skip(offset) if offset else rows
-    rows = rows.limit(limit) if limit else rows
-
-    return rows, count
+    if sort and order in ('asc', 'desc'):
+        rows = rows.sort([(sort, pymongo.ASCENDING if order == 'asc' else pymongo.DESCENDING), ('_id', 1)])
+    return rows.skip(offset).limit(limit), count

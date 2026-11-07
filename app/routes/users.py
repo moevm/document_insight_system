@@ -1,10 +1,10 @@
-import json
 from functools import wraps
 
 from flask import Blueprint, abort, jsonify, render_template, request
 from flask_login import current_user
 
 from app.db.methods.user import get_user, get_user_cursor
+from app.utils.table_query import number_filter, page_options, read_filters, text_filter
 
 users = Blueprint('users', __name__, template_folder='templates', static_folder='static')
 
@@ -24,60 +24,56 @@ def admin_required(route_func):
 @users.route("/data")
 @admin_required
 def users_data():
-    filters = request.args.get("filter", "{}")
     try:
-        filters = json.loads(filters)
-        filters = filters if filters else {}
-    except Exception:
-        # logger.warning("Can't parse filters")
-        # logger.warning(repr(e))
-        filters = {}
-    filter_query = {}
-    if f_username := filters.get("username", None):
-        filter_query["username"] = {"$regex": f_username}
-
-    if f_name := filters.get("name", None):
-        filter_query["name"] = {"$regex": f_name}
-
-    if f_formats := filters.get("all_formats", None):
-        filter_query["formats"] = {"$regex": f_formats}
-
-    if f_criteria := filters.get("all_criteria", None):
-        filter_query["criteria"] = {"$regex": f_criteria}
-
-    if f_check_counts := filters.get("check_counts", None):
-        try:
-            f_check_counts_value, f_check_counts_cond = int(f_check_counts.split()[1]), f_check_counts.split()[0]
-            if f_check_counts_cond == '>':
-                filter_query["$expr"] = {"$gte": [{"$size": "$files"}, f_check_counts_value]}
-            elif f_check_counts_cond == "<":
-                filter_query["$expr"] = {"$lte": [{"$size": "$files"}, f_check_counts_value]}
-        except ValueError:
-            pass
-
-    limit = request.args.get("limit", "")
-    limit = int(limit) if limit.isnumeric() else 10
-
-    offset = request.args.get("offset", "")
-    offset = int(offset) if offset.isnumeric() else 0
-
-    sort = request.args.get("sort", "")
-    sort = 'username' if not sort else sort
-
-    order = request.args.get("order", "")
-    order = 'username' if not order else order
-
-    rows, count = get_user_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+        filters = read_filters(request.args)
+        filter_query = {}
+        for field, key in {
+            'username': 'username',
+            'name': 'name',
+            'all_criteria': 'criteria',
+        }.items():
+            if value := filters.get(field):
+                filter_query[key] = text_filter(value)
+        if file_format := filters.get('all_formats'):
+            filter_query['formats'] = file_format.lower()
+        if role := filters.get('role'):
+            if role not in ('admin', 'user'):
+                raise ValueError('Неизвестная роль.')
+            filter_query['is_admin'] = True if role == 'admin' else {'$ne': True}
+        if is_lti := filters.get('is_LTI'):
+            if is_lti not in ('true', 'false'):
+                raise ValueError('Неизвестный способ входа.')
+            filter_query['is_LTI'] = True if is_lti == 'true' else {'$ne': True}
+        if count := filters.get('check_counts'):
+            condition = number_filter(count, integer=True)
+            count_expr = {'$size': {'$ifNull': ['$files', []]}}
+            filter_query['$expr'] = (
+                {'$and': [{op: [count_expr, value]} for op, value in condition.items()]}
+                if isinstance(condition, dict)
+                else {'$eq': [count_expr, condition]}
+            )
+        if search := request.args.get('search', '').strip():
+            filter_query['$or'] = [{field: text_filter(search)} for field in ('username', 'name', 'criteria')]
+        options = page_options(
+            request.args,
+            {'username', 'name', 'role', 'is_LTI', 'all_formats', 'all_criteria', 'check_counts'},
+            'username',
+        )
+    except ValueError as error:
+        return jsonify(error=str(error)), 400
+    rows, count = get_user_cursor(filter=filter_query, **options)
 
     response = {
         "total": count,
         "rows": [
             {
                 "username": item["username"],
-                "name": item["name"],
-                "all_formats": item["formats"],
-                "all_criteria": item["criteria"],
-                "check_counts": len(item["files"]),
+                "name": item.get("name", ''),
+                "role": "Администратор" if item.get("is_admin", False) else "Пользователь",
+                "is_LTI": item.get("is_LTI", False),
+                "all_formats": item.get("formats", []),
+                "all_criteria": item.get("criteria", ''),
+                "check_counts": len(item.get("files") or []),
             }
             for item in rows
         ],
@@ -95,4 +91,6 @@ def index():
 @admin_required
 def user_info(username):
     user_info = get_user(username)
+    if user_info is None:
+        abort(404)
     return render_template('one_user_info.html', user_info=user_info)

@@ -1,77 +1,10 @@
-{# Accepts: header dependicies #}
-
 {% extends 'root.html' %}
-
-{% block title %}
-    Результаты проверок
-{% endblock title %}
-
+{% from 'macros/data_table.html' import checks_table with context %}
+{% block title %}Статистика проверок{% endblock %}
 {% block main %}
-    <style>
-        .fht-cell {
-            margin: 0 0.2rem 0.2rem;
-        }
-
-        /* .check-list-table th td { border: #54585d; } */
-
-        #check-list-table {
-            table-layout: fixed;
-            word-wrap: break-word;
-        }
-
-        #check-list-table.table-bordered,
-        #check-list-table.table-bordered > thead > tr > th,
-        #check-list-table.table-bordered > tbody > tr > td {
-            border: 1px solid #a1a1a1;
-        }
-    </style>
-    <div class="holder row">
-        <div class="container-fluid table-responsive-xl">
-            <table id="check-list-table" class="table bg-white"
-                   data-filter-control="true"
-                   data-pagination="true"
-                   data-page-list="[5, 10, 25, 50, All]"
-                   data-ajax="ajaxRequest"
-                   data-query-params="queryParams"
-                   data-show-refresh="false"
-                   data-auto-refresh="true"
-                   data-auto-refresh-interval="10"
-                   data-show-auto-refresh="false"
-                   data-side-pagination="server"
-                   data-icon-size="lg"
-                   data-buttons="buttons"
-                   data-show-filter-control-switch="true"
-                   data-show-button-icons="false"
-                   data-show-button-text="true"
-            >
-                <thead>
-                <tr>
-                    <th data-field="_id" data-width="160">Upload ID</th>
-                    <th data-field="filename" data-filter-control="input" data-sortable="true">File name</th>
-                    <th data-field="criteria" data-filter-control="input" data-sortable="true">Criteria pack</th>
-                    {% if current_user.is_admin %}
-                        <th data-field="user" data-filter-control="input" data-sortable="true">Username</th>
-                        <th data-field="lms-user-id" data-sortable="false">User ID</th>
-                    {% endif %}
-                    <th data-field="upload-date" data-filter-control="datepicker"
-                        data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}'
-                        data-sortable="true">Upload date
-                    </th>
-                    <th data-field="moodle-date" data-filter-control="datepicker"
-                        data-filter-datepicker-options='{"autoclose":true, "clearBtn": true, "multidate":2, "multidateSeparator":"-", "format":"dd.mm.yyyy"}'
-                        data-sortable="true">Moodle upload date
-                    </th>
-                    <th data-field="score" data-filter-control="input" data-sortable="true">Result</th>
-                </tr>
-                </thead>
-            </table>
-        </div>
-    </div>
-{% endblock main %}
-{% block script %}
-    <script>
-        var is_admin = "{{current_user.is_admin}}" == "True"
-    </script>
-<script src={{ url_for("static", filename="check_list.js") }}></script>
+<div class="holder row"><div class="container-fluid">
+    <h3 class="mt-3">Статистика проверок</h3>
+    {{ checks_table('check-list-table') }}
+</div></div>
 {% endblock %}
-
+{% block script %}<script src="{{ url_for('static', filename='check_list.js') }}"></script>{% endblock %}
