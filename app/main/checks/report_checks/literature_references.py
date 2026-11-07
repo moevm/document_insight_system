@@ -3,7 +3,7 @@ from collections import Counter
 
 from docx.oxml.ns import qn
 
-from ...reports.section_patterns import APPENDIX_A_PATTERN, APPENDIX_TITLE, LITERATURE_INLINE_PATTERN
+from ...reports.section_patterns import APPENDIX_TITLE
 from ..base_check import BaseReportCriterion, answer
 from ..references import literature_numbers
 from .style_check_settings import StyleCheckSettings
@@ -21,7 +21,6 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         self.max_ref = max_ref
         self.literature_header = None
         self.literature_reference_text = []
-        self.name_pattern = LITERATURE_INLINE_PATTERN
         if headers_map:
             self.config = headers_map
         else:
@@ -102,12 +101,6 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                     '''
         return answer(False, result_str)
 
-    def get_text_in_table(self, index_table):
-        table = self.file.tables[index_table]
-        if hasattr(table, '_cells'):
-            return ' '.join(cell.text for cell in table._cells)
-        return table.text_content()
-
     def search_references_in_text(self, text, prev_ref, array_of_references, ref_sequence):
         for number in literature_numbers(text):
             prev_ref = self.add_references(number, prev_ref, array_of_references, ref_sequence)
@@ -167,15 +160,6 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
 
         return duplicates
 
-    def find_start_paragraph(self):
-        start_index = 0
-        for i in range(len(self.file.paragraphs)):
-            text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
-            if re.fullmatch(f'{self.name_pattern}', text_string):
-                start_index = i
-                break
-        return start_index
-
     def count_sources_vkr(self, header):
         literature_counter = 0
         if not len(header["child"]):
@@ -183,43 +167,6 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         for child in header["child"]:
             if child["text"].upper().startswith(APPENDIX_TITLE):
                 break
-            # if re.search(f"дата обращения", child["text"].lower()):
             literature_counter += 1
             self.literature_reference_text.append(child["text"])
         return literature_counter
-
-    def count_sources(self):
-        literature_counter = 0
-        start_page, end_page = self.search_literature_start_pdf()
-        for i in range(start_page, end_page + 1):
-            one_page = self.file.pdf_file.text_on_page[i].split('\n')
-            first_string = -1
-            last_string = len(one_page)
-
-            for j in range(len(one_page)):
-                one_str_lowercase = one_page[j].lower()
-                if re.search(self.name_pattern, one_str_lowercase):
-                    first_string = j
-                    break
-            for j in range(first_string, len(one_page)):
-                if re.search(APPENDIX_A_PATTERN, one_page[j].lower()):
-                    last_string = j
-                    break
-
-            for ind in range(first_string + 1, last_string):
-                if re.match(f"{literature_counter + 1}.", one_page[ind]):
-                    literature_counter += 1
-                    self.literature_reference_text.append(one_page[ind])
-        return literature_counter
-
-    def search_literature_start_pdf(self):
-        start_page = 0
-        end_page = self.file.pdf_file.page_count_all
-        for i in self.file.pdf_file.text_on_page.keys():
-            lowercase_str = self.file.pdf_file.text_on_page[i].lower()
-            if re.search(self.name_pattern, lowercase_str):
-                start_page = i
-            if re.search(APPENDIX_A_PATTERN, lowercase_str):
-                end_page = i
-                break
-        return start_page, end_page

@@ -160,9 +160,6 @@ class MdUploader(DocumentUploader):
             stack.append((level, node))
         return tree
 
-    def get_tables_size(self):
-        return sum(par['style_name'] == 'md_table' for par in self.styled_paragraphs) / max(len(self.paragraphs), 1)
-
     def find_literature_vkr(self, work_type='VKR'):
         return next(
             (

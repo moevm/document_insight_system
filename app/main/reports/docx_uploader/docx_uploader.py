@@ -228,41 +228,6 @@ class DocxUploader(DocumentUploader):
                     self.literature_header = header
         return self.literature_header
 
-    def build_vkr_hierarchy(self, styles):
-        indices = self.get_paragraph_indices_by_style(styles)
-        tagged_indices = [{"index": 0, "level": 0}, {"index": len(self.styled_paragraphs), "level": 0}]
-        for j in range(len(indices)):
-            tagged_indices.extend(
-                list(
-                    map(
-                        lambda index: {"index": index, "level": j + 1, "text": self.styled_paragraphs[index]["text"]},
-                        indices[j],
-                    )
-                )
-            )
-        tagged_indices.sort(key=lambda dct: dct["index"])
-        return tagged_indices
-
-    def build_vkr_hierarchy_style(self, styles):
-        indices = self.get_paragraph_indices_by_style(styles)
-        tagged_indices = [{"index": 0, "level": 0}, {"index": len(self.styled_paragraphs), "level": 0}]
-        for j in range(len(indices)):
-            tagged_indices.extend(
-                list(
-                    map(
-                        lambda index: {
-                            "index": index,
-                            "level": j + 1,
-                            "styled_text": self.styled_paragraphs[index],
-                            "style": self.paragraphs[index].paragraph_style_name.lower(),
-                        },
-                        indices[j],
-                    )
-                )
-            )
-        tagged_indices.sort(key=lambda dct: dct["index"])
-        return tagged_indices
-
     # Parses styles once; subsequent calls have no effect, since the file itself shouldn't change
     def parse_effective_styles(self):
         if self.styled_paragraphs:
@@ -272,25 +237,6 @@ class DocxUploader(DocumentUploader):
             for run in filter(lambda r: len(r.text.strip()) > 0, par.runs):
                 paragraph["runs"].append({"text": run.text, "style": Style(run, par)})
             self.styled_paragraphs.append(paragraph)
-
-    def unify_multiline_entities(self, first_line_regex_str):
-        pattern = re.compile(first_line_regex_str)
-        pars_to_delete = []
-        skip_flag = False
-        for i in range(len(self.styled_paragraphs) - 1):
-            if skip_flag:
-                skip_flag = False
-                continue
-            par = self.styled_paragraphs[i]
-            next_par = self.styled_paragraphs[i + 1]
-            if pattern.match(par["text"]):
-                skip_flag = True
-                par["text"] += "\n" + next_par["text"]
-                par["runs"].extend(next_par["runs"])
-                pars_to_delete.append(next_par)
-                continue
-        for par in pars_to_delete:
-            self.styled_paragraphs.remove(par)
 
     def get_paragraph_indices_by_style(self, style_list):
         result = []

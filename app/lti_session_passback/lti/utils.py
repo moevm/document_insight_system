@@ -50,13 +50,6 @@ def get_role(data, default_role=False):
         return default_role
 
 
-def get_exc_info(data):
-    task_title = get_param(data, 'resource_link_title')
-    task_id = get_param(data, 'resource_link_id')
-    un = f"{get_username(data)}_{get_param(data, 'tool_consumer_instance_guid')}"
-    return dict(zip(['title', 'id', 'username'], [task_title, task_id, un], strict=False))
-
-
 def get_custom_params(data):
     return {key[len(CUSTOM_PARAM_PREFIX) :]: data[key] for key in data if key.startswith(CUSTOM_PARAM_PREFIX)}
 

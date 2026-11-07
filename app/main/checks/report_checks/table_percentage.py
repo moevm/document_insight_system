@@ -139,13 +139,6 @@ class ReportTablePercentageCheck(BaseReportCriterion):
 
         return None
 
-    def find_tables_indexes_between_text(self, start_text: str, end_text: str | None = None):
-        """Функция нахождения индексов начала и конца таблиц между двумя текстами"""
-        start_index = self.find_table_index_after_text(start_text)
-        end_index = self.find_table_index_after_text(end_text)
-
-        return start_index, end_index
-
     def check(self):
         if self.is_markdown:
             return answer(False, 'Проверка доли таблиц применима к отчётам DOCX.')
