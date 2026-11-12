@@ -16,7 +16,6 @@ def test_users_data_requires_authenticated_admin(monkeypatch, role, expected_sta
     user_methods = ModuleType('app.db.methods.user')
     user_methods.get_user = Mock()
     user_methods.get_user_cursor = Mock(return_value=([], 0))
-    user_methods.set_user_role = Mock()
     monkeypatch.setitem(sys.modules, 'app.db.methods.user', user_methods)
     route_path = Path(__file__).resolve().parents[2] / 'app' / 'routes' / 'users.py'
     routes = runpy.run_path(str(route_path))

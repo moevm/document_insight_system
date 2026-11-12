@@ -36,3 +36,6 @@ class SWKeywordsCheck(BaseReportCriterion):
         if missing:
             return answer(False, 'Не пройдена! В тексте не найдены следующие ключевые слова: ' + ', '.join(missing))
         return answer(True, 'Пройдена!')
+
+    def text_to_lemma(self, text):
+        return ' '.join(content_lemmas(re.sub(r'<[^>]*>', '', text)))

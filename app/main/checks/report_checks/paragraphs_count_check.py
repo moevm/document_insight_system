@@ -1,7 +1,5 @@
 import re
 
-from app.main.reports.section_patterns import APPENDIX_TITLE
-
 from ..base_check import BaseReportCriterion, answer
 
 
@@ -35,7 +33,7 @@ class ReportParagraphsCountCheck(BaseReportCriterion):
         errors = []
         for index, chapter in enumerate(chapters):
             name = chapter['text']
-            if name.lower().startswith(APPENDIX_TITLE.lower()):
+            if name.lower().startswith('приложение'):
                 break
             if any(skip in name.lower() for skip in self.skip_sections):
                 continue

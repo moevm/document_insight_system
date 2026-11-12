@@ -1,7 +1,5 @@
-from app.main.reports.section_patterns import INTRODUCTION_TITLE
-
 SECTION_CONFIG = {
-    INTRODUCTION_TITLE.lower(): {
+    "введение": {
         "patterns": [
             'актуальность',
             'объект исследования',

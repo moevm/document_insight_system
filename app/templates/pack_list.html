@@ -1,25 +1,81 @@
-{% extends 'root.html' %}
-{% block title %}Наборы критериев{% endblock %}
-{% set types = {'pres': 'Презентация', 'report': 'Отчёт', 'LR': 'ЛР', 'VKR': 'ВКР'} %}
+{% extends "root.html" %}
+
+{% block title %}Список именованных критериев проверки{% endblock %}
+
+{% block head %}
+    <style>
+        .table {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 1px solid #dddddd;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            font-weight: bold;
+            padding: 5px;
+            background: #efefef;
+            border: 1px solid #dddddd;
+        }
+
+        .table td {
+            border: 1px solid #dddddd;
+            padding: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% set types = {'pres': "Презентация", 'report': "Отчёт", 'LR': "ЛР", 'VKR': "ВКР"} %}
+
 {% block main %}
-<div class="holder row"><div class="container-fluid">
-    <h3 class="mt-3">Наборы критериев</h3>
-    <a class="btn blue_button" href="{{ url_for('criterion_pack.criteria_pack_new') }}">Создать новый набор</a>
-    <table id="pack-list-table" class="table"><thead><tr>
-        <th data-field="name" data-sortable="true">Название набора</th>
-        <th data-field="type" data-sortable="true">Тип документа</th>
-        <th data-field="updated" data-sortable="true">Последнее изменение</th>
-        <th data-field="edit" data-html="true">Редактировать</th>
-    </tr></thead><tbody>
-    {% for pack in packs %}
-        <tr>
-            <td>{{ pack['name'] }}</td>
-            <td>{{ types.get(pack['file_type']['type']) }}{% if pack['file_type']['type'] == 'report' %}. {{ types.get(pack['file_type']['report_type']) }}{% endif %}</td>
-            <td>{{ pack['updated'].strftime('%Y-%m-%d %H:%M') }}</td>
-            <td><a href="{{ url_for('criterion_pack.criteria_pack', name=pack['name']) }}">Открыть</a></td>
-        </tr>
-    {% endfor %}
-    </tbody></table>
-</div></div>
-<script src="{{ url_for('static', filename='pack_list.js') }}"></script>
+
+        <div class="row justify-content-center">
+
+        <a href="{{ url_for('criterion_pack.criteria_pack_new') }}">Создать новый набор</a><br>
+        <table class="table" border="1px">
+            <thead>
+            <tr>
+                <th>Название набора</th>
+                <th>Тип документа</th>
+                <th>Последнее изменение</th>
+                <th>Редактировать</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for pack in packs %}
+                <tr>
+                    <td>
+                        {{ pack['name'] }}
+                    </td>
+                    <td>
+                        {{ types.get(pack['file_type']['type']) }}{% if pack['file_type']['type'] == 'report' %}.
+                            {{ types.get(pack['file_type']['report_type']) }}{% endif %}
+                    </td>
+                    <!--
+                    <td>
+                        <ul>
+                            {% for criterion in pack.criterions %}
+                                <li>
+                                    <a href=
+                        {{ url_for("routes_criterion.get_critetion", criterion_name=criterion.name) }}>
+                        {{ criterion.name }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                    </td>
+                    -->
+                    <td>
+                        <script> document.write((new Date({{ "%d"|format(pack['updated'].timestamp()*1000)}})).toLocaleString());</script>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('criterion_pack.criteria_pack', name=pack['name']) }}">>>>>></a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+<script src={{ url_for("static", filename="general.js") }}></script>
+
 {% endblock %}

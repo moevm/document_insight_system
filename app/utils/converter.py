@@ -1,3 +1,4 @@
+import os
 import subprocess
 from os.path import dirname
 
@@ -22,3 +23,10 @@ def convert_to(filepath, target_format='pdf'):
         new_filename = "{}.{}".format(filepath.rsplit('.', 1)[0], target_format)
 
     return new_filename
+
+
+def open_file(filepath, remove=False):
+    file = open(filepath, 'rb')
+    if remove:
+        os.remove(filepath)
+    return file

@@ -1,20 +1,17 @@
 import re
 
-from app.main.reports.section_patterns import INTRODUCTION_TITLE
 from app.nlp.text_similarity import NLPProcessor
-
-from ...reports.section_patterns import BODY_END_PATTERN
 
 
 def content_and_intro(file, report_type):
     chapters = file.make_chapters(report_type)
-    intro = next((chapter for chapter in chapters if INTRODUCTION_TITLE.lower() in chapter['text'].lower()), None)
+    intro = next((chapter for chapter in chapters if 'введение' in chapter['text'].lower()), None)
     content = {}
     for chapter in chapters:
         title = chapter['text']
-        if re.search(BODY_END_PATTERN, title, re.I):
+        if re.search(r'^приложение|список\s+(?:использованных\s+)?(?:источников|литературы)', title, re.I):
             break
-        if INTRODUCTION_TITLE.lower() not in title.lower():
+        if 'введение' not in title.lower():
             text = '\n'.join(child['text'] for child in chapter['child'])
             if text.strip():
                 content[title] = text

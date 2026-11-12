@@ -1,6 +1,6 @@
 from .check_file import check_file
 from .checklist_filter import checklist_filter
-from .converter import convert_to
+from .converter import convert_to, open_file
 from .decorators import decorator_assertion
 from .formatters import format_check, format_check_for_table
 from .get_file_len import get_file_len
@@ -18,6 +18,7 @@ __all__ = [
     'check_file',
     'checklist_filter',
     'convert_to',
+    'open_file',
     'decorator_assertion',
     'format_check',
     'format_check_for_table',

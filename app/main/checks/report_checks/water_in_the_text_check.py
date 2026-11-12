@@ -1,6 +1,5 @@
 import re
 
-from ...reports.section_patterns import LITERATURE_PATTERN
 from ..base_check import BaseReportCriterion, answer, morph
 from .watery_phrase_settings import WateryPhrase
 
@@ -40,7 +39,9 @@ class WaterInTheTextCheck(BaseReportCriterion):
         self.late_init()
         result_str = ""
         for chapter in self.chapters:
-            if re.search(LITERATURE_PATTERN, chapter['text'], re.I):
+            if re.search(
+                r'список\s+(?:использованных\s+|использованной\s+)?(?:источников|литературы)', chapter['text'], re.I
+            ):
                 break
             text = self.get_chapter_text(chapter)
             words = self.get_words(text)

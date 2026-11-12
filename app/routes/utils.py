@@ -1,6 +1,6 @@
 import os
 
-from flask import abort, request
+from flask import request
 from flask_login import current_user
 
 from app.db.methods import check as check_methods
@@ -21,10 +21,7 @@ def check_export_access():
 
 def get_query(req):
     # query for download csv/zip (only for admins)
-    try:
-        filter_query = checklist_filter(req.args, is_admin=True)
-    except ValueError as error:
-        abort(400, description=str(error))
+    filter_query = checklist_filter(req.args, is_admin=True)
     limit = False
     offset = False
     sort = req.args.get("sort", "")
