@@ -55,14 +55,3 @@ class Check(PackableWithId):
         package['conv_pdf_fs_id'] = self.conv_pdf_fs_id if not to_str else str(self.conv_pdf_fs_id)
         package['enabled_checks'] = self.enabled_checks
         return package
-
-    def get_flags(self):
-        def none_to_true(x):
-            return x is None or bool(x)
-
-        def none_to_false(x):
-            return x is not None and bool(x)
-
-        is_ended = none_to_true(self.is_ended)  # None for old checks => True, True->True, False->False
-        is_failed = none_to_false(self.is_failed)  # None for old checks => False, True->True, False->False
-        return {'is_ended': is_ended, 'is_failed': is_failed}

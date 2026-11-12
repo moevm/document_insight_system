@@ -1,3 +1,5 @@
+from app.main.reports.section_patterns import APPENDIX_TITLE
+
 from ..base_check import BaseReportCriterion, answer
 
 default_font_size: int = 12  # Значение размера шрифта по умолчанию
@@ -98,7 +100,7 @@ class ReportTablePercentageCheck(BaseReportCriterion):
         end_index = len(doc_docx.tables)
 
         if self._hasApplication:
-            end_index = self.find_table_index_after_text('ПРИЛОЖЕНИЕ')
+            end_index = self.find_table_index_after_text(APPENDIX_TITLE)
             end_index = end_index if end_index is not None else len(doc_docx.tables)
 
         chapters = self.file.make_chapters(self.file_type['report_type'])
@@ -121,7 +123,7 @@ class ReportTablePercentageCheck(BaseReportCriterion):
         for _, paragraph in enumerate(doc_docx.paragraphs):
             if target_text and (
                 (
-                    target_text == 'ПРИЛОЖЕНИЕ'
+                    target_text == APPENDIX_TITLE
                     and paragraph.text.startswith(target_text)
                     and 'heading' in paragraph.style.name.lower()
                 )
@@ -136,13 +138,6 @@ class ReportTablePercentageCheck(BaseReportCriterion):
                             return index
 
         return None
-
-    def find_tables_indexes_between_text(self, start_text: str, end_text: str | None = None):
-        """Функция нахождения индексов начала и конца таблиц между двумя текстами"""
-        start_index = self.find_table_index_after_text(start_text)
-        end_index = self.find_table_index_after_text(end_text)
-
-        return start_index, end_index
 
     def check(self):
         if self.is_markdown:

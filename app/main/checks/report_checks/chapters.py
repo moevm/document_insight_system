@@ -1,5 +1,7 @@
 import re
 
+from app.main.reports.section_patterns import APPENDIX_TITLE
+
 from ...reports.docx_uploader.style import Style
 from ..base_check import BaseReportCriterion, answer
 from .style_check_settings import StyleCheckSettings
@@ -72,7 +74,7 @@ class ReportChapters(BaseReportCriterion):
                 for style_name in styles:
                     if header["style"].find(style_name) >= 0:
                         if pre_headers and (
-                            header["text"] not in pre_headers and "приложение" not in header["text"].lower()
+                            header["text"] not in pre_headers and APPENDIX_TITLE.lower() not in header["text"].lower()
                         ):
                             # если для стиля есть предопределенные заголовки (= структурные части ВКР) -> проверяем
                             # иначе идем дальше, т.к. может быть несколько стилей для одного вида заголовка

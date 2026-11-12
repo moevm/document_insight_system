@@ -3,6 +3,7 @@ from collections import Counter
 
 from docx.oxml.ns import qn
 
+from ...reports.section_patterns import BODY_END_PATTERN, BODY_END_PREFIX_PATTERN
 from ..base_check import BaseReportCriterion, answer
 
 
@@ -16,9 +17,7 @@ class CaptionReferences(BaseReportCriterion):
             return answer(False, 'Не найдено ни одного заголовка.')
         numbers, text_parts, body_children = [], [], []
         for chapter in chapters:
-            if re.search(
-                r'список\s+(?:использованных\s+)?(?:источников|литературы)|^приложение', chapter['text'], re.I
-            ):
+            if re.search(BODY_END_PATTERN, chapter['text'], re.I):
                 break
             for child in chapter['child']:
                 body_children.append(child)
@@ -48,11 +47,25 @@ class CaptionReferences(BaseReportCriterion):
                 document = getattr(self.file, 'file', None)
                 has_images = has_tables = in_body = False
                 if document is not None:
+                    paragraphs = [paragraph for paragraph in document.paragraphs if paragraph.text.strip()]
+                    start = paragraphs[chapters[0]['number']]._p
+                    end = next(
+                        (
+                            chapter
+                            for chapter in chapters
+                            if re.match(
+                                BODY_END_PREFIX_PATTERN,
+                                chapter['text'],
+                                re.I,
+                            )
+                        ),
+                        None,
+                    )
+                    boundary = paragraphs[end['number']]._p if end else None
                     for element in document.element.body:
-                        text = ''.join(node.text or '' for node in element.iter(qn('w:t')))
-                        if text.strip().lower() == chapters[0]['text'].strip().lower():
+                        if element is start:
                             in_body = True
-                        if re.search(r'^приложение|^список\s', text, re.I):
+                        if element is boundary:
                             break
                         if in_body:
                             has_tables = has_tables or element.tag.endswith('}tbl')

@@ -1,3 +1,5 @@
+from app.main.reports.section_patterns import ABBREVIATIONS_TITLE, APPENDIX_TITLE, LITERATURE_TITLE
+
 from ..base_check import BaseReportCriterion, answer
 from ..check_abbreviations import forming_response, main_check
 
@@ -16,9 +18,9 @@ class ReportAbbreviationsCheck(BaseReportCriterion):
             text = self._get_document_text()
 
             headings = [
-                "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ",
-                "ПРИЛОЖЕНИЕ",
-                "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ",
+                LITERATURE_TITLE.upper(),
+                APPENDIX_TITLE,
+                ABBREVIATIONS_TITLE,
             ]
             unverifiable_text = self._get_unverifiable_text(headings)
 

@@ -5,6 +5,8 @@ from types import SimpleNamespace
 import markdown
 from lxml import html
 
+from app.main.reports.section_patterns import LITERATURE_MD_PATTERN
+
 from ..document_uploader import DocumentUploader
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
 
@@ -158,15 +160,12 @@ class MdUploader(DocumentUploader):
             stack.append((level, node))
         return tree
 
-    def get_tables_size(self):
-        return sum(par['style_name'] == 'md_table' for par in self.styled_paragraphs) / max(len(self.paragraphs), 1)
-
     def find_literature_vkr(self, work_type='VKR'):
         return next(
             (
                 chapter
                 for chapter in self.make_chapters(work_type)
-                if re.search(r'список\s+(?:использованных\s+)?(?:источников|литературы)', chapter['text'], re.I)
+                if re.search(LITERATURE_MD_PATTERN, chapter['text'], re.I)
             ),
             [],
         )

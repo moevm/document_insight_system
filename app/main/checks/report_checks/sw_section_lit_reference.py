@@ -1,6 +1,8 @@
 from copy import deepcopy
 from logging import getLogger
 
+from app.main.reports.section_patterns import INTRODUCTION_TITLE
+
 from ..base_check import BaseReportCriterion, answer
 from ..references import literature_numbers
 
@@ -10,7 +12,7 @@ SW_CONSTANTS = {
     "SW_KEY_QUESTIONS_SECTIONS": {"Актуальность": {"count": 1}},
     "SW_ANALOGS_SECTIONS": {"Принцип отбора аналогов": {"count": 4, "subchapters": 1}},
     "SW_FINAL_SECTIONS": {
-        "Введение": {"count": 1},
+        INTRODUCTION_TITLE: {"count": 1},
         "Принцип отбора аналогов": {"count": 4, "subchapters": 1},
     },
 }

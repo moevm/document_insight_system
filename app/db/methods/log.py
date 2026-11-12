@@ -26,7 +26,7 @@ def get_logs_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
     count = logs_collection.count_documents(filter)
     rows = logs_collection.find(filter)
 
-    if sort and order in ("asc, desc"):
+    if sort and order in ('asc', 'desc'):
         rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
 
     rows = rows.skip(offset) if offset else rows
