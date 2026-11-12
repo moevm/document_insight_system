@@ -1,13 +1,13 @@
 import re
-
-from docx.oxml import parse_xml
-from docx.oxml.ns import nsmap, qn
 from html import escape as html_escape
 from html.parser import HTMLParser
 
-from ..base_check import BaseReportCriterion, answer
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsmap, qn
 from main.reports.docx_uploader.docx_uploader import DocxUploader
 from main.reports.md_uploader.md_uploader import MdUploader
+
+from ..base_check import BaseReportCriterion, answer
 
 REL_NS = nsmap['r']
 REL_HYPERLINK = f'{REL_NS}/hyperlink'
@@ -35,15 +35,15 @@ class ReportHyperlinksCheck(BaseReportCriterion):
         self._elements_cache = {}
 
     def check(self):
-        # try:
-        if isinstance(self.file, DocxUploader):
-            links = self._collect_hyperlinks()
-        elif isinstance(self.file, MdUploader):
-            links = self._collect_md_hyperlinks()
-        else:
-            return answer(False, "Неизвестный тип файла")
-        # except Exception as e:
-        #     return answer(False, f"Ошибка при проверке гиперссылок: {e}")
+        try:
+            if isinstance(self.file, DocxUploader):
+                links = self._collect_hyperlinks()
+            elif isinstance(self.file, MdUploader):
+                links = self._collect_md_hyperlinks()
+            else:
+                return answer(False, "Неизвестный тип файла")
+        except Exception as e:
+            return answer(False, f"Ошибка при проверке гиперссылок: {e}")
 
         if not links:  # len(links) == 0
             return answer(True, "Проверка на гиперссылки пройдена")
@@ -53,20 +53,16 @@ class ReportHyperlinksCheck(BaseReportCriterion):
         """Возвращает список найденных активных (внешних) гиперссылок"""
         document = self.file.file
         found = []
-        
+
         for place, part, element in self._iter_sources(document):
-            found.extend(
-                self._iter_part_hyperlinks(part, element, place)
-            )
-            found.extend(
-                self._iter_external_images(part, element, place)
-            )
-        
+            found.extend(self._iter_part_hyperlinks(part, element, place))
+            found.extend(self._iter_external_images(part, element, place))
+
         pages = self._pdf_uri_pages()
-        
+
         for item in found:
             item["pages"] = pages.get(item["url"], [])
-        
+
         return found
 
     def _iter_sources(self, document):
@@ -197,15 +193,12 @@ class ReportHyperlinksCheck(BaseReportCriterion):
     def _link_html(self, item):
         text = html_escape(item["text"] or item["url"])
         url = html_escape(item["url"], quote=True)
-        
-        result = (
-            f"<i>{text}</i> &rarr; "
-            f"<span style='word-break: break-all'>{url}</span>"
-        )
-        
+
+        result = f"<i>{text}</i> &rarr; <span style='word-break: break-all'>{url}</span>"
+
         if item["pages"]:
             result += f" (стр. {self._pages_html(item['pages'])})"
-        
+
         return result
 
     def _pages_html(self, pages):
@@ -215,42 +208,32 @@ class ReportHyperlinksCheck(BaseReportCriterion):
     def _collect_md_hyperlinks(self):
         """Возвращает все активные гиперссылки в Markdown-отчете."""
         found = []
-        
+
         for paragraph in getattr(self.file, "paragraphs", []):
-            text = (
-                paragraph
-                if isinstance(paragraph, str)
-                else getattr(paragraph, "paragraph_text", '')
-            )
-            
+            text = paragraph if isinstance(paragraph, str) else getattr(paragraph, "paragraph_text", '')
+
             if not text:
                 continue
-            
+
             parser = AnchorParser()
             parser.feed(text)
-            
+
             for url in parser.links:
-                found.append({
-                    "place": "текст",
-                    "url": url,
-                    "text": '',
-                    "pages": []
-                })
-                
+                found.append({"place": "текст", "url": url, "text": '', "pages": []})
+
         return found
+
 
 class AnchorParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.links = []
-    
+
     def handle_starttag(self, tag, attrs):
         if tag.lower() != 'a':
             return
-        
-        href = next(
-            (value for name, value in attrs if name.lower() == "href"), None
-        )
-        
+
+        href = next((value for name, value in attrs if name.lower() == "href"), None)
+
         if href is not None:
             self.links.append(href)

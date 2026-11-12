@@ -67,30 +67,30 @@ class TestReportHyperlinksCheck:
         file_info = create_report_file_info(file_path)
         checker = ReportHyperlinksCheck(file_info)
         result = checker.check()
-        
+
         assert result["score"] == 0
-        
+
         verdict = result["verdict"][0].lower()
         assert "script" in verdict
         assert "<script>" not in verdict
         assert "alert(1)" in verdict
         assert "</script>" not in verdict
-    
+
     def test_08_multiple_references(self, reports_fixture_dir):
         file_path = reports_fixture_dir / "hyperlinks_check" / "invalid_multiple_occurrences.md"
         file_info = create_report_file_info(file_path)
         checker = ReportHyperlinksCheck(file_info)
         result = checker.check()
-        
+
         assert result["score"] == 0
-        
+
         verdict = result["verdict"][0].lower()
         assert "найдено активных гиперссылок: <b>2</b>" in verdict
-    
+
     def test_09_relative_references(self, reports_fixture_dir):
         file_path = reports_fixture_dir / "hyperlinks_check" / "invalid_relative_references.md"
         file_info = create_report_file_info(file_path)
         checker = ReportHyperlinksCheck(file_info)
         result = checker.check()
-        
+
         assert result["score"] == 0
