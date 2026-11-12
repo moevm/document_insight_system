@@ -2,6 +2,7 @@ import re
 
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsmap, qn
+import html
 
 from ..base_check import BaseReportCriterion, answer
 
@@ -104,7 +105,7 @@ class ReportHyperlinksCheck(BaseReportCriterion):
             if url is None:
                 continue
             text = ''.join(node.text or '' for node in hyperlink.iter(qn('w:t'))).strip()
-            yield {'place': self._refine_place(hyperlink, place), 'url': url, 'text': text}
+            yield {'place': self._refine_place(hyperlink, place), 'url': url, 'text': html.escape(text)}
 
         for click in element.iter(qn('a:hlinkClick')):
             r_id = click.get(qn('r:id'))
@@ -114,7 +115,7 @@ class ReportHyperlinksCheck(BaseReportCriterion):
             yield {
                 'place': f'{self._refine_place(click, place)}: изображение',
                 'url': url,
-                'text': self._shape_name(click),
+                'text': html.escape(self._shape_name(click)),
             }
 
     def _iter_external_images(self, part, element, place):
