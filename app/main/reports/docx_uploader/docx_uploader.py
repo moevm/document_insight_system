@@ -4,11 +4,8 @@ from functools import reduce
 import docx
 from docx.oxml.ns import qn
 
-from app.main.reports.section_patterns import ABSTRACT_TITLE, REFERAT_TITLE
-
 from ..document_uploader import DocumentUploader
 from ..pdf_document.pdf_document_manager import PdfDocumentManager
-from ..section_patterns import APPENDIX_PAGE_PATTERN, CONTENTS_TITLE, LITERATURE_PATTERN
 from .core_properties import CoreProperties
 from .inline_shape import InlineShape
 from .paragraph import Paragraph
@@ -130,27 +127,9 @@ class DocxUploader(DocumentUploader):
                         "main_character": True,
                         "page": 0,
                     },
-                    {
-                        "name": REFERAT_TITLE,
-                        "marker": False,
-                        "key": REFERAT_TITLE.lower(),
-                        "main_character": False,
-                        "page": 0,
-                    },
-                    {
-                        "name": ABSTRACT_TITLE,
-                        "marker": False,
-                        "key": ABSTRACT_TITLE.lower(),
-                        "main_character": False,
-                        "page": 0,
-                    },
-                    {
-                        "name": CONTENTS_TITLE,
-                        "marker": False,
-                        "key": CONTENTS_TITLE.lower(),
-                        "main_character": False,
-                        "page": 0,
-                    },
+                    {"name": "Реферат", "marker": False, "key": "реферат", "main_character": False, "page": 0},
+                    {"name": "Abstract", "marker": False, "key": "abstract", "main_character": False, "page": 0},
+                    {"name": "Содержание", "marker": False, "key": "содержание", "main_character": False, "page": 0},
                 ]
                 if required_headers is not None:
                     headers = [
@@ -196,7 +175,7 @@ class DocxUploader(DocumentUploader):
                 self.headers_page = 1
                 return self.headers_page
             for header in self.make_headers(work_type):
-                if header["name"].find(CONTENTS_TITLE) >= 0:
+                if header["name"].find('Содержание') >= 0:
                     if not header["page"]:
                         self.headers_page = 1
                     else:
@@ -208,13 +187,8 @@ class DocxUploader(DocumentUploader):
         if not self.literature_page:
             for page, text in self.pdf_file.get_text_on_page().items():
                 first_lines = ' '.join(text.splitlines()[:2])
-                if any(
-                    re.fullmatch(
-                        LITERATURE_PATTERN,
-                        line.strip(),
-                        re.I,
-                    )
-                    for line in (text.splitlines()[0] if text.splitlines() else '', first_lines)
+                if re.search(
+                    r'список\s+(?:использованных\s+|использованной\s+)?(?:источников|литературы)', first_lines, re.I
                 ):
                     self.literature_page = page
                     break
@@ -224,9 +198,46 @@ class DocxUploader(DocumentUploader):
         if not self.literature_header:
             for header in self.make_chapters(work_type):
                 header_text = header["text"].lower()
-                if re.search(LITERATURE_PATTERN, header_text):
+                if re.search(
+                    r'список\s+(?:использованных\s+|использованной\s+)?(?:источников|литературы)', header_text
+                ):
                     self.literature_header = header
         return self.literature_header
+
+    def build_vkr_hierarchy(self, styles):
+        indices = self.get_paragraph_indices_by_style(styles)
+        tagged_indices = [{"index": 0, "level": 0}, {"index": len(self.styled_paragraphs), "level": 0}]
+        for j in range(len(indices)):
+            tagged_indices.extend(
+                list(
+                    map(
+                        lambda index: {"index": index, "level": j + 1, "text": self.styled_paragraphs[index]["text"]},
+                        indices[j],
+                    )
+                )
+            )
+        tagged_indices.sort(key=lambda dct: dct["index"])
+        return tagged_indices
+
+    def build_vkr_hierarchy_style(self, styles):
+        indices = self.get_paragraph_indices_by_style(styles)
+        tagged_indices = [{"index": 0, "level": 0}, {"index": len(self.styled_paragraphs), "level": 0}]
+        for j in range(len(indices)):
+            tagged_indices.extend(
+                list(
+                    map(
+                        lambda index: {
+                            "index": index,
+                            "level": j + 1,
+                            "styled_text": self.styled_paragraphs[index],
+                            "style": self.paragraphs[index].paragraph_style_name.lower(),
+                        },
+                        indices[j],
+                    )
+                )
+            )
+        tagged_indices.sort(key=lambda dct: dct["index"])
+        return tagged_indices
 
     # Parses styles once; subsequent calls have no effect, since the file itself shouldn't change
     def parse_effective_styles(self):
@@ -237,6 +248,25 @@ class DocxUploader(DocumentUploader):
             for run in filter(lambda r: len(r.text.strip()) > 0, par.runs):
                 paragraph["runs"].append({"text": run.text, "style": Style(run, par)})
             self.styled_paragraphs.append(paragraph)
+
+    def unify_multiline_entities(self, first_line_regex_str):
+        pattern = re.compile(first_line_regex_str)
+        pars_to_delete = []
+        skip_flag = False
+        for i in range(len(self.styled_paragraphs) - 1):
+            if skip_flag:
+                skip_flag = False
+                continue
+            par = self.styled_paragraphs[i]
+            next_par = self.styled_paragraphs[i + 1]
+            if pattern.match(par["text"]):
+                skip_flag = True
+                par["text"] += "\n" + next_par["text"]
+                par["runs"].extend(next_par["runs"])
+                pars_to_delete.append(next_par)
+                continue
+        for par in pars_to_delete:
+            self.styled_paragraphs.remove(par)
 
     def get_paragraph_indices_by_style(self, style_list):
         result = []
@@ -253,7 +283,7 @@ class DocxUploader(DocumentUploader):
         if not self.page_count:
             for _, v in self.pdf_file.text_on_page.items():
                 line = v[:20] if len(v) > 21 else v
-                match = re.search(APPENDIX_PAGE_PATTERN, line.strip())
+                match = re.search('ПРИЛОЖЕНИЕ [А-Я]', line.strip())
                 if match:
                     remaining_text = line[match.end() :]
                     match_ellipsis = re.match(r'\.{2,}\s*', remaining_text.lstrip())

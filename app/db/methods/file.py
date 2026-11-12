@@ -33,6 +33,15 @@ def add_file_info_and_content(username, filepath, file_type, file_id=None):
     return file_info_id
 
 
+# Returns presentations with given id or None
+def get_presentation(file_id):
+    file = files_info_collection.find_one({'_id': file_id})
+    if file is not None:
+        return Presentation(file)
+    else:
+        return None
+
+
 def write_pdf(filename, filepath, file_id=None, rewrite=False):
     converted_filepath = convert_to(filepath, target_format="pdf")
     return add_file_to_db(filename, converted_filepath, file_id, rewrite=rewrite)

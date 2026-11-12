@@ -57,10 +57,9 @@ def lti_main():
         lti_user = user_methods.add_user(user_id, is_LTI=True)
         if lti_user:
             lti_user.name = person_name
+            lti_user.is_admin = role
         else:
             lti_user = user_methods.get_user(user_id)
-
-        lti_user.is_admin = role
 
         # task settings
         lti_user.file_type = file_type_info

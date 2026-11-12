@@ -1,6 +1,3 @@
-from app.main.reports.section_patterns import ABSTRACT_TITLE, REFERAT_TITLE
-
-from ...reports.section_patterns import CONTENTS_TITLE
 from ..base_check import BaseReportCriterion, answer
 
 
@@ -10,12 +7,7 @@ class ReportMaxSizeOfAbstractCheck(BaseReportCriterion):
     id = "max_abstract_size_check"
 
     def __init__(
-        self,
-        file_info,
-        max_size=1,
-        referat_header=REFERAT_TITLE,
-        abstract_header=ABSTRACT_TITLE,
-        contents_header=CONTENTS_TITLE,
+        self, file_info, max_size=1, referat_header='Реферат', abstract_header='Abstract', contents_header='Содержание'
     ):
         super().__init__(file_info)
         self.headers = []
@@ -25,7 +17,7 @@ class ReportMaxSizeOfAbstractCheck(BaseReportCriterion):
         self.section_names = (referat_header, abstract_header, contents_header)
 
     def late_init(self):
-        if self.section_names == (REFERAT_TITLE, ABSTRACT_TITLE, CONTENTS_TITLE):
+        if self.section_names == ('Реферат', 'Abstract', 'Содержание'):
             self.headers = self.file.make_headers(self.file_type['report_type'])
         else:
             self.headers = self.file.make_headers(self.file_type['report_type'], self.section_names)

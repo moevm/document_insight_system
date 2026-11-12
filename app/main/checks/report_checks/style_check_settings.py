@@ -1,22 +1,9 @@
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
-from app.main.reports.section_patterns import (
-    ABBREVIATIONS_TITLE,
-    APPENDIX_MULTILINE_PATTERN,
-    APPENDIX_UNIFY_PATTERN,
-    CONCLUSION_TITLE,
-    INTRODUCTION_TITLE,
-    LITERATURE_TITLE,
-)
-
-
-def _copy_header_rule(rule):
-    return {key: value.copy() if isinstance(value, (dict, list)) else value for key, value in rule.items()}
-
 
 class StyleCheckSettings:
-    APPENDIX_UNIFY_REGEX = APPENDIX_UNIFY_PATTERN
-    APPENDIX_REGEX = APPENDIX_MULTILINE_PATTERN
+    APPENDIX_UNIFY_REGEX = r"(?i)^приложение \w$"
+    APPENDIX_REGEX = r"(?i)^ПРИЛОЖЕНИЕ (\w)\n(.+)"
     HEADER_1_NUM_REGEX = r"^([1-9][0-9]*)\s*.+$"  # r"^([1-9][0-9]*\ )([\w\s])+$"
     HEADER_2_NUM_REGEX = r"^[1-9][0-9]*\.([1-9][0-9]*\.)* ([\w\s]+)$"
     HEADER_NUM_REGEX = r"^\d.+$"
@@ -197,10 +184,10 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": [
-                ABBREVIATIONS_TITLE,
-                INTRODUCTION_TITLE.upper(),
-                CONCLUSION_TITLE.upper(),
-                LITERATURE_TITLE.upper(),
+                "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ",
+                "ВВЕДЕНИЕ",
+                "ЗАКЛЮЧЕНИЕ",
+                "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ",
             ],
             "unify_regex": None,
             "regex": HEADER_REGEX,
@@ -232,12 +219,12 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": [
-                INTRODUCTION_TITLE.upper(),
+                "ВВЕДЕНИЕ",
                 "ПОСТАНОВКА ЗАДАЧИ",
                 "РЕЗУЛЬТАТЫ РАБОТЫ",
                 "ИСПОЛЬЗУЕМЫЕ ТЕХНОЛОГИИ",
                 "ОТЗЫВ РУКОВОДИТЕЛЯ",
-                CONCLUSION_TITLE.upper(),
+                "ЗАКЛЮЧЕНИЕ",
             ],
             "unify_regex": None,
             "regex": HEADER_REGEX,
@@ -251,22 +238,19 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": [
-                INTRODUCTION_TITLE.upper(),
+                "ВВЕДЕНИЕ",
                 "ПОСТАНОВКА ЗАДАЧИ",
                 "ОБЗОР ЛИТЕРАТУРЫ",
                 "ВЫВОДЫ",
                 "ПЛАН РАБОТЫ НА ВЕСЕННИЙ СЕМЕСТР",
                 "ОТЗЫВ РУКОВОДИТЕЛЯ",
-                LITERATURE_TITLE.upper(),
+                "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ",
             ],
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS + ('доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление'),
             "warned_words": STD_WARNED_WORDS,
         },
-        'structural_header': _copy_header_rule(VKR_CONFIG['any_header']),
-        'first_header': _copy_header_rule(VKR_CONFIG['first_header']),
-        'second_header': _copy_header_rule(VKR_CONFIG['second_header']),
     }
 
     NIR2_CONFIG = {
@@ -274,21 +258,18 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": [
-                INTRODUCTION_TITLE.upper(),
+                "ВВЕДЕНИЕ",
                 "ПОСТАНОВКА ЗАДАЧИ",
                 "РЕЗУЛЬТАТЫ РАБОТЫ В ВЕСЕННЕМ СЕМЕСТРЕ",
                 "ОПИСАНИЕ ПРЕДПОЛАГАЕМОГО МЕТОДА РЕШЕНИЯ",
                 "ПЛАН РАБОТЫ НА ОСЕННИЙ СЕМЕСТР",
-                LITERATURE_TITLE.upper(),
+                "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ",
             ],
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS + ('доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление'),
             "warned_words": STD_WARNED_WORDS,
         },
-        'structural_header': _copy_header_rule(VKR_CONFIG['any_header']),
-        'first_header': _copy_header_rule(VKR_CONFIG['first_header']),
-        'second_header': _copy_header_rule(VKR_CONFIG['second_header']),
     }
 
     NIR3_CONFIG = {
@@ -296,22 +277,19 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": [
-                INTRODUCTION_TITLE.upper(),
+                "ВВЕДЕНИЕ",
                 "ПОСТАНОВКА ЗАДАЧИ",
                 "РЕЗУЛЬТАТЫ РАБОТЫ В ОСЕННЕМ СЕМЕСТРЕ",
                 "ОПИСАНИЕ ПРЕДПОЛАГАЕМОГО МЕТОДА РЕШЕНИЯ",
                 "ПЛАН РАБОТЫ НА ВЕСЕННИЙ СЕМЕСТР",
                 "ОТЗЫВ РУКОВОДИТЕЛЯ",
-                LITERATURE_TITLE.upper(),
+                "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ",
             ],
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS + ('доработать', 'доработка', 'переписать', 'рефакторинг', 'исправление'),
             "warned_words": STD_WARNED_WORDS,
         },
-        'structural_header': _copy_header_rule(VKR_CONFIG['any_header']),
-        'first_header': _copy_header_rule(VKR_CONFIG['first_header']),
-        'second_header': _copy_header_rule(VKR_CONFIG['second_header']),
     }
 
     MD_CONFIG = {
@@ -362,7 +340,7 @@ class StyleCheckSettings:
                 "Цель дипломного исследования",
                 "Цель на текущий семестр",
                 "Задачи",
-                LITERATURE_TITLE,
+                "Список использованных источников",
             ],
             "unify_regex": None,
             "regex": HEADER_REGEX,
@@ -377,13 +355,12 @@ class StyleCheckSettings:
             "style": HEADER_1_STYLE,
             "docx_style": ["heading 2"],
             "headers": [
-                "Описание предметной области",
                 "Принцип отбора аналогов",
                 "Критерии сравнения аналогов",
                 "Таблица сравнения аналогов",
                 "Выводы по итогам сравнения",
                 "Выбор метода решения",
-                LITERATURE_TITLE,
+                "Список использованных источников",
             ],
             "unify_regex": None,
             "regex": HEADER_REGEX,
@@ -399,12 +376,11 @@ class StyleCheckSettings:
             "docx_style": ["heading 2"],
             "headers": [
                 "Аннотация",
-                INTRODUCTION_TITLE,
+                "Введение",
                 "Обзор предметной области",
                 "Выбор метода решения",
-                "Описание метода решения",
-                CONCLUSION_TITLE,
-                LITERATURE_TITLE,
+                "Заключение",
+                "Список использованных источников",
             ],
             "unify_regex": None,
             "regex": HEADER_REGEX,
@@ -443,6 +419,4 @@ class StyleCheckSettings:
         'NIR3_HEADERS': NIR3_CONFIG,
         'MD_HEADERS': MD_CONFIG,
         'OPNP_HEADERS': OPNP_CONFIG,
-        'SWTask2_HEADERS': {'any_header': OPNP_CONFIG['Сравнение аналогов']},
-        'SWTask3_HEADERS': {'any_header': OPNP_CONFIG['any_header']},
     }

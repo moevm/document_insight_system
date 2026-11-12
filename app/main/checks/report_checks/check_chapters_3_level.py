@@ -1,6 +1,5 @@
 import re
 
-from ...reports.section_patterns import ABBREVIATIONS_TITLE, CONTENTS_TITLE
 from ..base_check import BaseReportCriterion, answer
 
 
@@ -9,7 +8,7 @@ class ReportСhaptersLevel3ContentCheck(BaseReportCriterion):
     _description = "В содержании не должно быть пунктов глубже допустимой глубины"
     id = "report_3_level_in_content_check"
 
-    def __init__(self, file_info, forbidden_depth=3, end_marker=ABBREVIATIONS_TITLE):
+    def __init__(self, file_info, forbidden_depth=3, end_marker="ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ"):
         super().__init__(file_info)
         self.forbidden_depth = forbidden_depth
         self.end_marker = end_marker
@@ -26,7 +25,7 @@ class ReportСhaptersLevel3ContentCheck(BaseReportCriterion):
                 text_par = paragraph.paragraph_text.strip()
                 style = str(paragraph.paragraph_style_name).lower()
 
-                if text_par.casefold() == CONTENTS_TITLE.casefold():
+                if "СОДЕРЖАНИЕ" in text_par.upper():
                     bool_content_find = True
                     continue
 

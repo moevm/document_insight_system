@@ -1,5 +1,3 @@
-from app.main.reports.section_patterns import APPENDIX_TITLE
-
 from ...reports.docx_uploader.style import Style
 from ..base_check import BaseReportCriterion, answer
 from .style_check_settings import StyleCheckSettings
@@ -84,7 +82,7 @@ class ReportMainTextCheck(BaseReportCriterion):
                 "<br><br>Проверьте корректность использования стилей.",
             )
         for header in self.headers:
-            if header["text"].find(APPENDIX_TITLE) >= 0:
+            if header["text"].find("ПРИЛОЖЕНИЕ") >= 0:
                 break
             err_string = ''
             for child in header["child"]:

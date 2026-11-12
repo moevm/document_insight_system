@@ -1,5 +1,3 @@
-from app.main.reports.section_patterns import INTRODUCTION_TITLE
-
 from ..base_check import BaseReportCriterion, answer
 from .section_component_config import SECTION_CONFIG
 from .style_check_settings import StyleCheckSettings
@@ -13,7 +11,7 @@ class ReportSectionComponent(BaseReportCriterion):
     def __init__(
         self,
         file_info,
-        chapter=INTRODUCTION_TITLE,
+        chapter='Введение',
         patterns=None,
         bold_check_exceptions=None,
         headers_map=None,

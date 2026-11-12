@@ -12,7 +12,6 @@ module.exports = {
         login: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/login.js'],
         logs: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/logs.js'],
         one_user_info: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/one_user_info.js'],
-        pack_list: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/pack_list.js'],
         profile: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/profile.js'],
         results: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/results.js'],
         signup: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/signup.js'],

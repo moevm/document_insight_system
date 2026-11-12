@@ -1,7 +1,5 @@
 import re
 
-from app.main.reports.section_patterns import LITERATURE_INLINE_PATTERN
-
 from ..base_check import BaseReportCriterion, answer
 
 
@@ -16,7 +14,7 @@ class BannedWordsInLiteratureCheck(BaseReportCriterion):
         self.banned_words = list(dict.fromkeys([*type(self).banned_words, *(banned_words or [])]))
         self.headers_page = 1
         self.literature_header = []
-        self.name_pattern = LITERATURE_INLINE_PATTERN
+        self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
 
     def late_init_vkr(self):
         self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])

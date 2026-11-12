@@ -45,9 +45,16 @@ def parse_consumer_info(key_str, secret_str):
 
 def get_role(data, default_role=False):
     try:
-        return ADMIN_ROLE in {role.strip() for role in get_param(data, ROLES).split(',')}
+        return get_param(data, ROLES).split(',')[0] == ADMIN_ROLE
     except Exception:
         return default_role
+
+
+def get_exc_info(data):
+    task_title = get_param(data, 'resource_link_title')
+    task_id = get_param(data, 'resource_link_id')
+    un = f"{get_username(data)}_{get_param(data, 'tool_consumer_instance_guid')}"
+    return dict(zip(['title', 'id', 'username'], [task_title, task_id, un], strict=False))
 
 
 def get_custom_params(data):
