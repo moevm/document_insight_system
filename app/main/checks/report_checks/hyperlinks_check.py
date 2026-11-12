@@ -5,6 +5,8 @@ from docx.oxml.ns import nsmap, qn
 import html
 
 from ..base_check import BaseReportCriterion, answer
+from main.reports.docx_uploader.docx_uploader import DocxUploader
+from main.reports.md_uploader.md_uploader import MdUploader
 
 REL_NS = nsmap['r']
 REL_HYPERLINK = f'{REL_NS}/hyperlink'
@@ -34,10 +36,12 @@ class ReportHyperlinksCheck(BaseReportCriterion):
 
     def check(self):
         try:
-            links = self._collect_hyperlinks()
-        except AttributeError:
-            # загрузчики без docx-документа - проверяем ссылки markdown
-            links = self._collect_md_hyperlinks()
+            if isinstance(self.file, DocxUploader):
+                links = self._collect_hyperlinks()
+            elif isinstance(self.file, MdUploader):
+                links = self._collect_md_hyperlinks()
+            else:
+                return answer(False, "Неизвестный тип файла")
         except Exception as e:
             return answer(False, f"Ошибка при проверке гиперссылок: {e}")
 
