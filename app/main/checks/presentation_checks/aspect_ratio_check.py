@@ -41,7 +41,7 @@ class PresAspectRatioCheck(BasePresCriterion):
         return aspect_ratio in self.correct_ratios
 
     def __convert_size_to_pixels(self, size, dpi=96):
-        return math.trunc(size.inches * dpi)
+        return math.trunc(int(size) / 914400 * dpi)
 
     def __get_correct_instruction(self, aspect_ratio):
         correct_ratios_str = ", ".join(map(str, self.correct_ratios))

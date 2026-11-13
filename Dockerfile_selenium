@@ -1,6 +1,6 @@
 FROM selenium/standalone-chrome:121.0-chromedriver-121.0-grid-4.18.0-20240220
 
-ENV LOGIN="" 
+ENV LOGIN=""
 ENV PASSWORD=""
 
 WORKDIR /usr/src/project

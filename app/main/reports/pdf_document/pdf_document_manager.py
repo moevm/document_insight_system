@@ -21,19 +21,20 @@ class PdfDocumentManager:
         # self.only_text_on_page = {}
 
     def get_text_on_page(self, start_page=None, end_page=None):
-        start_page = start_page or 0
-        end_page = end_page or len(self.pages)
-        return {page_num + 1: page.get_text() for page_num, page in enumerate(self.pages[start_page:end_page])}
+        # Public page numbers are one-based and the end is inclusive.
+        start = 0 if start_page is None else max(start_page - 1, 0)
+        end = len(self.pages) if end_page is None else max(end_page, 0)
+        return {index + 1: self.pages[index].get_text() for index in range(start, min(end, len(self.pages)))}
 
     # def get_text_on_page(self):
     #     return {page + 1: self.pages[page].extract_text() for page in range(self.page_count_all)}
 
     def get_image_num(self):
-        return len(self.pdf_file.get_page_images(0))
+        return sum(len(self.pdf_file.get_page_images(index)) for index in range(len(self.pages)))
 
     def page_images(self, page_without_pril):
         total_height = 0
-        for page_num in range(page_without_pril):
+        for page_num in range(min(page_without_pril, len(self.pages))):
             page = self.pdf_file[page_num]
             images = self.pdf_file.get_page_images(page_num)
             for image in images:

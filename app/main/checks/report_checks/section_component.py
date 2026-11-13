@@ -8,8 +8,21 @@ class ReportSectionComponent(BaseReportCriterion):
     _description = "Проверка наличия необходимых компонентов раздела и форматирования (жирный шрифт)"
     id = 'report_section_component'
 
-    def __init__(self, file_info, chapter='Введение', patterns=None, bold_check_exceptions=None, headers_map=None):
+    def __init__(
+        self,
+        file_info,
+        chapter='Введение',
+        patterns=None,
+        bold_check_exceptions=None,
+        headers_map=None,
+        check_bold=True,
+    ):
         super().__init__(file_info)
+        if not isinstance(check_bold, bool):
+            raise ValueError('check_bold должен быть логическим значением true или false.')
+        self.check_bold = check_bold
+        if not check_bold:
+            self.label = 'Проверка наличия необходимых компонентов указанного раздела'
         self.intro = {}
 
         # конфиг
@@ -49,14 +62,17 @@ class ReportSectionComponent(BaseReportCriterion):
         self.chapters = self.file.make_chapters(self.file_type['report_type'])
 
     def _is_text_bold_in_paragraph(self, paragraph, search_text):
+        text = ''.join(run['text'] for run in paragraph.get('runs', []))
+        offset = text.lower().find(search_text.lower())
+        if offset < 0:
+            return False
+        end, position = offset + len(search_text), 0
         for run in paragraph.get('runs', []):
-            run_text = run['text'].lower()
-            if search_text.lower() in run_text:
-                style = run.get('style')
-                if style and hasattr(style, 'bold'):
-                    if style.bold:
-                        return True
-        return False
+            run_end = position + len(run['text'])
+            if position < end and run_end > offset and not getattr(run.get('style'), 'bold', False):
+                return False
+            position = run_end
+        return True
 
     def _check_bold_formatting(self, pattern):
         text_to_check = pattern['text'].lower()
@@ -74,9 +90,12 @@ class ReportSectionComponent(BaseReportCriterion):
         return False
 
     def check(self):
-        if self.file.page_counter() < 4:
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
 
+        for pattern in self.patterns:
+            pattern['marker'] = 0
+            pattern['paragraph_index'] = None
         self.late_init()
         if not self.chapter:
             return answer(True, f'Данная проверка не предусмотрена для работы с темой "{self.headers_main}"')
@@ -99,7 +118,6 @@ class ReportSectionComponent(BaseReportCriterion):
                     if par.find(self.patterns[i]["text"]) >= 0:
                         self.patterns[i]["marker"] = 1
                         self.patterns[i]["paragraph_index"] = intro_par["number"]
-                        break
 
         missing_components = []
         bold_missing = []
@@ -107,7 +125,7 @@ class ReportSectionComponent(BaseReportCriterion):
         for pattern in self.patterns:
             if not pattern["marker"]:
                 missing_components.append(pattern["name"])
-            elif pattern["text"].lower() not in self.bold_check_exceptions:
+            elif self.check_bold and pattern["text"].lower() not in self.bold_check_exceptions:
                 if not self._check_bold_formatting(pattern):
                     bold_missing.append(pattern["name"])
 
@@ -123,6 +141,5 @@ class ReportSectionComponent(BaseReportCriterion):
         if errors:
             return answer(False, '<br>'.join(errors))
         else:
-            return answer(
-                True, f'Все необходимые компоненты раздела "{self.chapter}" обнаружены и правильно отформатированы!'
-            )
+            suffix = ' и правильно отформатированы' if self.check_bold else ''
+            return answer(True, f'Все необходимые компоненты раздела "{self.chapter}" обнаружены{suffix}!')

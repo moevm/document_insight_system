@@ -23,7 +23,7 @@ class BaseCriterionPack:
         self.min_score = min_score  # min score to pass
 
     def init(self, file_info):
-        # create criterion objects, ignore errors - validation was performed earlier
+        # Failed initialization must remain visible and fail the pack.
         file_info['file_type'] = self.file_type
         self.criterions, errors = init_criterions(self.raw_criterions, file_info=file_info)
 
@@ -34,6 +34,12 @@ class BaseCriterionPack:
             current_check_stage.set(criterion.id)
             try:
                 criterion_check_result = criterion.check()
+                if (
+                    not isinstance(criterion_check_result, dict)
+                    or "score" not in criterion_check_result
+                    or "verdict" not in criterion_check_result
+                ):
+                    raise ValueError("Критерий вернул некорректный результат.")
             except Exception as e:
                 trace_msg = traceback.format_exc()
                 err_msg = f'{criterion.id}: oшибка во время проверки: {e} ({trace_msg[len(trace_msg) // 2 :]})'

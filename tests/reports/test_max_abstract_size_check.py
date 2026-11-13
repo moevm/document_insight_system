@@ -8,6 +8,13 @@ class TestReportMaxSizeOfAbstractCheck:
     def test_01_valid_size(self, reports_fixture_dir):
         file_info = create_report_file_info(reports_fixture_dir / "max_abstract_size_check" / "valid.md")
         checker = ReportMaxSizeOfAbstractCheck(file_info, max_size=1)
+        file_info['file'].make_headers = MagicMock(
+            return_value=[
+                {'name': 'Реферат', 'page': 4},
+                {'name': 'Abstract', 'page': 5},
+                {'name': 'Содержание', 'page': 6},
+            ]
+        )
         result = checker.check()
         assert result["score"] == 1.0
         assert "соответствуют шаблону" in result["verdict"][0]

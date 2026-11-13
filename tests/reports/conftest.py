@@ -4,24 +4,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-mock_md2pdf_module = MagicMock()
-mock_md2pdf_module.core.md2pdf.return_value = "mock.pdf"
-sys.modules["md2pdf"] = mock_md2pdf_module
-sys.modules["md2pdf.core"] = mock_md2pdf_module.core
-
-mock_pymupdf = MagicMock()
-mock_doc = MagicMock()
-mock_doc.page_count = 1
-mock_page = MagicMock()
-mock_page.get_text.return_value = "Sample text on page"
-mock_page.rect = MagicMock(height=1000, y0=50, y1=950)
-mock_doc.load_page.return_value = mock_page
-mock_doc.__getitem__.return_value = mock_page
-mock_doc.get_page_images.return_value = []
-mock_pymupdf.open.return_value = mock_doc
-sys.modules["pymupdf"] = mock_pymupdf
-sys.modules["fitz"] = mock_pymupdf
-
 project_root = Path(__file__).parent.parent.parent
 tests_path = str(project_root / "tests")
 if tests_path in sys.path:
@@ -35,9 +17,28 @@ def reports_fixture_dir():
 
 
 @pytest.fixture(autouse=True)
-def auto_patch_uploader():
+def auto_patch_uploader(monkeypatch):
 
+    from types import ModuleType
+
+    import main.reports.md_uploader.md_uploader as legacy_md_module
     from main.reports.md_uploader.md_uploader import MdUploader
+
+    import app.main.reports.md_uploader.md_uploader as md_module
+
+    core = ModuleType('md2pdf.core')
+    core.md2pdf = lambda *args, **kwargs: None
+    monkeypatch.setitem(sys.modules, 'md2pdf', ModuleType('md2pdf'))
+    monkeypatch.setitem(sys.modules, 'md2pdf.core', core)
+    pdf = MagicMock()
+    pdf.page_count_all = 1
+    pdf.text_on_page = {1: 'Sample text on page'}
+    pdf.get_text_on_page.return_value = pdf.text_on_page
+    pdf.get_image_num.return_value = 0
+    pdf.page_images.return_value = 0
+    pdf.page_height.return_value = 1000
+    monkeypatch.setattr(md_module, 'PdfDocumentManager', lambda *a, **k: pdf)
+    monkeypatch.setattr(legacy_md_module, 'PdfDocumentManager', lambda *a, **k: pdf)
 
     original_parse = MdUploader.parse
 
@@ -91,6 +92,6 @@ def auto_patch_uploader():
 
         return res
 
-    MdUploader.parse = patched_parse
+    monkeypatch.setattr(MdUploader, "parse", patched_parse)
+    monkeypatch.setattr(md_module.MdUploader, "parse", patched_parse)
     yield
-    MdUploader.parse = original_parse

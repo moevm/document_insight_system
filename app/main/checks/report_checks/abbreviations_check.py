@@ -28,9 +28,7 @@ class ReportAbbreviationsCheck(BaseReportCriterion):
 
             unexplained_abbr_with_page = {}
 
-            for page_num in range(1, self.file.page_counter() + 1):
-                text_on_page = self.file.pdf_file.text_on_page[page_num]
-
+            for page_num, text_on_page in self.file.pdf_file.get_text_on_page().items():
                 for abbr in unexplained_abbr:
                     if abbr in text_on_page and abbr not in unexplained_abbr_with_page:
                         unexplained_abbr_with_page[abbr] = page_num
@@ -81,7 +79,9 @@ class ReportAbbreviationsCheck(BaseReportCriterion):
         return " ".join(text_parts)
 
     def _get_text_title_page(self):
-        title_page = self.file.pdf_file.text_on_page[1]
+        title_page = (
+            self.file.get_main_headers('VKR') if self.is_markdown else self.file.pdf_file.text_on_page.get(1, '')
+        )
         return title_page
 
     def _get_unverifiable_text(self, unverifiable_headings):

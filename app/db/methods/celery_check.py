@@ -1,9 +1,6 @@
 from datetime import datetime
 
 from app.db.db_main import get_celery_check_collection
-from app.db.methods.client import get_db
-
-db = get_db()
 
 celery_check_collection = get_celery_check_collection()  # collection for mapping celery_task to check
 
@@ -50,7 +47,3 @@ def get_average_processing_time(min_time=15.0):
 
 def get_celery_task(celery_task_id):
     return celery_check_collection.find_one({'celery_task_id': celery_task_id})
-
-
-def get_celery_task_by_check(check_id):
-    return celery_check_collection.find_one({'check_id': check_id})

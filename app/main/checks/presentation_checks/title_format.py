@@ -31,6 +31,8 @@ class TitleFormatCheck(BasePresCriterion):
         )
 
     def get_failing_headers(self):
+        self.empty_headers = []
+        self.len_exceeded = []
         for i, title in enumerate(self.file.get_titles(), 1):
             if title == "":
                 self.empty_headers.append(i)

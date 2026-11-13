@@ -10,15 +10,24 @@ class ReportFirstPagesCheck(BaseReportCriterion):
     id = 'first_pages_check'
     priority = True
 
-    def __init__(self, file_info):
+    def __init__(self, file_info, headers=None):
         super().__init__(file_info)
         self.headers = []
+        self.required_headers = headers
 
     def late_init(self):
-        self.headers = self.file.make_headers(self.file_type['report_type'])
+        self.headers = (
+            self.file.make_headers(self.file_type['report_type'], self.required_headers)
+            if self.required_headers is not None
+            else self.file.make_headers(self.file_type['report_type'])
+        )
 
     def check(self):
+        if not hasattr(self.file, 'make_headers'):
+            return answer(False, 'Проверка первых страниц применима к отчётам DOCX.')
         self.late_init()
+        if not self.headers:
+            return answer(False, 'Не задан список обязательных первых страниц для этого типа отчёта.')
         result_str = ''
         for header in self.headers:
             if not header["marker"]:

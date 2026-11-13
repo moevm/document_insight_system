@@ -1,13 +1,6 @@
-import logging
-
-from main.checks_config.parser import sld_num
-
 from app.db.types.ConsumerDBManager import ConsumersDBManager
 
-logger = logging.getLogger('root_logger')
-
 TITLE = 'context_title'
-RETURN_URL = 'launch_presentation_return_url'
 USERNAME = 'ext_user_username'
 PERSON_NAME = 'lis_person_name_full'
 ROLES = 'roles'
@@ -25,10 +18,6 @@ def get_param(data, key):
 
 def get_title(data):
     return get_param(data, TITLE)
-
-
-def get_return_url(data):
-    return get_param(data, RETURN_URL)
 
 
 def get_username(data):
@@ -72,14 +61,6 @@ def get_custom_params(data):
     return {key[len(CUSTOM_PARAM_PREFIX) :]: data[key] for key in data if key.startswith(CUSTOM_PARAM_PREFIX)}
 
 
-def get_criteria_from_launch(data):
-    custom = get_custom_params(data)
-    task_info = get_exc_info(data)
-    eval_criteria = launch_sanity_check(custom, task_info)
-
-    return eval_criteria
-
-
 def extract_passback_params(data):
     params = {}
     for param_key in PASSBACK_PARAMS:
@@ -88,71 +69,3 @@ def extract_passback_params(data):
         else:
             raise KeyError("{} doesn't include {}. Must inslude: {}".format(data, param_key, PASSBACK_PARAMS))
     return params
-
-
-def launch_sanity_check(custom, task_info):
-    try:
-        order = (
-            'template_name',
-            'slides_number',
-            'slides_enum',
-            'slides_headers',
-            'goals_slide',
-            'probe_slide',
-            'actual_slide',
-            'conclusion_slide',
-            'slide_every_task',
-            'conclusion_actual',
-            'conclusion_along',
-        )
-        detect_additional = custom.get('detect_additional', 'True')
-        slides_number = custom.get('slides_number', 'bsc')
-        eval_criteria = dict((k, eval(custom[k])) for k in order if k in custom and k != 'slides_number')
-    except NameError:
-        logger.warning(
-            "Error in declared launch values is present in {0}(id={1}). {2}'s checks will be defaulted".format(
-                *task_info.values()
-            )
-        )
-        return dict()
-
-    int_false_checks = ['slide_every_task', 'conclusion_actual']
-    check_types = {
-        **dict.fromkeys(
-            [
-                'template_name',
-                'slides_enum',
-                'slides_headers',
-                'goals_slide',
-                'detect_additional',
-                'probe_slide',
-                'actual_slide',
-                'conclusion_slide',
-                'conclusion_along',
-            ],
-            bool,
-        ),
-        **dict.fromkeys(int_false_checks, (int, bool)),
-    }
-
-    failed_types = [k for k, v in eval_criteria.items() if not isinstance(v, check_types[k]) and k != 'slides_number']
-    [failed_types.append(check) for check in int_false_checks if custom.get(check) == 'True']
-
-    detect_additional = True if not isinstance(eval(detect_additional), bool) else eval(detect_additional)
-    if slides_number not in ['bsc', 'msc', 'False'] and not isinstance(eval(slides_number), (list)):
-        failed_types.append('slides_number')
-    else:
-        eval_criteria['slides_number'] = (
-            {'sld_num': sld_num.get(slides_number, None) or eval(slides_number), 'detect_additional': detect_additional}
-            if slides_number != 'False'
-            else False
-        )
-
-    if failed_types:
-        [eval_criteria.pop(key, None) for key in failed_types]
-        logger.warning(f"The following check types don't match their designated types: {', '.join(failed_types)}.")
-        logger.warning("They will be disabled for task {0}(id={1}) in {2}'s checks".format(*task_info.values()))
-
-    reordered_dict = {k: eval_criteria.get(k, False) for k in order}
-
-    return reordered_dict
