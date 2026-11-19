@@ -79,3 +79,49 @@ class TestAppendixReferenceCheck:
         result = self._check(reports_fixture_dir, "preposition_invalid.md")
         assert result["score"] == 0.0
         assert result["verdict"][0].endswith(": В")
+
+    def test_17_docx_valid_reference(self, reports_fixture_dir):
+        result = self._check(reports_fixture_dir, "valid.docx")
+        assert result["score"] == 1.0
+        assert "Пройдена" in result["verdict"][0]
+
+    def test_18_docx_missing_reference(self, reports_fixture_dir):
+        result = self._check(reports_fixture_dir, "invalid.docx")
+        assert result["score"] == 0.0
+        assert result["verdict"][0] == "Не упомянуты в тексте следующие приложения: А"
+
+    def test_19_docx_application_genitive_is_not_reference(self, reports_fixture_dir):
+        result = self._check(reports_fixture_dir, "app_modules_invalid.docx")
+        assert result["score"] == 0.0
+        assert result["verdict"][0].endswith(": А, Б, В")
+
+    def test_20_docx_genitive_reference(self, reports_fixture_dir):
+        result = self._check(reports_fixture_dir, "genitive_reference_valid.docx")
+        assert result["score"] == 1.0
+
+    def test_21_docx_lowercase_letter_is_not_reference(self, reports_fixture_dir):
+        result = self._check(reports_fixture_dir, "lowercase_letter_invalid.docx")
+        assert result["score"] == 0.0
+        assert result["verdict"][0].endswith(": А")
+
+    def test_22_docx_formatted_reference(self, reports_fixture_dir):
+        result = self._check(reports_fixture_dir, "formatted_valid.docx")
+        assert result["score"] == 1.0
+
+    def test_23_docx_reference_in_table(self, reports_fixture_dir):
+        result = self._check(reports_fixture_dir, "table_valid.docx")
+        assert result["score"] == 1.0
+
+    def test_24_docx_reference_in_appendix_table_not_counted(self, reports_fixture_dir):
+        result = self._check(reports_fixture_dir, "table_in_appendix_invalid.docx")
+        assert result["score"] == 0.0
+        assert result["verdict"][0].endswith(": Б")
+
+    def test_25_docx_table_before_chapters_not_counted(self, reports_fixture_dir):
+        result = self._check(reports_fixture_dir, "title_table_invalid.docx")
+        assert result["score"] == 0.0
+        assert result["verdict"][0].endswith(": А")
+
+    def test_26_formatted_reference(self, reports_fixture_dir):
+        result = self._check(reports_fixture_dir, "formatted_valid.md")
+        assert result["score"] == 1.0
