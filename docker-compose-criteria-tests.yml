@@ -1,0 +1,8 @@
+services:
+  report-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile_criteria_tests
+    command: pytest -n auto --html=test_results/report.html --self-contained-html tests/reports
+    volumes:
+      - ./test_results:/app/test_results
