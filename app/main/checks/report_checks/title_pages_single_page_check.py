@@ -17,7 +17,7 @@ class TitlePagesSinglePage(BaseReportCriterion):
 
         found = [header for header in self.headers if header["marker"]]
         violations = []
-        for current, following in zip(found, found[1:]):
+        for current, following in zip(found, found[1:], strict=False):
             last_page = following["page"] - 1
             if last_page > current["page"]:
                 pages_str = '–'.join(self.format_page_link([current["page"], last_page]))
