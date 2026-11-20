@@ -118,10 +118,12 @@ class TestCheckSequenceSections:
         assert "Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен стилем 'Заголовок 2'" in message
 
     def test_feedback_contains_all_detected_violations(self):
-        checker = make_checker([
-            make_paragraph("ЗАДАНИЕ"),
-            make_paragraph("ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ", style="heading 3"),
-        ])
+        checker = make_checker(
+            [
+                make_paragraph("ЗАДАНИЕ"),
+                make_paragraph("ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ", style="heading 3"),
+            ]
+        )
 
         result, message = checker.check_sequence_sections()
 

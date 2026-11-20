@@ -88,6 +88,7 @@ class ReportStructureCheck(BaseReportCriterion):
         found_sections = []
         intro_found = False
         errors = []
+        definitions = "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ"
 
         for paragraph in paragraphs:
             if not paragraph.paragraph_text:
@@ -102,19 +103,19 @@ class ReportStructureCheck(BaseReportCriterion):
                     errors.append("Раздел 'ВВЕДЕНИЕ' должен быть оформлен стилем 'Заголовок 2'")
                 break
 
-            if "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ" in text:
+            if definitions in text:
                 if "heading 2" not in style and "заголовок 2" not in style:
-                    errors.append(
-                        "Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен стилем 'Заголовок 2'"
-                    )
-                found_sections.append("ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ")
+                    errors.append(f"Раздел '{definitions}' должен быть оформлен стилем 'Заголовок 2'")
+                found_sections.append(definitions)
                 continue
 
             for section in self.required_sections:
                 if section in text:
                     if "heading" in style or "заголовок" in style:
-                        errors.append(f"Раздел '{section}' должен быть оформлен стилем 'Обычный', "
-                        "а не как заголовок. Уберите стиль 'Заголовок' и используйте обычный текст.")
+                        errors.append(
+                            f"Раздел '{section}' должен быть оформлен стилем 'Обычный', "
+                            "а не как заголовок. Уберите стиль 'Заголовок' и используйте обычный текст."
+                        )
                     found_sections.append(section)
                     break
 
@@ -122,6 +123,7 @@ class ReportStructureCheck(BaseReportCriterion):
             errors.append("Не найден раздел 'ВВЕДЕНИЕ' (должен быть заголовком второго уровня)")
 
         if " ".join(found_sections) != " ".join(self.required_sections):
+            ordinary_sections = "', '".join(section for section in self.required_sections if section != definitions)
             result_str = (
                 f"Ваша структура работы не соотвествует требуемой!"
                 f"<br>Ваша структура: <br>   {'<br>'.join(found_sections)}"
@@ -129,9 +131,8 @@ class ReportStructureCheck(BaseReportCriterion):
                 f"Рекомендации:"
                 f"<ul>"
                 f"<li>Все разделы должны идти строго в указанном порядке</li>"
-                f"<li>Разделы 'ЗАДАНИЕ', 'РЕФЕРАТ', 'ABSTRACT', 'СОДЕРЖАНИЕ' "
-                "должны быть оформлены как обычный текст (стиль 'Обычный')</li>"
-                f"<li>Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен стилем 'Заголовок 2'</li>"
+                f"<li>Разделы '{ordinary_sections}' должны быть оформлены как обычный текст (стиль 'Обычный')</li>"
+                f"<li>Раздел '{definitions}' должен быть оформлен стилем 'Заголовок 2'</li>"
                 f"</ul>"
             )
             errors.append(result_str)
@@ -145,13 +146,13 @@ class ReportStructureCheck(BaseReportCriterion):
         try:
             if self.is_markdown:
                 return answer(False, "Проверка применима к отчётам DOCX.")
-            
+
             if not self.has_enough_pages():
                 return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
-            
+
             if self.file_type['report_type'] != 'VKR':
                 return answer(False, "Проверка предназначена для ВКР")
-            
+
             result_bool = True
             result_str = ""
             vkr_config = StyleCheckSettings.VKR_CONFIG['any_header']
