@@ -95,6 +95,14 @@ class StyleCheckSettings:
         'опрос',
         'сюжет',
     )  # TODO: list of "warning" words
+    REQUIRED_SECTIONS_BEFORE_INTRO = (
+        "ЗАДАНИЕ",
+        "КАЛЕНДАРНЫЙ ПЛАН",
+        "РЕФЕРАТ",
+        "ABSTRACT",
+        "СОДЕРЖАНИЕ",
+        "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ",
+    )
     STD_MIN_LIT_REF = 1
     STD_MAX_LIT_REF = 1000  # just in case for future edit
     HEADER_1_STYLE = {
@@ -202,6 +210,9 @@ class StyleCheckSettings:
                 CONCLUSION_TITLE.upper(),
                 LITERATURE_TITLE.upper(),
             ],
+            "required_sections_before_intro": REQUIRED_SECTIONS_BEFORE_INTRO,
+            "check_sequence": True,
+            "check_presence": True,
             "unify_regex": None,
             "regex": HEADER_REGEX,
             "banned_words": STD_BANNED_WORDS,
