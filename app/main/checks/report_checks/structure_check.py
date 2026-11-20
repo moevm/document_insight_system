@@ -33,8 +33,6 @@ class ReportStructureCheck(BaseReportCriterion):
                 self.patterns = StyleCheckSettings.CONFIGS.get(self.config)['any_header']['headers']
 
     def check_needed_headers(self):
-        if self.file.page_counter() < 4:
-            return False, "В отчете недостаточно страниц. Нечего проверять."
         self.late_init()
         if not self.patterns:
             return False, (
@@ -89,6 +87,7 @@ class ReportStructureCheck(BaseReportCriterion):
 
         found_sections = []
         intro_found = False
+        errors = []
 
         for paragraph in paragraphs:
             if not paragraph.paragraph_text:
@@ -97,15 +96,13 @@ class ReportStructureCheck(BaseReportCriterion):
             text = paragraph.paragraph_text.strip()
             style = str(paragraph.paragraph_style_name).lower()
 
-            if "ВВЕДЕНИЕ" in text:
-                if "heading 2" not in style:
-                    return False, "Раздел 'ВВЕДЕНИЕ' должен быть оформлен стилем 'Заголовок 2'"
+            if "ВВЕДЕНИЕ" in text and "heading 2" in style:
                 intro_found = True
                 break
 
             if "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ" in text:
                 if "heading 2" not in style:
-                    return False, (
+                    errors.append(
                         "Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен стилем 'Заголовок 2'"
                     )
                 found_sections.append("ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ")
@@ -121,7 +118,7 @@ class ReportStructureCheck(BaseReportCriterion):
                     break
 
         if not intro_found:
-            return False, "Не найден раздел 'ВВЕДЕНИЕ' (должен быть заголовком второго уровня)"
+            errors.append("Не найден раздел 'ВВЕДЕНИЕ' (должен быть заголовком второго уровня)")
 
         if " ".join(found_sections) != " ".join(self.required_sections):
             result_str = (
@@ -136,12 +133,24 @@ class ReportStructureCheck(BaseReportCriterion):
                 f"<li>Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен стилем 'Заголовок 2'</li>"
                 f"</ul>"
             )
-            return False, result_str
+            errors.append(result_str)
+
+        if errors:
+            return False, "<br>".join(errors)
 
         return True, "Проверка последовательности разделов до раздела 'ВВЕДЕНИЕ' пройдена"
 
     def check(self):
         try:
+            if self.is_markdown:
+                return answer(False, "Проверка применима к отчётам DOCX.")
+            
+            if not self.has_enough_pages():
+                return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
+            
+            if self.file_type['report_type'] != 'VKR':
+                return answer(False, "Проверка предназначена для ВКР")
+            
             result_bool = True
             result_str = ""
             vkr_config = StyleCheckSettings.VKR_CONFIG['any_header']

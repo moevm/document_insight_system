@@ -25,7 +25,7 @@ class TestCheckSequenceSections:
     def test_all_sections_in_order(self):
         paragraphs = [
             make_paragraph("ЗАДАНИЕ"),
-            make_paragraph("календарный план"),
+            make_paragraph("КАЛЕНДАРНЫЙ ПЛАН"),
             make_paragraph("РЕФЕРАТ"),
             make_paragraph("ABSTRACT"),
             make_paragraph("СОДЕРЖАНИЕ"),
@@ -52,7 +52,7 @@ class TestCheckSequenceSections:
         paragraphs = [
             make_paragraph("РЕФЕРАТ"),
             make_paragraph("ЗАДАНИЕ"),
-            make_paragraph("календарный план"),
+            make_paragraph("КАЛЕНДАРНЫЙ ПЛАН"),
             make_paragraph("ABSTRACT"),
             make_paragraph("СОДЕРЖАНИЕ"),
             make_paragraph("ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ", style="heading 2"),
@@ -77,7 +77,7 @@ class TestCheckSequenceSections:
     def test_intro_wrong_style(self):
         paragraphs = [
             make_paragraph("ЗАДАНИЕ"),
-            make_paragraph("календарный план"),
+            make_paragraph("КАЛЕНДАРНЫЙ ПЛАН"),
             make_paragraph("РЕФЕРАТ"),
             make_paragraph("ABSTRACT"),
             make_paragraph("СОДЕРЖАНИЕ"),
@@ -88,12 +88,12 @@ class TestCheckSequenceSections:
         result, message = checker.check_sequence_sections()
 
         assert result is False
-        assert "Раздел 'ВВЕДЕНИЕ' должен быть оформлен стилем 'Заголовок 2'" in message
+        assert "Не найден раздел 'ВВЕДЕНИЕ' (должен быть заголовком второго уровня)" in message
 
     def test_definition_wrong_style(self):
         paragraphs = [
             make_paragraph("ЗАДАНИЕ"),
-            make_paragraph("календарный план"),
+            make_paragraph("КАЛЕНДАРНЫЙ ПЛАН"),
             make_paragraph("РЕФЕРАТ"),
             make_paragraph("ABSTRACT"),
             make_paragraph("СОДЕРЖАНИЕ"),
@@ -105,3 +105,16 @@ class TestCheckSequenceSections:
 
         assert result is False
         assert "Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен стилем 'Заголовок 2'" in message
+
+    def test_feedback_contains_all_detected_violations(self):
+        checker = make_checker([
+            make_paragraph("ЗАДАНИЕ"),
+            make_paragraph("ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ", style="heading 3"),
+        ])
+
+        result, message = checker.check_sequence_sections()
+
+        assert result is False
+        assert "Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен" in message
+        assert "Не найден раздел 'ВВЕДЕНИЕ'" in message
+        assert "Требуемая структура" in message

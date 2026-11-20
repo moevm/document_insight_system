@@ -84,7 +84,7 @@ class StyleCheckSettings:
     )  # TODO: list of "warning" words
     REQUIRED_SECTIONS_BEFORE_INTRO = (
         "ЗАДАНИЕ",
-        "календарный план",
+        "КАЛЕНДАРНЫЙ ПЛАН",
         "РЕФЕРАТ",
         "ABSTRACT",
         "СОДЕРЖАНИЕ",
