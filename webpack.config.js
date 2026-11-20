@@ -19,6 +19,7 @@ module.exports = {
         profile: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/profile.js'],
         results: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/results.js'],
         signup: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/signup.js'],
+        document_diff: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/document_diff.js'],
         upload: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/upload.js'],
         user_list: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/user_list.js'],
         version: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/version.js'],

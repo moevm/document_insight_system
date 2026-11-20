@@ -15,6 +15,7 @@ from routes.check_list import check_list
 from routes.checks import checks
 from routes.criterion_pack import criterion_pack
 from routes.criterion_packs import criterion_packs
+from routes.document_diff import document_diff
 from routes.get_csv import get_csv
 from routes.get_last_check_results import get_last_check_results
 from routes.get_pdf import get_pdf
@@ -73,6 +74,7 @@ app.register_blueprint(get_last_check_results, url_prefix='/get_last_check_resul
 app.register_blueprint(version, url_prefix='/version')
 app.register_blueprint(capacity, url_prefix='/capacity')
 app.register_blueprint(profile, url_prefix='/profile')
+app.register_blueprint(document_diff, url_prefix='/document_diff')
 
 app.logger.propagate = True
 login_manager = LoginManager()

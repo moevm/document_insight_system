@@ -10,7 +10,8 @@ checks_collection = db['checks']
 consumers_collection = db['consumers']
 criteria_pack_collection = db['criteria_pack']
 logs_collection = db.create_collection('logs', capped=True, size=5242880) if not db['logs'] else db['logs']
-celery_check_collection = db['celery_check']  # collection for mapping celery_task to check
+celery_check_collection = db['celery_check']
+document_diff_collection = db['document_diff']
 
 
 def get_checks_collection():
@@ -35,3 +36,7 @@ def get_logs_collection():
 
 def get_celery_check_collection():
     return celery_check_collection
+
+
+def get_document_diff_collection():
+    return document_diff_collection

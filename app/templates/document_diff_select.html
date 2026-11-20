@@ -1,0 +1,134 @@
+{% extends "root.html" %}
+
+{% block title %}Сравнение документов{% endblock %}
+
+{% block main %}
+    <div class="holder row justify-content-center">
+        <div class="container-fluid p-3">
+            <h3 class="texteous ins text-center">Сравнение документов</h3>
+            <form id="document-diff-form" action="{{ url_for('document_diff.document_diff_compare') }}" method="post"
+                  enctype="multipart/form-data">
+
+                <div class="text-center mb-3">
+                    <div class="btn-group btn-group-toggle" id="format-toggle" data-toggle="buttons">
+                        <label class="btn btn-outline-primary {{ 'active' if fmt != 'pptx' }}">
+                            <input type="radio" name="format" value="docx" {{ 'checked' if fmt != 'pptx' }}> Допустимые форматы: doc, docx, md, odt
+                        </label>
+                        <label class="btn btn-outline-primary {{ 'active' if fmt == 'pptx' }}">
+                            <input type="radio" name="format" value="pptx" {{ 'checked' if fmt == 'pptx' }}> Допустимые форматы: ppt, pptx, odp
+                        </label>
+                    </div>
+                </div>
+
+                {% if error %}
+                    <div class="alert alert-danger" role="alert">{{ error }}</div>
+                {% endif %}
+
+                <div class="row">
+                    {% for side, label in [('first', 'Документ №1'), ('second', 'Документ №2')] %}
+                        <div class="col-md-6 mb-3">
+                            <div class="border p-3 h-100">
+                                <h5 class="text-center">{{ label }}</h5>
+                                <p class="text-center mb-3" id="{{ side }}-document-name">Документ не выбран</p>
+                                <input id="{{ side }}-file" name="{{ side }}_file" type="file"
+                                       accept=".doc,.docx,.md,.odt" class="d-none">
+                                <input id="{{ side }}-document-id" name="{{ side }}_document_id" type="hidden">
+                                <div class="document-diff-actions">
+                                    <label class="btn btn-primary" for="{{ side }}-file">Загрузить</label>
+                                    <button class="btn btn-secondary find-system-document" data-side="{{ side }}"
+                                            data-label="{{ label }}" type="button">Найти в системе</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div id="system-document-search" class="border p-3 mb-3 d-none">
+                    <div id="system-document-filters">
+                        <h5 id="system-document-search-title">Поиск документа</h5>
+                        <div class="form-row align-items-end">
+                        <div class="form-group col-md-2">
+                            <label for="filter-filename">Название документа</label>
+                            <input class="form-control" id="filter-filename" name="filter_filename" type="text"
+                                   placeholder="ГОД_ВКР_НОМЕРГРУППЫ_ФАМИЛИЯ">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label for="filter-id">ID</label>
+                            <input class="form-control" id="filter-id" name="filter_id" type="text"
+                                   placeholder="Upload ID">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label for="filter-student">ФИ студента</label>
+                            <input class="form-control" id="filter-student" name="filter_student" type="text"
+                                   placeholder="Иванов Иван" list="student-suggestions" autocomplete="off">
+                            <datalist id="student-suggestions"></datalist>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label for="filter-criteria">Набор критериев</label>
+                            <input class="form-control" id="filter-criteria" name="filter_criteria" type="text"
+                                   placeholder="BaseReportCriterionPack">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label for="filter-date-from">Дата загрузки, от</label>
+                            <input class="form-control" id="filter-date-from" name="filter_date_from" type="datetime-local">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label for="filter-date-to">Дата загрузки, до</label>
+                            <input class="form-control" id="filter-date-to" name="filter_date_to" type="datetime-local">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="filter-score-from">Балл, от</label>
+                            <input class="form-control" id="filter-score-from" name="filter_score_from" type="number"
+                                   min="0" max="1" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="filter-score-to">Балл, до</label>
+                            <input class="form-control" id="filter-score-to" name="filter_score_to" type="number"
+                                   min="0" max="1" step="0.01" placeholder="1.00">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label class="invisible d-block">&nbsp;</label>
+                            <div class="d-flex align-items-start">
+                                <button class="btn btn-primary document-diff-search-button mr-2 text-nowrap"
+                                        id="find-system-documents" type="button">
+                                    Найти
+                                </button>
+
+                                <button class="btn btn-secondary text-nowrap"
+                                        id="reset-system-document-filters" type="button">
+                                    Сбросить фильтры
+                                </button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    <div id="document-diff-error" class="alert alert-danger d-none" role="alert"></div>
+                    <div class="table-responsive-xl">
+                        <table class="table bg-white mb-0" id="document-diff-table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Upload ID</th>
+                                <th>Название документа</th>
+                                <th>ФИ студента</th>
+                                <th>Набор критериев</th>
+                                <th>Дата и время загрузки</th>
+                                <th>Балл</th>
+                            </tr>
+                            </thead>
+                            <tbody id="document-diff-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="text-center mb-3">
+                    <button class="btn btn-primary" id="start-document-diff" type="submit" disabled>Сравнить документы</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='document_diff.js') }}"></script>
+{% endblock %}
