@@ -88,7 +88,18 @@ class TestCheckSequenceSections:
         result, message = checker.check_sequence_sections()
 
         assert result is False
-        assert "Не найден раздел 'ВВЕДЕНИЕ' (должен быть заголовком второго уровня)" in message
+        assert "Раздел 'ВВЕДЕНИЕ' должен быть оформлен стилем 'Заголовок 2'" in message
+
+    def test_template_heading_style(self):
+        paragraphs = [
+            make_paragraph(section, style="ВКР_Заголовок 2" if section.startswith("ОПРЕДЕЛЕНИЯ") else "normal")
+            for section in StyleCheckSettings.REQUIRED_SECTIONS_BEFORE_INTRO
+        ]
+        paragraphs.append(make_paragraph("ВВЕДЕНИЕ", style="ВКР_Заголовок 2"))
+
+        result, message = make_checker(paragraphs).check_sequence_sections()
+
+        assert result is True, message
 
     def test_definition_wrong_style(self):
         paragraphs = [

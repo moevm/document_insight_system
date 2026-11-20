@@ -96,12 +96,14 @@ class ReportStructureCheck(BaseReportCriterion):
             text = paragraph.paragraph_text.strip()
             style = str(paragraph.paragraph_style_name).lower()
 
-            if "ВВЕДЕНИЕ" in text and "heading 2" in style:
+            if text == "ВВЕДЕНИЕ":
                 intro_found = True
+                if "heading 2" not in style and "заголовок 2" not in style:
+                    errors.append("Раздел 'ВВЕДЕНИЕ' должен быть оформлен стилем 'Заголовок 2'")
                 break
 
             if "ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ" in text:
-                if "heading 2" not in style:
+                if "heading 2" not in style and "заголовок 2" not in style:
                     errors.append(
                         "Раздел 'ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ' должен быть оформлен стилем 'Заголовок 2'"
                     )
@@ -110,10 +112,9 @@ class ReportStructureCheck(BaseReportCriterion):
 
             for section in self.required_sections:
                 if section in text:
-                    if "heading" in style:
-                        f"Раздел '{section}' должен быть оформлен стилем 'Обычный', "
-                        "а не как заголовок. Уберите стиль 'Заголовок' "
-                        "и используйте обычный текст."
+                    if "heading" in style or "заголовок" in style:
+                        errors.append(f"Раздел '{section}' должен быть оформлен стилем 'Обычный', "
+                        "а не как заголовок. Уберите стиль 'Заголовок' и используйте обычный текст.")
                     found_sections.append(section)
                     break
 
