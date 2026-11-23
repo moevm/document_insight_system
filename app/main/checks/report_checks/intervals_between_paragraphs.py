@@ -18,6 +18,9 @@ class ReportIntervalsParagraphsCheck(BaseReportCriterion):
 
     def check(self):
         try:
+            if self.is_markdown:
+                return answer(False, "Проверка интервалов применима к отчётам DOCX.")
+            
             problematic_paragraphs = []
 
             for i, paragraph in enumerate(self.file.paragraphs):
