@@ -7,6 +7,7 @@ from docx.oxml.ns import qn
 from docx.shared import Pt
 
 from app.main.checks.report_checks.intervals_between_paragraphs import ReportIntervalsParagraphsCheck
+from app.main.checks.report_checks.style_check_settings import StyleCheckSettings
 
 
 def make_paragraph(text, style="normal", line_spacing=1.5, space_before=0, space_after=0):
@@ -172,6 +173,15 @@ class TestScore:
 
 
 class TestParams:
+    def test_constructor_accepts_one_parameter(self):
+        defaults = StyleCheckSettings.DEFAULT_PARAGRAPH_INTERVALS
+        checker = ReportIntervalsParagraphsCheck({}, params={'space_before': 12})
+
+        assert checker.space_before == 12
+        assert checker.max_line_spacing == defaults['line_spacing']
+        assert checker.space_after == defaults['space_after']
+        assert checker.max_problematic_paragraphs == defaults['max_problematic_paragraphs']
+
     def test_custom_line_spacing(self):
         paragraphs = [
             make_paragraph("Абзац line_spacing 1.5", line_spacing=1.5),
@@ -208,13 +218,48 @@ class TestParams:
 
 
 class TestEdgeCases:
-    def test_none_values_ignored(self):
+    def test_document_defaults_are_used(self):
         paragraphs = [make_paragraph("None", line_spacing=None, space_before=None, space_after=None)]
 
         checker = make_checker(paragraphs=paragraphs)
         result = checker.check()
 
-        assert result["score"] == 1.0
+        assert result["score"] < 1.0
+
+    def test_inherited_style_and_direct_override(self):
+        checker = make_checker()
+        document = checker.file.file
+        base = document.styles.add_style('Base spacing', WD_STYLE_TYPE.PARAGRAPH)
+        base.paragraph_format.space_before = Pt(12)
+        child = document.styles.add_style('Child spacing', WD_STYLE_TYPE.PARAGRAPH)
+        child.base_style = base
+        inherited = document.add_paragraph('Наследует', style=child)
+        override = document.add_paragraph('Переопределяет', style=child)
+        for paragraph in (inherited, override):
+            paragraph.paragraph_format.space_after = Pt(0)
+            paragraph.paragraph_format.line_spacing = 1.5
+        override.paragraph_format.space_before = Pt(0)
+
+        result = checker.check()
+
+        assert result['score'] == pytest.approx(0.9)
+        assert 'Наследует' in result['verdict'][0]
+        assert 'Переопределяет' not in result['verdict'][0]
+
+    def test_document_defaults(self):
+        checker = make_checker()
+        document = checker.file.file
+        spacing = document.styles.element.xpath('./w:docDefaults/w:pPrDefault/w:pPr/w:spacing')[0]
+        spacing.set(qn('w:before'), '240')
+        spacing.set(qn('w:after'), '0')
+        spacing.set(qn('w:line'), '360')
+        spacing.set(qn('w:lineRule'), 'auto')
+        document.add_paragraph('Интервал из defaults')
+
+        result = checker.check()
+
+        assert result['score'] == pytest.approx(0.9)
+        assert 'Интервал из defaults' in result['verdict'][0]
 
     def test_paragraph_without_text_skipped(self):
         paragraphs = [
