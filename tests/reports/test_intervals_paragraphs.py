@@ -1,6 +1,10 @@
 from unittest.mock import MagicMock
 
 import pytest
+from docx import Document
+from docx.enum.style import WD_STYLE_TYPE
+from docx.oxml.ns import qn
+from docx.shared import Pt
 
 from app.main.checks.report_checks.intervals_between_paragraphs import ReportIntervalsParagraphsCheck
 
@@ -36,7 +40,18 @@ def make_checker(
     obj.max_problematic_paragraphs = p['max_problematic_paragraphs']
 
     obj.file = MagicMock()
-    obj.file.paragraphs = paragraphs or []
+    obj.file.source_format = 'docx'
+    document = Document()
+    for p in paragraphs or []:
+        paragraph = document.add_paragraph(p.paragraph_text)
+        if p.paragraph_style_name.startswith('heading'):
+            paragraph.style = document.styles[p.paragraph_style_name.title()]
+        paragraph.paragraph_format.line_spacing = p.paragraph_line_spacing
+        if p.paragraph_space_before is not None:
+            paragraph.paragraph_format.space_before = Pt(p.paragraph_space_before)
+        if p.paragraph_space_after is not None:
+            paragraph.paragraph_format.space_after = Pt(p.paragraph_space_after)
+    obj.file.file = document
 
     return obj
 

@@ -9,12 +9,12 @@ class ReportIntervalsParagraphsCheck(BaseReportCriterion):
 
     def __init__(self, file_info, params=None):
         super().__init__(file_info)
-        if not params:
-            params = StyleCheckSettings.DEFAULT_PARAGRAPH_INTERVALS
-        self.max_line_spacing = params['line_spacing']
-        self.space_before = params['space_before']
-        self.space_after = params['space_after']
-        self.max_problematic_paragraphs = params['max_problematic_paragraphs']
+        defaults = StyleCheckSettings.DEFAULT_PARAGRAPH_INTERVALS
+        params = params or {}
+        self.max_line_spacing = params.get('line_spacing', defaults['line_spacing'])
+        self.space_before = params.get('space_before', defaults['space_before'])
+        self.space_after = params.get('space_after', defaults['space_after'])
+        self.max_problematic_paragraphs = params.get('max_problematic_paragraphs', defaults['max_problematic_paragraphs'])
 
     def check(self):
         try:
