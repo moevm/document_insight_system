@@ -30,11 +30,7 @@ class AdminCriterionsTestSelenium(BasicSeleniumTest):
 
     def test_open_description(self):
         self.begin()
-        button = self.driver.find_element(
-            By.CSS_SELECTOR, '#results_table tbody tr[data-index="0"] a.detail-icon'
-        )
+        button = self.driver.find_element(By.CSS_SELECTOR, '#results_table tbody tr[data-index="0"] a.detail-icon')
         button.click()
-        description = self.driver.find_element(
-            By.CSS_SELECTOR, '#results_table tbody tr.detail-view td'
-        ).text.strip()
+        description = self.driver.find_element(By.CSS_SELECTOR, '#results_table tbody tr.detail-view td').text.strip()
         self.assertTrue(description, 'Criterion description is empty')
