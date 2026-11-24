@@ -1,3 +1,4 @@
+# import pdfplumber
 import pymupdf
 
 from app.utils import convert_to
@@ -34,6 +35,19 @@ class PdfDocumentManager:
                     total_height += image_height
         return total_height
 
+    def page_images_count(self, page_without_pril: int) -> int:
+        """Возвращяет кол-во РАСТРОВЫХ изображение без учета 'Приложение'"""
+        images_count = 0
+        pages_count = min(page_without_pril, self.page_count_all)
+        for page_num in range(pages_count):
+            page = self.pdf_file[page_num]
+            image_xrefs = set()
+            for image in self.pdf_file.get_page_images(page_num, full=True):
+                image_xrefs.add(image[0])
+            for xref in image_xrefs:
+                images_count += len(page.get_image_rects(xref))
+        return images_count
+
     def page_height(self, page_without_pril):
         page = self.pdf_file[0]  # get first page as a sample
         page_rect = page.rect
@@ -42,7 +56,6 @@ class PdfDocumentManager:
         available_space = (height - top_margin - bottom_margin) * page_without_pril
 
         return available_space
-
 
 def main(args):
     pdf_document_manager = PdfDocumentManager(args.filename)
