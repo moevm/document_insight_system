@@ -57,6 +57,7 @@ class PdfDocumentManager:
 
         return available_space
 
+
 def main(args):
     pdf_document_manager = PdfDocumentManager(args.filename)
     for k, v in pdf_document_manager.text_on_page.items():
