@@ -1,3 +1,4 @@
+import { DataTable, badge } from './data_table';
 import '../styles/results.css';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
@@ -269,35 +270,8 @@ $(function () {
     });
 });
 
-document.querySelectorAll('.toggleresult').forEach(item => {
-    item.addEventListener('click', event => {
-        const nextRow = item.parentNode.nextElementSibling;
-        if (nextRow.classList.contains('hidden')) {
-            nextRow.classList.remove('hidden');
-            nextRow.classList.add('visible');
-        } else {
-            nextRow.classList.add('hidden');
-            nextRow.classList.remove('visible');
-        }
-    });
-});
-
-const toggleButtonResult = document.getElementById('toggleButtonResult');
-if (toggleButtonResult) {
-    toggleButtonResult.addEventListener('click', () => {
-        const button = document.getElementById('toggleButtonResult');
-        if (button.innerHTML.trim() === '<i class="bi bi-chevron-double-down"></i>') {
-            button.innerHTML = '<i class="bi bi-chevron-double-up"></i>';
-            document.querySelectorAll('.hidden').forEach(row => {
-                row.classList.remove('hidden');
-                row.classList.add('visible');
-            });
-        } else {
-            button.innerHTML = '<i class="bi bi-chevron-double-down"></i>';
-            document.querySelectorAll('.visible').forEach(row => {
-                row.classList.remove('visible');
-                row.classList.add('hidden');
-            });
-        }
-    });
-}
+$(() => new DataTable('#results_table', {
+    sort: 'index', details: row => row._detail || '',
+    filters: [{ field: 'result', label: 'Результат', values: ['Пройдена', 'Не пройдена', 'Частично пройдена'].map(value => [value, value]) }],
+    columns: [{ field: 'result', formatter: value => badge(value, value === 'Пройдена' ? 'success' : value === 'Не пройдена' ? 'danger' : 'warning') }]
+}));

@@ -51,25 +51,32 @@ def set_passbacked_flag(checks_id, flag):
 
 
 def get_latest_users_check(filter=None):
-    local_filter = filter
-    user = local_filter.get('user')
-    username_filter = {'username': user} if user else {}
-    all_users = [user['username'] for user in users_collection.find(username_filter, {'username': 1})]
-    latest_checks = []
-    for user in all_users:
-        local_filter['user'] = user
-        check, count = get_checks_cursor(local_filter, limit=1, sort='_id', order='desc')
-        if count:
-            latest_checks.append(check[0])
-    return latest_checks, len(latest_checks)
+    return get_latest_check_cursor(filter or {}, limit=0)
 
 
 def get_latest_user_check_by_moodle(moodle_id):
     return list(db.checks.find({'lms_user_id': moodle_id}).sort('_id', -1).limit(1))
 
 
-def get_latest_check_cursor(filter, *args, **kwargs):
-    return get_latest_users_check(filter)
+def get_latest_check_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
+    sort = {'upload-date': '_id', 'moodle-date': 'lms_passback_time'}.get(sort, sort) or '_id'
+    rows = [{'$sort': {sort: 1 if order == 'asc' else -1, **({'_id': -1} if sort != '_id' else {})}}]
+    if offset:
+        rows.append({'$skip': offset})
+    if limit:
+        rows.append({'$limit': limit})
+    pipeline = [
+        {'$match': filter or {}},
+        {'$sort': {'_id': -1}},
+        {'$group': {'_id': '$user', 'check': {'$first': '$$ROOT'}}},
+        {'$replaceRoot': {'newRoot': '$check'}},
+        {'$facet': {'rows': rows, 'count': [{'$count': 'total'}]}},
+    ]
+    if not limit and not offset:
+        all_rows = list(checks_collection.aggregate(pipeline[:-1] + rows))
+        return all_rows, len(all_rows)
+    result = next(iter(checks_collection.aggregate(pipeline)), {'rows': [], 'count': []})
+    return result['rows'], result['count'][0]['total'] if result['count'] else 0
 
 
 def get_checks(filter=None, latest=None, limit=10, offset=0, sort=None, order=None):
@@ -87,8 +94,11 @@ def get_checks_cursor(filter=None, limit=10, offset=0, sort=None, order=None):
     count = checks_collection.count_documents(filter)
     rows = checks_collection.find(filter)
 
-    if sort and order in ("asc, desc"):
-        rows = rows.sort(sort, pymongo.ASCENDING if order == "asc" else pymongo.DESCENDING)
+    if sort and order in ('asc', 'desc'):
+        rows = rows.sort(
+            [(sort, pymongo.ASCENDING if order == 'asc' else pymongo.DESCENDING)]
+            + ([('_id', -1)] if sort != '_id' else [])
+        )
 
     rows = rows.skip(offset) if offset else rows
     rows = rows.limit(limit) if limit else rows

@@ -17,8 +17,12 @@ def format_check(check):
     )
 
 
-def format_check_for_table(check, set_link=None):
-    return {
+def format_check_for_table(check, set_link=None, include_status=False):
+    ended = check.get('is_ended') is not False
+    failed = bool(check.get('is_failed'))
+    passed = check.get('is_passed', int(check['score']) == 1)
+    status = 'В обработке' if not ended else 'Ошибка' if failed else 'Пройдена' if passed else 'Не пройдена'
+    row = {
         "_id": str(check["_id"]),
         "filename": check["filename"],
         "criteria": check.get("criteria", ''),
@@ -32,3 +36,7 @@ def format_check_for_table(check, set_link=None):
         "score": check["score"],
         "link": f"{set_link}{url_for('results.results_main', _id=check['_id'])}" if set_link else '',
     }
+
+    if include_status:
+        row.update(is_ended=ended, is_failed=failed, is_passed=passed, status=status)
+    return row
