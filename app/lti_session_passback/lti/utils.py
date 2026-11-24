@@ -45,7 +45,7 @@ def parse_consumer_info(key_str, secret_str):
 
 def get_role(data, default_role=False):
     try:
-        return get_param(data, ROLES).split(',')[0] == ADMIN_ROLE
+        return ADMIN_ROLE in {role.strip() for role in get_param(data, ROLES).split(',')}
     except Exception:
         return default_role
 
