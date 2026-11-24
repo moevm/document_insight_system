@@ -1,5 +1,12 @@
 import re
 
+from app.main.reports.section_patterns import (
+    ABBREVIATIONS_TITLE,
+    APPENDIX_TITLE,
+    CONCLUSION_TITLE,
+    INTRODUCTION_TITLE,
+    LITERATURE_TITLE,
+)
 from app.nlp.tokenization import content_lemmas
 
 from ..base_check import BaseReportCriterion, answer
@@ -32,9 +39,9 @@ class FindThemeInReport(BaseReportCriterion):
         text = []
         for chapter in self.file.make_chapters(self.file_type['report_type']):
             title = chapter['text'].strip().lower()
-            if title.startswith('приложение') or 'список использованных источников' in title:
+            if title.startswith(APPENDIX_TITLE.lower()) or LITERATURE_TITLE.lower() in title:
                 break
-            if title in ('введение', 'заключение', 'определения, обозначения и сокращения'):
+            if title in (INTRODUCTION_TITLE.lower(), CONCLUSION_TITLE.lower(), ABBREVIATIONS_TITLE.lower()):
                 continue
             text.extend(child['text'] for child in chapter['child'])
         percent = round(len(theme & set(content_lemmas(' '.join(text)))) * 100 / len(theme))

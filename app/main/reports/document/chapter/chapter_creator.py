@@ -3,6 +3,15 @@ import re
 import docx
 from docx2python import docx2python
 
+from app.main.reports.section_patterns import (
+    ABBREVIATIONS_CASE_PATTERN,
+    ABBREVIATIONS_TITLE,
+    APPENDIX_CASE_PATTERN,
+    CONCLUSION_CASE_PATTERN,
+    CONTENTS_TITLE,
+    INTRODUCTION_CASE_PATTERN,
+)
+
 from .chapter import Chapter
 from .chapter_object import ChapterObjectHeader, ChapterObjectImage, ChapterObjectTable
 
@@ -35,14 +44,13 @@ class ChapterCreator:
                 for item in elem:
                     s += item[0]
                     s += '+'
-                if re.search(r'(ЗАКЛЮЧЕНИЕ|Заключение|заключение)', s):
+                if re.search(CONCLUSION_CASE_PATTERN, s):
                     flag = True
                     break
                 elif (
-                    re.search(r'(ВВЕДЕНИЕ|Введение|введение)', s)
+                    re.search(INTRODUCTION_CASE_PATTERN, s)
                     or re.search(
-                        r'(ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ|Определения, обозначения и сокращения|'
-                        r'определения, обозначения и сокращения)',
+                        ABBREVIATIONS_CASE_PATTERN,
                         s,
                     )
                     or len(s) == len(elem)
@@ -53,23 +61,22 @@ class ChapterCreator:
                         new_chapters.append(f"{s.split('+')[0]} {s.split('+')[1]}".strip())
         else:
             for elem in doc.body[body_index][0][0]:
-                if re.search(r'(ЗАКЛЮЧЕНИЕ|Заключение|заключение)', elem):
+                if re.search(CONCLUSION_CASE_PATTERN, elem):
                     flag = True
                     break
             if not flag:
                 return False, None, None
             for i in range(paragraph_index, len(doc.body[body_index][0][0])):
                 if (
-                    re.search(r'(ВВЕДЕНИЕ|Введение|введение)', doc.body[body_index][0][0][i])
+                    re.search(INTRODUCTION_CASE_PATTERN, doc.body[body_index][0][0][i])
                     or re.search(
-                        r'(ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ|Определения, обозначения и сокращения|'
-                        r'определения, обозначения и сокращения)',
+                        ABBREVIATIONS_CASE_PATTERN,
                         doc.body[body_index][0][0][i],
                     )
                     or doc.body[body_index][0][0][i] == ''
                 ):
                     continue
-                elif re.search(r'(ЗАКЛЮЧЕНИЕ|Заключение|заключение)', doc.body[body_index][0][0][i]):
+                elif re.search(CONCLUSION_CASE_PATTERN, doc.body[body_index][0][0][i]):
                     index = i + 1
                     break
                 else:
@@ -149,7 +156,7 @@ class ChapterCreator:
         errors = []
         cur_index = 0
         cur_chapter = 0
-        application_pattern = r'(Приложение|ПРИЛОЖЕНИЕ|приложение) [А-ЯЁа-яё]'
+        application_pattern = APPENDIX_CASE_PATTERN
         application_find_index = 0
         find_index = 0
         while cur_chapter != len(chapter_names):
@@ -160,7 +167,7 @@ class ChapterCreator:
 
             if cur_index == len(parsed_doc.body):
                 # ???
-                if chapter_names[cur_chapter] != 'определения, обозначения и сокращения':
+                if chapter_names[cur_chapter] != ABBREVIATIONS_TITLE.lower():
                     errors.append(chapter_names[cur_chapter])
                 cur_chapter += 1
                 cur_index = doc_chapters[-1][0][0] if doc_chapters else 0
@@ -181,7 +188,7 @@ class ChapterCreator:
                     find_chapter = chapter_names[cur_chapter].lower()
                 else:
                     find_chapter = chapter_names[cur_chapter].capitalize()
-                if chapter_names[cur_chapter] == 'СОДЕРЖАНИЕ':
+                if chapter_names[cur_chapter] == CONTENTS_TITLE.upper():
                     is_correct, new_chapters, index = self.make_content(
                         parsed_doc, cur_index, parsed_doc.body[cur_index][0][0].index(find_chapter)
                     )
