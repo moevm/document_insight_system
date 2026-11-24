@@ -161,8 +161,8 @@ class DocxUploader(DocumentUploader):
                 previous_page = 0
                 for header in headers:
                     for page, text in self.pdf_file.get_text_on_page(end_page=self.page_count).items():
-                        first_line = text.splitlines()[0].strip().lower() if text.splitlines() else ''
-                        if page > previous_page and header['key'] in first_line:
+                        head_lines = [line.strip().lower() for line in text.splitlines() if line.strip()][:2]
+                        if page > previous_page and any(header["key"] in line for line in head_lines):
                             header['marker'] = True
                             header['page'] = page
                             previous_page = page
