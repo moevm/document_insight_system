@@ -3,7 +3,7 @@ import re
 from bson import ObjectId
 from flask_login import current_user
 
-from .table_query import date_filter, number_filter, text_filter
+from .table_query import date_boundaries, date_filter, number_filter, text_filter
 
 FILTER_PREFIX = 'filter_'
 
@@ -22,8 +22,10 @@ def checklist_filter(data, is_admin=False):
             '$options': 'i',
         }
     if value := filters.get('upload-date'):
+        start, end = date_boundaries(value)
         query['_id'] = {
-            operator: ObjectId.from_datetime(date) for operator, date in date_filter(value, timezone_offset).items()
+            '$gte': ObjectId.from_datetime(start - timezone_offset),
+            '$lt': ObjectId.from_datetime(end - timezone_offset),
         }
     if value := filters.get('moodle-date'):
         query['lms_passback_time'] = date_filter(value)

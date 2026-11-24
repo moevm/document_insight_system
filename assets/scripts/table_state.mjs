@@ -40,13 +40,34 @@ export function tableUrl(search, state, mode) {
     return `?${query}`;
 }
 
+const russianDate = value => value.split('-').reverse().join('.');
+
 export function dateRangeInputs(value = '') {
-    const parts = value.split('-').map(part => part.trim().split('.').reverse().join('-'));
-    return [parts[0] || '', parts[1] || ''];
+    const sides = String(value).replace(/\u2013/g, '-').split('-');
+    const parse = text => {
+        const date = /(\d{1,2})\.(\d{1,2})\.(\d{4})/.exec(text || '');
+        const time = /(\d{1,2}):(\d{2})/.exec(text || '');
+        return [
+            date ? `${date[3]}-${date[2].padStart(2, '0')}-${date[1].padStart(2, '0')}` : '',
+            time ? `${time[1].padStart(2, '0')}:${time[2]}` : ''
+        ];
+    };
+    const start = parse(sides[0]);
+    const end = parse(sides[1]);
+    if (!end[0] && end[1]) end[0] = start[0];
+    return [start, end];
 }
 
-export function dateRangeFilter(start, end) {
-    if (!start && !end) return '';
-    const values = [start || end, end || start].map(value => value.split('-').reverse().join('.'));
-    return values[0] === values[1] ? values[0] : values.join('-');
+export function dateRangeFilter(sides = []) {
+    const [[startDate, startTime] = [], [rawEndDate, endTime] = []] = sides;
+    // a time without its own date belongs to the start day: "24.11.2026 12:00-15:00"
+    const endDate = rawEndDate || (endTime ? startDate : '');
+    const russian = (date, time) => `${russianDate(date)}${time ? ` ${time}` : ''}`;
+    if (!startDate) return endDate ? russian(endDate, endTime) : '';
+    if (!endDate) return russian(startDate, startTime);
+    // the upper end is exclusive: a same-day end keeps its own day unless the start covers the whole day
+    const start = russian(startDate, startDate === endDate && !startTime ? '' : startTime);
+    if (startDate === endDate && !startTime && !endTime) return start;
+    const end = endDate === startDate ? endTime || russian(endDate, '') : russian(endDate, endTime);
+    return `${start}-${end}`;
 }

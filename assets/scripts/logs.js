@@ -3,7 +3,7 @@ import { DataTable, escapeHtml, badge } from './data_table';
 $(() => new DataTable('#logs-table', {
     url: '/logs/data', sort: 'timestamp', order: 'desc', refresh: true,
     filters: [
-        { field: 'timestamp', type: 'date-range', label: 'Дата', placeholder: '01.11.2026-07.11.2026', hint: 'ДД.ММ.ГГГГ или диапазон' },
+        { field: 'timestamp', type: 'date-range', label: 'Дата', hint: 'Без времени — вся дата; с временем «по» — до указанной минуты, не включая её.' },
         { field: 'check_id', label: 'ID проверки' }, { field: 'stage', label: 'Этап' },
         { field: 'service-name', label: 'Сервис' },
         { field: 'levelname', label: 'Уровень', values: ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'].map(level => [level, level]) },

@@ -27,6 +27,8 @@
 
 .table-filter legend { font-size: .85rem; font-weight: 600; margin: 0; }
 .table-date-range { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem; }
+.table-date-range-side { display: grid; grid-template-columns: auto 1fr; gap: .2rem .35rem; align-items: center; }
+.table-date-range-label { grid-row: 1 / span 2; font-weight: 400; color: #52606d; }
 .table-date-range input { min-width: 0; padding-left: .3rem; padding-right: .3rem; }
 
 .data-table-panel .table-actions .fixed-table-toolbar { margin: 0; display: flex; }

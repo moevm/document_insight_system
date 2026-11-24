@@ -42,9 +42,30 @@ test('only declared string filters survive; reset removes old links and latest',
 });
 
 test('date controls round trip inclusive dates and either endpoint', () => {
-    assert.deepEqual(dateRangeInputs('01.11.2026-07.11.2026'), ['2026-11-01', '2026-11-07']);
-    assert.deepEqual(dateRangeInputs('07.11.2026'), ['2026-11-07', '']);
-    assert.equal(dateRangeFilter('2026-11-01', '2026-11-07'), '01.11.2026-07.11.2026');
-    assert.equal(dateRangeFilter('', '2026-11-07'), '07.11.2026');
-    assert.equal(dateRangeFilter('', ''), '');
+    assert.deepEqual(dateRangeInputs('01.11.2026-07.11.2026'), [['2026-11-01', ''], ['2026-11-07', '']]);
+    assert.deepEqual(dateRangeInputs('07.11.2026'), [['2026-11-07', ''], ['', '']]);
+    assert.equal(dateRangeFilter([['2026-11-01', ''], ['2026-11-07', '']]), '01.11.2026-07.11.2026');
+    assert.equal(dateRangeFilter([['', ''], ['2026-11-07', '']]), '07.11.2026');
+    assert.equal(dateRangeFilter([['', ''], ['', '']]), '');
+});
+
+test('time inputs survive any combination of dates and times', () => {
+    assert.deepEqual(dateRangeInputs('24.11.2026 12:00-25.11.2026 13:00'), [['2026-11-24', '12:00'], ['2026-11-25', '13:00']]);
+
+    assert.deepEqual(dateRangeInputs('24.11.2026 12:00-15:00'), [['2026-11-24', '12:00'], ['2026-11-24', '15:00']]);
+    assert.deepEqual(dateRangeInputs('24.11.2026-30.11.2026 15:00'), [['2026-11-24', ''], ['2026-11-30', '15:00']]);
+    assert.deepEqual(dateRangeInputs('7.11.2026 9:30'), [['2026-11-07', '09:30'], ['', '']]);
+    assert.deepEqual(dateRangeInputs('24.11.2026 – 30.11.2026'), [['2026-11-24', ''], ['2026-11-30', '']]);
+    assert.equal(dateRangeFilter([['2026-11-24', '12:00'], ['2026-11-25', '13:00']]), '24.11.2026 12:00-25.11.2026 13:00');
+    assert.equal(dateRangeFilter([['2026-11-24', '12:00'], ['2026-11-24', '15:00']]), '24.11.2026 12:00-15:00');
+    assert.equal(dateRangeFilter([['2026-11-24', ''], ['2026-11-30', '15:00']]), '24.11.2026-30.11.2026 15:00');
+    assert.equal(dateRangeFilter([['2026-11-24', '12:00'], ['2026-11-30', '']]), '24.11.2026 12:00-30.11.2026');
+    assert.equal(dateRangeFilter([['', '12:00'], ['', '']]), '');
+
+    assert.equal(dateRangeFilter([['2026-11-24', '12:00'], ['', '15:00']]), '24.11.2026 12:00-15:00');
+    assert.equal(dateRangeFilter([['2026-11-24', ''], ['', '15:00']]), '24.11.2026-15:00');
+    assert.equal(dateRangeFilter([['2026-11-24', ''], ['2026-11-24', '']]), '24.11.2026');
+    for (const value of ['24.11.2026 12:00-25.11.2026 13:00', '24.11.2026 12:00-15:00', '24.11.2026-30.11.2026 15:00']) {
+        assert.equal(dateRangeFilter(dateRangeInputs(value)), value);
+    }
 });

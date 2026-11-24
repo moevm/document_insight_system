@@ -52,15 +52,47 @@ def number_filter(value, integer=False):
     raise ValueError('Числовой фильтр: укажите число, сравнение (>= 5) или диапазон (5-10).')
 
 
-def date_filter(value, shift=timedelta()):
+DATE_FORMAT = '%d.%m.%Y'
+DATE_TIME_FORMAT = '%d.%m.%Y %H:%M'
+TIME_FORMAT = '%H:%M'
+
+
+def parse_moment(text):
+    """Return (datetime, has_time) for 'ДД.ММ.ГГГГ' or 'ДД.ММ.ГГГГ ЧЧ:ММ'."""
+    text = text.strip()
+    for fmt in (DATE_TIME_FORMAT, DATE_FORMAT):
+        try:
+            return datetime.strptime(text, fmt), fmt == DATE_TIME_FORMAT
+        except ValueError:
+            continue
+    raise ValueError
+
+
+def date_boundaries(value):
+    text = value.replace('\u2013', '-').strip()
     try:
-        parts = value.split('-')
-        if not 1 <= len(parts) <= 2:
+        start_text, _, end_text = text.partition('-')
+        start, start_has_time = parse_moment(start_text)
+        if not end_text.strip():
+            return start, start + (timedelta(minutes=1) if start_has_time else timedelta(days=1))
+        try:
+            end, end_has_time = parse_moment(end_text)
+        except ValueError:
+            clock = datetime.strptime(end_text.strip(), TIME_FORMAT)
+            end = start.replace(hour=clock.hour, minute=clock.minute, second=0, microsecond=0)
+            end_has_time = True
+        if not end_has_time:
+            end += timedelta(days=1)
+        if end <= start:
             raise ValueError
-        start = datetime.strptime(parts[0].strip(), '%d.%m.%Y')
-        end = datetime.strptime(parts[-1].strip(), '%d.%m.%Y')
-        if end < start:
-            raise ValueError
-        return {'$gte': start - shift, '$lt': end + timedelta(days=1) - shift}
     except (ValueError, OverflowError) as error:
-        raise ValueError('Дата: укажите ДД.ММ.ГГГГ или диапазон ДД.ММ.ГГГГ-ДД.ММ.ГГГГ.') from error
+        raise ValueError(
+            'Дата: укажите ДД.ММ.ГГГГ или ДД.ММ.ГГГГ ЧЧ:ММ, диапазон — через дефис, '
+            'например 24.11.2026 12:00-25.11.2026 13:00. Время без даты не поддерживается.'
+        ) from error
+    return start, end
+
+
+def date_filter(value, shift=timedelta()):
+    start, end = date_boundaries(value)
+    return {'$gte': start - shift, '$lt': end - shift}
