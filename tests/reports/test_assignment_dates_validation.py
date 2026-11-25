@@ -45,3 +45,10 @@ class TestAssignmentDatesValidation:
         result = checker.check()
 
         assert result["score"] == 0.0
+
+    def test_05_without_header(self, reports_fixture_dir):
+        file_info = create_report_file_info(reports_fixture_dir / "assignment_dates_validation" / "without_header.docx")
+        checker = ReportAssignmentDatesValidationCheck(file_info, date_of_issue="2026-11-24", required_days=7)
+        result = checker.check()
+
+        assert result["score"] == 0.0

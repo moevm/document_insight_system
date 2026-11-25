@@ -46,6 +46,10 @@ class ReportAssignmentDatesValidationCheck(BaseReportCriterion):
     def check(self):
         headers = self.file.make_headers(self.file_type['report_type'])
         task_header = next(header for header in headers if header.get("key", None) == "задание")
+
+        if task_header is None:
+            return answer(False, "Не найден лист с заданием")
+
         task_number_page = task_header.get("page", None)
         page_text = self.file.pdf_file.get_text_on_page(task_number_page, task_number_page).get(task_number_page, '')
 
