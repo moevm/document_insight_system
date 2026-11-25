@@ -44,7 +44,7 @@ class ReportAssignmentDatesValidationCheck(BaseReportCriterion):
         self.required_days = required_days
 
     def check(self):
-        headers = self.file.make_headers("VKR")
+        headers = self.file.make_headers(self.file_type['report_type'])
         task_header = next(header for header in headers if header.get("key", None) == "задание")
         task_number_page = task_header.get("page", None)
         page_text = self.file.pdf_file.get_text_on_page(task_number_page, task_number_page).get(task_number_page, '')
