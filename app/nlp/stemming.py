@@ -1,8 +1,9 @@
 import itertools
+import re
 
-from nltk.corpus import stopwords
-from nltk.tokenize import sent_tokenize, word_tokenize
 from pymorphy3 import MorphAnalyzer
+
+from .tokenization import content_lemmas, sentence_tokens
 
 MORPH_ANALYZER = MorphAnalyzer()
 TASKS = 'задачи:'
@@ -25,10 +26,12 @@ class Stemming:
         self.sentences = []
         find_title_tasks = False
         for sent in string.split('\n'):
-            if flag and TASKS not in sent.lower() and not find_title_tasks:
+            if flag and not re.search(r'\bзадач[аи]\b', sent, re.I) and not find_title_tasks:
                 continue
             find_title_tasks = True
-            for s in sent_tokenize(sent):
+            if flag and re.match(r'^\s*цель\s*:', sent, re.I):
+                continue
+            for s in sentence_tokens(sent):
                 self.sentences.append(s)
         return self.sentences
 
@@ -36,12 +39,11 @@ class Stemming:
         self.sentences = []
         self.find_further_development = False
         self.filtered_docs = []
-        stop_words = set(stopwords.words("russian"))
         filtered_doc = []
         self.get_sentences(string, flag)
 
         for sent in self.sentences:
-            token_sent = [w.lower() for w in word_tokenize(sent) if w.lower() not in stop_words]
+            token_sent = content_lemmas(sent)
             for word in token_sent:
                 w = MORPH_ANALYZER.parse(word)[0].normal_form
                 filtered_doc.append(w)

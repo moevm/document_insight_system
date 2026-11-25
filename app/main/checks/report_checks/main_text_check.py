@@ -1,3 +1,5 @@
+from app.main.reports.section_patterns import APPENDIX_TITLE
+
 from ...reports.docx_uploader.style import Style
 from ..base_check import BaseReportCriterion, answer
 from .style_check_settings import StyleCheckSettings
@@ -25,8 +27,14 @@ class ReportMainTextCheck(BaseReportCriterion):
         super().__init__(file_info)
         self.headers = []
         self.main_text_styles = main_text_styles
+        if len(main_text_styles) > len(StyleCheckSettings.VKR_MAIN_TEXT_CONFIG):
+            raise ValueError("Для каждого стиля должен быть задан шаблон форматирования.")
         self.main_text_styles_names = main_text_styles_names
-        self.target_styles = StyleCheckSettings.VKR_MAIN_TEXT_CONFIG
+        self.target_styles = (
+            StyleCheckSettings.LR_MAIN_TEXT_CONFIG
+            if self.file_type['report_type'] == 'LR'
+            else StyleCheckSettings.VKR_MAIN_TEXT_CONFIG
+        )
         self.target_styles = list(
             map(
                 lambda elem: {"name": elem["name"], "style": self.construct_style_from_description(elem["style"])},
@@ -63,7 +71,9 @@ class ReportMainTextCheck(BaseReportCriterion):
         return err
 
     def check(self):
-        if self.file.page_counter() < 4:
+        if self.is_markdown:
+            return answer(False, 'Проверка оформления основного текста применима к отчётам DOCX.')
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         self.late_init()
         result_str = ''
@@ -74,7 +84,7 @@ class ReportMainTextCheck(BaseReportCriterion):
                 "<br><br>Проверьте корректность использования стилей.",
             )
         for header in self.headers:
-            if header["text"].find("ПРИЛОЖЕНИЕ") >= 0:
+            if header["text"].find(APPENDIX_TITLE) >= 0:
                 break
             err_string = ''
             for child in header["child"]:

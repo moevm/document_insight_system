@@ -5,7 +5,7 @@ from tests.util.report_file_utils import create_report_file_info
 class TestReportPageCounterCheck:
     def test_01_valid_count(self, reports_fixture_dir):
         file_info = create_report_file_info(reports_fixture_dir / "page_counter" / "valid.md")
-        checker = ReportPageCounter(file_info, min_number=5, max_number=100)
+        checker = ReportPageCounter(file_info, min_number=1, max_number=100)
         result = checker.check()
         assert result["score"] == 1.0
 

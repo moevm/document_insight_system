@@ -34,6 +34,8 @@ class LRReportSectionCheck(BaseReportCriterion):
         return style
 
     def check(self):
+        if self.is_markdown:
+            return answer(False, 'Проверка стилей применима к отчётам DOCX.')
         self.file.parse_effective_styles()
         result = True
         result_str = ""
@@ -88,11 +90,8 @@ class LRReportSectionCheck(BaseReportCriterion):
             err.extend(diff_lst)
         return err
 
-    # unify_regex is used in self.file.unify_multiline_entities()
     # header_regex has two capture groups: first is marker and second is header itself (no decorations)
     def check_marked_headers(self, unify_regex, header_regex, precheck_style, template_style, headers):
-        # if unify_regex is not None:
-        #     self.file.unify_multiline_entities(unify_regex)
         indices = self.file.get_paragraph_indices_by_style([precheck_style])[0]
         found_texts = list(map(lambda i: self.file.styled_paragraphs[i]["text"], indices))
         pars = list(map(lambda i: self.file.styled_paragraphs[i], indices))
@@ -114,7 +113,7 @@ class LRReportSectionCheck(BaseReportCriterion):
                 continue
             match = pattern.match(found_texts[found_idx])
             if match:
-                if headers[header_idx].lower() in match.group(2).lower():
+                if headers[header_idx].lower() in match.group(0).lower():
                     errors.extend(self.style_diff(pars[found_idx], template_style))
                     last_found = found_idx
                     marker_idx += 1

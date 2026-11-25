@@ -87,22 +87,20 @@
     </div>
     {% if results.is_ended and not results.is_failed %}
     <div class="alert-info" style="text-align: center">
-        Подробности проверки по каждому критерию доступны по нажатию <i class="bi bi-chevron-double-down"></i> в левом столбце.
+        Нажмите «+» в строке, чтобы открыть замечания по критерию.
     </div>
     <!-- Checks table -->
     <table class="table table-striped table-hover" id="results_table">
         <thead>
             <tr>
-                <th><button id="toggleButtonResult" class="flat-button"><i class="bi bi-chevron-double-down"></button></th>
-                <th class="results_table_index ins" scope="col">#</th>
-                <th class="results_table_test ins" scope="col">Тест</th>
-                <th class="results_table_result ins" scope="col">Результат</th>
+                <th data-field="index" data-sortable="true">#</th>
+                <th data-field="name" data-sortable="true">Критерий</th>
+                <th data-field="result" data-sortable="true">Результат</th>
             </tr>
         </thead>
         <tbody>
             {% for criterion_info in results.enabled_checks %}
             <tr>
-                <td class="toggleresult raw-button"><i class="bi bi-chevron-double-down"></td>
                 <th scope="row" class="ins">{{ loop.index }}</th>
                 <td class="ins">{{ criterion_info['name'] }}</td>
                 {% set colors = {0.0: 'table-danger', 1.0: 'table-success'} %}
@@ -111,8 +109,8 @@
                     {{ result_labels.get(criterion_info['score'], 'Частично пройдена') }}
                 </td>
             </tr>
-            <tr class="hidden">
-                <td colspan="4">
+            <tr data-detail>
+                <td colspan="3">
 
                     {% for item in criterion_info.get('verdict', ["Пройдена!"] if criterion_info.get('score')==1.0 else
                     ["Не пройдена"]) %}
