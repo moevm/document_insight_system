@@ -1,13 +1,40 @@
-ARG IMAGE_VERSION=0.6
+ARG IMAGE_VERSION
 
 FROM python:3.12-slim-bookworm
 
-LABEL project='dis'
-LABEL version='worker-base-${IMAGE_VERSION}'
+ARG IMAGE_VERSION
+
 
 ENV LANG=en_US.UTF-8
 ENV TZ=Europe/Moscow
 
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
-    apt update && apt install -y g++ gcc libreoffice-writer libreoffice-impress default-jre libreoffice-java-common && \
-    rm -rf /var/lib/apt/lists
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        locales \
+        tzdata \
+        g++ \
+        gcc \
+        libreoffice-writer \
+        libreoffice-impress \
+        default-jre \
+        libreoffice-java-common \
+    && sed -i '/^# en_US.UTF-8 UTF-8/s/^# //' /etc/locale.gen \
+    && locale-gen en_US.UTF-8 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime \
+    && echo "${TZ}" > /etc/timezone
+
+ARG VCS_REF=unknown
+ARG BUILD_DATE=unknown
+ARG SOURCE_BRANCH=unknown
+ARG SOURCE_STATE=unknown
+
+LABEL project="dis" \
+    version="${IMAGE_VERSION}" \
+    org.opencontainers.image.version="${IMAGE_VERSION}" \
+    org.opencontainers.image.revision="${VCS_REF}" \
+    org.opencontainers.image.created="${BUILD_DATE}" \
+    org.opencontainers.image.source="https://github.com/moevm/document_insight_system" \
+    org.opencontainers.image.source-state="${SOURCE_STATE}" \
+    dis.role="worker-base"

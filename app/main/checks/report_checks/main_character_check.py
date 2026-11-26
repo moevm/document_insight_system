@@ -14,6 +14,10 @@ class ReportMainCharacterCheck(BaseReportCriterion):
 
     def __init__(self, file_info, tables_count_to_verify=8, edu_degree='bsc'):
         super().__init__(file_info)
+        if edu_degree not in ReportMainPageSetting.FIRST_TABLE_DEGREE_PART:
+            raise ValueError('edu_degree должен быть bsc или msc.')
+        if tables_count_to_verify < 1:
+            raise ValueError('tables_count_to_verify должен быть положительным.')
         self.headers = []
         self.first_check_list = None
         self.second_check_list = None
@@ -25,10 +29,12 @@ class ReportMainCharacterCheck(BaseReportCriterion):
         self.headers = self.file.make_headers(self.file_type["report_type"])
 
     def check(self):
+        if self.is_markdown:
+            return answer(False, 'Проверка полей первых страниц применима к отчётам DOCX.')
         self.first_check_list = copy.deepcopy(ReportMainPageSetting.get_first_table(self.edu_degree))
         self.second_check_list = copy.deepcopy(ReportMainPageSetting.SECOND_TABLE)
         self.calendar_plan_check_list = copy.deepcopy(ReportMainPageSetting.CALENDAR_PLAN_TABLE)
-        if self.file.page_counter() < 4:
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         if self.tables_count_to_verify > len(self.file.tables):
             return answer(

@@ -1,14 +1,10 @@
-import json
-from datetime import datetime, timedelta
-
 from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user, login_required
 
 from app.db.methods.log import get_logs_cursor
-from app.root_logger import get_root_logger
+from app.utils.table_query import date_filter, number_filter, page_options, read_filters, text_filter
 
 logs = Blueprint('logs', __name__, template_folder='templates', static_folder='static')
-logger = get_root_logger('web')
 
 
 @logs.route("/")
@@ -20,73 +16,30 @@ def logs_main():
 @logs.route("/data")
 @login_required
 def logs_data():
-    filters = request.args.get("filter", "{}")
     try:
-        filters = json.loads(filters)
-        filters = filters if filters else {}
-    except Exception as e:
-        logger.warning("Can't parse filters")
-        logger.warning(repr(e))
-        filters = {}
-
-    # req filter to mongo query filter conversion
-    filter_query = {}
-    if f_service_name := filters.get("service-name", None):
-        filter_query["serviceName"] = {"$regex": f_service_name}
-
-    if f_check_id := filters.get("check_id", None):
-        filter_query["check_id"] = {"$regex": f_check_id}
-
-    if f_stage := filters.get("stage", None):
-        filter_query["stage"] = {"$regex": f_stage}
-
-    if f_levelname := filters.get("levelname", None):
-        filter_query["levelname"] = {"$regex": f_levelname}
-
-    if f_pathname := filters.get("pathname", None):
-        filter_query["pathname"] = {"$regex": f_pathname}
-
-    f_lineno = filters.get("lineno", "")
-    f_lineno_list = list(filter(lambda val: val, f_lineno.split("-")))
-    try:
-        if len(f_lineno_list) == 1:
-            filter_query["lineno"] = int(f_lineno_list[0])
-        elif len(f_lineno_list) > 1:
-            filter_query["lineno"] = {"$gte": int(f_lineno_list[0]), "$lte": int(f_lineno_list[1])}
-    except Exception as e:
-        logger.warning("Can't apply lineno filter")
-        logger.warning(repr(e))
-
-    f_timestamp = filters.get("timestamp", "")
-    f_timestamp_list = list(filter(lambda val: val, f_timestamp.split("-")))
-    try:
-        if len(f_timestamp_list) == 1:
-            date = datetime.strptime(f_timestamp_list[0], "%d.%m.%Y")
-            filter_query['timestamp'] = {"$gte": date, "$lte": date + timedelta(hours=23, minutes=59, seconds=59)}
-        elif len(f_timestamp_list) > 1:
-            filter_query['timestamp'] = {
-                "$gte": datetime.strptime(f_timestamp_list[0], "%d.%m.%Y"),
-                "$lte": datetime.strptime(f_timestamp_list[1], "%d.%m.%Y"),
-            }
-    except Exception as e:
-        logger.warning("Can't apply timestamp filter")
-        logger.warning(repr(e))
-
-    # parse and validate rest query
-    limit = request.args.get("limit", "")
-    limit = int(limit) if limit.isnumeric() else 10
-
-    offset = request.args.get("offset", "")
-    offset = int(offset) if offset.isnumeric() else 0
-
-    sort = request.args.get("sort", "")
-    sort = 'timestamp' if not sort else sort
-
-    order = request.args.get("order", "")
-    order = 'desc' if not order else order
-
-    # get data and records count
-    rows, count = get_logs_cursor(filter=filter_query, limit=limit, offset=offset, sort=sort, order=order)
+        filters = read_filters(request.args)
+        filter_query = {}
+        for field, key in {
+            'service-name': 'serviceName',
+            'check_id': 'check_id',
+            'stage': 'stage',
+            'levelname': 'levelname',
+            'pathname': 'pathname',
+        }.items():
+            if value := filters.get(field):
+                filter_query[key] = text_filter(value)
+        if value := filters.get('lineno'):
+            filter_query['lineno'] = number_filter(value, integer=True)
+        if value := filters.get('timestamp'):
+            filter_query['timestamp'] = date_filter(value)
+        if search := request.args.get('search', '').strip():
+            filter_query['$or'] = [
+                {field: text_filter(search)} for field in ('message', 'check_id', 'serviceName', 'stage')
+            ]
+        options = page_options(request.args, {'timestamp', 'service-name', 'levelname', 'lineno'}, 'timestamp', 'desc')
+    except ValueError as error:
+        return jsonify(error=str(error)), 400
+    rows, count = get_logs_cursor(filter=filter_query, **options)
 
     # construct response
     response = {

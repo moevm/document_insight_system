@@ -1,7 +1,8 @@
-# !/bin/bash
+#!/bin/bash
+set -euo pipefail
 
 service="selenium-tests"
-container_id=$(docker compose -f docker-compose.yml -f docker-compose-selenium.yml ps -q $service)
+container_id=$(docker compose -f docker-compose.yml -f docker-compose-selenium.yml ps --all -q "$service")
 
 if [ -z "$container_id" ]; then
     echo "Контейнер сервиса $service не найден."

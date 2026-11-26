@@ -4,11 +4,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
     mode: 'production',
-//    entry: ['core-js/stable', 'regenerator-runtime/runtime', "./assets/scripts/main.js"],
     entry: {
-//        stable: 'core-js/stable',
-//        runtime: 'regenerator-runtime/runtime',
-//        main: ['core-js/stable', 'regenerator-runtime/runtime',"./assets/scripts/main.js"],
         admin_criterions: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/admin_criterions.js'],
         check_list: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/check_list.js'],
         criterion_pack: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/criterion_pack.js'],
@@ -16,6 +12,7 @@ module.exports = {
         login: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/login.js'],
         logs: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/logs.js'],
         one_user_info: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/one_user_info.js'],
+        pack_list: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/pack_list.js'],
         profile: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/profile.js'],
         results: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/results.js'],
         signup: ['core-js/stable', 'regenerator-runtime/runtime', './assets/scripts/general_imports.js', './assets/scripts/signup.js'],

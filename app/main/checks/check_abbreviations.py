@@ -32,6 +32,12 @@ def get_first_letters(phrase):
 
 
 def is_abbreviation_explained(abbr: str, text: str) -> bool:
+    first = re.search(r'\b' + re.escape(abbr) + r'\b', text)
+    if first is None:
+        return False
+    line_start = text.rfind('\n', 0, first.start()) + 1
+    line_end = text.find('\n', first.end())
+    text = text[line_start : line_end if line_end >= 0 else len(text)]
     patterns = [
         rf"{abbr}\s*\(([^)]+)\)",  # АААА (расшифровка)
         rf"\(([^)]+)\)\s*{abbr}",  # (расшифровка) АААА
@@ -124,7 +130,7 @@ def main_check(text: str, unverifiable_text: str):
         return continue_check, res_str, unexplained_abbr
 
     except Exception as e:
-        return False, f"Ошибка при проверке аббревиатур: {str(e)}", {}
+        raise ValueError(f"Ошибка при проверке аббревиатур: {str(e)}") from e
 
 
 def forming_response(unexplained_abbr_with_page, format_page_link):

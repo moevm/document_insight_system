@@ -1,7 +1,11 @@
 import re
 from collections import Counter
 
+from docx.oxml.ns import qn
+
+from ...reports.section_patterns import APPENDIX_TITLE
 from ..base_check import BaseReportCriterion, answer
+from ..references import literature_numbers
 from .style_check_settings import StyleCheckSettings
 
 
@@ -10,12 +14,13 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
     _description = ''
     id = 'literature_references'
 
-    def __init__(self, file_info, min_ref=1, max_ref=1000, headers_map=None):
+    def __init__(self, file_info, min_ref=None, max_ref=None, headers_map=None):
         super().__init__(file_info)
         self.headers = []
+        self.min_ref = min_ref
+        self.max_ref = max_ref
         self.literature_header = None
         self.literature_reference_text = []
-        self.name_pattern = r'список[ \t]*(использованных|использованной|)[ \t]*(источников|литературы)'
         if headers_map:
             self.config = headers_map
         else:
@@ -25,49 +30,28 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
         self.headers = self.file.make_chapters(self.file_type['report_type'])
         self.headers_main = self.file.get_main_headers(self.file_type['report_type'])
         self.literature_header = self.file.find_literature_vkr(self.file_type['report_type'])
-        if self.headers_main in StyleCheckSettings.CONFIGS.get(self.config):
-            self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main][
-                'min_ref_for_literature_references_check'
-            ]
-            self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)[self.headers_main][
-                'mах_ref_for_literature_references_check'
-            ]
-        else:
-            if 'any_header' in StyleCheckSettings.CONFIGS.get(self.config):
-                self.min_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header'][
-                    'min_ref_for_literature_references_check'
-                ]
-                self.max_ref = StyleCheckSettings.CONFIGS.get(self.config)['any_header'][
-                    'mах_ref_for_literature_references_check'
-                ]
+        config = StyleCheckSettings.CONFIGS.get(self.config)
+        if not isinstance(config, dict):
+            raise ValueError(f'Неизвестная карта заголовков: {self.config}')
+        settings = config.get(self.headers_main, config.get('any_header', {}))
+        if self.min_ref is None:
+            self.min_ref = settings.get('min_ref_for_literature_references_check', 1)
+        if self.max_ref is None:
+            self.max_ref = settings.get('mах_ref_for_literature_references_check', 1000)
 
     def check(self):
-        if self.file.page_counter() < 4:
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         number_of_sources = 0
         start_literature_par = 0
         result_str = ''
-        # TODO: проверить совместимость / дублируемость LR и VKR
-        if self.file_type['report_type'] == 'LR':
-            start_literature_par = self.find_start_paragraph()
-            if start_literature_par:
-                number_of_sources = self.count_sources()
-            else:
-                return answer(False, 'Нет списка литературы.')
-        elif self.file_type['report_type'] == 'VKR':
-            self.late_init_vkr()
-            header = self.literature_header
-            if not header:
-                return answer(
-                    False,
-                    'Не найден Список использованных источников.<br><br>Если в вашей работе есть список источников, проверьте корректность использования стилей.',  # noqa: E501
-                )
-            start_literature_par = header["number"]
-            number_of_sources = self.count_sources_vkr(header)
-        else:
-            return answer(
-                False, 'Во время обработки произошла критическая ошибка - указан неверный тип работы в наборе критериев'
-            )
+        self.literature_reference_text = []
+        self.late_init_vkr()
+        header = self.literature_header
+        if not header:
+            return answer(False, 'Не найден Список использованных источников / список литературы.')
+        start_literature_par = header['number']
+        number_of_sources = self.count_sources_vkr(header)
         if not number_of_sources:
             return answer(
                 False,
@@ -81,7 +65,7 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
             if not self.min_ref <= number_of_sources <= self.max_ref:
                 return answer(
                     False,
-                    f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть не менее {self.min_ref}.',  # noqa: E501
+                    f'Список источников оформлен верно, однако их количество ({number_of_sources}) не удовлетворяет необходимому критерию. <br> Количество источников должно быть в пределах [{self.min_ref}; {self.max_ref}].',  # noqa: E501
                 )
             elif ref_sequence:
                 result_str += f"Источники должны нумероваться в порядке упоминания в тексте. Неправильные последовательности: {'; '.join(num for num in ref_sequence)}"  # noqa: E501
@@ -117,55 +101,31 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
                     '''
         return answer(False, result_str)
 
-    def get_text_in_table(self, index_table: int) -> str:
-        """Функция получения всего текста из таблицы"""
-        text = ''
-        for cell in self.file.tables[index_table]._cells:
-            if cell.text.strip():
-                text += cell.text.strip()
-        return text
-
-    def search_references_in_text(self, text: str, prev_ref, array_of_references, ref_sequence) -> int:
-        """Функция поиска ссылок в переданном тексте"""
-        reg_exp = r'\[[\^]{0,1}[\d \-,]+\]'
-        detected_references = re.findall(reg_exp, text)
-        if detected_references:
-            for reference_raw in detected_references:
-                reference = reference_raw.replace('^', '')  # TODO: kostyl'...
-                for one_part in re.split(r'[\[\],]', reference):
-                    if re.match(r'\d+[ \-]+\d+', one_part):
-                        start, end = re.split(r'[ -]+', one_part)
-                        for k in range(int(start), int(end) + 1):
-                            prev_ref = self.add_references(k, prev_ref, array_of_references, ref_sequence)
-                    elif one_part != '':
-                        prev_ref = self.add_references(int(one_part), prev_ref, array_of_references, ref_sequence)
+    def search_references_in_text(self, text, prev_ref, array_of_references, ref_sequence):
+        for number in literature_numbers(text):
+            prev_ref = self.add_references(number, prev_ref, array_of_references, ref_sequence)
         return prev_ref
 
     def search_references(self, start_par):
-        """Функция поиска ссылок в документе"""
-        prev_ref = 0
-        ref_sequence = []
-        array_of_references = set()
-        index_table = -1
-        for i in range(0, start_par):
-            paragraph_text = (
-                self.file.paragraphs[i]
-                if isinstance(self.file.paragraphs[i], str)
-                else self.file.paragraphs[i].paragraph_text
-            )
-            match = re.search(r'Таблица ([.\d]+)', paragraph_text)
-            table_text = ''
-            if match:
-                index_table += 1  # int(match.group(1)) - 1       # TODO: fix logic
-                table_text = self.get_text_in_table(index_table)
-
-            paragraph_text += table_text
-            prev_ref = self.search_references_in_text(paragraph_text, prev_ref, array_of_references, ref_sequence)
-
-        if ref_sequence:
-            if ref_sequence[0][1] == '0':
-                ref_sequence[0] = ref_sequence[0].replace('[0],', '')
-        return array_of_references, ref_sequence
+        prev_ref, ref_sequence, references = 0, [], set()
+        document = getattr(self.file, 'file', None)
+        if document is not None and hasattr(document, 'element'):
+            paragraphs = [paragraph for paragraph in document.paragraphs if paragraph.text.strip()]
+            boundary = paragraphs[start_par]._p
+            texts = []
+            for element in document.element.body:
+                text = ''.join(node.text or '' for node in element.iter(qn('w:t')))
+                if element is boundary:
+                    break
+                texts.append(text)
+        else:
+            texts = [
+                paragraph if isinstance(paragraph, str) else paragraph.paragraph_text
+                for paragraph in self.file.paragraphs[:start_par]
+            ]
+        for text in texts:
+            prev_ref = self.search_references_in_text(text, prev_ref, references, ref_sequence)
+        return references, ref_sequence
 
     def add_references(self, k, prev_ref, array_of_references, ref_sequence):
         if k not in array_of_references:
@@ -180,13 +140,17 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
 
     def checking_duplicate_sources(self) -> list:
         """Функция нахождения дубликатов в источниках"""
-        counter = Counter([text.lower() for text in self.literature_reference_text])
+        normalized = [
+            re.sub(r'^\s*(?:\[\d+\]|\d+[.)])\s*', '', text.lower()) for text in self.literature_reference_text
+        ]
+        normalized = [' '.join(text.split()) for text in normalized]
+        counter = Counter(normalized)
 
         duplicates = []
         for text, count in counter.items():
             if count >= 2:
                 positions_duplicates = [
-                    i + 1 for i, text_in_ref in enumerate(self.literature_reference_text) if text == text_in_ref.lower()
+                    i + 1 for i, text_in_ref in enumerate(self.literature_reference_text) if text == normalized[i]
                 ]
 
                 if positions_duplicates:
@@ -196,59 +160,13 @@ class ReferencesToLiteratureCheck(BaseReportCriterion):
 
         return duplicates
 
-    def find_start_paragraph(self):
-        start_index = 0
-        for i in range(len(self.file.paragraphs)):
-            text_string = self.file.paragraphs[i].to_string().lower().split('\n')[1]
-            if re.fullmatch(f'{self.name_pattern}', text_string):
-                start_index = i
-                break
-        return start_index
-
     def count_sources_vkr(self, header):
         literature_counter = 0
         if not len(header["child"]):
             return literature_counter
         for child in header["child"]:
-            if child["text"].startswith('ПРИЛОЖЕНИЕ'):
+            if child["text"].upper().startswith(APPENDIX_TITLE):
                 break
-            # if re.search(f"дата обращения", child["text"].lower()):
             literature_counter += 1
             self.literature_reference_text.append(child["text"])
         return literature_counter
-
-    def count_sources(self):
-        literature_counter = 0
-        start_page, end_page = self.search_literature_start_pdf()
-        for i in range(start_page, end_page + 1):
-            one_page = self.file.pdf_file.text_on_page[i].split('\n')
-            first_string = -1
-            last_string = len(one_page)
-
-            for j in range(len(one_page)):
-                one_str_lowercase = one_page[j].lower()
-                if re.search(self.name_pattern, one_str_lowercase):
-                    first_string = j
-                    break
-            for j in range(first_string, len(one_page)):
-                if re.search('приложение а[\n .]', one_page[j].lower()):
-                    last_string = j
-                    break
-
-            for ind in range(first_string + 1, last_string):
-                if re.match(f"{literature_counter + 1}.", one_page[ind]):
-                    literature_counter += 1
-                    self.literature_reference_text.append(one_page[ind])
-        return literature_counter
-
-    def search_literature_start_pdf(self):
-        start_page = 0
-        end_page = self.file.pdf_file.page_count_all
-        for i in self.file.pdf_file.text_on_page.keys():
-            lowercase_str = self.file.pdf_file.text_on_page[i].lower()
-            if re.search(self.name_pattern, lowercase_str):
-                start_page = i
-            if re.search('приложение а[\n .]', lowercase_str):
-                end_page = i
-                break
-        return start_page, end_page

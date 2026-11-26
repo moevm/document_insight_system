@@ -1,5 +1,7 @@
 import re
 
+from app.main.reports.section_patterns import APPENDIX_TITLE
+
 from ...reports.docx_uploader.style import Style
 from ..base_check import BaseReportCriterion, answer
 from .style_check_settings import StyleCheckSettings
@@ -10,21 +12,18 @@ class ReportChapters(BaseReportCriterion):
     _description = '(Шрифты, отступы и т.д.)'
     id = 'header_check'
 
-    def __init__(self, file_info):
+    def __init__(self, file_info, headers_map=None):
         super().__init__(file_info)
         self.headers = []
-        self.target_styles = (
-            StyleCheckSettings.VKR_CONFIG if (self.file_type['report_type'] == 'VKR') else StyleCheckSettings.LR_CONFIG
-        )
-        self.target_styles = list(
-            map(
-                lambda elem: {"style": self.construct_style_from_description(elem["style"])},
-                self.target_styles.values(),
-            )
-        )
+        self.config = headers_map or ('VKR_HEADERS' if self.file_type['report_type'] == 'VKR' else 'LR_HEADERS')
+        config = StyleCheckSettings.CONFIGS.get(self.config)
+        if not isinstance(config, dict):
+            raise ValueError(f'Неизвестная карта заголовков: {self.config}')
+        self.target_styles = [
+            {"style": self.construct_style_from_description(elem['style'])} for elem in config.values()
+        ]
         self.docx_styles = {}
         self.style_regex = {}
-        self.config = 'VKR_HEADERS' if (self.file_type['report_type'] == 'VKR') else 'LR_HEADERS'
         self.presets = StyleCheckSettings.CONFIGS.get(self.config)
         level = 0
         for _, format_description in self.presets.items():
@@ -57,7 +56,9 @@ class ReportChapters(BaseReportCriterion):
         return err
 
     def check(self):
-        if self.file.page_counter() < 4:
+        if self.is_markdown:
+            return answer(False, 'Проверка стилей заголовков применима к отчётам DOCX.')
+        if not self.has_enough_pages():
             return answer(False, "В отчете недостаточно страниц. Нечего проверять.")
         self.late_init()
         result_str = ''
@@ -73,7 +74,7 @@ class ReportChapters(BaseReportCriterion):
                 for style_name in styles:
                     if header["style"].find(style_name) >= 0:
                         if pre_headers and (
-                            header["text"] not in pre_headers and "приложение" not in header["text"].lower()
+                            header["text"] not in pre_headers and APPENDIX_TITLE.lower() not in header["text"].lower()
                         ):
                             # если для стиля есть предопределенные заголовки (= структурные части ВКР) -> проверяем
                             # иначе идем дальше, т.к. может быть несколько стилей для одного вида заголовка

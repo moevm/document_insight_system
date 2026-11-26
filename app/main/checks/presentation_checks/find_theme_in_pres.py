@@ -1,68 +1,35 @@
-import string
-
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from pymorphy3 import MorphAnalyzer
+from app.nlp.tokenization import content_lemmas
 
 from ..base_check import BasePresCriterion, answer
-from .find_def_sld import FindDefSld
-
-MORPH_ANALYZER = MorphAnalyzer()
 
 
 class FindThemeInPres(BasePresCriterion):
-    label = "Проверка упоминания темы в заголовках презентации"
-    _description = (
-        'Проверка упоминания темы в заголовках презентации, не включая титульный слайд, '
-        'слайды "Цели и задачи", "Заключение"'
-    )
+    label = 'Проверка упоминания темы в заголовках презентации'
+    _description = 'Слова темы титульного слайда встречаются в остальных заголовках.'
     id = 'theme_in_pres_check'
 
-    def __init__(self, file_info, skip_slides_nums=(1,), skip_slides_titles=("Заключение",), limit=60):
+    def __init__(self, file_info, skip_slides_nums=(1,), skip_slides_titles=('Заключение',), limit=60, theme=None):
         super().__init__(file_info)
-        self.skip_slides_title = skip_slides_titles
-        slides = []
-        for title in self.skip_slides_title:
-            find_sld = FindDefSld(file_info=file_info, key_slide=title)
-            find_sld.check()
-            slides.extend(find_sld.found_idxs)
-        self.skip_slides = [*skip_slides_nums, *slides]
+        self.skip_slides_nums = skip_slides_nums
+        self.skip_slides_titles = skip_slides_titles
         self.limit = limit
+        self.theme = theme
+        if not 0 < limit <= 100:
+            raise ValueError('limit должен быть в пределах (0; 100].')
 
     def check(self):
-        stop_words = set(stopwords.words("russian"))
-
-        text_from_title = [
-            slide for page, slide in enumerate(self.file.get_titles(), 1) if page not in self.skip_slides
-        ]
-        theme = ''.join(word for word in text_from_title[0])
-
-        translator = str.maketrans('', '', string.punctuation)
-        theme_without_punct = theme.translate(translator)
-        words_in_theme = word_tokenize(theme_without_punct)
-        lemma_theme = {
-            MORPH_ANALYZER.parse(word)[0].normal_form for word in words_in_theme if word.lower() not in stop_words
-        }
-
-        text_from_slide = [slide for page, slide in enumerate(self.file.get_text_from_slides(), 1) if page > 1]
-        string_from_text = ''.join(text_from_slide)
-
-        text_without_punct = string_from_text.translate(translator)
-        words_in_text = word_tokenize(text_without_punct)
-
-        lemma_text = {
-            MORPH_ANALYZER.parse(word)[0].normal_form for word in words_in_text if word.lower() not in stop_words
-        }
-
-        value_intersection = round(len(lemma_theme.intersection(lemma_text)) * 100 // len(lemma_theme))
-
-        if value_intersection == 0:
-            return answer(False, "Не пройдена! В презентации не упоминаются слова, завяленные в теме.")
-        elif value_intersection < self.limit:
-            return answer(
-                round(value_intersection / self.limit, 1),
-                f"Частично пройдена! Процент упоминания темы в вашей презентации ({value_intersection} %)"
-                f"ниже требуемого ({self.limit} %).",
-            )
-        else:
-            return answer(True, f'Пройдена! Процент упоминания темы в презентации: {value_intersection} %')
+        titles = self.file.get_titles()
+        if not titles:
+            return answer(False, 'В презентации нет слайдов.')
+        theme = set(content_lemmas(self.theme if self.theme is not None else titles[0]))
+        if not theme:
+            return answer(False, 'Не удалось определить тему презентации по титульному заголовку.')
+        text = ' '.join(
+            title
+            for index, title in enumerate(titles, 1)
+            if index not in self.skip_slides_nums
+            and not any(skip.lower() in title.lower() for skip in self.skip_slides_titles)
+        )
+        percent = round(len(theme & set(content_lemmas(text))) * 100 / len(theme))
+        score = min(percent / self.limit, 1)
+        return answer(score, f'Процент упоминания темы в заголовках: {percent}%; требуется {self.limit}%.')
