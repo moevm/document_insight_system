@@ -13,7 +13,7 @@ from flask import Flask
 from flask_login import LoginManager, UserMixin
 
 from app.utils.checklist_filter import checklist_filter
-from app.utils.table_query import date_filter, number_filter, page_options, read_filters
+from app.utils.table_query import date_boundaries, date_filter, number_filter, page_options, read_filters
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -53,6 +53,53 @@ def test_date_range_includes_entire_last_day():
     assert date_filter('07.11.2026')['$lt'] == datetime(2026, 11, 8)
     with pytest.raises(ValueError):
         date_filter('08.11.2026-07.11.2026')
+
+
+@pytest.mark.parametrize(
+    'value, start, end',
+    [
+        ('24.11.2026-30.11.2026', datetime(2026, 11, 24), datetime(2026, 12, 1)),
+        ('24.11.2026 12:00-25.11.2026 13:00', datetime(2026, 11, 24, 12), datetime(2026, 11, 25, 13)),
+        ('24.11.2026 12:00-15:00', datetime(2026, 11, 24, 12), datetime(2026, 11, 24, 15)),
+        ('24.11.2026 12:00-30.11.2026', datetime(2026, 11, 24, 12), datetime(2026, 12, 1)),
+        ('24.11.2026-30.11.2026 15:00', datetime(2026, 11, 24), datetime(2026, 11, 30, 15)),
+        ('24.11.2026 12:00', datetime(2026, 11, 24, 12), datetime(2026, 11, 24, 12, 1)),
+        ('24.11.2026 – 26.11.2026', datetime(2026, 11, 24), datetime(2026, 11, 27)),
+    ],
+)
+def test_date_time_range_boundaries(value, start, end):
+    assert date_boundaries(value) == (start, end)
+
+
+@pytest.mark.parametrize(
+    'value', ['25.11.2026 13:00-24.11.2026 12:00', '24.11.2026 12:00-24.11.2026 12:00', '12:00-15:00', '12:00', '']
+)
+def test_invalid_date_time_range(value):
+    with pytest.raises(ValueError):
+        date_boundaries(value)
+
+
+def test_upload_date_with_time_maps_to_utc_object_ids():
+    from bson import ObjectId
+
+    from app.utils import timezone_offset
+
+    class User(UserMixin):
+        username = 'me'
+        is_admin = True
+
+    app = Flask(__name__)
+    manager = LoginManager(app)
+    manager.request_loader(lambda request: User())
+    with app.test_request_context('/'):
+        query = checklist_filter({'filter_upload-date': '24.11.2026 12:00-25.11.2026 13:00'})
+    assert query['_id'] == {
+        '$gte': ObjectId.from_datetime(datetime(2026, 11, 24, 12) - timezone_offset),
+        '$lt': ObjectId.from_datetime(datetime(2026, 11, 25, 13) - timezone_offset),
+    }
+    lower, upper = query['_id']['$gte'], query['_id']['$lt']
+    assert lower < ObjectId.from_datetime(datetime(2026, 11, 25, 12, 59, 59) - timezone_offset) < upper
+    assert upper == ObjectId.from_datetime(datetime(2026, 11, 25, 13) - timezone_offset)
 
 
 @pytest.mark.parametrize('value', ['[]', 'null', '"x"', '{"name": 1}', '{'])
@@ -173,6 +220,20 @@ def checks_client(monkeypatch):
     manager.request_loader(lambda request: User())
     app.register_blueprint(routes['check_list'], url_prefix='/check_list')
     return app.test_client(), checks
+
+
+def test_statistics_accepts_time_bounds_and_rejects_lone_time(checks_client):
+    client, checks = checks_client
+    response = client.get('/check_list/data', query_string={'filter_upload-date': '24.11.2026 12:00-25.11.2026 13:00'})
+    assert response.status_code == 200
+    query = checks.get_checks_cursor.call_args.kwargs['filter']
+    assert query['_id']['$gte'] < query['_id']['$lt']
+    response = client.get('/check_list/data', query_string={'filter_moodle-date': '24.11.2026-30.11.2026 15:00'})
+    assert response.status_code == 200
+    assert checks.get_checks_cursor.call_args.kwargs['filter']['lms_passback_time']['$lt'] == datetime(2026, 11, 30, 15)
+    response = client.get('/check_list/data', query_string={'filter_upload-date': '12:00-15:00'})
+    assert response.status_code == 400
+    assert 'Дата' in response.get_json()['error']
 
 
 def test_statistics_keeps_owner_restriction_with_search_and_latest(checks_client):

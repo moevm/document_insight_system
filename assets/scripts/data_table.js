@@ -102,9 +102,14 @@ export class DataTable {
                 const $range = $('<div class="table-date-range">').attr('data-field', field.field).appendTo($group);
                 const values = dateRangeInputs(this.state.filters[field.field]);
                 ['с', 'по'].forEach((label, index) => {
-                    $('<input type="date" class="form-control">').attr('aria-label', `${field.label}: ${label}`)
-                        .val(values[index]).appendTo($range).on('change', () => this.scheduleFilters());
+                    const $side = $('<div class="table-date-range-side">').appendTo($range);
+                    $('<span class="table-date-range-label">').text(label).appendTo($side);
+                    $('<input type="date" class="form-control">').attr('aria-label', `${field.label}: ${label}, дата`)
+                        .val(values[index][0]).appendTo($side).on('change', () => this.scheduleFilters());
+                    $('<input type="time" class="form-control">').attr('aria-label', `${field.label}: ${label}, время`)
+                        .val(values[index][1]).appendTo($side).on('change', () => this.scheduleFilters());
                 });
+                if (field.hint) $('<small class="text-muted">').text(field.hint).appendTo($group);
                 continue;
             }
             const $label = $('<label class="table-filter">').text(field.label).appendTo(this.$filters);
@@ -129,7 +134,9 @@ export class DataTable {
             this.state.filters = {};
             this.$filters.find('[data-field]').each((_, input) => {
                 const value = $(input).hasClass('table-date-range')
-                    ? dateRangeFilter(...$(input).find('input').map((_, date) => date.value).get())
+                    ? dateRangeFilter($(input).find('.table-date-range-side').toArray().map(side => [
+                        $(side).find('input[type="date"]').val(), $(side).find('input[type="time"]').val()
+                    ]))
                     : $(input).val().trim();
                 if (value) this.state.filters[$(input).data('field')] = value;
             });

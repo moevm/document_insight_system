@@ -14,8 +14,8 @@ export function mountChecks(selector) {
             ...(admin && !fixedUser ? [{ field: 'user', label: 'Пользователь' }] : []),
             { field: 'status', label: 'Состояние', values: [['processing', 'В обработке'], ['failed', 'Ошибка'], ['passed', 'Пройдена'], ['not-passed', 'Не пройдена']] },
             { field: 'score', label: 'Оценка', placeholder: '0.5 или 0.5-1', hint: 'Точное значение или диапазон, от 0 до 1' },
-            { field: 'upload-date', type: 'date-range', label: 'Дата загрузки', placeholder: '01.11.2026-07.11.2026', hint: 'ДД.ММ.ГГГГ или диапазон включительно' },
-            { field: 'moodle-date', type: 'date-range', label: 'Дата оценки в LMS', placeholder: '01.11.2026-07.11.2026' }
+            { field: 'upload-date', type: 'date-range', label: 'Дата загрузки', hint: 'Без времени — вся дата; с временем «по» — до указанной минуты, не включая её.' },
+            { field: 'moodle-date', type: 'date-range', label: 'Дата оценки в LMS', hint: 'Без времени — вся дата; с временем «по» — до указанной минуты, не включая её.' }
         ],
         actions: admin ? [
             { label: 'CSV', url: '/get_csv/', filename: 'Статистика.csv' },
