@@ -1,0 +1,272 @@
+from unittest.mock import MagicMock
+
+import pytest
+from docx import Document
+from docx.enum.style import WD_STYLE_TYPE
+from docx.oxml.ns import qn
+from docx.shared import Pt
+
+from app.main.checks.report_checks.intervals_between_paragraphs import ReportIntervalsParagraphsCheck
+from app.main.checks.report_checks.style_check_settings import StyleCheckSettings
+
+
+def make_paragraph(text, style="normal", line_spacing=1.5, space_before=0, space_after=0):
+    p = MagicMock()
+    p.paragraph_text = text
+    p.paragraph_style_name = style
+    p.paragraph_line_spacing = line_spacing
+    p.paragraph_space_before = space_before
+    p.paragraph_space_after = space_after
+    return p
+
+
+def make_checker(
+    paragraphs=None,
+    params=None,
+):
+    obj = ReportIntervalsParagraphsCheck.__new__(ReportIntervalsParagraphsCheck)
+
+    default_params = {
+        'line_spacing': 1.5,
+        'space_before': 0,
+        'space_after': 0,
+        'max_problematic_paragraphs': 10,
+    }
+
+    p = {**default_params, **(params or {})}
+
+    obj.max_line_spacing = p['line_spacing']
+    obj.space_before = p['space_before']
+    obj.space_after = p['space_after']
+    obj.max_problematic_paragraphs = p['max_problematic_paragraphs']
+
+    obj.file = MagicMock()
+    obj.file.source_format = 'docx'
+    document = Document()
+    for p in paragraphs or []:
+        paragraph = document.add_paragraph(p.paragraph_text)
+        if p.paragraph_style_name.startswith('heading'):
+            paragraph.style = document.styles[p.paragraph_style_name.title()]
+        paragraph.paragraph_format.line_spacing = p.paragraph_line_spacing
+        if p.paragraph_space_before is not None:
+            paragraph.paragraph_format.space_before = Pt(p.paragraph_space_before)
+        if p.paragraph_space_after is not None:
+            paragraph.paragraph_format.space_after = Pt(p.paragraph_space_after)
+    obj.file.file = document
+
+    return obj
+
+
+class TestValidDocument:
+    def test_all_correct(self):
+        paragraphs = [
+            make_paragraph("Первый абзац"),
+            make_paragraph("Второй абзац"),
+            make_paragraph("Третий абзац"),
+        ]
+        checker = make_checker(paragraphs=paragraphs)
+        result = checker.check()
+
+        assert result["score"] == 1.0
+
+    def test_empty_document(self):
+        checker = make_checker(paragraphs=[])
+        result = checker.check()
+
+        assert result["score"] == 1.0
+
+    def test_headings_ignored(self):
+        paragraphs = [
+            make_paragraph("ВВЕДЕНИЕ", style="heading 1", line_spacing=2.0),
+            make_paragraph("ПОСТАНОВКА ЗАДАЧИ", line_spacing=1.5),
+            make_paragraph("ЗАКЛЮЧЕНИЕ", style="heading 2", space_before=10),
+        ]
+        checker = make_checker(paragraphs=paragraphs)
+        result = checker.check()
+
+        assert result["score"] == 1.0
+
+
+class TestProblems:
+    def test_wrong_line_spacing(self):
+        paragraphs = [
+            make_paragraph("ВВЕДЕНИЕ"),
+            make_paragraph("ВВЕДЕНИЕ", line_spacing=2.0),
+        ]
+        checker = make_checker(paragraphs=paragraphs)
+        result = checker.check()
+
+        assert 0 < result["score"] < 1.0
+
+    def test_wrong_space_before(self):
+        paragraphs = [
+            make_paragraph("Плохой абзац", space_before=12),
+            make_paragraph("Плохой абзац", space_before=12),
+            make_paragraph("Плохой абзац", space_before=12),
+            make_paragraph("Хороший абзац"),
+        ]
+        checker = make_checker(paragraphs=paragraphs)
+        result = checker.check()
+
+        assert 0 < result["score"] < 1.0
+
+    def test_wrong_space_after(self):
+        paragraphs = [
+            make_paragraph("Плохой", space_after=6),
+        ]
+        checker = make_checker(paragraphs=paragraphs)
+        result = checker.check()
+
+        assert 0 < result["score"] < 1.0
+
+    def test_multiple_issues_in_one_paragraph(self):
+        paragraphs = [
+            make_paragraph("Плохой абзац", line_spacing=2.0, space_before=12, space_after=6),
+            make_paragraph("Хороший абзац"),
+            make_paragraph("Хороший абзац"),
+        ]
+        checker = make_checker(paragraphs=paragraphs)
+        result = checker.check()
+
+        assert result["score"] == pytest.approx(0.9)
+
+    def test_all_paragraphs_bad(self):
+        paragraphs = [
+            make_paragraph("Плохой абзац", line_spacing=2.0),
+            make_paragraph("Плохой абзац", line_spacing=2.0, space_before=12),
+            make_paragraph("Плохой абзац", space_before=12),
+            make_paragraph("Плохой абзац", line_spacing=2.0, space_after=6),
+            make_paragraph("Плохой абзац", line_spacing=2.0, space_before=12, space_after=6),
+        ]
+        checker = make_checker(paragraphs=paragraphs)
+        result = checker.check()
+
+        assert result["score"] == 0.5
+
+
+class TestScore:
+    def test_score_at_threshold(self):
+        paragraphs = [make_paragraph(f"Плохой абзац {i}", line_spacing=2.0) for i in range(10)]
+        checker = make_checker(paragraphs=paragraphs, params={"max_problematic_paragraphs": 10})
+        result = checker.check()
+
+        assert result["score"] == 0.0
+
+    def test_score_above_threshold(self):
+        paragraphs = [make_paragraph(f"Плохой абзац {i}", line_spacing=2.0) for i in range(20)]
+        checker = make_checker(paragraphs=paragraphs, params={"max_problematic_paragraphs": 10})
+        result = checker.check()
+
+        assert result["score"] == 0.0
+
+    def test_score_proportional(self):
+        paragraphs = [
+            make_paragraph("Плохой абзац", line_spacing=2.0),
+            make_paragraph("Плохой абзац", line_spacing=2.0),
+            make_paragraph("Хороший абзац"),
+            make_paragraph("Хороший абзац"),
+        ]
+        checker = make_checker(paragraphs=paragraphs)
+        result = checker.check()
+
+        assert result["score"] == pytest.approx(0.8)
+
+
+class TestParams:
+    def test_constructor_accepts_one_parameter(self):
+        defaults = StyleCheckSettings.DEFAULT_PARAGRAPH_INTERVALS
+        checker = ReportIntervalsParagraphsCheck({}, params={'space_before': 12})
+
+        assert checker.space_before == 12
+        assert checker.max_line_spacing == defaults['line_spacing']
+        assert checker.space_after == defaults['space_after']
+        assert checker.max_problematic_paragraphs == defaults['max_problematic_paragraphs']
+
+    def test_custom_line_spacing(self):
+        paragraphs = [
+            make_paragraph("Абзац line_spacing 1.5", line_spacing=1.5),
+        ]
+        checker = make_checker(paragraphs=paragraphs, params={"line_spacing": 2.0})
+        result = checker.check()
+
+        assert result["score"] == 0.9
+
+    def test_custom_space_before(self):
+        paragraphs = [
+            make_paragraph("Абзац space_before 12", space_before=12),
+        ]
+        checker = make_checker(paragraphs=paragraphs, params={"space_before": 12})
+        result = checker.check()
+
+        assert result["score"] == 1.0
+
+    def test_custom_params_match(self):
+        paragraphs = [
+            make_paragraph("Введение", line_spacing=2.0, space_before=12, space_after=6),
+        ]
+        checker = make_checker(
+            paragraphs=paragraphs,
+            params={
+                "line_spacing": 2.0,
+                "space_before": 12,
+                "space_after": 6,
+            },
+        )
+        result = checker.check()
+
+        assert result["score"] == 1.0
+
+
+class TestEdgeCases:
+    def test_document_defaults_are_used(self):
+        paragraphs = [make_paragraph("None", line_spacing=None, space_before=None, space_after=None)]
+
+        checker = make_checker(paragraphs=paragraphs)
+        result = checker.check()
+
+        assert result["score"] < 1.0
+
+    def test_inherited_style_and_direct_override(self):
+        checker = make_checker()
+        document = checker.file.file
+        base = document.styles.add_style('Base spacing', WD_STYLE_TYPE.PARAGRAPH)
+        base.paragraph_format.space_before = Pt(12)
+        child = document.styles.add_style('Child spacing', WD_STYLE_TYPE.PARAGRAPH)
+        child.base_style = base
+        inherited = document.add_paragraph('Наследует', style=child)
+        override = document.add_paragraph('Переопределяет', style=child)
+        for paragraph in (inherited, override):
+            paragraph.paragraph_format.space_after = Pt(0)
+            paragraph.paragraph_format.line_spacing = 1.5
+        override.paragraph_format.space_before = Pt(0)
+
+        result = checker.check()
+
+        assert result['score'] == pytest.approx(0.9)
+        assert 'Наследует' in result['verdict'][0]
+        assert 'Переопределяет' not in result['verdict'][0]
+
+    def test_document_defaults(self):
+        checker = make_checker()
+        document = checker.file.file
+        spacing = document.styles.element.xpath('./w:docDefaults/w:pPrDefault/w:pPr/w:spacing')[0]
+        spacing.set(qn('w:before'), '240')
+        spacing.set(qn('w:after'), '0')
+        spacing.set(qn('w:line'), '360')
+        spacing.set(qn('w:lineRule'), 'auto')
+        document.add_paragraph('Интервал из defaults')
+
+        result = checker.check()
+
+        assert result['score'] == pytest.approx(0.9)
+        assert 'Интервал из defaults' in result['verdict'][0]
+
+    def test_paragraph_without_text_skipped(self):
+        paragraphs = [
+            make_paragraph("", line_spacing=2.0),
+            make_paragraph("Введение"),
+        ]
+        checker = make_checker(paragraphs=paragraphs)
+        result = checker.check()
+
+        assert result["score"] == 1.0
