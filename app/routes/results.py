@@ -46,6 +46,7 @@ def results_main(_id):
         ):
             # show processing time for user
             avg_process_time = None if check.is_ended else celery_check_methods.get_average_processing_time()
+            # check = _prepare_verdicts_for_view(check, current_user.is_admin)
             return render_template(
                 "./results.html",
                 navi_upload=True,
