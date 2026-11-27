@@ -16,8 +16,8 @@ class ReportTaskTracker(BaseReportCriterion):
         chapter=INTRODUCTION_TITLE,
         patterns=('задач', 'объект'),
         deny_list=('доделать', 'решить', 'описать'),
-        min_count_tasks=1,
-        max_count_tasks=3,
+        min_count_tasks=3,
+        max_count_tasks=5,
     ):
         super().__init__(file_info)
         self.chapter = chapter
